@@ -5,9 +5,14 @@ import React, {
 	useEffect,
 	ReactNode,
 } from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AuthState, User, LoginCredentials, RegisterData } from '../types/auth'
-import { loginUser, registerUser, logoutUser } from '../backend/auth'
+import {
+	checkAuthStatus as checkAuthStatusBackend,
+	handleLogin,
+	handleRegister,
+	handleLogout,
+} from '../backend/auth'
+import { appStateManager } from '../backend/auth/appStateManager'
 
 // Initial state
 const initialState: AuthState = {
@@ -83,106 +88,42 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	const [state, dispatch] = useReducer(authReducer, initialState)
 
-	// Check for existing token on app start
+	// Check for existing token on app start and setup app state monitoring
 	useEffect(() => {
-		checkAuthStatus()
+		const initializeAuth = async () => {
+			// Set up logout callback for app state manager
+			appStateManager.setLogoutCallback(async () => {
+				dispatch({ type: 'LOGOUT' })
+			})
+
+			// FIRST: Check for app termination before loading any auth state
+			await appStateManager.checkTerminationAndClearAuth()
+
+			// THEN: Load auth status (which will be cleared if app was terminated)
+			await checkAuthStatusBackend(dispatch)
+
+			// FINALLY: Start monitoring app state for future terminations
+			await appStateManager.start()
+		}
+
+		initializeAuth()
+
+		// Cleanup on unmount
+		return () => {
+			appStateManager.stop()
+		}
 	}, [])
 
-	const checkAuthStatus = async () => {
-		try {
-			const token = await AsyncStorage.getItem('authToken')
-			const userString = await AsyncStorage.getItem('user')
-
-			if (token && userString) {
-				const user = JSON.parse(userString)
-				dispatch({ type: 'SET_USER', payload: user })
-			} else {
-				dispatch({ type: 'SET_LOADING', payload: false })
-			}
-		} catch (error) {
-			console.error('Error checking auth status:', error)
-			dispatch({ type: 'SET_LOADING', payload: false })
-		}
-	}
-
 	const login = async (credentials: LoginCredentials): Promise<boolean> => {
-		try {
-			dispatch({ type: 'SET_LOADING', payload: true })
-			dispatch({ type: 'SET_ERROR', payload: null })
-
-			const response = await loginUser(credentials)
-
-			if (response.success && response.user && response.token) {
-				// Store token and user data
-				await AsyncStorage.setItem('authToken', response.token)
-				await AsyncStorage.setItem('user', JSON.stringify(response.user))
-
-				dispatch({
-					type: 'LOGIN_SUCCESS',
-					payload: { user: response.user, token: response.token },
-				})
-				return true
-			} else {
-				dispatch({
-					type: 'SET_ERROR',
-					payload: response.error || 'Login failed',
-				})
-				return false
-			}
-		} catch (error) {
-			console.error('Login error:', error)
-			dispatch({
-				type: 'SET_ERROR',
-				payload: 'Login failed. Please try again.',
-			})
-			return false
-		}
+		return await handleLogin(credentials, dispatch)
 	}
 
 	const register = async (data: RegisterData): Promise<boolean> => {
-		try {
-			dispatch({ type: 'SET_LOADING', payload: true })
-			dispatch({ type: 'SET_ERROR', payload: null })
-
-			const response = await registerUser(data)
-
-			if (response.success) {
-				dispatch({ type: 'SET_LOADING', payload: false })
-				return true
-			} else {
-				dispatch({
-					type: 'SET_ERROR',
-					payload: response.error || 'Registration failed',
-				})
-				return false
-			}
-		} catch (error) {
-			console.error('Registration error:', error)
-			dispatch({
-				type: 'SET_ERROR',
-				payload: 'Registration failed. Please try again.',
-			})
-			return false
-		}
+		return await handleRegister(data, dispatch)
 	}
 
 	const logout = async (): Promise<void> => {
-		try {
-			// Call backend logout (optional for JWT)
-			await logoutUser()
-
-			// Remove stored data
-			await AsyncStorage.removeItem('authToken')
-			await AsyncStorage.removeItem('user')
-
-			dispatch({ type: 'LOGOUT' })
-		} catch (error) {
-			console.error('Logout error:', error)
-			// Even if backend call fails, still logout locally
-			await AsyncStorage.removeItem('authToken')
-			await AsyncStorage.removeItem('user')
-			dispatch({ type: 'LOGOUT' })
-		}
+		await handleLogout(dispatch)
 	}
 
 	const clearError = () => {
