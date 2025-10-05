@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { TouchableOpacity, Text, StyleSheet } from 'react-native'
 import { useAuth } from '../context'
 import { ConfirmationModal, AlertModal } from './modals'
@@ -18,8 +18,11 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
 	const { logout } = useAuth()
 	const confirmationModal = useConfirmationModal()
 	const alertModal = useAlertModal()
+	const [isLoggingOut, setIsLoggingOut] = useState(false)
 
 	const handleLogout = () => {
+		if (isLoggingOut) return // Prevent multiple clicks during logout
+
 		confirmationModal.showConfirmation({
 			title: 'Confirm Logout',
 			message: 'Are you sure you want to logout?',
@@ -27,6 +30,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
 			confirmStyle: 'destructive',
 			onConfirm: async () => {
 				try {
+					setIsLoggingOut(true)
 					await logout()
 				} catch (error) {
 					console.error('Logout error:', error)
@@ -34,6 +38,8 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
 						title: 'Error',
 						message: 'Failed to logout. Please try again.',
 					})
+				} finally {
+					setIsLoggingOut(false)
 				}
 			},
 		})
@@ -42,9 +48,16 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
 	return (
 		<>
 			<TouchableOpacity
-				style={[styles.logoutButton, style]}
-				onPress={handleLogout}>
-				<Text style={[styles.logoutText, textStyle]}>{title}</Text>
+				style={[
+					styles.logoutButton,
+					style,
+					isLoggingOut && styles.disabledButton,
+				]}
+				onPress={handleLogout}
+				disabled={isLoggingOut}>
+				<Text style={[styles.logoutText, textStyle]}>
+					{isLoggingOut ? 'Logging out...' : title}
+				</Text>
 			</TouchableOpacity>
 
 			<ConfirmationModal
@@ -72,6 +85,10 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		marginTop: 20,
+	},
+	disabledButton: {
+		backgroundColor: '#6c757d',
+		opacity: 0.6,
 	},
 	logoutText: {
 		color: 'white',

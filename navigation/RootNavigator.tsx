@@ -113,12 +113,12 @@ const RootNavigator: React.FC = () => {
 					/>
 				) : (
 					<>
-						{user?.role === 'CUSTOMER' ? (
+						{user?.role === 'customer' ? (
 							<Stack.Screen
 								name="Customer"
 								component={CustomerStack}
 							/>
-						) : user?.role === 'CONCESSION_OWNER' ? (
+						) : user?.role === 'concessionaire' ? (
 							<Stack.Screen
 								name="Concessionaire"
 								component={ConcessionaireStack}

@@ -10,7 +10,7 @@ import {
 import { useAuth, useTheme } from '../../../context'
 import { LoginCredentials } from '../../../types'
 import { AlertModal } from '../../../components'
-import { useAlertModal } from '../../../hooks'
+import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { createLoginStyles } from '../../../styles/auth/themedStyles'
@@ -29,10 +29,42 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 	const { colors } = useTheme()
 	const loginStyles = createLoginStyles(colors)
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
+	const responsive = useResponsiveDimensions()
 	const [credentials, setCredentials] = useState<LoginCredentials>({
 		email: '',
 		password: '',
 	})
+
+	// Get responsive styles based on orientation
+	const dynamicStyles = {
+		container: {
+			...loginStyles.container,
+			paddingHorizontal: responsive.getResponsivePadding().horizontal,
+		},
+		content: {
+			...loginStyles.content,
+			paddingVertical: responsive.getResponsivePadding().vertical,
+			// In landscape, reduce vertical spacing
+			justifyContent: responsive.isLandscape
+				? ('flex-start' as const)
+				: ('center' as const),
+			paddingTop: responsive.isLandscape ? 40 : undefined,
+		},
+		title: {
+			...loginStyles.title,
+			fontSize: responsive.getResponsiveFontSize(32),
+			marginBottom: responsive.getResponsiveMargin().small,
+		},
+		subtitle: {
+			...loginStyles.subtitle,
+			fontSize: responsive.getResponsiveFontSize(16),
+			marginBottom: responsive.getResponsiveMargin().medium,
+		},
+		form: {
+			...loginStyles.form,
+			marginBottom: responsive.getResponsiveMargin().medium,
+		},
+	}
 
 	const handleLogin = async () => {
 		if (!credentials.email || !credentials.password) {
@@ -64,13 +96,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 	return (
 		<>
 			<KeyboardAvoidingView
-				style={loginStyles.container}
+				style={dynamicStyles.container}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-				<View style={loginStyles.content}>
-					<Text style={loginStyles.title}>Welcome Back</Text>
-					<Text style={loginStyles.subtitle}>Sign in to your account</Text>
+				<View style={dynamicStyles.content}>
+					<Text style={dynamicStyles.title}>Welcome Back</Text>
+					<Text style={dynamicStyles.subtitle}>Sign in to your account</Text>
 
-					<View style={loginStyles.form}>
+					<View style={dynamicStyles.form}>
 						<TextInput
 							style={loginStyles.input}
 							placeholder="Email"
@@ -79,6 +111,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 							keyboardType="email-address"
 							autoCapitalize="none"
 							autoCorrect={false}
+							textContentType="none"
+							importantForAutofill="no"
+							contextMenuHidden={true}
+							selectTextOnFocus={false}
 						/>
 
 						<TextInput
@@ -88,6 +124,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 							onChangeText={handlePasswordChange}
 							secureTextEntry
 							autoCapitalize="none"
+							textContentType="none"
+							importantForAutofill="no"
+							contextMenuHidden={true}
+							selectTextOnFocus={false}
+							passwordRules=""
 						/>
 
 						<TouchableOpacity

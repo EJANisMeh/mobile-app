@@ -11,7 +11,7 @@ import {
 import { useAuth, useTheme } from '../../../context'
 import { RegisterData } from '../../../types'
 import { AlertModal } from '../../../components'
-import { useAlertModal } from '../../../hooks'
+import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { createRegisterStyles } from '../../../styles/auth/themedStyles'
@@ -30,14 +30,37 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 	const { colors } = useTheme()
 	const registerStyles = createRegisterStyles(colors)
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
+	const responsive = useResponsiveDimensions()
 	const [formData, setFormData] = useState<RegisterData>({
 		fname: '',
 		lname: '',
 		email: '',
 		password: '',
 		confirmPassword: '',
-		role: 'CUSTOMER',
+		role: 'customer',
 	})
+
+	// Get responsive styles
+	const dynamicStyles = {
+		container: {
+			...registerStyles.container,
+		},
+		scrollContent: {
+			...registerStyles.scrollContent,
+			paddingHorizontal: responsive.getResponsivePadding().horizontal,
+			paddingVertical: responsive.getResponsivePadding().vertical,
+		},
+		title: {
+			...registerStyles.title,
+			fontSize: responsive.getResponsiveFontSize(32),
+			marginBottom: responsive.getResponsiveMargin().small,
+		},
+		subtitle: {
+			...registerStyles.subtitle,
+			fontSize: responsive.getResponsiveFontSize(16),
+			marginBottom: responsive.getResponsiveMargin().medium,
+		},
+	}
 
 	const handleRegister = async () => {
 		// Basic validation
@@ -87,12 +110,12 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 	return (
 		<>
 			<KeyboardAvoidingView
-				style={registerStyles.container}
+				style={dynamicStyles.container}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-				<ScrollView contentContainerStyle={registerStyles.scrollContent}>
+				<ScrollView contentContainerStyle={dynamicStyles.scrollContent}>
 					<View style={registerStyles.content}>
-						<Text style={registerStyles.title}>Create Account</Text>
-						<Text style={registerStyles.subtitle}>Join us today</Text>
+						<Text style={dynamicStyles.title}>Create Account</Text>
+						<Text style={dynamicStyles.subtitle}>Join us today</Text>
 
 						<View style={registerStyles.form}>
 							<View style={registerStyles.nameRow}>
@@ -128,14 +151,14 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 									<TouchableOpacity
 										style={[
 											registerStyles.roleButton,
-											formData.role === 'CUSTOMER' &&
+											formData.role === 'customer' &&
 												registerStyles.roleButtonActive,
 										]}
-										onPress={() => updateField('role', 'CUSTOMER')}>
+										onPress={() => updateField('role', 'customer')}>
 										<Text
 											style={[
 												registerStyles.roleButtonText,
-												formData.role === 'CUSTOMER' &&
+												formData.role === 'customer' &&
 													registerStyles.roleButtonTextActive,
 											]}>
 											Customer
@@ -145,14 +168,14 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 									<TouchableOpacity
 										style={[
 											registerStyles.roleButton,
-											formData.role === 'CONCESSION_OWNER' &&
+											formData.role === 'concessionaire' &&
 												registerStyles.roleButtonActive,
 										]}
-										onPress={() => updateField('role', 'CONCESSION_OWNER')}>
+										onPress={() => updateField('role', 'concessionaire')}>
 										<Text
 											style={[
 												registerStyles.roleButtonText,
-												formData.role === 'CONCESSION_OWNER' &&
+												formData.role === 'concessionaire' &&
 													registerStyles.roleButtonTextActive,
 											]}>
 											Concession Owner

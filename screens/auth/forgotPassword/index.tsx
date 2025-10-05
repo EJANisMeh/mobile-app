@@ -62,7 +62,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 			showAlert({
 				title: 'Success',
 				message: 'Password reset instructions have been sent to your email.',
-				onConfirm: () => navigation.goBack(),
+				onConfirm: () => navigation.navigate('EmailVerification', { email }),
 			})
 		} catch (error) {
 			showAlert({

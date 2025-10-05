@@ -71,8 +71,12 @@ const apiCall = async <T = any>(
 		const response = await fetch(url, config)
 		const data = await response.json()
 
+		// Don't throw errors, return them as part of the response
 		if (!response.ok) {
-			throw new Error(data.error || `HTTP error! status: ${response.status}`)
+			return {
+				success: false,
+				error: data.error || `Request failed with status ${response.status}`,
+			}
 		}
 
 		return data

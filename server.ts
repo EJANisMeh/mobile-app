@@ -1,11 +1,11 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { connectDatabase, disconnectDatabase } from './backend/db'
+import { connectDatabase, disconnectDatabase } from './backend/db/index'
 import authRoutes from './backend/auth/authRouter'
-import menuRoutes from './backend/menu'
-import orderRoutes from './backend/order'
-import profileRoutes from './backend/profile'
+import menuRoutes from './backend/menu/index'
+import orderRoutes from './backend/order/index'
+import profileRoutes from './backend/profile/index'
 
 // Load environment variables
 dotenv.config()

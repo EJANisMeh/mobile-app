@@ -7,6 +7,7 @@ import React, {
 } from 'react'
 import { AuthState, User, LoginCredentials, RegisterData } from '../types/auth'
 import { authApi } from '../services/api'
+import { appStateManager } from '../utils/appStateManager'
 
 // Initial state
 const initialState: AuthState = {
@@ -81,6 +82,37 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	const [state, dispatch] = useReducer(authReducer, initialState)
 
+	// Logout function
+	const logout = async (): Promise<void> => {
+		try {
+			await authApi.logout()
+			await appStateManager.clearSession()
+			dispatch({ type: 'LOGOUT' })
+		} catch (error) {
+			console.error('Error during logout:', error)
+			// Even if logout fails, clear the local state
+			dispatch({ type: 'LOGOUT' })
+		}
+	}
+
+	// Auto-logout handler for app state manager
+	const handleAutoLogout = async () => {
+		console.log('Auto-logout triggered by app state manager')
+		await logout()
+	}
+
+	// App background handler
+	const handleAppBackground = () => {
+		console.log('App going to background')
+		// Additional background handling if needed
+	}
+
+	// App foreground handler
+	const handleAppForeground = () => {
+		console.log('App coming to foreground')
+		// Additional foreground handling if needed
+	}
+
 	// Check authentication status on app start
 	useEffect(() => {
 		const checkAuthStatus = async () => {
@@ -91,6 +123,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 				if (isAuthenticated && user) {
 					dispatch({ type: 'SET_USER', payload: user })
+
+					// Initialize app state manager for authenticated users
+					appStateManager.initialize({
+						onAutoLogout: handleAutoLogout,
+						onAppBackground: handleAppBackground,
+						onAppForeground: handleAppForeground,
+					})
 				} else {
 					dispatch({ type: 'SET_USER', payload: null })
 				}
@@ -106,6 +145,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		}
 
 		checkAuthStatus()
+
+		// Cleanup on unmount
+		return () => {
+			appStateManager.cleanup()
+		}
 	}, [])
 
 	// Login function
@@ -121,6 +165,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 					type: 'LOGIN_SUCCESS',
 					payload: { user: response.user, token: response.token || '' },
 				})
+
+				// Initialize app state manager after successful login
+				appStateManager.initialize({
+					onAutoLogout: handleAutoLogout,
+					onAppBackground: handleAppBackground,
+					onAppForeground: handleAppForeground,
+				})
+
 				return true
 			} else {
 				dispatch({
@@ -152,6 +204,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 					type: 'LOGIN_SUCCESS',
 					payload: { user: response.user, token: response.token || '' },
 				})
+
+				// Initialize app state manager after successful registration
+				appStateManager.initialize({
+					onAutoLogout: handleAutoLogout,
+					onAppBackground: handleAppBackground,
+					onAppForeground: handleAppForeground,
+				})
+
 				return true
 			} else {
 				dispatch({
@@ -167,18 +227,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 			return false
 		} finally {
 			dispatch({ type: 'SET_LOADING', payload: false })
-		}
-	}
-
-	// Logout function
-	const logout = async (): Promise<void> => {
-		try {
-			await authApi.logout()
-			dispatch({ type: 'LOGOUT' })
-		} catch (error) {
-			console.error('Error during logout:', error)
-			// Even if logout fails, clear the local state
-			dispatch({ type: 'LOGOUT' })
 		}
 	}
 
