@@ -6,13 +6,7 @@ import React, {
 	ReactNode,
 } from 'react'
 import { AuthState, User, LoginCredentials, RegisterData } from '../types/auth'
-import {
-	checkAuthStatus as checkAuthStatusBackend,
-	handleLogin,
-	handleRegister,
-	handleLogout,
-} from '../backend/auth'
-import { appStateManager } from '../backend/auth/appStateManager'
+import { authApi } from '../services/api'
 
 // Initial state
 const initialState: AuthState = {
@@ -61,6 +55,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 				...state,
 				user: null,
 				isAuthenticated: false,
+				isLoading: false,
 				error: null,
 			}
 		default:
@@ -69,12 +64,10 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 }
 
 // Context type
-type AuthContextType = {
-	state: AuthState
+interface AuthContextType extends AuthState {
 	login: (credentials: LoginCredentials) => Promise<boolean>
 	register: (data: RegisterData) => Promise<boolean>
 	logout: () => Promise<void>
-	clearError: () => void
 }
 
 // Create context
@@ -88,54 +81,112 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	const [state, dispatch] = useReducer(authReducer, initialState)
 
-	// Check for existing token on app start and setup app state monitoring
+	// Check authentication status on app start
 	useEffect(() => {
-		const initializeAuth = async () => {
-			// Set up logout callback for app state manager
-			appStateManager.setLogoutCallback(async () => {
-				dispatch({ type: 'LOGOUT' })
-			})
+		const checkAuthStatus = async () => {
+			try {
+				dispatch({ type: 'SET_LOADING', payload: true })
 
-			// FIRST: Check for app termination before loading any auth state
-			await appStateManager.checkTerminationAndClearAuth()
+				const { user, isAuthenticated } = await authApi.checkAuthStatus()
 
-			// THEN: Load auth status (which will be cleared if app was terminated)
-			await checkAuthStatusBackend(dispatch)
-
-			// FINALLY: Start monitoring app state for future terminations
-			await appStateManager.start()
+				if (isAuthenticated && user) {
+					dispatch({ type: 'SET_USER', payload: user })
+				} else {
+					dispatch({ type: 'SET_USER', payload: null })
+				}
+			} catch (error) {
+				console.error('Error checking auth status:', error)
+				dispatch({
+					type: 'SET_ERROR',
+					payload: 'Failed to check authentication status',
+				})
+			} finally {
+				dispatch({ type: 'SET_LOADING', payload: false })
+			}
 		}
 
-		initializeAuth()
-
-		// Cleanup on unmount
-		return () => {
-			appStateManager.stop()
-		}
+		checkAuthStatus()
 	}, [])
 
+	// Login function
 	const login = async (credentials: LoginCredentials): Promise<boolean> => {
-		return await handleLogin(credentials, dispatch)
+		try {
+			dispatch({ type: 'SET_LOADING', payload: true })
+			dispatch({ type: 'SET_ERROR', payload: null })
+
+			const response = await authApi.login(credentials)
+
+			if (response.success && response.user) {
+				dispatch({
+					type: 'LOGIN_SUCCESS',
+					payload: { user: response.user, token: response.token || '' },
+				})
+				return true
+			} else {
+				dispatch({
+					type: 'SET_ERROR',
+					payload: response.error || 'Login failed',
+				})
+				return false
+			}
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : 'Login failed'
+			dispatch({ type: 'SET_ERROR', payload: errorMessage })
+			return false
+		} finally {
+			dispatch({ type: 'SET_LOADING', payload: false })
+		}
 	}
 
+	// Register function
 	const register = async (data: RegisterData): Promise<boolean> => {
-		return await handleRegister(data, dispatch)
+		try {
+			dispatch({ type: 'SET_LOADING', payload: true })
+			dispatch({ type: 'SET_ERROR', payload: null })
+
+			const response = await authApi.register(data)
+
+			if (response.success && response.user) {
+				dispatch({
+					type: 'LOGIN_SUCCESS',
+					payload: { user: response.user, token: response.token || '' },
+				})
+				return true
+			} else {
+				dispatch({
+					type: 'SET_ERROR',
+					payload: response.error || 'Registration failed',
+				})
+				return false
+			}
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : 'Registration failed'
+			dispatch({ type: 'SET_ERROR', payload: errorMessage })
+			return false
+		} finally {
+			dispatch({ type: 'SET_LOADING', payload: false })
+		}
 	}
 
+	// Logout function
 	const logout = async (): Promise<void> => {
-		await handleLogout(dispatch)
-	}
-
-	const clearError = () => {
-		dispatch({ type: 'SET_ERROR', payload: null })
+		try {
+			await authApi.logout()
+			dispatch({ type: 'LOGOUT' })
+		} catch (error) {
+			console.error('Error during logout:', error)
+			// Even if logout fails, clear the local state
+			dispatch({ type: 'LOGOUT' })
+		}
 	}
 
 	const value: AuthContextType = {
-		state,
+		...state,
 		login,
 		register,
 		logout,
-		clearError,
 	}
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

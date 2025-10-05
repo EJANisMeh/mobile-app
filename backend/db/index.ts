@@ -1,12 +1,39 @@
-// Database connection will be handled by your separate backend server
-// This file is kept for future backend server implementation
+// Database backend index - exports all database connection and setup
+// This file provides database connection and initialization for the Express server
 
-// TODO: When you create a separate Node.js backend server, move this there:
-// import { PrismaClient } from '@prisma/client';
-// const prisma = new PrismaClient();
-// export { prisma };
+import { PrismaClient } from '@prisma/client'
 
-export const db = {
-	// Placeholder for database functions that will call your backend API
-	// Example: async getUser(id: string) { return fetch(`/api/users/${id}`) }
+// Initialize Prisma Client
+export const prisma = new PrismaClient({
+	log:
+		process.env.NODE_ENV === 'development'
+			? ['query', 'info', 'warn', 'error']
+			: ['error'],
+})
+
+// Database connection helper
+export const connectDatabase = async () => {
+	try {
+		await prisma.$connect()
+		console.log('✅ Database connected successfully')
+	} catch (error) {
+		console.error('❌ Database connection failed:', error)
+		process.exit(1)
+	}
 }
+
+// Graceful shutdown helper
+export const disconnectDatabase = async () => {
+	try {
+		await prisma.$disconnect()
+		console.log('✅ Database disconnected successfully')
+	} catch (error) {
+		console.error('❌ Database disconnection error:', error)
+	}
+}
+
+// Export simplified query functions
+export { selectQuery, selectOne } from './selectQuery'
+export { insertQuery, upsertQuery } from './insertQuery'
+export { updateQuery, updateManyQuery } from './updateQuery'
+export { deleteQuery, deleteManyQuery } from './deleteQuery'

@@ -1,6 +1,6 @@
 import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
-import { useAuth } from '../context'
+import { useAuth, useTheme } from '../context'
 import { RootStackParamList } from '../types/navigation'
 import AuthStack from './AuthStack'
 import CustomerStack from './CustomerStack'
@@ -11,86 +11,114 @@ import {
 	StyleSheet,
 	ActivityIndicator,
 	TouchableOpacity,
-	Alert,
 } from 'react-native'
-import {
-	clearAuthData,
-	logStoredAuthData,
-	simulateAppTermination,
-} from '../backend/auth'
+import { authApi, userApi, healthApi } from '../services/api'
+import { MenuModal } from '../components'
+import { useMenuModal } from '../hooks'
 
 const Stack = createStackNavigator<RootStackParamList>()
 
-const LoadingScreen: React.FC = () => (
-	<View style={styles.loadingContainer}>
-		<ActivityIndicator
-			size="large"
-			color="#007bff"
-		/>
-		<Text style={styles.loadingText}>Loading...</Text>
-	</View>
-)
+// Debug menu toggle - set to false to hide debug menu
+const SHOW_DEBUG_MENU = true
+
+const LoadingScreen: React.FC = () => {
+	const { colors } = useTheme()
+
+	return (
+		<View
+			style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+			<ActivityIndicator
+				size="large"
+				color={colors.primary}
+			/>
+			<Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+				Loading...
+			</Text>
+		</View>
+	)
+}
 
 const RootNavigator: React.FC = () => {
-	const { state } = useAuth()
+	const { user, isAuthenticated, isLoading, logout } = useAuth()
+	const { mode, toggleTheme, colors } = useTheme()
+	const debugMenuModal = useMenuModal()
 
 	// Show loading screen while checking auth status
-	if (state.isLoading) {
+	if (isLoading) {
 		return <LoadingScreen />
 	}
 
 	// Log authentication state and user object for debugging
 	console.log('Auth:', {
-		isAuthenticated: state.isAuthenticated,
-		user: state.user,
+		isAuthenticated: isAuthenticated,
+		user: user,
 	})
 
 	// Debug function to clear auth data
 	const handleClearAuthData = async () => {
-		Alert.alert('Debug Menu', 'Choose debug action:', [
-			{ text: 'Cancel', style: 'cancel' },
-			{
-				text: 'Clear Auth Data',
-				style: 'destructive',
-				onPress: async () => {
-					await clearAuthData()
-					console.log('Auth data cleared manually')
+		debugMenuModal.showMenu({
+			title: 'Debug Menu',
+			message: 'Choose debug action:',
+			options: [
+				{
+					text: 'Clear Auth & Logout',
+					style: 'destructive',
+					onPress: async () => {
+						await authApi.clearAuthData()
+						await logout()
+						console.log('Auth data cleared and logged out')
+					},
 				},
-			},
-			{
-				text: 'Log Auth Data',
-				onPress: async () => {
-					await logStoredAuthData()
+				{
+					text: 'Log Auth Data',
+					onPress: async () => {
+						const user = await authApi.getStoredUser()
+						console.log('Stored user data:', user)
+					},
 				},
-			},
-			{
-				text: 'Simulate Termination',
-				onPress: async () => {
-					await simulateAppTermination()
+				{
+					text: 'Test Database',
+					onPress: async () => {
+						const result = await healthApi.testDatabase()
+						console.log('Database test result:', result)
+					},
 				},
-			},
-		])
+				{
+					text: `Toggle Theme (${mode === 'light' ? 'to Dark' : 'to Light'})`,
+					onPress: () => {
+						toggleTheme()
+					},
+				},
+				{
+					text: 'Seed Test Users',
+					onPress: async () => {
+						const result = await userApi.seedTestUsers()
+						console.log('Seed test users result:', result)
+					},
+				},
+			],
+		})
 	}
 
-	// Show debug button when authenticated (for development)
-	const showDebugButton = state.isAuthenticated && __DEV__
+	// Show debug button when authenticated and debug menu is enabled
+	const showDebugButton = isAuthenticated && __DEV__ && SHOW_DEBUG_MENU
 
 	return (
 		<>
 			<Stack.Navigator screenOptions={{ headerShown: false }}>
-				{!state.isAuthenticated ? (
+				{!isAuthenticated ? (
 					<Stack.Screen
 						name="Auth"
 						component={AuthStack}
 					/>
 				) : (
 					<>
-						{state.user?.role === 'CUSTOMER' ? (
+						{user?.role === 'CUSTOMER' ? (
 							<Stack.Screen
 								name="Customer"
 								component={CustomerStack}
 							/>
-						) : state.user?.role === 'CONCESSION_OWNER' ? (
+						) : user?.role === 'CONCESSION_OWNER' ? (
 							<Stack.Screen
 								name="Concessionaire"
 								component={ConcessionaireStack}
@@ -109,11 +137,20 @@ const RootNavigator: React.FC = () => {
 			{/* Debug button for development */}
 			{showDebugButton && (
 				<TouchableOpacity
-					style={styles.debugButton}
+					style={[styles.debugButton, { backgroundColor: colors.error }]}
 					onPress={handleClearAuthData}>
-					<Text style={styles.debugButtonText}>�️ Debug Menu</Text>
+					<Text
+						style={[styles.debugButtonText, { color: colors.textOnPrimary }]}>
+						⚙️ Debug Menu
+					</Text>
 				</TouchableOpacity>
 			)}
+
+			<MenuModal
+				visible={debugMenuModal.visible}
+				onClose={debugMenuModal.hideMenu}
+				{...debugMenuModal.props}
+			/>
 		</>
 	)
 }
@@ -123,24 +160,20 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: '#f8f9fa',
 	},
 	loadingText: {
 		marginTop: 16,
 		fontSize: 16,
-		color: '#666',
 	},
 	debugButton: {
 		position: 'absolute',
 		top: 50,
 		right: 20,
-		backgroundColor: '#ff4444',
 		padding: 10,
 		borderRadius: 8,
 		zIndex: 9999,
 	},
 	debugButtonText: {
-		color: 'white',
 		fontSize: 12,
 		fontWeight: 'bold',
 	},

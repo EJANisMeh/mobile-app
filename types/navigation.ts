@@ -11,6 +11,8 @@ export type AuthStackParamList = {
 	Login: undefined
 	Register: undefined
 	ForgotPassword: undefined
+	EmailVerification: { email: string }
+	ChangePassword: undefined
 }
 
 export type CustomerStackParamList = {

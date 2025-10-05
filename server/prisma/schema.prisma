@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int         @id @default(autoincrement())
+  role            String      @db.VarChar(20)
+  fname           String?
+  lname           String?
+  email           String      @unique
+  passwordHash    String      @map("password_hash")
+  new_login       Boolean     @default(true)
+  emailVerified   Boolean     @default(false) @map("email_verified")
+  contact_details Json        @default("[]")
+  image_url       String?
+  concession_id   Int?
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  feedback        Feedback[]
+  orders          Order[]
+  concessions     Concession? @relation(fields: [concession_id], references: [id], onUpdate: NoAction)
+
+  @@index([contact_details], map: "users_contact_details_gin_idx", type: Gin)
+  @@map("users")
+}
+
+model Cafeteria {
+  id          Int          @id @default(autoincrement())
+  name        String
+  location    String?
+  image_url   String?
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  concessions Concession[]
+
+  @@index([name])
+  @@map("cafeterias")
+}
+
+model Concession {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  image_url            String?
+  cafeteriaId          Int?                   @map("cafeteria_id")
+  is_open              Boolean                @default(false)
+  payment_methods      Json                   @default("[]")
+  createdAt            DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  cafeteria            Cafeteria?             @relation(fields: [cafeteriaId], references: [id], onUpdate: NoAction)
+  menu_item_categories menu_item_categories[]
+  menuItems            MenuItem[]
+  orders               Order[]
+  users                User[]
+
+  @@index([payment_methods], map: "concessions_payment_methods_gin_idx", type: Gin)
+  @@map("concessions")
+}
+
+model MenuItem {
+  id                                                                Int                          @id @default(autoincrement())
+  name                                                              String
+  description                                                       String?
+  basePrice                                                         Decimal                      @map("base_price") @db.Decimal(10, 2)
+  imageUrl                                                          String?                      @map("image_url")
+  availability                                                      Boolean                      @default(false)
+  concessionId                                                      Int                          @map("concession_id")
+  categoryId                                                        Int?                         @map("category_id")
+  position                                                          Int?                         @default(0)
+  createdAt                                                         DateTime                     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                                                         DateTime                     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  feedback                                                          Feedback[]
+  menu_item_addons_menu_item_addons_menu_item_idTomenu_items        menu_item_addons[]           @relation("menu_item_addons_menu_item_idTomenu_items")
+  menu_item_addons_menu_item_addons_target_menu_item_idTomenu_items menu_item_addons[]           @relation("menu_item_addons_target_menu_item_idTomenu_items")
+  menu_item_variation_groups                                        menu_item_variation_groups[]
+  category                                                          menu_item_categories?        @relation(fields: [categoryId], references: [id], onUpdate: NoAction)
+  concession                                                        Concession                   @relation(fields: [concessionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  order_items_order_items_addon_menu_item_idTomenu_items            OrderItem[]                  @relation("order_items_addon_menu_item_idTomenu_items")
+  orderItems                                                        OrderItem[]
+
+  @@index([concessionId])
+  @@map("menu_items")
+}
+
+model Order {
+  id              Int            @id @default(autoincrement())
+  customerId      Int?           @map("customer_id")
+  concessionId    Int?           @map("concession_id")
+  total           Decimal        @db.Decimal(12, 2)
+  payment_mode    Json?          @default("{}")
+  status_id       Int
+  concession_note String?
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  orderItems      OrderItem[]
+  concession      Concession?    @relation(fields: [concessionId], references: [id], onUpdate: NoAction)
+  customer        User?          @relation(fields: [customerId], references: [id], onUpdate: NoAction)
+  order_statuses  order_statuses @relation(fields: [status_id], references: [id], onUpdate: NoAction)
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id                                                    Int                         @id @default(autoincrement())
+  orderId                                               Int                         @map("order_id")
+  menuItemId                                            Int                         @map("menu_item_id")
+  variationId                                           Int?                        @map("variation_id")
+  addon_menu_item_id                                    Int?
+  quantity                                              Int                         @default(1)
+  unitPrice                                             Decimal                     @map("unit_price") @db.Decimal(12, 2)
+  variation_snapshot                                    Json?
+  options_snapshot                                      Json?
+  addons_snapshot                                       Json?
+  item_total                                            Decimal                     @db.Decimal(12, 2)
+  createdAt                                             DateTime                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at                                            DateTime                    @default(now()) @db.Timestamptz(6)
+  menu_items_order_items_addon_menu_item_idTomenu_items MenuItem?                   @relation("order_items_addon_menu_item_idTomenu_items", fields: [addon_menu_item_id], references: [id], onUpdate: NoAction)
+  menuItem                                              MenuItem                    @relation(fields: [menuItemId], references: [id], onUpdate: NoAction)
+  order                                                 Order                       @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  variation                                             menu_item_variation_groups? @relation(fields: [variationId], references: [id], onUpdate: NoAction)
+
+  @@index([addons_snapshot], map: "order_items_addons_snapshot_gin_idx", type: Gin)
+  @@index([menuItemId])
+  @@index([options_snapshot], map: "order_items_options_snapshot_gin_idx", type: Gin)
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Feedback {
+  id           Int      @id @default(autoincrement())
+  menu_item_id Int
+  user_id      Int
+  rating       Int
+  comment      String?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  menu_items   MenuItem @relation(fields: [menu_item_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users        User     @relation(fields: [user_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@index([menu_item_id])
+  @@index([user_id])
+  @@map("feedback")
+}
+
+model menu_item_addons {
+  id                                                          Int                         @id @default(autoincrement())
+  menu_item_id                                                Int
+  label                                                       String?
+  target_menu_item_id                                         Int?
+  target_variation_group_id                                   Int?
+  price_override                                              Decimal?                    @db.Decimal(10, 2)
+  required                                                    Boolean                     @default(false)
+  position                                                    Int?                        @default(0)
+  menu_items_menu_item_addons_menu_item_idTomenu_items        MenuItem                    @relation("menu_item_addons_menu_item_idTomenu_items", fields: [menu_item_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  menu_items_menu_item_addons_target_menu_item_idTomenu_items MenuItem?                   @relation("menu_item_addons_target_menu_item_idTomenu_items", fields: [target_menu_item_id], references: [id], onUpdate: NoAction)
+  menu_item_variation_groups                                  menu_item_variation_groups? @relation(fields: [target_variation_group_id], references: [id], onUpdate: NoAction)
+}
+
+model menu_item_categories {
+  id            Int        @id @default(autoincrement())
+  concession_id Int
+  name          String
+  position      Int?       @default(0)
+  created_at    DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime   @default(now()) @db.Timestamptz(6)
+  concessions   Concession @relation(fields: [concession_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  menuItems     MenuItem[]
+
+  @@index([concession_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model menu_item_variation_groups {
+  id                                 Int                                  @id @default(autoincrement())
+  menu_item_id                       Int
+  kind                               String
+  code                               String?
+  name                               String
+  price                              Decimal?                             @db.Decimal(10, 2)
+  price_adjustment                   Decimal?                             @db.Decimal(10, 2)
+  is_default                         Boolean                              @default(false)
+  selection_type_id                  Int?
+  multi_limit                        Int?
+  position                           Int?                                 @default(0)
+  menu_item_addons                   menu_item_addons[]
+  menu_items                         MenuItem                             @relation(fields: [menu_item_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  selection_types                    selection_types?                     @relation(fields: [selection_type_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  menu_item_variation_option_choices menu_item_variation_option_choices[]
+  orderItems                         OrderItem[]
+}
+
+model menu_item_variation_option_choices {
+  id                         Int                        @id @default(autoincrement())
+  group_id                   Int
+  code                       String?
+  name                       String
+  price_adjustment           Decimal                    @default(0.00) @db.Decimal(10, 2)
+  is_default                 Boolean                    @default(false)
+  position                   Int?                       @default(0)
+  menu_item_variation_groups menu_item_variation_groups @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model order_statuses {
+  id          Int     @id @default(autoincrement())
+  code        String  @unique
+  description String?
+  orders      Order[]
+}
+
+model selection_types {
+  id                         Int                          @id @default(autoincrement())
+  code                       String                       @unique
+  description                String?
+  menu_item_variation_groups menu_item_variation_groups[]
+}

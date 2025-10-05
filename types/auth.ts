@@ -2,15 +2,15 @@
 export type User = {
 	id: number
 	role: string
-	fname?: string
-	lname?: string
+	fname: string | null
+	lname: string | null
 	email: string
 	passwordHash: string
 	new_login: boolean
 	emailVerified: boolean
 	contact_details: any // JsonValue from Prisma
-	image_url?: string
-	concession_id?: number
+	image_url: string | null
+	concession_id: number | null
 	createdAt: Date
 	updatedAt: Date
 }
@@ -49,6 +49,7 @@ export type AuthResponse = {
 	token?: string
 	error?: string
 	message?: string
+	needsEmailVerification?: boolean
 }
 
 export type ResetPasswordData = {
