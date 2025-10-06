@@ -1,28 +1,7 @@
-// Authentication related type definitions
-export type User = {
-	id: number
-	role: string
-	fname: string | null
-	lname: string | null
-	email: string
-	passwordHash: string
-	new_login: boolean
-	emailVerified: boolean
-	contact_details: any // JsonValue from Prisma
-	image_url: string | null
-	concession_id: number | null
-	createdAt: Date
-	updatedAt: Date
-}
-
-export type UserType =
-	| 'CUSTOMER'
-	| 'CAFETERIA_ADMIN'
-	| 'CONCESSION_OWNER'
-	| 'SYSTEM_ADMIN'
+import { UserData } from './user'
 
 export type AuthState = {
-	user: Omit<User, 'passwordHash'> | null
+	user: Omit<UserData, 'passwordHash'> | null
 	isAuthenticated: boolean
 	isLoading: boolean
 	error: string | null
@@ -45,7 +24,7 @@ export type RegisterData = {
 
 export type AuthResponse = {
 	success: boolean
-	user?: Omit<User, 'passwordHash'>
+	user?: Omit<UserData, 'passwordHash'>
 	token?: string
 	error?: string
 	message?: string
@@ -65,4 +44,50 @@ export type ChangePasswordData = {
 export type EmailVerificationData = {
 	token: string
 	email: string
+}
+
+export interface AuthBackendType {
+	user: UserData | null
+	login: (credentials: LoginCredentials) => Promise<{
+		success: boolean
+		error?: string
+		user?: UserData
+		token?: string
+		needsEmailVerification?: boolean
+		needsProfileCreation?: boolean
+	}>
+	register: (data: RegisterData) => Promise<{
+		success: boolean
+		error?: string
+		user?: UserData
+		token?: string
+		needsEmailVerification?: boolean
+	}>
+	logout: () => Promise<{ success: boolean }>
+	checkAuthStatus: () => Promise<{
+		success: boolean
+		user?: UserData
+		error?: string
+	}>
+	changePassword: (data: {
+		currentPassword: string
+		newPassword: string
+		userId: number
+	}) => Promise<{ success: boolean; error?: string }>
+	verifyEmail: (data: {
+		userId: number
+		verificationCode: string
+	}) => Promise<{ success: boolean; error?: string }>
+	resendVerification: (userId: number) => Promise<{
+		success: boolean
+		error?: string
+	}>
+	requestPasswordReset: (email: string) => Promise<{
+		success: boolean
+		error?: string
+	}>
+	resetPassword: (data: {
+		token: string
+		newPassword: string
+	}) => Promise<{ success: boolean; error?: string }>
 }

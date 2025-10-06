@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Platform } from 'react-native'
-import { User, LoginCredentials, RegisterData } from '../types/auth'
+import { UserData, LoginCredentials, RegisterData } from '../types'
 
 /**
  * API Service - Thin HTTP Client Layer
@@ -41,9 +41,10 @@ const getApiBaseUrl = () => {
 
 		// Android (emulator vs device)
 		if (Platform.OS === 'android') {
-			// Most Android emulators (AVD) map host localhost to 10.0.2.2
-			// If you're on a physical Android device use phoneIp instead.
-			return 'http://10.0.2.2:3000/api'
+			// For physical Android device, use your computer's IP address
+			// For Android emulator (AVD), use 10.0.2.2
+			// Change this line to 'http://10.0.2.2:3000/api' if using emulator
+			return `http://${phoneIp}:3000/api`
 		}
 
 		// Fallback to local network IP for any other platform
@@ -60,10 +61,12 @@ const API_BASE_URL = getApiBaseUrl()
 interface ApiResponse<T = any> {
 	success: boolean
 	data?: T
-	user?: User
+	user?: UserData
 	token?: string
 	message?: string
 	error?: string
+	needsEmailVerification?: boolean
+	needsProfileCreation?: boolean
 }
 
 // Helper function to make API calls
@@ -260,7 +263,7 @@ export const userApi = {
 	/**
 	 * Update user profile
 	 */
-	updateProfile: async (data: Partial<User>): Promise<ApiResponse> => {
+	updateProfile: async (data: Partial<UserData>): Promise<ApiResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
 		return await apiCall('/user/update-profile', {

@@ -1,5 +1,5 @@
 // Navigation related type definitions
-import { UserType } from './auth'
+import { UserType } from './user'
 
 export type RootStackParamList = {
 	Auth: undefined

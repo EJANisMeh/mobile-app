@@ -13,7 +13,8 @@ import {
 	TouchableOpacity,
 } from 'react-native'
 import { authApi, userApi, debugApi } from '../services/api'
-import { getStoredUser, clearAuthData } from '../backend/user/getStoredUser'
+import { getStoredUser } from '../backend/auth/user'
+import { clearAuthData } from '../backend/auth/authData/clearAuthData'
 import { MenuModal } from '../components'
 import { useMenuModal } from '../hooks'
 
@@ -48,12 +49,6 @@ const RootNavigator: React.FC = () => {
 	if (isLoading) {
 		return <LoadingScreen />
 	}
-
-	// Log authentication state and user object for debugging
-	console.log('Auth:', {
-		isAuthenticated: isAuthenticated,
-		user: user,
-	})
 
 	// Debug function to clear auth data
 	const handleClearAuthData = async () => {
