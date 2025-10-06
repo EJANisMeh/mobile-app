@@ -115,7 +115,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 				<ScrollView contentContainerStyle={dynamicStyles.scrollContent}>
 					<View style={registerStyles.content}>
 						<Text style={dynamicStyles.title}>Create Account</Text>
-						<Text style={dynamicStyles.subtitle}>Join us today</Text>
 
 						<View style={registerStyles.form}>
 							<View style={registerStyles.nameRow}>
@@ -144,45 +143,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 								autoCapitalize="none"
 								autoCorrect={false}
 							/>
-
-							<View style={registerStyles.roleContainer}>
-								<Text style={registerStyles.roleLabel}>I am a:</Text>
-								<View style={registerStyles.roleButtons}>
-									<TouchableOpacity
-										style={[
-											registerStyles.roleButton,
-											formData.role === 'customer' &&
-												registerStyles.roleButtonActive,
-										]}
-										onPress={() => updateField('role', 'customer')}>
-										<Text
-											style={[
-												registerStyles.roleButtonText,
-												formData.role === 'customer' &&
-													registerStyles.roleButtonTextActive,
-											]}>
-											Customer
-										</Text>
-									</TouchableOpacity>
-
-									<TouchableOpacity
-										style={[
-											registerStyles.roleButton,
-											formData.role === 'concessionaire' &&
-												registerStyles.roleButtonActive,
-										]}
-										onPress={() => updateField('role', 'concessionaire')}>
-										<Text
-											style={[
-												registerStyles.roleButtonText,
-												formData.role === 'concessionaire' &&
-													registerStyles.roleButtonTextActive,
-											]}>
-											Concession Owner
-										</Text>
-									</TouchableOpacity>
-								</View>
-							</View>
 
 							<TextInput
 								style={registerStyles.input}

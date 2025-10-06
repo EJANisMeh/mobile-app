@@ -6,6 +6,7 @@ import {
 	TouchableOpacity,
 	KeyboardAvoidingView,
 	Platform,
+	Keyboard,
 } from 'react-native'
 import { useAuth, useTheme } from '../../../context'
 import { LoginCredentials } from '../../../types'
@@ -93,6 +94,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 		setCredentials((prev: LoginCredentials) => ({ ...prev, password }))
 	}
 
+	const handleForgotPassword = () => {
+		Keyboard.dismiss()
+		navigation.navigate('ForgotPassword')
+	}
+
 	return (
 		<>
 			<KeyboardAvoidingView
@@ -114,7 +120,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 							textContentType="none"
 							importantForAutofill="no"
 							contextMenuHidden={true}
-							selectTextOnFocus={false}
 						/>
 
 						<TextInput
@@ -127,7 +132,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 							textContentType="none"
 							importantForAutofill="no"
 							contextMenuHidden={true}
-							selectTextOnFocus={false}
 							passwordRules=""
 						/>
 
@@ -145,7 +149,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
 						<TouchableOpacity
 							style={loginStyles.forgotPassword}
-							onPress={() => navigation.navigate('ForgotPassword')}>
+							onPress={handleForgotPassword}>
 							<Text style={loginStyles.forgotPasswordText}>
 								Forgot Password?
 							</Text>
