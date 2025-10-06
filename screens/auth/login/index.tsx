@@ -7,6 +7,8 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 	Keyboard,
+	ScrollView,
+	Dimensions,
 } from 'react-native'
 import { useAuth, useTheme } from '../../../context'
 import { LoginCredentials } from '../../../types'
@@ -96,73 +98,93 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
 	const handleForgotPassword = () => {
 		Keyboard.dismiss()
-		navigation.navigate('ForgotPassword')
+		setTimeout(() => {
+			navigation.navigate('ForgotPassword')
+		}, 100)
+	}
+
+	const handleRegisterNavigation = () => {
+		Keyboard.dismiss()
+		setTimeout(() => {
+			navigation.navigate('Register')
+		}, 100)
 	}
 
 	return (
 		<>
 			<KeyboardAvoidingView
+				key={responsive.isLandscape ? 'landscape' : 'portrait'}
 				style={dynamicStyles.container}
-				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-				<View style={dynamicStyles.content}>
-					<Text style={dynamicStyles.title}>Welcome Back</Text>
-					<Text style={dynamicStyles.subtitle}>Sign in to your account</Text>
+				behavior="padding"
+				enabled={true}
+				keyboardVerticalOffset={Platform.OS === 'android' ? -100 : 0}>
+				<ScrollView
+					contentContainerStyle={{ flexGrow: 1 }}
+					keyboardShouldPersistTaps="handled"
+					bounces={false}
+					showsVerticalScrollIndicator={false}>
+					<View style={dynamicStyles.content}>
+						<Text style={dynamicStyles.title}>Welcome Back</Text>
+						<Text style={dynamicStyles.subtitle}>Sign in to your account</Text>
 
-					<View style={dynamicStyles.form}>
-						<TextInput
-							style={loginStyles.input}
-							placeholder="Email"
-							value={credentials.email}
-							onChangeText={handleEmailChange}
-							keyboardType="email-address"
-							autoCapitalize="none"
-							autoCorrect={false}
-							textContentType="none"
-							importantForAutofill="no"
-							contextMenuHidden={true}
-						/>
+						<View style={dynamicStyles.form}>
+							<TextInput
+								style={loginStyles.input}
+								placeholder="Email"
+								value={credentials.email}
+								onChangeText={handleEmailChange}
+								keyboardType="email-address"
+								autoCapitalize="none"
+								autoCorrect={false}
+								textContentType="none"
+								importantForAutofill="no"
+								contextMenuHidden={true}
+							/>
 
-						<TextInput
-							style={loginStyles.input}
-							placeholder="Password"
-							value={credentials.password}
-							onChangeText={handlePasswordChange}
-							secureTextEntry
-							autoCapitalize="none"
-							textContentType="none"
-							importantForAutofill="no"
-							contextMenuHidden={true}
-							passwordRules=""
-						/>
+							<TextInput
+								style={loginStyles.input}
+								placeholder="Password"
+								value={credentials.password}
+								onChangeText={handlePasswordChange}
+								secureTextEntry
+								autoCapitalize="none"
+								textContentType="none"
+								importantForAutofill="no"
+								contextMenuHidden={true}
+								passwordRules=""
+							/>
 
-						<TouchableOpacity
-							style={[
-								loginStyles.loginButton,
-								isLoading && loginStyles.disabledButton,
-							]}
-							onPress={handleLogin}
-							disabled={isLoading}>
-							<Text style={loginStyles.loginButtonText}>
-								{isLoading ? 'Signing In...' : 'Sign In'}
+							<TouchableOpacity
+								style={[
+									loginStyles.loginButton,
+									isLoading && loginStyles.disabledButton,
+								]}
+								onPress={handleLogin}
+								disabled={isLoading}>
+								<Text style={loginStyles.loginButtonText}>
+									{isLoading ? 'Signing In...' : 'Sign In'}
+								</Text>
+							</TouchableOpacity>
+
+							<TouchableOpacity
+								style={loginStyles.forgotPassword}
+								onPress={handleForgotPassword}>
+								<Text style={loginStyles.forgotPasswordText}>
+									Forgot Password?
+								</Text>
+							</TouchableOpacity>
+						</View>
+
+						<View style={loginStyles.footer}>
+							<Text style={loginStyles.footerText}>
+								Don't have an account?{' '}
 							</Text>
-						</TouchableOpacity>
-
-						<TouchableOpacity
-							style={loginStyles.forgotPassword}
-							onPress={handleForgotPassword}>
-							<Text style={loginStyles.forgotPasswordText}>
-								Forgot Password?
-							</Text>
-						</TouchableOpacity>
+							<TouchableOpacity onPress={handleRegisterNavigation}>
+								<Text style={loginStyles.signUpText}>Sign Up</Text>
+							</TouchableOpacity>
+						</View>
 					</View>
-
-					<View style={loginStyles.footer}>
-						<Text style={loginStyles.footerText}>Don't have an account? </Text>
-						<TouchableOpacity onPress={() => navigation.navigate('Register')}>
-							<Text style={loginStyles.signUpText}>Sign Up</Text>
-						</TouchableOpacity>
-					</View>
-				</View>
+				</ScrollView>
 			</KeyboardAvoidingView>
 
 			<AlertModal

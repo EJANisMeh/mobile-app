@@ -6,7 +6,9 @@ import {
 	TouchableOpacity,
 	KeyboardAvoidingView,
 	Platform,
+	Keyboard,
 	ScrollView,
+	Dimensions,
 } from 'react-native'
 import { useAuth, useTheme } from '../../../context'
 import { RegisterData } from '../../../types'
@@ -110,9 +112,16 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 	return (
 		<>
 			<KeyboardAvoidingView
+				key={responsive.isLandscape ? 'landscape' : 'portrait'}
 				style={dynamicStyles.container}
-				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-				<ScrollView contentContainerStyle={dynamicStyles.scrollContent}>
+				behavior="padding"
+				enabled={true}
+				keyboardVerticalOffset={Platform.OS === 'android' ? -100 : 0}>
+				<ScrollView
+					contentContainerStyle={{ flexGrow: 1 }}
+					keyboardShouldPersistTaps="handled"
+					bounces={false}
+					showsVerticalScrollIndicator={false}>
 					<View style={registerStyles.content}>
 						<Text style={dynamicStyles.title}>Create Account</Text>
 
