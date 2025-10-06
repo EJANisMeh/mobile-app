@@ -2,6 +2,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Platform } from 'react-native'
 import { User, LoginCredentials, RegisterData } from '../types/auth'
 
+/**
+ * API Service - Thin HTTP Client Layer
+ *
+ * This file contains ONLY HTTP client code for making API requests.
+ * All business logic is in the backend modules (backend/auth/, backend/user/, backend/debug/)
+ *
+ * Responsibilities:
+ * - Configure API base URL based on platform
+ * - Make HTTP requests to backend endpoints
+ * - Handle AsyncStorage for tokens (frontend caching only)
+ * - Return responses to callers
+ *
+ * Does NOT contain:
+ * - Validation logic (belongs in backend)
+ * - Database operations (belongs in backend/db)
+ * - Business rules (belongs in backend)
+ */
+
 // API Configuration
 // For React Native development:
 // - Web and iOS simulator can use localhost
@@ -89,125 +107,234 @@ const apiCall = async <T = any>(
 	}
 }
 
-// Auth API functions
+/**
+ * Authentication API Endpoints
+ * Pure HTTP client - all business logic is in backend/auth/*
+ */
 export const authApi = {
-	// Register new user
+	/**
+	 * Register new user
+	 * Backend handles: validation, email check, password hashing, creating user with new_login=true & emailVerified=false
+	 */
 	register: async (userData: RegisterData): Promise<ApiResponse> => {
-		const response = await apiCall('/auth/register', {
+		return await apiCall('/auth/register', {
 			method: 'POST',
 			body: JSON.stringify(userData),
 		})
-
-		if (response.success && response.token) {
-			await AsyncStorage.setItem('authToken', response.token)
-			await AsyncStorage.setItem('user', JSON.stringify(response.user))
-		}
-
-		return response
 	},
 
-	// Login user
+	/**
+	 * Login user
+	 * Backend handles: validation, user lookup, password verification, email_verify check, new_login check, JWT generation
+	 * Returns: { token, user, needsEmailVerification?, needsProfileCreation? }
+	 */
 	login: async (credentials: LoginCredentials): Promise<ApiResponse> => {
-		const response = await apiCall('/auth/login', {
+		return await apiCall('/auth/login', {
 			method: 'POST',
 			body: JSON.stringify(credentials),
 		})
+	},
 
-		if (response.success && response.token) {
-			await AsyncStorage.setItem('authToken', response.token)
-			await AsyncStorage.setItem('user', JSON.stringify(response.user))
+	/**
+	 * Check authentication status
+	 * Backend handles: JWT verification, user lookup
+	 */
+	checkAuthStatus: async (): Promise<ApiResponse> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		if (!token) {
+			return { success: false, error: 'No token found' }
 		}
+
+		return await apiCall('/auth/check-status', {
+			method: 'POST',
+			headers: { Authorization: `Bearer ${token}` },
+		})
+	},
+
+	/**
+	 * Logout user
+	 * Backend handles: logging (future: token blacklist)
+	 * Frontend handles: clearing AsyncStorage
+	 */
+	logout: async (): Promise<ApiResponse> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		const response = await apiCall('/auth/logout', {
+			method: 'POST',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+		})
+
+		// Clear local storage regardless of backend response
+		await AsyncStorage.multiRemove(['authToken', 'user', 'lastActiveTimestamp'])
 
 		return response
 	},
 
-	// Verify token
-	verifyToken: async (token: string): Promise<ApiResponse> => {
-		return await apiCall('/auth/verify-token', {
+	/**
+	 * Change password
+	 * Backend handles: validation, current password verification, password hashing, updating user
+	 */
+	changePassword: async (data: {
+		currentPassword: string
+		newPassword: string
+		userId: number
+	}): Promise<ApiResponse> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall('/auth/change-password', {
 			method: 'POST',
-			body: JSON.stringify({ token }),
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+			body: JSON.stringify(data),
 		})
 	},
 
-	// Check auth status from stored token
-	checkAuthStatus: async (): Promise<{
-		user: User | null
-		isAuthenticated: boolean
-	}> => {
-		try {
-			const token = await AsyncStorage.getItem('authToken')
-
-			if (!token) {
-				return { user: null, isAuthenticated: false }
-			}
-
-			const response = await authApi.verifyToken(token)
-
-			if (response.success && response.user) {
-				return { user: response.user, isAuthenticated: true }
-			} else {
-				// Token is invalid, remove it
-				await AsyncStorage.multiRemove(['authToken', 'user'])
-				return { user: null, isAuthenticated: false }
-			}
-		} catch (error) {
-			console.error('Error checking auth status:', error)
-			return { user: null, isAuthenticated: false }
-		}
+	/**
+	 * Request password reset email
+	 * Backend handles: user lookup, token generation, email sending
+	 */
+	requestPasswordReset: async (email: string): Promise<ApiResponse> => {
+		return await apiCall('/auth/request-reset', {
+			method: 'POST',
+			body: JSON.stringify({ email }),
+		})
 	},
 
-	// Logout user
-	logout: async (): Promise<void> => {
-		try {
-			await AsyncStorage.multiRemove(['authToken', 'user'])
-		} catch (error) {
-			console.error('Error during logout:', error)
-		}
+	/**
+	 * Reset password with token
+	 * Backend handles: token verification, password hashing, updating user
+	 */
+	resetPassword: async (data: {
+		token: string
+		newPassword: string
+	}): Promise<ApiResponse> => {
+		return await apiCall('/auth/reset-password', {
+			method: 'POST',
+			body: JSON.stringify(data),
+		})
 	},
 
-	// Get stored user data
-	getStoredUser: async (): Promise<User | null> => {
-		try {
-			const userData = await AsyncStorage.getItem('user')
-			return userData ? JSON.parse(userData) : null
-		} catch (error) {
-			console.error('Error getting stored user:', error)
-			return null
-		}
+	/**
+	 * Verify email address
+	 * Backend handles: user lookup, updating emailVerified status
+	 */
+	verifyEmail: async (data: {
+		userId: number
+		verificationCode: string
+	}): Promise<ApiResponse> => {
+		return await apiCall('/auth/verify-email', {
+			method: 'POST',
+			body: JSON.stringify(data),
+		})
 	},
 
-	// Clear all auth data
-	clearAuthData: async (): Promise<void> => {
-		try {
-			await AsyncStorage.multiRemove(['authToken', 'user'])
-		} catch (error) {
-			console.error('Error clearing auth data:', error)
-		}
+	/**
+	 * Resend email verification
+	 * Backend handles: user lookup, sending verification email
+	 */
+	resendVerification: async (userId: number): Promise<ApiResponse> => {
+		return await apiCall('/auth/resend-verification', {
+			method: 'POST',
+			body: JSON.stringify({ userId }),
+		})
+	},
+
+	/**
+	 * Check email verification status
+	 * Backend handles: user lookup, returning emailVerified status
+	 */
+	checkEmailStatus: async (userId: number): Promise<ApiResponse> => {
+		return await apiCall('/auth/email-status', {
+			method: 'POST',
+			body: JSON.stringify({ userId }),
+		})
 	},
 }
 
-// User API functions
+/**
+ * User Data API Endpoints
+ * Note: User storage in AsyncStorage is handled by backend/user/getStoredUser.ts
+ * These are HTTP endpoints if needed for server-side user operations
+ */
 export const userApi = {
-	// Get all users (for testing/debug)
-	getUsers: async (): Promise<ApiResponse> => {
-		return await apiCall('/users')
+	/**
+	 * Update user profile
+	 */
+	updateProfile: async (data: Partial<User>): Promise<ApiResponse> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall('/user/update-profile', {
+			method: 'POST',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+			body: JSON.stringify(data),
+		})
 	},
 
-	// Seed test users
-	seedTestUsers: async (): Promise<ApiResponse> => {
-		return await apiCall('/users/seed-test-users', {
-			method: 'POST',
+	/**
+	 * Get user profile
+	 */
+	getProfile: async (userId: number): Promise<ApiResponse> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall(`/user/profile/${userId}`, {
+			method: 'GET',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
 		})
 	},
 }
 
-// Health check
-export const healthApi = {
-	checkHealth: async (): Promise<ApiResponse> => {
-		return await apiCall('/health')
+/**
+ * Debug/Testing API Endpoints
+ * These call backend/debug/* modules for development testing
+ */
+export const debugApi = {
+	/**
+	 * Seed test users
+	 * Backend handles: creating 6 test users with various states
+	 */
+	seedTestUsers: async (): Promise<ApiResponse> => {
+		return await apiCall('/debug/seed-users', {
+			method: 'POST',
+		})
 	},
 
+	/**
+	 * Clear test users
+	 * Backend handles: deleting test users from database
+	 */
+	clearTestUsers: async (): Promise<ApiResponse> => {
+		return await apiCall('/debug/clear-users', {
+			method: 'POST',
+		})
+	},
+
+	/**
+	 * Test database connection
+	 * Backend handles: running test queries
+	 */
 	testDatabase: async (): Promise<ApiResponse> => {
-		return await apiCall('/test-db')
+		return await apiCall('/debug/test-db', {
+			method: 'GET',
+		})
+	},
+
+	/**
+	 * Get database statistics
+	 * Backend handles: counting users by role and verification status
+	 */
+	getDatabaseStats: async (): Promise<ApiResponse> => {
+		return await apiCall('/debug/db-stats', {
+			method: 'GET',
+		})
+	},
+
+	/**
+	 * Health check
+	 * Backend handles: server status, uptime, environment info
+	 */
+	healthCheck: async (): Promise<ApiResponse> => {
+		return await apiCall('/debug/health', {
+			method: 'GET',
+		})
 	},
 }

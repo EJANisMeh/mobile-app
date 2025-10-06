@@ -119,10 +119,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 			try {
 				dispatch({ type: 'SET_LOADING', payload: true })
 
-				const { user, isAuthenticated } = await authApi.checkAuthStatus()
+				const response = await authApi.checkAuthStatus()
 
-				if (isAuthenticated && user) {
-					dispatch({ type: 'SET_USER', payload: user })
+				if (response.success && response.user) {
+					dispatch({ type: 'SET_USER', payload: response.user })
 
 					// Initialize app state manager for authenticated users
 					appStateManager.initialize({

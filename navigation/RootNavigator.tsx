@@ -12,7 +12,8 @@ import {
 	ActivityIndicator,
 	TouchableOpacity,
 } from 'react-native'
-import { authApi, userApi, healthApi } from '../services/api'
+import { authApi, userApi, debugApi } from '../services/api'
+import { getStoredUser, clearAuthData } from '../backend/user/getStoredUser'
 import { MenuModal } from '../components'
 import { useMenuModal } from '../hooks'
 
@@ -64,7 +65,7 @@ const RootNavigator: React.FC = () => {
 					text: 'Clear Auth & Logout',
 					style: 'destructive',
 					onPress: async () => {
-						await authApi.clearAuthData()
+						await clearAuthData()
 						await logout()
 						console.log('Auth data cleared and logged out')
 					},
@@ -72,14 +73,14 @@ const RootNavigator: React.FC = () => {
 				{
 					text: 'Log Auth Data',
 					onPress: async () => {
-						const user = await authApi.getStoredUser()
+						const user = await getStoredUser()
 						console.log('Stored user data:', user)
 					},
 				},
 				{
 					text: 'Test Database',
 					onPress: async () => {
-						const result = await healthApi.testDatabase()
+						const result = await debugApi.testDatabase()
 						console.log('Database test result:', result)
 					},
 				},
@@ -92,7 +93,7 @@ const RootNavigator: React.FC = () => {
 				{
 					text: 'Seed Test Users',
 					onPress: async () => {
-						const result = await userApi.seedTestUsers()
+						const result = await debugApi.seedTestUsers()
 						console.log('Seed test users result:', result)
 					},
 				},
