@@ -28,11 +28,12 @@ class AppStateManager {
 			this.handleAppStateChange
 		)
 
-		// Check for auto-logout on app start
-		this.checkForAutoLogout()
-
-		// Update last active timestamp immediately
-		this.updateLastActiveTimestamp()
+		// Clear any old session data and start fresh
+		// This prevents auto-logout during login
+		this.clearSession().then(() => {
+			// Update last active timestamp immediately with fresh session
+			this.updateLastActiveTimestamp()
+		})
 	}
 
 	// Clean up listeners

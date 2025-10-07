@@ -28,7 +28,6 @@ export const login = async (req: express.Request, res: express.Response) => {
 				error: 'Email and password are required',
 			})
 		}
-
 		// Step 2: Find user by email using modularized selectOne query
 		const userResult = await selectOne(prisma, {
 			table: 'user',

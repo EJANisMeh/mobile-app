@@ -44,9 +44,17 @@ const RootNavigator: React.FC = () => {
 	const { user, isAuthenticated, isLoading, logout } = useAuth()
 	const { mode, toggleTheme, colors } = useTheme()
 	const debugMenuModal = useMenuModal()
+	const [isInitializing, setIsInitializing] = React.useState(true)
 
-	// Show loading screen while checking auth status
-	if (isLoading) {
+	// Only show loading screen during initial app startup
+	React.useEffect(() => {
+		if (!isLoading) {
+			setIsInitializing(false)
+		}
+	}, [isLoading])
+
+	// Show loading screen while checking auth status on app start
+	if (isInitializing) {
 		return <LoadingScreen />
 	}
 

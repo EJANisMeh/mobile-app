@@ -24,7 +24,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 	// Derive auth state from backend user
 	const isAuthenticated = !!authBackend.user
-	const [isLoading, setIsLoading] = React.useState(true)
+	const [isCheckingAuth, setIsCheckingAuth] = React.useState(true) // Renamed for clarity
+	const [isLoading, setIsLoading] = React.useState(false) // For login/register operations
 	const [error, setError] = React.useState<string | null>(null)
 
 	// Auto-logout handler for app state manager
@@ -47,7 +48,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	useEffect(() => {
 		const checkAuthStatus = async () => {
 			try {
-				setIsLoading(true)
+				setIsCheckingAuth(true)
 				const result = await authBackend.checkAuthStatus()
 
 				if (result.success) {
@@ -62,7 +63,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 				console.error('Error checking auth status:', err)
 				setError('Failed to check authentication status')
 			} finally {
-				setIsLoading(false)
+				setIsCheckingAuth(false)
 			}
 		}
 
@@ -74,81 +75,62 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		}
 	}, [])
 
-	// Login wrapper
+	// Login wrapper - delegates to backend
 	const login = async (credentials: LoginCredentials): Promise<boolean> => {
-		try {
-			setIsLoading(true)
-			setError(null)
+		setIsLoading(true)
+		setError(null)
 
-			const result = await authBackend.login(credentials)
+		const result = await authBackend.login(credentials)
 
-			if (result.success) {
-				// Initialize app state manager after successful login
-				appStateManager.initialize({
-					onAutoLogout: handleAutoLogout,
-					onAppBackground: handleAppBackground,
-					onAppForeground: handleAppForeground,
-				})
-				return true
-			} else {
-				setError(result.error || 'Login failed')
-				return false
-			}
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Login failed'
-			setError(errorMessage)
-			return false
-		} finally {
+		if (result.success) {
+			// Initialize app state manager after successful login
+			appStateManager.initialize({
+				onAutoLogout: handleAutoLogout,
+				onAppBackground: handleAppBackground,
+				onAppForeground: handleAppForeground,
+			})
 			setIsLoading(false)
+			return true
+		} else {
+			setError(result.error || 'Login failed')
+			setIsLoading(false)
+			return false
 		}
 	}
 
-	// Register wrapper
+	// Register wrapper - delegates to backend
 	const register = async (data: RegisterData): Promise<boolean> => {
-		try {
-			setIsLoading(true)
-			setError(null)
+		setIsLoading(true)
+		setError(null)
 
-			const result = await authBackend.register(data)
+		const result = await authBackend.register(data)
 
-			if (result.success) {
-				// Initialize app state manager after successful registration
-				appStateManager.initialize({
-					onAutoLogout: handleAutoLogout,
-					onAppBackground: handleAppBackground,
-					onAppForeground: handleAppForeground,
-				})
-				return true
-			} else {
-				setError(result.error || 'Registration failed')
-				return false
-			}
-		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : 'Registration failed'
-			setError(errorMessage)
-			return false
-		} finally {
+		if (result.success) {
+			// Initialize app state manager after successful registration
+			appStateManager.initialize({
+				onAutoLogout: handleAutoLogout,
+				onAppBackground: handleAppBackground,
+				onAppForeground: handleAppForeground,
+			})
 			setIsLoading(false)
+			return true
+		} else {
+			setError(result.error || 'Registration failed')
+			setIsLoading(false)
+			return false
 		}
 	}
 
-	// Logout wrapper
+	// Logout wrapper - delegates to backend
 	const logout = async (): Promise<void> => {
-		try {
-			await authBackend.logout()
-			await appStateManager.clearSession()
-		} catch (err) {
-			console.error('Error during logout:', err)
-			// Even if logout fails, clear session
-			await appStateManager.clearSession()
-		}
+		await authBackend.logout()
+		await appStateManager.clearSession()
 	}
 
 	const value: AuthContextType = {
 		user: authBackend.user,
 		isAuthenticated,
-		isLoading,
+		isLoading: isCheckingAuth || isLoading, // Combined loading state
 		error,
 		login,
 		register,
