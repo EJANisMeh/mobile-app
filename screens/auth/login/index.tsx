@@ -9,6 +9,7 @@ import {
 	Keyboard,
 	ScrollView,
 	Dimensions,
+	ActivityIndicator,
 } from 'react-native'
 import { useAuth, useTheme } from '../../../context'
 import { LoginCredentials } from '../../../types'
@@ -80,12 +81,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
 		const success = await login(credentials)
 
-		if (!success && error) {
+		if (!success) {
+			// Error is already set in AuthContext, show it in alert
 			showAlert({
 				title: 'Login Failed',
-				message: error,
+				message: error || 'Invalid email or password. Please try again.',
 			})
 		}
+		// If success, RootNavigator will handle navigation automatically
 	}
 
 	const handleEmailChange = (email: string) => {
@@ -124,13 +127,19 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 					bounces={false}
 					showsVerticalScrollIndicator={false}>
 					<View style={dynamicStyles.content}>
-						<Text style={dynamicStyles.title}>Welcome Back</Text>
+						<Text style={dynamicStyles.title}>Hello User</Text>
 						<Text style={dynamicStyles.subtitle}>Sign in to your account</Text>
 
 						<View style={dynamicStyles.form}>
 							<TextInput
-								style={loginStyles.input}
-								placeholder="Email"
+								style={[
+									loginStyles.input,
+									isLoading && {
+										opacity: 0.6,
+										backgroundColor: colors.surface,
+									},
+								]}
+								placeholder="Email (yourEmail@example.com)"
 								value={credentials.email}
 								onChangeText={handleEmailChange}
 								keyboardType="email-address"
@@ -139,10 +148,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 								textContentType="none"
 								importantForAutofill="no"
 								contextMenuHidden={true}
+								editable={!isLoading}
 							/>
 
 							<TextInput
-								style={loginStyles.input}
+								style={[
+									loginStyles.input,
+									isLoading && {
+										opacity: 0.6,
+										backgroundColor: colors.surface,
+									},
+								]}
 								placeholder="Password"
 								value={credentials.password}
 								onChangeText={handlePasswordChange}
@@ -152,6 +168,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 								importantForAutofill="no"
 								contextMenuHidden={true}
 								passwordRules=""
+								editable={!isLoading}
 							/>
 
 							<TouchableOpacity
@@ -160,16 +177,34 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 									isLoading && loginStyles.disabledButton,
 								]}
 								onPress={handleLogin}
-								disabled={isLoading}>
-								<Text style={loginStyles.loginButtonText}>
-									{isLoading ? 'Signing In...' : 'Sign In'}
-								</Text>
+								disabled={isLoading}
+								activeOpacity={isLoading ? 1 : 0.7}>
+								{isLoading ? (
+									<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+										<ActivityIndicator
+											size="small"
+											color={colors.textOnPrimary}
+											style={{ marginRight: 8 }}
+										/>
+										<Text style={loginStyles.loginButtonText}>
+											Signing In...
+										</Text>
+									</View>
+								) : (
+									<Text style={loginStyles.loginButtonText}>Sign In</Text>
+								)}
 							</TouchableOpacity>
 
 							<TouchableOpacity
 								style={loginStyles.forgotPassword}
-								onPress={handleForgotPassword}>
-								<Text style={loginStyles.forgotPasswordText}>
+								onPress={handleForgotPassword}
+								disabled={isLoading}
+								activeOpacity={isLoading ? 1 : 0.7}>
+								<Text
+									style={[
+										loginStyles.forgotPasswordText,
+										isLoading && { opacity: 0.5 },
+									]}>
 									Forgot Password?
 								</Text>
 							</TouchableOpacity>
@@ -179,8 +214,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 							<Text style={loginStyles.footerText}>
 								Don't have an account?{' '}
 							</Text>
-							<TouchableOpacity onPress={handleRegisterNavigation}>
-								<Text style={loginStyles.signUpText}>Sign Up</Text>
+							<TouchableOpacity
+								onPress={handleRegisterNavigation}
+								disabled={isLoading}
+								activeOpacity={isLoading ? 1 : 0.7}>
+								<Text
+									style={[
+										loginStyles.signUpText,
+										isLoading && { opacity: 0.5 },
+									]}>
+									Sign Up
+								</Text>
 							</TouchableOpacity>
 						</View>
 					</View>

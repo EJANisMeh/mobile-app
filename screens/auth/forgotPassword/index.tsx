@@ -69,6 +69,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 				onConfirm: () => {
 					hideAlert()
 					// Auto-navigate to EmailVerification since we're using test accounts without email API
+					console.log("test")
 					navigation.navigate('EmailVerification', { email })
 				},
 			})

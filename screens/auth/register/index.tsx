@@ -9,6 +9,7 @@ import {
 	Keyboard,
 	ScrollView,
 	Dimensions,
+	ActivityIndicator,
 } from 'react-native'
 import { useAuth, useTheme } from '../../../context'
 import { RegisterData } from '../../../types'
@@ -34,8 +35,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
 	const responsive = useResponsiveDimensions()
 	const [formData, setFormData] = useState<RegisterData>({
-		fname: '',
-		lname: '',
 		email: '',
 		password: '',
 		confirmPassword: '',
@@ -65,43 +64,61 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 	}
 
 	const handleRegister = async () => {
-		// Basic validation
-		if (
-			!formData.fname ||
-			!formData.lname ||
-			!formData.email ||
-			!formData.password
-		) {
+		// Validate all fields
+		if (!formData.email || !formData.password || !formData.confirmPassword) {
 			showAlert({
 				title: 'Missing Information',
-				message: 'Please fill in all required fields.',
+				message: 'All fields are required',
 			})
 			return
 		}
 
+		// Validate password match
 		if (formData.password !== formData.confirmPassword) {
 			showAlert({
 				title: 'Password Mismatch',
-				message: 'Passwords do not match.',
+				message: 'Passwords do not match',
 			})
 			return
 		}
 
+		// Validate email format
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+		if (!emailRegex.test(formData.email)) {
+			showAlert({
+				title: 'Invalid Email',
+				message: 'Email format is incorrect',
+			})
+			return
+		}
+
+		// Validate password length
 		if (formData.password.length < 6) {
 			showAlert({
 				title: 'Weak Password',
-				message: 'Password must be at least 6 characters long.',
+				message: 'Password must be at least 6 characters long',
 			})
 			return
 		}
 
 		const success = await register(formData)
 
-		if (!success && error) {
-			showAlert({
-				title: 'Registration Failed',
-				message: error,
-			})
+		if (!success) {
+			// Handle specific backend errors
+			if (error?.includes('already exists')) {
+				showAlert({
+					title: 'Email Already Exists',
+					message: 'Email already exists',
+				})
+			} else {
+				showAlert({
+					title: 'Registration Failed',
+					message: error || 'Failed to create account. Please try again.',
+				})
+			}
+		} else {
+			// Navigate to email verification screen on success
+			navigation.navigate('EmailVerification', { email: formData.email })
 		}
 	}
 
@@ -124,33 +141,18 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 					showsVerticalScrollIndicator={false}>
 					<View style={registerStyles.content}>
 						<Text style={dynamicStyles.title}>Create Account</Text>
+						<Text style={dynamicStyles.subtitle}>Sign up to get started</Text>
 
 						<View style={registerStyles.form}>
-							<View style={registerStyles.nameRow}>
-								<TextInput
-									style={[registerStyles.input, registerStyles.nameInput]}
-									placeholder="First Name"
-									value={formData.fname}
-									onChangeText={(value) => updateField('fname', value)}
-									autoCapitalize="words"
-								/>
-								<TextInput
-									style={[registerStyles.input, registerStyles.nameInput]}
-									placeholder="Last Name"
-									value={formData.lname}
-									onChangeText={(value) => updateField('lname', value)}
-									autoCapitalize="words"
-								/>
-							</View>
-
 							<TextInput
 								style={registerStyles.input}
-								placeholder="Email"
+								placeholder="Email (yourEmail@example.com)"
 								value={formData.email}
 								onChangeText={(value) => updateField('email', value)}
 								keyboardType="email-address"
 								autoCapitalize="none"
 								autoCorrect={false}
+								editable={!isLoading}
 							/>
 
 							<TextInput
@@ -160,6 +162,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 								onChangeText={(value) => updateField('password', value)}
 								secureTextEntry
 								autoCapitalize="none"
+								editable={!isLoading}
 							/>
 
 							<TextInput
@@ -169,6 +172,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 								onChangeText={(value) => updateField('confirmPassword', value)}
 								secureTextEntry
 								autoCapitalize="none"
+								editable={!isLoading}
 							/>
 
 							<TouchableOpacity
@@ -177,10 +181,24 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 									isLoading && registerStyles.disabledButton,
 								]}
 								onPress={handleRegister}
-								disabled={isLoading}>
-								<Text style={registerStyles.registerButtonText}>
-									{isLoading ? 'Creating Account...' : 'Create Account'}
-								</Text>
+								disabled={isLoading}
+								activeOpacity={isLoading ? 1 : 0.7}>
+								{isLoading ? (
+									<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+										<ActivityIndicator
+											size="small"
+											color={colors.textOnPrimary}
+											style={{ marginRight: 8 }}
+										/>
+										<Text style={registerStyles.registerButtonText}>
+											Creating Account...
+										</Text>
+									</View>
+								) : (
+									<Text style={registerStyles.registerButtonText}>
+										Create Account
+									</Text>
+								)}
 							</TouchableOpacity>
 						</View>
 
@@ -188,8 +206,17 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 							<Text style={registerStyles.footerText}>
 								Already have an account?{' '}
 							</Text>
-							<TouchableOpacity onPress={() => navigation.navigate('Login')}>
-								<Text style={registerStyles.signInText}>Sign In</Text>
+							<TouchableOpacity
+								onPress={() => navigation.navigate('Login')}
+								disabled={isLoading}
+								activeOpacity={isLoading ? 1 : 0.7}>
+								<Text
+									style={[
+										registerStyles.signInText,
+										isLoading && { opacity: 0.5 },
+									]}>
+									Sign In
+								</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
