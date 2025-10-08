@@ -1,0 +1,5 @@
+export type UserType =
+	| 'CUSTOMER'
+	| 'CAFETERIA_ADMIN'
+	| 'CONCESSION_OWNER'
+	| 'SYSTEM_ADMIN'

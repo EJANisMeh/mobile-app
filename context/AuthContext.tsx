@@ -1,22 +1,16 @@
 import React, { createContext, useContext, useEffect, ReactNode } from 'react'
-import { AuthState, LoginCredentials, RegisterData } from '../types/auth'
-import { useAuthBackend } from '../backend/auth'
+import { AuthProviderProps, AuthContextType, LoginCredentials, RegisterData } from '../types'
+import { useAuthBackend } from '../hooks'
 import { appStateManager } from '../utils/appStateManager'
 
 // Context type - extends AuthState and adds auth functions
-interface AuthContextType extends AuthState {
-	login: (credentials: LoginCredentials) => Promise<boolean>
-	register: (data: RegisterData) => Promise<boolean>
-	logout: () => Promise<void>
-}
+
 
 // Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Provider component
-interface AuthProviderProps {
-	children: ReactNode
-}
+
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	// Use backend auth functions from backend/auth/index.ts

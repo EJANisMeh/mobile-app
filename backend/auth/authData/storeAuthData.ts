@@ -3,7 +3,7 @@
  * Called after successful login/register
  */
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { UserData } from '../../../types/user'
+import { UserData } from '../../../types/userTypes'
 
 export const storeAuthData = async (
 	token: string,

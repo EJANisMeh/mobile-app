@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { UserData } from '../../../types/user'
+import { UserData } from '../../../types/userTypes'
 import { USER_DATA_KEY } from './constants'
 
 /**

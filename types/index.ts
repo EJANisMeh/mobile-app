@@ -1,4 +1,5 @@
 // Main types index file
-export * from './auth'
+export * from './apiTypes'
+export * from './authTypes'
 export * from './navigation'
-export * from './user'
+export * from './userTypes'

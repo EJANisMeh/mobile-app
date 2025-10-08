@@ -1,50 +1,5 @@
-import { UserData } from './user'
-
-export type AuthState = {
-	user: Omit<UserData, 'passwordHash'> | null
-	isAuthenticated: boolean
-	isLoading: boolean
-	error: string | null
-}
-
-export type LoginCredentials = {
-	email: string
-	password: string
-}
-
-export type RegisterData = {
-	fname: string
-	lname: string
-	email: string
-	contact_details?: any
-	password: string
-	confirmPassword: string
-	role: string
-}
-
-export type AuthResponse = {
-	success: boolean
-	user?: Omit<UserData, 'passwordHash'>
-	token?: string
-	error?: string
-	message?: string
-	needsEmailVerification?: boolean
-}
-
-export type ResetPasswordData = {
-	email: string
-}
-
-export type ChangePasswordData = {
-	currentPassword: string
-	newPassword: string
-	confirmPassword: string
-}
-
-export type EmailVerificationData = {
-	token: string
-	email: string
-}
+import { UserData } from '../userTypes'
+import { LoginCredentials, RegisterData } from '.'
 
 export interface AuthBackendType {
 	user: UserData | null

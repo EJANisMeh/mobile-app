@@ -1,4 +1,3 @@
-// Authentication related type definitions
 export type UserData = {
 	id: number
 	role: string
@@ -13,15 +12,4 @@ export type UserData = {
 	concession_id: number | null
 	createdAt: Date
 	updatedAt: Date
-}
-
-export type UserType =
-	| 'CUSTOMER'
-	| 'CAFETERIA_ADMIN'
-	| 'CONCESSION_OWNER'
-	| 'SYSTEM_ADMIN'
-
-export interface UserBackendType {
-	user: UserData | null
-	setUser: React.Dispatch<React.SetStateAction<UserData | null>>
 }

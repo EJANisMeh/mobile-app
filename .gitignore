@@ -47,3 +47,4 @@ yarn-error.*
 # Local-only GitHub helper folders (do not commit)
 .github/dbquerycode/
 .github/instructions/
+.github/ARCHITECTURE.md
