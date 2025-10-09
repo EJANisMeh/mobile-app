@@ -43,12 +43,12 @@ const getApiBaseUrl = () => {
 		if (Platform.OS === 'android') {
 			// For physical Android device, use your computer's IP address
 			// For Android emulator (AVD), use 10.0.2.2
-			// return 'http://10.0.2.2:3000/api' // uncomment this if using emulator
-			return 'http://${phoneIp}:3000/api' // uncomment this if using physical android dvice
+			// return `http://10.0.2.2:3000/api` // uncomment this if using emulator
+			return `http://${phoneIp}:3000/api` // uncomment this if using physical android device
 		}
 
 		// Fallback to local network IP for any other platform
-		return 'http://${phoneIp}:3000/api'
+		return `http://${phoneIp}:3000/api`
 	}
 
 	// Production API URL (replace with your actual production URL)
