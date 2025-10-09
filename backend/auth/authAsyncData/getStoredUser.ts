@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { UserData } from '../../../types/userTypes'
-import { USER_DATA_KEY } from './constants'
 
 /**
  * Get stored user data from AsyncStorage
@@ -13,7 +12,7 @@ import { USER_DATA_KEY } from './constants'
  */
 export const getStoredUser = async (): Promise<UserData | null> => {
 	try {
-		const userData = await AsyncStorage.getItem(USER_DATA_KEY)
+		const userData = await AsyncStorage.getItem('user')
 
 		if (!userData) {
 			return null

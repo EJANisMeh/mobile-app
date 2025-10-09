@@ -45,6 +45,4 @@ yarn-error.*
 /generated/prisma
 
 # Local-only GitHub helper folders (do not commit)
-.github/dbquerycode/
-.github/instructions/
-.github/ARCHITECTURE.md
+.github/
