@@ -3,7 +3,7 @@
  * Provides all authentication functions and state
  */
 import { useState } from 'react'
-import { AuthBackendType, UserData } from '../../types/'
+import { AuthBackendType, UserData } from '../../types'
 import { authApi } from '../../services/api'
 import {
 	storeAuthToken,
