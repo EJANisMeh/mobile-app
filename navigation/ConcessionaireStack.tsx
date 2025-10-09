@@ -3,12 +3,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { ConcessionaireStackParamList } from '../types/navigation'
 
 // Import screen components
-import MenuScreen from '../screens/concessionaire/MenuScreen'
-import OrdersScreen from '../screens/concessionaire/OrdersScreen'
-import ConcessionScreen from '../screens/concessionaire/ConcessionScreen'
-import ScanQRScreen from '../screens/concessionaire/ScanQRScreen'
-import NotificationsScreen from '../screens/concessionaire/NotificationsScreen'
-import ProfileScreen from '../screens/concessionaire/ProfileScreen'
+import MenuScreen from '../screens/concessionaire/menu'
+import OrdersScreen from '../screens/concessionaire/orders'
+import ConcessionScreen from '../screens/concessionaire/concession'
+import NotificationsScreen from '../screens/concessionaire/notification'
+import ProfileScreen from '../screens/concessionaire/profile'
 
 const Tab = createBottomTabNavigator<ConcessionaireStackParamList>()
 
@@ -43,14 +42,6 @@ const ConcessionaireStack: React.FC = () => {
 				options={{
 					title: 'My Concession',
 					tabBarLabel: 'Concession',
-				}}
-			/>
-			<Tab.Screen
-				name="ScanQR"
-				component={ScanQRScreen}
-				options={{
-					title: 'Scan QR',
-					tabBarLabel: 'Scan',
 				}}
 			/>
 			<Tab.Screen
