@@ -3,7 +3,7 @@
  * These call backend/debug/* modules for development testing
  */
 import { ApiResponse } from '../../types'
-import { apiCall } from '../api'
+import { apiCall } from './api'
 
 export const debugApi = {
 	/**

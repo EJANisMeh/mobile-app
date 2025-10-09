@@ -4,7 +4,7 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { ApiResponse, LoginCredentials, RegisterData } from '../../types'
-import { apiCall } from '../api'
+import { apiCall } from './api'
 
 export const authApi = {
 	/**
