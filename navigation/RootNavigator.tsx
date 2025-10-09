@@ -12,9 +12,9 @@ import {
 	ActivityIndicator,
 	TouchableOpacity,
 } from 'react-native'
-import { authApi, userApi, debugApi } from '../services/api/api'
-import { getStoredUser } from '../backend/auth/user'
-import { clearAuthData } from '../backend/auth/authData/clearAuthData'
+import { authApi, userApi, debugApi } from '../services/api'
+import { getStoredUser } from '../backend/auth/authAsyncData'
+import { clearAuthData } from '../backend/auth/authAsyncData/clearAuthData'
 import { MenuModal } from '../components'
 import { useMenuModal } from '../hooks'
 

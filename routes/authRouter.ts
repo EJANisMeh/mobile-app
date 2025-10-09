@@ -1,18 +1,16 @@
 import express from 'express'
-import { login } from '../backend/auth/login'
-import { register } from '../backend/auth/register'
-import { checkAuthStatus } from '../backend/auth/checkAuthStatus'
-import { logout } from '../backend/auth/logout'
-import { changePassword } from '../backend/auth/changePassword'
 import {
+	login,
+	register,
+	checkAuthStatus,
+	logout,
+	changePassword,
 	resetPassword,
 	requestPasswordReset,
-} from '../backend/auth/resetPassword'
-import {
 	verifyEmail,
 	resendVerificationEmail,
 	checkEmailVerificationStatus,
-} from '../backend/auth/verifyEmail'
+} from '../backend/auth'
 
 const router = express.Router()
 

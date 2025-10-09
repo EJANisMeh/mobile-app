@@ -5,9 +5,12 @@
 import { useState } from 'react'
 import { AuthBackendType, UserData } from '../../types/'
 import { authApi } from '../../services/api'
-import { storeAuthToken } from '../../backend/auth/authToken'
-import { getStoredUser, storeUser } from '../../backend/auth/user'
-import { clearAuthData } from '../../backend/auth/authData'
+import {
+	storeAuthToken,
+	getStoredUser,
+	storeUser,
+	clearAuthData,
+} from '../../backend/auth/authAsyncData'
 
 export const useAuthBackend = (): AuthBackendType => {
 	const [user, setUser] = useState<UserData | null>(null)
