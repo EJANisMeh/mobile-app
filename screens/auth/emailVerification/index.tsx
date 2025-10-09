@@ -5,7 +5,7 @@ import { AlertModal } from '../../../components'
 import { useAlertModal } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackScreenProps } from '@react-navigation/stack'
-import { createEmailVerificationStyles } from '../../../styles/auth/themedStyles'
+import { createEmailVerificationStyles } from '../../../styles/themedStyles'
 
 type EmailVerificationScreenProps = StackScreenProps<
 	AuthStackParamList,

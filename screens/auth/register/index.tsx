@@ -17,7 +17,7 @@ import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
-import { createRegisterStyles } from '../../../styles/auth/themedStyles'
+import { createRegisterStyles } from '../../../styles/themedStyles'
 
 type RegisterScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,

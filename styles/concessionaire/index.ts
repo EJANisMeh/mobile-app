@@ -1,6 +1,5 @@
 export { concessionaireMenuStyles } from './menu'
 export { concessionaireOrdersStyles } from './orders'
 export { concessionaireConcessionStyles } from './concession'
-export { concessionaireScanQRStyles } from './scanQR'
 export { concessionaireNotificationsStyles } from './notifications'
 export { concessionaireProfileStyles } from './profile'

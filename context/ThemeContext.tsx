@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, {
+	createContext,
+	useContext,
+	useState,
+	useEffect,
+	ReactNode,
+} from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export type ThemeMode = 'light' | 'dark'
@@ -8,27 +14,27 @@ export interface ThemeColors {
 	primary: string
 	primaryDark: string
 	secondary: string
-	
+
 	// Background colors
 	background: string
 	surface: string
 	card: string
-	
+
 	// Text colors
 	text: string
 	textSecondary: string
 	textOnPrimary: string
-	
+
 	// Border and divider colors
 	border: string
 	divider: string
-	
+
 	// Status colors
 	success: string
 	warning: string
 	error: string
 	info: string
-	
+
 	// Input colors
 	inputBackground: string
 	inputBorder: string
@@ -41,27 +47,27 @@ const lightTheme: ThemeColors = {
 	primary: '#DC143C', // Crimson red
 	primaryDark: '#B91C3C', // Darker red
 	secondary: '#FF6B6B', // Light red accent
-	
+
 	// Background colors
 	background: '#FFFFFF', // Pure white
 	surface: '#F8F9FA', // Off-white
 	card: '#FFFFFF', // White cards
-	
+
 	// Text colors
 	text: '#1A1A1A', // Dark text on white
 	textSecondary: '#6B7280', // Gray text
 	textOnPrimary: '#FFFFFF', // White text on red
-	
+
 	// Border and divider colors
 	border: '#E5E7EB', // Light gray borders
 	divider: '#F3F4F6', // Very light gray
-	
+
 	// Status colors
 	success: '#10B981', // Green
 	warning: '#F59E0B', // Amber
 	error: '#EF4444', // Red
 	info: '#3B82F6', // Blue
-	
+
 	// Input colors
 	inputBackground: '#FFFFFF',
 	inputBorder: '#D1D5DB',
@@ -74,27 +80,27 @@ const darkTheme: ThemeColors = {
 	primary: '#DC143C', // Crimson red (same as light)
 	primaryDark: '#B91C3C', // Darker red
 	secondary: '#FF8A8A', // Lighter red for dark background
-	
+
 	// Background colors
 	background: '#000000', // Pure black
 	surface: '#1A1A1A', // Dark gray
 	card: '#2D2D2D', // Lighter dark gray
-	
+
 	// Text colors
 	text: '#FFFFFF', // White text on black
 	textSecondary: '#A3A3A3', // Light gray text
 	textOnPrimary: '#FFFFFF', // White text on red
-	
+
 	// Border and divider colors
 	border: '#404040', // Dark gray borders
 	divider: '#2D2D2D', // Darker gray
-	
+
 	// Status colors
 	success: '#22C55E', // Brighter green for dark
 	warning: '#FBBF24', // Brighter amber
 	error: '#F87171', // Lighter red
 	info: '#60A5FA', // Lighter blue
-	
+
 	// Input colors
 	inputBackground: '#2D2D2D',
 	inputBorder: '#404040',
@@ -148,7 +154,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 	}
 
 	const toggleTheme = () => {
-		setMode(prev => prev === 'light' ? 'dark' : 'light')
+		setMode((prev) => (prev === 'light' ? 'dark' : 'light'))
 	}
 
 	const setTheme = (newMode: ThemeMode) => {
@@ -164,11 +170,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 		setTheme,
 	}
 
-	return (
-		<ThemeContext.Provider value={value}>
-			{children}
-		</ThemeContext.Provider>
-	)
+	return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
 export const useTheme = (): ThemeContextType => {

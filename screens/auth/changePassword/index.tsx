@@ -13,7 +13,7 @@ import { AlertModal } from '../../../components'
 import { useAlertModal } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
-import { createChangePasswordStyles } from '../../../styles/auth/themedStyles'
+import { createChangePasswordStyles } from '../../../styles/themedStyles'
 
 type ChangePasswordScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,

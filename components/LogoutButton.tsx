@@ -1,14 +1,12 @@
 import React, { useState } from 'react'
-import { TouchableOpacity, Text, StyleSheet } from 'react-native'
+import { TouchableOpacity, Text } from 'react-native'
 import { useAuth } from '../context'
 import { ConfirmationModal, AlertModal } from './modals'
 import { useConfirmationModal, useAlertModal } from '../hooks'
+import { logoutButtonStyles as styles } from '../styles/components'
+import type { LogoutButtonProps } from '../types/componentTypes'
 
-interface LogoutButtonProps {
-	style?: any
-	textStyle?: any
-	title?: string
-}
+
 
 export const LogoutButton: React.FC<LogoutButtonProps> = ({
 	style,
@@ -75,24 +73,3 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
 		</>
 	)
 }
-
-const styles = StyleSheet.create({
-	logoutButton: {
-		backgroundColor: '#dc3545',
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 8,
-		alignItems: 'center',
-		justifyContent: 'center',
-		marginTop: 20,
-	},
-	disabledButton: {
-		backgroundColor: '#6c757d',
-		opacity: 0.6,
-	},
-	logoutText: {
-		color: 'white',
-		fontSize: 16,
-		fontWeight: 'bold',
-	},
-})
