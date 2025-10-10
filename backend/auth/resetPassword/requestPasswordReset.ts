@@ -33,17 +33,16 @@ export const requestPasswordReset = async (
 			where: { email: email.toLowerCase() },
 		})
 
-		// Don't reveal if email exists or not for security
-		// Always return success to prevent email enumeration
+		// Check if user exists - for development we'll return actual status
+		// In production, you might want to return success always to prevent email enumeration
 		if (!userResult.success || !userResult.data) {
-			return res.json({
-				success: true,
-				message:
-					'If an account exists with this email, a password reset link has been sent.',
+			return res.status(404).json({
+				success: false,
+				error: 'No account found with this email address.',
 			})
 		}
 
-		// TODO: Step 3: Generate reset token
+		// TODO: Step 3: Generate reset token (for now using hardcoded 123456)
 		// TODO: Step 4: Store reset token in database
 		// TODO: Step 5: Send reset email
 
@@ -52,8 +51,7 @@ export const requestPasswordReset = async (
 
 		res.json({
 			success: true,
-			message:
-				'If an account exists with this email, a password reset link has been sent.',
+			message: 'Verification code has been sent to your email.',
 		})
 	} catch (error) {
 		console.error('Request password reset error:', error)

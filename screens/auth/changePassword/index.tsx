@@ -10,10 +10,11 @@ import {
 } from 'react-native'
 import { useAuth, useTheme } from '../../../context'
 import { AlertModal } from '../../../components'
-import { useAlertModal } from '../../../hooks'
+import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { createChangePasswordStyles } from '../../../styles/themedStyles'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 type ChangePasswordScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,
@@ -29,6 +30,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 }) => {
 	const { colors } = useTheme()
 	const changePasswordStyles = createChangePasswordStyles(colors)
+	const responsive = useResponsiveDimensions()
 	const [formData, setFormData] = useState({
 		currentPassword: '',
 		newPassword: '',
@@ -52,14 +54,6 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 	}
 
 	const validateForm = () => {
-		if (!formData.currentPassword) {
-			showAlert({
-				title: 'Error',
-				message: 'Please enter your current password',
-			})
-			return false
-		}
-
 		if (!formData.newPassword) {
 			showAlert({
 				title: 'Error',
@@ -125,36 +119,23 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 	return (
 		<>
 			<KeyboardAvoidingView
+				key={responsive.isLandscape ? 'landscape' : 'portrait'}
 				style={changePasswordStyles.container}
-				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-				<ScrollView contentContainerStyle={changePasswordStyles.scrollContent}>
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+				enabled={true}
+				keyboardVerticalOffset={Platform.OS === 'android' ? -100 : 0}>
+				<ScrollView
+					contentContainerStyle={{ flexGrow: 1 }}
+					keyboardShouldPersistTaps="handled"
+					bounces={false}
+					showsVerticalScrollIndicator={false}>
 					<View style={changePasswordStyles.content}>
 						<Text style={changePasswordStyles.title}>Change Password</Text>
 						<Text style={changePasswordStyles.subtitle}>
-							Enter your current password and choose a new one
+							Enter your new password
 						</Text>
 
 						<View style={changePasswordStyles.form}>
-							<View style={changePasswordStyles.inputContainer}>
-								<TextInput
-									style={changePasswordStyles.input}
-									placeholder="Current Password"
-									value={formData.currentPassword}
-									onChangeText={(value) =>
-										updateField('currentPassword', value)
-									}
-									secureTextEntry={!showPasswords.current}
-									autoCapitalize="none"
-								/>
-								<TouchableOpacity
-									style={changePasswordStyles.eyeButton}
-									onPress={() => togglePasswordVisibility('current')}>
-									<Text style={changePasswordStyles.eyeText}>
-										{showPasswords.current ? '🙈' : '👁️'}
-									</Text>
-								</TouchableOpacity>
-							</View>
-
 							<View style={changePasswordStyles.inputContainer}>
 								<TextInput
 									style={changePasswordStyles.input}
@@ -167,9 +148,11 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 								<TouchableOpacity
 									style={changePasswordStyles.eyeButton}
 									onPress={() => togglePasswordVisibility('new')}>
-									<Text style={changePasswordStyles.eyeText}>
-										{showPasswords.new ? '🙈' : '👁️'}
-									</Text>
+									<MaterialCommunityIcons
+										name={showPasswords.new ? 'eye-off' : 'eye'}
+										size={24}
+										color={colors.text}
+									/>
 								</TouchableOpacity>
 							</View>
 
@@ -187,17 +170,13 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 								<TouchableOpacity
 									style={changePasswordStyles.eyeButton}
 									onPress={() => togglePasswordVisibility('confirm')}>
-									<Text style={changePasswordStyles.eyeText}>
-										{showPasswords.confirm ? '🙈' : '👁️'}
-									</Text>
+									<MaterialCommunityIcons
+										name={showPasswords.confirm ? 'eye-off' : 'eye'}
+										size={24}
+										color={colors.text}
+									/>
 								</TouchableOpacity>
 							</View>
-
-							<Text style={changePasswordStyles.requirements}>
-								Password requirements:
-								{'\n'}• At least 6 characters long
-								{'\n'}• Different from current password
-							</Text>
 
 							<TouchableOpacity
 								style={[

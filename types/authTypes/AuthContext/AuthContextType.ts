@@ -4,4 +4,5 @@ export interface AuthContextType extends AuthState {
 	login: (credentials: LoginCredentials) => Promise<boolean>
 	register: (data: RegisterData) => Promise<boolean>
 	logout: () => Promise<void>
+	requestPasswordReset: (email: string) => Promise<boolean>
 }

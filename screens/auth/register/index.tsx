@@ -118,7 +118,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 			}
 		} else {
 			// Navigate to email verification screen on success
-			navigation.navigate('EmailVerification', { email: formData.email })
+			navigation.navigate('EmailVerification', {
+				email: formData.email,
+				purpose: 'email-verification',
+			})
 		}
 	}
 

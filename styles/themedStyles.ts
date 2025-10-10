@@ -248,7 +248,7 @@ export const createForgotPasswordStyles = (colors: ThemeColors) =>
 			borderRadius: 8,
 			paddingVertical: 14,
 			alignItems: 'center',
-			marginBottom: 16,
+			marginBottom: 32,
 		},
 		submitButtonText: {
 			color: colors.textOnPrimary,

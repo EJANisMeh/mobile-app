@@ -74,7 +74,7 @@ export const changePasswordStyles = StyleSheet.create({
 		paddingVertical: 16,
 		borderRadius: 12,
 		alignItems: 'center',
-		marginBottom: 16,
+		marginBottom: 32,
 		shadowColor: '#007bff',
 		shadowOffset: {
 			width: 0,

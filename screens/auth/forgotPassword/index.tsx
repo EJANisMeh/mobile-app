@@ -6,16 +6,15 @@ import {
 	TouchableOpacity,
 	KeyboardAvoidingView,
 	Platform,
-	Keyboard,
 	ScrollView,
-	Dimensions,
 } from 'react-native'
-import { useTheme } from '../../../context'
+import { useAuth, useTheme } from '../../../context'
 import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { createForgotPasswordStyles } from '../../../styles/themedStyles'
+import { authApi } from '../../../services/api'
 
 type ForgotPasswordScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,
@@ -30,11 +29,13 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 	navigation,
 }) => {
 	const { colors } = useTheme()
+	const { error, requestPasswordReset } = useAuth()
 	const forgotPasswordStyles = createForgotPasswordStyles(colors)
 	const responsive = useResponsiveDimensions()
 	const [email, setEmail] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
-	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
+	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
+		useAlertModal()
 
 	const handleSendResetEmail = async () => {
 		if (!email) {
@@ -57,20 +58,29 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 
 		setIsLoading(true)
 		try {
-			// TODO: Implement actual password reset when backend is ready
-			// await resetPassword(email)
+			// Call backend to check if email exists and send reset email
+			const success = await requestPasswordReset(email)
+			const resetTitle = "Password Reset"
+			const resetMsg = "Password reset request sent to the email"
 
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1500))
-			console.log('test')
+			if (!success) {
+				showAlert({
+					title: resetTitle,
+					message: resetMsg
+				})
+				return
+			}
 
 			showAlert({
-				title: 'Success',
-				message: 'Password reset instructions have been sent to your email.',
+				title: resetTitle,
+				message: resetMsg,
 				onConfirm: () => {
 					hideAlert()
-					// Auto-navigate to EmailVerification since we're using test accounts without email API
-					navigation.navigate('EmailVerification', { email })
+					// Navigate to EmailVerification with password-reset purpose
+					navigation.navigate('EmailVerification', {
+						email,
+						purpose: 'password-reset',
+					})
 				},
 			})
 		} catch (error) {
@@ -144,6 +154,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 				onClose={hideAlert}
 				title={title}
 				message={message}
+				buttons={[{ text: 'Confirm', onPress: handleConfirm }]}
 			/>
 		</>
 	)

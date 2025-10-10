@@ -1,16 +1,19 @@
 import React, { createContext, useContext, useEffect, ReactNode } from 'react'
-import { AuthProviderProps, AuthContextType, LoginCredentials, RegisterData } from '../types'
+import {
+	AuthProviderProps,
+	AuthContextType,
+	LoginCredentials,
+	RegisterData,
+} from '../types'
 import { useAuthBackend } from '../hooks'
 import { appStateManager } from '../utils/appStateManager'
 
 // Context type - extends AuthState and adds auth functions
 
-
 // Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Provider component
-
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	// Use backend auth functions from backend/auth/index.ts
@@ -70,7 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	}, [])
 
 	// Login wrapper - delegates to backend
-	const login = async (credentials: LoginCredentials): Promise<boolean> => {
+	const login: AuthContextType['login'] = async (credentials: LoginCredentials): Promise<boolean> => {
 		setIsLoading(true)
 		setError(null)
 
@@ -93,7 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	}
 
 	// Register wrapper - delegates to backend
-	const register = async (data: RegisterData): Promise<boolean> => {
+	const register: AuthContextType['register'] = async (data: RegisterData): Promise<boolean> => {
 		setIsLoading(true)
 		setError(null)
 
@@ -121,6 +124,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		await appStateManager.clearSession()
 	}
 
+	const requestPasswordReset: AuthContextType['requestPasswordReset'] = async (
+		email: string
+	): Promise<boolean> => {
+		setIsLoading(true)
+		setError(null)
+
+		try {
+			const result = await authBackend.requestPasswordReset(email)
+
+			setIsLoading(false)
+
+			if (result.success) {
+				return true
+			} else {
+				setError(result.error || 'Failed to send password reset email')
+				return false
+			}
+		} catch (err) {
+			setIsLoading(false)
+			setError(
+				err instanceof Error
+					? err.message
+					: 'Failed to send password reset email'
+			)
+			return false
+		}
+	}
+
 	const value: AuthContextType = {
 		user: authBackend.user,
 		isAuthenticated,
@@ -129,6 +160,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		login,
 		register,
 		logout,
+		requestPasswordReset,
 	}
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
