@@ -38,7 +38,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 		email: '',
 		password: '',
 		confirmPassword: '',
-		role: 'customer',
 	})
 
 	// Get responsive styles
@@ -101,9 +100,9 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 			return
 		}
 
-		const success = await register(formData)
+		const result = await register(formData)
 
-		if (!success) {
+		if (!result.success) {
 			// Handle specific backend errors
 			if (error?.includes('already exists')) {
 				showAlert({
@@ -119,7 +118,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 		} else {
 			// Navigate to email verification screen on success
 			navigation.navigate('EmailVerification', {
-				email: formData.email,
+				userId: result.userId,
 				purpose: 'email-verification',
 			})
 		}

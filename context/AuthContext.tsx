@@ -96,25 +96,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	}
 
 	// Register wrapper - delegates to backend
-	const register: AuthContextType['register'] = async (data: RegisterData): Promise<boolean> => {
+	const register: AuthContextType['register'] = async (
+		data: RegisterData
+	): Promise<{
+		success: boolean
+		userId?: number
+		error?: string
+	}> => {
 		setIsLoading(true)
 		setError(null)
 
 		const result = await authBackend.register(data)
 
+		setIsLoading(false)
+
 		if (result.success) {
-			// Initialize app state manager after successful registration
-			appStateManager.initialize({
-				onAutoLogout: handleAutoLogout,
-				onAppBackground: handleAppBackground,
-				onAppForeground: handleAppForeground,
-			})
-			setIsLoading(false)
-			return true
+			return { success: true, userId: result.userId }
 		} else {
 			setError(result.error || 'Registration failed')
-			setIsLoading(false)
-			return false
+			return { success: false, error: result.error }
 		}
 	}
 
@@ -152,6 +152,64 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		}
 	}
 
+	const resetPassword: AuthContextType['resetPassword'] = async (
+		emailOrUserId: string | number,
+		newPassword: string
+	): Promise<boolean> => {
+		setIsLoading(true)
+		setError(null)
+
+		try {
+			const payload: any = { newPassword }
+			if (typeof emailOrUserId === 'number') payload.userId = emailOrUserId
+			else payload.email = emailOrUserId
+
+			const result = await authBackend.resetPassword(payload)
+
+			setIsLoading(false)
+
+			if (result.success) {
+				return true
+			} else {
+				setError(result.error || 'Failed to reset password')
+				return false
+			}
+		} catch (err) {
+			setIsLoading(false)
+			setError(
+				err instanceof Error ? err.message : 'Failed to reset password'
+			)
+			return false
+		}
+	}
+
+	const verifyEmail: AuthContextType['verifyEmail'] = async (data: {
+		userId: number
+		verificationCode: string
+	}): Promise<boolean> => {
+		setIsLoading(true)
+		setError(null)
+
+		try {
+			const result = await authBackend.verifyEmail(data)
+
+			setIsLoading(false)
+
+			if (result.success) {
+				return true
+			} else {
+				setError(result.error || 'Failed to verify email')
+				return false
+			}
+		} catch (err) {
+			setIsLoading(false)
+			setError(
+				err instanceof Error ? err.message : 'Failed to verify email'
+			)
+			return false
+		}
+	}
+
 	const value: AuthContextType = {
 		user: authBackend.user,
 		isAuthenticated,
@@ -161,6 +219,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		register,
 		logout,
 		requestPasswordReset,
+		resetPassword,
+		verifyEmail,
 	}
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

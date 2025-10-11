@@ -1,6 +1,6 @@
 /**
  * Authentication Backend Hook
- * Provides all authentication functions and state
+ * Provides all authentication functions and state by calling auth backend API
  */
 import { useState } from 'react'
 import { AuthBackendType, UserData } from '../../types'
@@ -64,20 +64,12 @@ export const useAuthBackend = (): AuthBackendType => {
 			// Call backend register endpoint via API
 			const response = await authApi.register(data)
 
-			if (response.success && response.user && response.token) {
-				// Store auth token
-				await storeAuthToken(response.token)
-
-				// Store user data
-				await storeUser(response.user as UserData)
-
-				// Update local state
-				setUser(response.user as UserData)
+			if (response.success) {
+				const respAny = response as any
 
 				return {
 					success: true,
-					user: response.user as UserData,
-					token: response.token,
+					userId: respAny.userId as number,
 					needsEmailVerification: response.needsEmailVerification,
 				}
 			} else {
@@ -240,7 +232,7 @@ export const useAuthBackend = (): AuthBackendType => {
 	}
 
 	/**
-	 * Reset password with token
+	 * Reset password with email
 	 */
 	const resetPassword: AuthBackendType['resetPassword'] = async (data) => {
 		try {

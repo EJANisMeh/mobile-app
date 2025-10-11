@@ -1,6 +1,7 @@
 import express from 'express'
 import bcrypt from 'bcryptjs'
 import { prisma, selectOne, updateQuery } from '../../db'
+import { verifyAndConsumeResetToken } from './resetTokenStore'
 
 /**
  * Reset password endpoint handler
@@ -19,14 +20,23 @@ export const resetPassword = async (
 	res: express.Response
 ) => {
 	try {
-		const { email, newPassword, resetToken } = req.body
+		const { email, userId, newPassword, resetToken } = req.body
 
-		// Step 1: Validate input
-		if (!email || !newPassword) {
+		// Step 1: Validate input - require newPassword and either email or userId
+		if ((!email && !userId) || !newPassword) {
 			return res.status(400).json({
 				success: false,
-				error: 'Email and new password are required',
+				error: 'Either email or userId and new password are required',
 			})
+		}
+
+		// In production require resetToken; in development allow but verify if provided
+		if (process.env.NODE_ENV === 'production') {
+			if (!resetToken) {
+				return res
+					.status(400)
+					.json({ success: false, error: 'Reset token is required' })
+			}
 		}
 
 		// TODO: In production, verify resetToken here
@@ -46,20 +56,41 @@ export const resetPassword = async (
 			})
 		}
 
-		// Step 2: Find user by email using modularized selectOne query
-		const userResult = await selectOne(prisma, {
-			table: 'user',
-			where: { email: email.toLowerCase() },
-		})
+		// Step 2: Find user by userId or email using modularized selectOne query
+		let userResult
+		if (userId) {
+			userResult = await selectOne(prisma, {
+				table: 'user',
+				where: { id: Number(userId) },
+			})
+		} else {
+			userResult = await selectOne(prisma, {
+				table: 'user',
+				where: { email: (email as string).toLowerCase() },
+			})
+		}
 
 		if (!userResult.success || !userResult.data) {
 			return res.status(404).json({
 				success: false,
-				error: 'No account found with this email address',
+				error: 'No account found for the provided identifier',
 			})
 		}
 
 		const user = userResult.data
+
+		// Verify reset token (if provided) and require it in production
+		if (process.env.NODE_ENV === 'production' || resetToken) {
+			const ok = verifyAndConsumeResetToken(resetToken, {
+				userId: user.id,
+				email: user.email,
+			})
+			if (!ok) {
+				return res
+					.status(400)
+					.json({ success: false, error: 'Invalid or expired reset token' })
+			}
+		}
 
 		// Step 3: Hash new password using bcrypt
 		const newPasswordHash = await bcrypt.hash(newPassword, 12)
@@ -91,4 +122,3 @@ export const resetPassword = async (
 		})
 	}
 }
-

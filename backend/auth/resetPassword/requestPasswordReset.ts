@@ -11,6 +11,7 @@
 
 import express from 'express'
 import { prisma, selectOne } from '../../db'
+import { createResetToken } from './resetTokenStore'
 
 export const requestPasswordReset = async (
 	req: express.Request,
@@ -42,17 +43,17 @@ export const requestPasswordReset = async (
 			})
 		}
 
-		// TODO: Step 3: Generate reset token (for now using hardcoded 123456)
-		// TODO: Step 4: Store reset token in database
-		// TODO: Step 5: Send reset email
+		// Step 3: Generate reset token and (in production) send email
+		const token = createResetToken(userResult.data.id, email)
 
-		// For now, just log and return success
-		console.log(`Password reset requested for email: ${email}`)
+		// TODO: send token via email service instead of returning it
+		console.log(`Password reset requested for email: ${email} token=${token}`)
 
-		res.json({
-			success: true,
-			message: 'Verification code has been sent to your email.',
-		})
+		const responsePayload: any = { success: true, message: 'Verification code has been sent to your email.' }
+		// For development convenience, return token in response. DO NOT do this in production.
+		if (process.env.NODE_ENV !== 'production') responsePayload.resetToken = token
+
+		res.json(responsePayload)
 	} catch (error) {
 		console.error('Request password reset error:', error)
 		res.status(500).json({

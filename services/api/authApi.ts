@@ -96,11 +96,12 @@ export const authApi = {
 	},
 
 	/**
-	 * Reset password with token
-	 * Backend handles: token verification, password hashing, updating user
+	 * Reset password with email
+	 * Backend handles: user lookup by email, password hashing, updating user
 	 */
 	resetPassword: async (data: {
-		token: string
+		email?: string
+		userId?: number
 		newPassword: string
 	}): Promise<ApiResponse> => {
 		return await apiCall('/auth/reset-password', {

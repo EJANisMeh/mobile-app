@@ -21,7 +21,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	navigation,
 	route,
 }) => {
-	const { email, purpose } = route.params
+	const { email, purpose, userId } = route.params
 	const { colors } = useTheme()
 	const emailVerificationStyles = createEmailVerificationStyles(colors)
 	const responsive = useResponsiveDimensions()
@@ -32,7 +32,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	const [countdown, setCountdown] = useState(30)
 	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
 		useAlertModal()
-	const { user, logout } = useAuth()
+	const { user, logout, verifyEmail } = useAuth()
 
 	// Refs for input fields
 	const inputRefs = useRef<(TextInput | null)[]>([])
@@ -101,27 +101,41 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 				showAlert({
 					title: 'Success',
 					message: 'Email verified! You can now reset your password.',
-					onConfirm: () => {
-						hideAlert()
-						navigation.navigate('ChangePassword')
-					},
+							onConfirm: () => {
+								hideAlert()
+								navigation.navigate('ChangePassword', { email: email! })
+							},
 				})
 			} else {
 				// Email verification purpose - update email_verified field
-				// TODO: Implement actual email verification when backend is ready
-				// await verifyEmail(userId, enteredCode)
+				if (!userId) {
+					showAlert({
+						title: 'Error',
+						message: 'User ID is missing. Please try registering again.',
+					})
+					return
+				}
 
-				// Simulate API call
-				await new Promise((resolve) => setTimeout(resolve, 1500))
-
-				showAlert({
-					title: 'Success',
-					message: 'Your email has been verified successfully!',
-					onConfirm: () => {
-						hideAlert()
-						navigation.navigate('Login')
-					},
+				const success = await verifyEmail({
+					userId,
+					verificationCode: enteredCode,
 				})
+
+				if (success) {
+					showAlert({
+						title: 'Success',
+						message: 'Your email has been verified successfully!',
+						onConfirm: () => {
+							hideAlert()
+							navigation.navigate('Login')
+						},
+					})
+				} else {
+					showAlert({
+						title: 'Error',
+						message: 'Failed to verify email. Please try again.',
+					})
+				}
 			}
 		} catch (error) {
 			showAlert({
@@ -209,16 +223,12 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 					showsVerticalScrollIndicator={false}>
 					<View style={emailVerificationStyles.content}>
 						<View style={emailVerificationStyles.iconContainer}>
-							<Text style={emailVerificationStyles.icon}>�</Text>
+							<Text style={emailVerificationStyles.icon}>🔐</Text>
 						</View>
 
 						<Text style={emailVerificationStyles.title}>
 							{getScreenTitle()}
 						</Text>
-						<Text style={emailVerificationStyles.subtitle}>
-							We've sent a verification code to:
-						</Text>
-						<Text style={emailVerificationStyles.email}>{email}</Text>
 						<Text style={emailVerificationStyles.description}>
 							{getScreenDescription()}
 						</Text>

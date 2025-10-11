@@ -14,7 +14,7 @@ export interface AuthBackendType {
 	register: (data: RegisterData) => Promise<{
 		success: boolean
 		error?: string
-		user?: UserData
+		userId?: number
 		token?: string
 		needsEmailVerification?: boolean
 	}>
@@ -42,7 +42,8 @@ export interface AuthBackendType {
 		error?: string
 	}>
 	resetPassword: (data: {
-		token: string
+		email?: string
+		userId?: number
 		newPassword: string
 	}) => Promise<{ success: boolean; error?: string }>
 }

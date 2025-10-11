@@ -4,54 +4,36 @@ import { prisma, selectOne, updateQuery } from '../../db'
 /**
  * Verify email endpoint handler
  * Process:
- * 1. Validate verification token is provided
- * 2. Find user by verification token (TODO: add verification_token field to user table)
- * 3. Update emailVerified to true using updateQuery from backend/db
- * 4. Clear verification token
+ * 1. Validate userId and verificationCode are provided
+ * 2. Find user by userId
+ * 3. Verify the code matches (hardcoded to '123456' for development)
+ * 4. Update emailVerified to true using updateQuery from backend/db
  */
 export const verifyEmail = async (
 	req: express.Request,
 	res: express.Response
 ) => {
 	try {
-		const { token, email } = req.body
+		const { userId, verificationCode } = req.body
 
 		// Step 1: Validate input
-		if (!token && !email) {
+		if (!userId || !verificationCode) {
 			return res.status(400).json({
 				success: false,
-				error: 'Verification token or email is required',
+				error: 'User ID and verification code are required',
 			})
 		}
 
-		// For development, we'll allow verification by email directly
-		// In production, this should only work with a valid token
-		let userResult
-
-		if (email && process.env.NODE_ENV !== 'production') {
-			// Development: Allow verification by email
-			userResult = await selectOne(prisma, {
-				table: 'user',
-				where: { email: email.toLowerCase() },
-			})
-		} else if (token) {
-			// TODO: In production, find user by verification token
-			// For now, we'll use email as a fallback
-			return res.status(501).json({
-				success: false,
-				error: 'Token-based verification not yet implemented',
-			})
-		} else {
-			return res.status(400).json({
-				success: false,
-				error: 'Invalid verification method',
-			})
-		}
+		// Step 2: Find user by userId
+		const userResult = await selectOne(prisma, {
+			table: 'user',
+			where: { id: userId },
+		})
 
 		if (!userResult.success || !userResult.data) {
 			return res.status(404).json({
 				success: false,
-				error: 'User not found or invalid verification token',
+				error: 'User not found',
 			})
 		}
 
@@ -66,7 +48,17 @@ export const verifyEmail = async (
 			})
 		}
 
-		// Step 2: Update emailVerified to true using modularized updateQuery
+		// Step 3: Verify the code (hardcoded to '123456' for development)
+		// TODO: In production, store and validate actual verification codes
+		const VERIFICATION_CODE = '123456'
+		if (verificationCode !== VERIFICATION_CODE) {
+			return res.status(400).json({
+				success: false,
+				error: 'Invalid verification code',
+			})
+		}
+
+		// Step 4: Update emailVerified to true using modularized updateQuery
 		const updateResult = await updateQuery(prisma, {
 			table: 'user',
 			where: { id: user.id },

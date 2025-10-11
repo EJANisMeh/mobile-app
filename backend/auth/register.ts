@@ -1,11 +1,6 @@
 import express from 'express'
 import bcrypt from 'bcryptjs'
-import * as jwt from 'jsonwebtoken'
 import { prisma, selectOne, insertQuery } from '../db'
-
-// Environment variables
-const JWT_SECRET: string = process.env.JWT_SECRET || 'your-super-secret-jwt-key'
-const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '7d'
 
 /**
  * Register endpoint handler
@@ -19,13 +14,13 @@ const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '7d'
  */
 export const register = async (req: express.Request, res: express.Response) => {
 	try {
-		const { fname, lname, email, password, role } = req.body
+		const { email, password } = req.body
 
-		// Step 1: Validate input
-		if (!fname || !lname || !email || !password || !role) {
+		// Step 1: Validate input (only email and password required)
+		if (!email || !password) {
 			return res.status(400).json({
 				success: false,
-				error: 'All fields are required (fname, lname, email, password, role)',
+				error: 'Email and password are required',
 			})
 		}
 
@@ -46,21 +41,6 @@ export const register = async (req: express.Request, res: express.Response) => {
 			})
 		}
 
-		// Validate role
-		const validRoles = [
-			'customer',
-			'concessionaire',
-			'cafeteria_admin',
-			'system_admin',
-		]
-		if (!validRoles.includes(role.toLowerCase())) {
-			return res.status(400).json({
-				success: false,
-				error:
-					'Invalid role. Must be one of: customer, concessionaire, cafeteria_admin, system_admin',
-			})
-		}
-
 		// Step 2: Check if user already exists using modularized selectOne query
 		const existingUserResult = await selectOne(prisma, {
 			table: 'user',
@@ -78,17 +58,14 @@ export const register = async (req: express.Request, res: express.Response) => {
 		const passwordHash = await bcrypt.hash(password, 12)
 
 		// Step 4: Create user using modularized insertQuery
-		// Set new_login=true (first time user) and emailVerified=false (needs verification)
+		// Only store email, passwordHash, and role (hardcoded to 'customer')
+		// new_login defaults to true, emailVerified defaults to false per schema
 		const userResult = await insertQuery(prisma, {
 			table: 'user',
 			data: {
-				fname: fname.trim(),
-				lname: lname.trim(),
 				email: email.toLowerCase().trim(),
 				passwordHash,
-				role: role.toLowerCase(),
-				new_login: true, // First time login flag
-				emailVerified: false, // Needs email verification
+				role: 'customer',
 			},
 		})
 
@@ -101,37 +78,9 @@ export const register = async (req: express.Request, res: express.Response) => {
 
 		const user = userResult.data
 
-		// Step 5: Generate JWT token
-		const token = (jwt as any).sign(
-			{
-				userId: user.id,
-				email: user.email,
-				role: user.role,
-			},
-			JWT_SECRET,
-			{ expiresIn: JWT_EXPIRES_IN }
-		)
-
-		// Step 6: Return user data (excluding password hash)
-		const userResponse = {
-			id: user.id,
-			role: user.role,
-			fname: user.fname,
-			lname: user.lname,
-			email: user.email,
-			new_login: user.new_login,
-			emailVerified: user.emailVerified,
-			contact_details: user.contact_details,
-			image_url: user.image_url,
-			concession_id: user.concession_id,
-			createdAt: user.createdAt,
-			updatedAt: user.updatedAt,
-		}
-
 		res.status(201).json({
 			success: true,
-			user: userResponse,
-			token,
+			userId: user.id,
 			needsEmailVerification: true, // Flag that email verification is needed
 			message: 'Registration successful - Please verify your email',
 		})

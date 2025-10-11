@@ -23,11 +23,14 @@ type ChangePasswordScreenNavigationProp = StackNavigationProp<
 
 interface ChangePasswordScreenProps {
 	navigation: ChangePasswordScreenNavigationProp
+	route: { params: { email?: string; userId?: number } }
 }
 
 const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 	navigation,
+	route,
 }) => {
+	const { email, userId } = route.params
 	const { colors } = useTheme()
 	const changePasswordStyles = createChangePasswordStyles(colors)
 	const responsive = useResponsiveDimensions()
@@ -41,8 +44,9 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 		new: false,
 		confirm: false,
 	})
-	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
-	const { user, error } = useAuth()
+	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
+		useAlertModal()
+	const { resetPassword, error } = useAuth()
 	const [localIsLoading, setLocalIsLoading] = useState(false)
 
 	const updateField = (field: string, value: string) => {
@@ -94,22 +98,35 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 
 		setLocalIsLoading(true)
 		try {
-			// TODO: Implement actual password change when backend is ready
-			// await changePassword(formData.currentPassword, formData.newPassword)
+			// Call resetPassword with email or userId and new password
+			const identifier = email ?? userId
+			const success = await resetPassword(
+				identifier as string | number,
+				formData.newPassword
+			)
 
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1500))
+			if (!success) {
+				showAlert({
+					title: 'Error',
+					message: error || 'Failed to reset password. Please try again.',
+				})
+				return
+			}
 
 			showAlert({
 				title: 'Success',
 				message: 'Your password has been changed successfully.',
-				onConfirm: () => navigation.goBack(),
+				onConfirm: () => {
+					navigation.reset({
+						index: 0,
+						routes: [{ name: 'Login' }],
+					})
+				},
 			})
 		} catch (error) {
 			showAlert({
 				title: 'Error',
-				message:
-					'Failed to change password. Please check your current password and try again.',
+				message: 'Failed to change password. Please try again.',
 			})
 		} finally {
 			setLocalIsLoading(false)
@@ -207,6 +224,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 				onClose={hideAlert}
 				title={title}
 				message={message}
+				buttons={[{ text: 'OK', onPress: handleConfirm }]}
 			/>
 		</>
 	)
