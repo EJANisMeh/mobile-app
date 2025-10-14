@@ -66,7 +66,7 @@ export const login = async (req: express.Request, res: express.Response) => {
 		// Step 5: Check if this is a new login (first time login after registration)
 		if (user.new_login) {
 			// User needs to complete profile creation
-			// We'll still give them a token but flag them as needing profile creation
+			// Issue a JWT token so they can complete their profile, but flag them as needing profile creation
 			const token = (jwt as any).sign(
 				{
 					userId: user.id,
@@ -77,21 +77,13 @@ export const login = async (req: express.Request, res: express.Response) => {
 				{ expiresIn: JWT_EXPIRES_IN }
 			)
 
-			// Update new_login to false using modularized updateQuery
-			await updateQuery(prisma, {
-				table: 'user',
-				where: { id: user.id },
-				data: { new_login: false },
-			})
-
-			// Return user data with profile creation flag
 			const userResponse = {
 				id: user.id,
 				role: user.role,
 				fname: user.fname,
 				lname: user.lname,
 				email: user.email,
-				new_login: false, // We just updated it
+				new_login: user.new_login,
 				emailVerified: user.emailVerified,
 				contact_details: user.contact_details,
 				image_url: user.image_url,
@@ -107,9 +99,7 @@ export const login = async (req: express.Request, res: express.Response) => {
 				needsProfileCreation: true,
 				message: 'Login successful - Please complete your profile',
 			})
-		}
-
-		// Step 6: Generate JWT token for successful login
+		} // Step 6: Generate JWT token for successful login
 		const token = (jwt as any).sign(
 			{
 				userId: user.id,

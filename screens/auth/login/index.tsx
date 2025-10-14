@@ -32,7 +32,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 	const { isLoading, error, login } = useAuth()
 	const { colors } = useTheme()
 	const loginStyles = createLoginStyles(colors)
-	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
+	const { visible, title, message, showAlert, hideAlert, handleConfirm } = useAlertModal()
 	const responsive = useResponsiveDimensions()
 	const [credentials, setCredentials] = useState<LoginCredentials>({
 		email: '',
@@ -79,16 +79,34 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 			return
 		}
 
-		const success = await login(credentials)
+		const result = await login(credentials)
 
-		if (!success) {
+		if (result.success)
+		{
+			console.log("Login successful:", result);
+			// Check if user needs to complete profile
+			if (result.needsProfileCreation && result.userId && result.token) {
+				showAlert({
+					title: 'Welcome!',
+					message: 'Please complete your profile to continue.',
+					onConfirm: () => {
+						hideAlert()
+						setCredentials({ email: '', password: '' })
+						navigation.navigate('ProfileCreation', {
+							userId: result.userId!,
+							token: result.token!,
+						})
+					},
+				})
+			}
+			// If no profile creation needed, RootNavigator will handle navigation automatically
+		} else {
 			// Error is already set in AuthContext, show it in alert
 			showAlert({
 				title: 'Login Failed',
 				message: error || 'Invalid email or password. Please try again.',
 			})
 		}
-		// If success, RootNavigator will handle navigation automatically
 	}
 
 	const handleEmailChange = (email: string) => {
@@ -236,6 +254,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 				onClose={hideAlert}
 				title={title}
 				message={message}
+				buttons={[{ text: 'OK', onPress: handleConfirm }]}
 			/>
 		</>
 	)

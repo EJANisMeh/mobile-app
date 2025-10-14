@@ -5,6 +5,7 @@ import {
 	checkAuthStatus,
 	logout,
 	changePassword,
+	completeProfile,
 	resetPassword,
 	requestPasswordReset,
 	verifyEmail,
@@ -28,6 +29,9 @@ router.post('/logout', logout)
 
 // Change password endpoint
 router.post('/change-password', changePassword)
+
+// Complete profile endpoint
+router.post('/complete-profile', completeProfile)
 
 // Password reset endpoints
 router.post('/request-reset', requestPasswordReset)

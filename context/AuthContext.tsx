@@ -73,26 +73,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	}, [])
 
 	// Login wrapper - delegates to backend
-	const login: AuthContextType['login'] = async (credentials: LoginCredentials): Promise<boolean> => {
+	const login: AuthContextType['login'] = async (
+		credentials: LoginCredentials
+	): Promise<{
+		success: boolean
+		needEmailVerification?: boolean
+		needsProfileCreation?: boolean
+		userId?: number
+		token?: string
+	}> => {
 		setIsLoading(true)
 		setError(null)
 
 		const result = await authBackend.login(credentials)
 
-		if (result.success) {
-			// Initialize app state manager after successful login
-			appStateManager.initialize({
-				onAutoLogout: handleAutoLogout,
-				onAppBackground: handleAppBackground,
-				onAppForeground: handleAppForeground,
-			})
-			setIsLoading(false)
-			return true
-		} else {
+		// Handle post-login logic
+		if (!result.success || !result.user || !result.token) {
 			setError(result.error || 'Login failed')
 			setIsLoading(false)
-			return false
+			return { success: false }
 		}
+
+		console.log(`result.needsProfileCreation: ${result.needsProfileCreation}`) // Debug log
+		// If the backend indicates the user must complete profile, return success
+		// with the userId (don't expect a token yet)
+		if (result.needsProfileCreation && result.user) {
+			setIsLoading(false)
+			return {
+				success: true,
+				needsProfileCreation: true,
+				userId: result.user.id,
+				token: result.token,
+			}
+		}
+
+		// Initialize app state manager after successful login (only if profile is complete)
+		appStateManager.initialize({
+			onAutoLogout: handleAutoLogout,
+			onAppBackground: handleAppBackground,
+			onAppForeground: handleAppForeground,
+		})
+		setIsLoading(false)
+		return { success: true, userId: result.user.id, token: result.token }
 	}
 
 	// Register wrapper - delegates to backend
@@ -176,9 +198,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 			}
 		} catch (err) {
 			setIsLoading(false)
-			setError(
-				err instanceof Error ? err.message : 'Failed to reset password'
-			)
+			setError(err instanceof Error ? err.message : 'Failed to reset password')
 			return false
 		}
 	}
@@ -203,8 +223,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 			}
 		} catch (err) {
 			setIsLoading(false)
+			setError(err instanceof Error ? err.message : 'Failed to verify email')
+			return false
+		}
+	}
+
+	const completeProfile: AuthContextType['completeProfile'] = async (data: {
+		userId: number
+		fname: string
+		lname: string
+		image_url?: string
+		contact_details?: string[]
+	}): Promise<boolean> => {
+		setIsLoading(true)
+		setError(null)
+
+		try {
+			const result = await authBackend.completeProfile(data)
+
+			setIsLoading(false)
+
+			if (result.success) {
+				return true
+			} else {
+				setError(result.error || 'Failed to complete profile')
+				return false
+			}
+		} catch (err) {
+			setIsLoading(false)
 			setError(
-				err instanceof Error ? err.message : 'Failed to verify email'
+				err instanceof Error ? err.message : 'Failed to complete profile'
 			)
 			return false
 		}
@@ -221,6 +269,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		requestPasswordReset,
 		resetPassword,
 		verifyEmail,
+		completeProfile,
 	}
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

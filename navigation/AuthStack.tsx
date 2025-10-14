@@ -6,6 +6,7 @@ import RegisterScreen from '../screens/auth/register'
 import ForgotPasswordScreen from '../screens/auth/forgotPassword'
 import EmailVerificationScreen from '../screens/auth/emailVerification'
 import ChangePasswordScreen from '../screens/auth/changePassword'
+import ProfileCreationScreen from '../screens/auth/profileCreation'
 
 const Stack = createStackNavigator<AuthStackParamList>()
 
@@ -35,6 +36,10 @@ const AuthStack: React.FC = () => {
 			<Stack.Screen
 				name="ChangePassword"
 				component={ChangePasswordScreen}
+			/>
+			<Stack.Screen
+				name="ProfileCreation"
+				component={ProfileCreationScreen}
 			/>
 		</Stack.Navigator>
 	)

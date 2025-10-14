@@ -29,6 +29,13 @@ export interface AuthBackendType {
 		newPassword: string
 		userId: number
 	}) => Promise<{ success: boolean; error?: string }>
+	completeProfile: (data: {
+		userId: number
+		fname: string
+		lname: string
+		image_url?: string
+		contact_details?: string[]
+	}) => Promise<{ success: boolean; error?: string; user?: UserData }>
 	verifyEmail: (data: {
 		userId: number
 		verificationCode: string

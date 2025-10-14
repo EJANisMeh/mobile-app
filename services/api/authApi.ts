@@ -85,6 +85,23 @@ export const authApi = {
 	},
 
 	/**
+	 * Complete user profile
+	 * Backend handles: updating fname, lname, image_url, contact_details, setting new_login to false
+	 */
+	completeProfile: async (data: {
+		userId: number
+		fname: string
+		lname: string
+		image_url?: string
+		contact_details?: string[]
+	}): Promise<ApiResponse> => {
+		return await apiCall('/auth/complete-profile', {
+			method: 'POST',
+			body: JSON.stringify(data),
+		})
+	},
+
+	/**
 	 * Request password reset email
 	 * Backend handles: user lookup, token generation, email sending
 	 */

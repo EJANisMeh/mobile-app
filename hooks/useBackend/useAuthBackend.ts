@@ -24,29 +24,31 @@ export const useAuthBackend = (): AuthBackendType => {
 			// Call backend login endpoint via API
 			const response = await authApi.login(credentials)
 
-			if (response.success && response.user && response.token) {
-				// Store auth token
-				await storeAuthToken(response.token)
-
-				// Store user data
-				await storeUser(response.user as UserData)
-
-				// Update local state
-				setUser(response.user as UserData)
-
-				return {
-					success: true,
-					user: response.user as UserData,
-					token: response.token,
-					needsEmailVerification: response.needsEmailVerification,
-					needsProfileCreation: response.needsProfileCreation,
-				}
-			} else {
+			if (!response.token || !response.user || !response.success) {
 				return {
 					success: false,
 					error: response.error || 'Login failed',
 				}
 			}
+
+			// Check if user needs to complete profile
+			// If so, don't store auth data yet - just return the info
+
+			if (response.needsEmailVerification || response.needsProfileCreation) {
+				return response
+			}
+
+			// Normal login flow - store auth data
+			// Store auth token
+			await storeAuthToken(response.token)
+
+			// Store user data
+			await storeUser(response.user as UserData)
+
+			// Update local state
+			setUser(response.user as UserData)
+
+			return response
 		} catch (error) {
 			return {
 				success: false,
@@ -65,11 +67,9 @@ export const useAuthBackend = (): AuthBackendType => {
 			const response = await authApi.register(data)
 
 			if (response.success) {
-				const respAny = response as any
-
 				return {
 					success: true,
-					userId: respAny.userId as number,
+					userId: response.userId as number,
 					needsEmailVerification: response.needsEmailVerification,
 				}
 			} else {
@@ -156,6 +156,42 @@ export const useAuthBackend = (): AuthBackendType => {
 				success: false,
 				error:
 					error instanceof Error ? error.message : 'Password change failed',
+			}
+		}
+	}
+
+	/**
+	 * Complete user profile
+	 * Updates user data and sets new_login to false
+	 */
+	const completeProfile: AuthBackendType['completeProfile'] = async (data) => {
+		try {
+			const response = await authApi.completeProfile(data)
+
+			if (response.success && response.user && response.token) {
+				// Store new token (with updated new_login=false)
+				await storeAuthToken(response.token)
+
+				// Update local user state with new profile data
+				const updatedUser = response.user as UserData
+				setUser(updatedUser)
+				await storeUser(updatedUser)
+
+				return {
+					success: true,
+					user: updatedUser,
+				}
+			}
+
+			return {
+				success: response.success,
+				error: response.error,
+			}
+		} catch (error) {
+			return {
+				success: false,
+				error:
+					error instanceof Error ? error.message : 'Profile completion failed',
 			}
 		}
 	}
@@ -256,6 +292,7 @@ export const useAuthBackend = (): AuthBackendType => {
 		logout,
 		checkAuthStatus,
 		changePassword,
+		completeProfile,
 		verifyEmail,
 		resendVerification,
 		requestPasswordReset,
