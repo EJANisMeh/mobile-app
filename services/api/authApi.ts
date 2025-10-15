@@ -3,7 +3,7 @@
  * Pure HTTP client - all business logic is in backend/auth/*
  */
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { ApiResponse, LoginCredentials, RegisterData } from '../../types'
+import { AuthApiResponse, LoginCredentials, RegisterData } from '../../types'
 import { apiCall } from './api'
 
 export const authApi = {
@@ -11,7 +11,7 @@ export const authApi = {
 	 * Register new user
 	 * Backend handles: validation, email check, password hashing, creating user with new_login=true & emailVerified=false
 	 */
-	register: async (userData: RegisterData): Promise<ApiResponse> => {
+	register: async (userData: RegisterData): Promise<AuthApiResponse> => {
 		return await apiCall('/auth/register', {
 			method: 'POST',
 			body: JSON.stringify(userData),
@@ -23,7 +23,7 @@ export const authApi = {
 	 * Backend handles: validation, user lookup, password verification, email_verify check, new_login check, JWT generation
 	 * Returns: { token, user, needsEmailVerification?, needsProfileCreation? }
 	 */
-	login: async (credentials: LoginCredentials): Promise<ApiResponse> => {
+	login: async (credentials: LoginCredentials): Promise<AuthApiResponse> => {
 		return await apiCall('/auth/login', {
 			method: 'POST',
 			body: JSON.stringify(credentials),
@@ -34,7 +34,7 @@ export const authApi = {
 	 * Check authentication status
 	 * Backend handles: JWT verification, user lookup
 	 */
-	checkAuthStatus: async (): Promise<ApiResponse> => {
+	checkAuthStatus: async (): Promise<AuthApiResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
 		if (!token) {
@@ -52,7 +52,7 @@ export const authApi = {
 	 * Backend handles: logging (future: token blacklist)
 	 * Frontend handles: clearing AsyncStorage
 	 */
-	logout: async (): Promise<ApiResponse> => {
+	logout: async (): Promise<AuthApiResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
 		const response = await apiCall('/auth/logout', {
@@ -74,7 +74,7 @@ export const authApi = {
 		currentPassword: string
 		newPassword: string
 		userId: number
-	}): Promise<ApiResponse> => {
+	}): Promise<AuthApiResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
 		return await apiCall('/auth/change-password', {
@@ -94,7 +94,7 @@ export const authApi = {
 		lname: string
 		image_url?: string
 		contact_details?: string[]
-	}): Promise<ApiResponse> => {
+	}): Promise<AuthApiResponse> => {
 		return await apiCall('/auth/complete-profile', {
 			method: 'POST',
 			body: JSON.stringify(data),
@@ -105,7 +105,7 @@ export const authApi = {
 	 * Request password reset email
 	 * Backend handles: user lookup, token generation, email sending
 	 */
-	requestPasswordReset: async (email: string): Promise<ApiResponse> => {
+	requestPasswordReset: async (email: string): Promise<AuthApiResponse> => {
 		return await apiCall('/auth/request-reset', {
 			method: 'POST',
 			body: JSON.stringify({ email }),
@@ -120,7 +120,7 @@ export const authApi = {
 		email?: string
 		userId?: number
 		newPassword: string
-	}): Promise<ApiResponse> => {
+	}): Promise<AuthApiResponse> => {
 		return await apiCall('/auth/reset-password', {
 			method: 'POST',
 			body: JSON.stringify(data),
@@ -134,7 +134,7 @@ export const authApi = {
 	verifyEmail: async (data: {
 		userId: number
 		verificationCode: string
-	}): Promise<ApiResponse> => {
+	}): Promise<AuthApiResponse> => {
 		return await apiCall('/auth/verify-email', {
 			method: 'POST',
 			body: JSON.stringify(data),
@@ -145,7 +145,7 @@ export const authApi = {
 	 * Resend email verification
 	 * Backend handles: user lookup, sending verification email
 	 */
-	resendVerification: async (userId: number): Promise<ApiResponse> => {
+	resendVerification: async (userId: number): Promise<AuthApiResponse> => {
 		return await apiCall('/auth/resend-verification', {
 			method: 'POST',
 			body: JSON.stringify({ userId }),
@@ -156,7 +156,7 @@ export const authApi = {
 	 * Check email verification status
 	 * Backend handles: user lookup, returning emailVerified status
 	 */
-	checkEmailStatus: async (userId: number): Promise<ApiResponse> => {
+	checkEmailStatus: async (userId: number): Promise<AuthApiResponse> => {
 		return await apiCall('/auth/email-status', {
 			method: 'POST',
 			body: JSON.stringify({ userId }),

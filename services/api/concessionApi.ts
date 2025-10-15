@@ -3,7 +3,7 @@
  * Pure HTTP client - all business logic is in backend/concession/*
  */
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { ApiResponse } from '../../types'
+import { ConcessionApiResponse } from '../../types'
 import { apiCall } from './api'
 
 export const concessionApi = {
@@ -11,7 +11,9 @@ export const concessionApi = {
 	 * Get concession by ID
 	 * Backend handles: concession lookup, returning concession data
 	 */
-	getConcession: async (concessionId: number): Promise<ApiResponse> => {
+	getConcession: async (
+		concessionId: number
+	): Promise<ConcessionApiResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
 		return await apiCall(`/api/concession/${concessionId}`, {
@@ -34,7 +36,7 @@ export const concessionApi = {
 			payment_methods?: string[]
 			schedule?: any
 		}
-	): Promise<ApiResponse> => {
+	): Promise<ConcessionApiResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
 		return await apiCall(`/api/concession/${concessionId}`, {
@@ -50,7 +52,7 @@ export const concessionApi = {
 	 */
 	toggleConcessionStatus: async (
 		concessionId: number
-	): Promise<ApiResponse> => {
+	): Promise<ConcessionApiResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
 		return await apiCall(`/api/concession/${concessionId}/toggle-status`, {

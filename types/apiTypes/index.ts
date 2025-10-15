@@ -1,1 +1,2 @@
-export { ApiResponse } from './ApiResponse'
+export { AuthApiResponse } from './AuthApiResponse'
+export { ConcessionApiResponse } from './ConcessionApiResponse'

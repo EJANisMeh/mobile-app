@@ -32,7 +32,7 @@ export interface ConcessionData {
 	name: string
 	description?: string | null
 	image_url?: string | null
-	cafeteriaId?: number | null
+	cafeteriaId: number | null
 	is_open: boolean
 	payment_methods: string[] // ["cash", "gcash", "maya"]
 	schedule?: ConcessionSchedule | null

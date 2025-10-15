@@ -25,22 +25,22 @@ export const toggleConcessionStatus = async (
 		}
 
 		// Step 2: Get current concession to determine current status
-		const concessionResult = await selectOne(prisma, {
+		const concessionDataResult = await selectOne(prisma, {
 			table: 'concession',
 			where: { id: parseInt(concessionId) },
 		})
 
-		if (!concessionResult.success || !concessionResult.data) {
+		if (!concessionDataResult.success || !concessionDataResult.data) {
 			return res.status(404).json({
 				success: false,
 				error: 'Concession not found',
 			})
 		}
 
-		const currentConcession = concessionResult.data
+		const currentConcessionData = concessionDataResult.data
 
 		// Step 3: Toggle the is_open status
-		const newStatus = !currentConcession.is_open
+		const newStatus = !currentConcessionData.is_open
 
 		const updateResult = await updateQuery(prisma, {
 			table: 'concession',
@@ -55,28 +55,17 @@ export const toggleConcessionStatus = async (
 			})
 		}
 
-		const concession = updateResult.data
+		const updatedConcessionData = updateResult.data
 
-		// Step 4: Return updated concession data
-		res.json({
+		// Step 4: Return updated concession status
+		return res.json({
 			success: true,
-			concession: {
-				id: concession.id,
-				name: concession.name,
-				description: concession.description,
-				image_url: concession.image_url,
-				cafeteriaId: concession.cafeteriaId,
-				is_open: concession.is_open,
-				payment_methods: concession.payment_methods,
-				schedule: concession.schedule,
-				createdAt: concession.createdAt,
-				updatedAt: concession.updatedAt,
-			},
+			concession_data: updatedConcessionData,
 			message: `Concession is now ${newStatus ? 'open' : 'closed'}`,
 		})
 	} catch (error) {
 		console.error('Toggle concession status error:', error)
-		res.status(500).json({
+		return res.status(500).json({
 			success: false,
 			error: 'Internal server error while toggling concession status',
 		})

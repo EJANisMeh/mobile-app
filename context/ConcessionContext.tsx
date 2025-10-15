@@ -70,8 +70,8 @@ export const ConcessionProvider: React.FC<ConcessionProviderProps> = ({
 		async (concessionId: number): Promise<boolean> => {
 			const result = await backend.toggleConcessionStatus(concessionId)
 
-			if (result.success && result.concession) {
-				setConcession(result.concession)
+			if (result.success && result.concession_data) {
+				setConcession(result.concession_data)
 				return true
 			}
 
