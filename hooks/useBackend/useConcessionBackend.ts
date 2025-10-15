@@ -92,8 +92,7 @@ export const useConcessionBackend = () => {
 	 * Toggle concession open/closed status
 	 */
 	const toggleConcessionStatus = async (
-		concessionId: number,
-		is_open: boolean
+		concessionId: number
 	): Promise<{
 		success: boolean
 		concession?: ConcessionData
@@ -104,8 +103,7 @@ export const useConcessionBackend = () => {
 
 		try {
 			const response = await concessionApi.toggleConcessionStatus(
-				concessionId,
-				is_open
+				concessionId
 			)
 
 			if (response.success && response.concession) {

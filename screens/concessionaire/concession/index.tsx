@@ -7,16 +7,16 @@ import {
 	ActivityIndicator,
 } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { useTheme, useConcession, useAuth } from '../../../context'
+import { useThemeContext, useConcessionContext, useAuthContext } from '../../../context'
 import { useAlertModal } from '../../../hooks'
 import { createConcessionStyles } from '../../../styles/themedStyles'
 import { AlertModal } from '../../../components/modals'
 
 const ConcessionScreen: React.FC = () => {
-	const { colors } = useTheme()
-	const { user } = useAuth()
+	const { colors } = useThemeContext()
+	const { user } = useAuthContext()
 	const { concession, loading, error, getConcession, toggleConcessionStatus } =
-		useConcession()
+		useConcessionContext()
 	const styles = createConcessionStyles(colors)
 
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
@@ -37,7 +37,7 @@ const ConcessionScreen: React.FC = () => {
 		setIsTogglingStatus(true)
 
 		try {
-			const result = await toggleConcessionStatus(concession.id, newStatus)
+			const result = await toggleConcessionStatus(concession.id)
 
 			if (result) {
 				showAlert({
@@ -180,7 +180,7 @@ const ConcessionScreen: React.FC = () => {
 				<View style={styles.paymentMethodsSection}>
 					<Text style={styles.sectionTitle}>Payment Methods</Text>
 					<View style={styles.paymentMethodsList}>
-						{concession?.payment_methods?.map((method, index) => (
+						{concession?.payment_methods?.map((method: string, index: number) => (
 							<View
 								key={index}
 								style={[

@@ -12,10 +12,7 @@ export interface ConcessionContextType {
 		concessionId: number,
 		data: UpdateConcessionData
 	) => Promise<boolean>
-	toggleConcessionStatus: (
-		concessionId: number,
-		is_open: boolean
-	) => Promise<boolean>
+	toggleConcessionStatus: (concessionId: number) => Promise<boolean>
 	refreshConcession: () => Promise<void>
 }
 

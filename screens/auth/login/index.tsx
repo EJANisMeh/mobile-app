@@ -11,7 +11,7 @@ import {
 	Dimensions,
 	ActivityIndicator,
 } from 'react-native'
-import { useAuth, useTheme } from '../../../context'
+import { useAuthContext, useThemeContext } from '../../../context'
 import { LoginCredentials } from '../../../types'
 import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
@@ -29,8 +29,8 @@ interface LoginScreenProps {
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
-	const { isLoading, error, login } = useAuth()
-	const { colors } = useTheme()
+	const { isLoading, error, login } = useAuthContext()
+	const { colors } = useThemeContext()
 	const loginStyles = createLoginStyles(colors)
 	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
 		useAlertModal()

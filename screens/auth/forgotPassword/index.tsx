@@ -8,7 +8,7 @@ import {
 	Platform,
 	ScrollView,
 } from 'react-native'
-import { useAuth, useTheme } from '../../../context'
+import { useAuthContext, useThemeContext } from '../../../context'
 import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
@@ -28,8 +28,8 @@ interface ForgotPasswordScreenProps {
 const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 	navigation,
 }) => {
-	const { colors } = useTheme()
-	const { error, requestPasswordReset } = useAuth()
+	const { colors } = useThemeContext()
+	const { error, requestPasswordReset } = useAuthContext()
 	const forgotPasswordStyles = createForgotPasswordStyles(colors)
 	const responsive = useResponsiveDimensions()
 	const [email, setEmail] = useState('')

@@ -11,7 +11,7 @@ import {
 	Dimensions,
 	ActivityIndicator,
 } from 'react-native'
-import { useAuth, useTheme } from '../../../context'
+import { useAuthContext, useThemeContext } from '../../../context'
 import { RegisterData } from '../../../types'
 import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
@@ -29,8 +29,8 @@ interface RegisterScreenProps {
 }
 
 const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
-	const { isLoading, error, register } = useAuth()
-	const { colors } = useTheme()
+	const { isLoading, error, register } = useAuthContext()
+	const { colors } = useThemeContext()
 	const registerStyles = createRegisterStyles(colors)
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
 	const responsive = useResponsiveDimensions()

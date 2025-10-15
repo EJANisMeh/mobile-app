@@ -67,8 +67,8 @@ export const ConcessionProvider: React.FC<ConcessionProviderProps> = ({
 	 * Toggle concession open/closed status
 	 */
 	const toggleConcessionStatus = useCallback(
-		async (concessionId: number, is_open: boolean): Promise<boolean> => {
-			const result = await backend.toggleConcessionStatus(concessionId, is_open)
+		async (concessionId: number): Promise<boolean> => {
+			const result = await backend.toggleConcessionStatus(concessionId)
 
 			if (result.success && result.concession) {
 				setConcession(result.concession)

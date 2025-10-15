@@ -5,8 +5,8 @@
  */
 import React, { createContext, useContext, ReactNode } from 'react'
 import { useThemeBackend } from '../hooks/useBackend'
-import { useAuth as useAuthHook } from '../hooks/useAuth'
-import { useConcession as useConcessionHook } from '../hooks/useConcession'
+import { useAuth } from './AuthContext'
+import { useConcession } from './ConcessionContext'
 
 const GlobalContext = createContext<any>(null)
 
@@ -14,8 +14,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 	// Instantiate all modules here
 	const Contexts = {
 		theme: useThemeBackend(),
-		auth: useAuthHook(),
-		concession: useConcessionHook(),
+		auth: useAuth(),
+		concession: useConcession(),
 	}
 
 	return (
@@ -24,6 +24,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 }
 
 // Custom hooks for each module
-export const useTheme = () => useContext(GlobalContext).theme
-export const useAuth = () => useContext(GlobalContext).auth
-export const useConcession = () => useContext(GlobalContext).concession
+export const useThemeContext = () => useContext(GlobalContext).theme
+export const useAuthContext = () => useContext(GlobalContext).auth
+export const useConcessionContext = () => useContext(GlobalContext).concession

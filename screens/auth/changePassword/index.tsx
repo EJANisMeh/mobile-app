@@ -8,7 +8,7 @@ import {
 	Platform,
 	ScrollView,
 } from 'react-native'
-import { useAuth, useTheme } from '../../../context'
+import { useAuthContext, useThemeContext } from '../../../context'
 import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
@@ -31,7 +31,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 	route,
 }) => {
 	const { email, userId } = route.params
-	const { colors } = useTheme()
+	const { colors } = useThemeContext()
 	const changePasswordStyles = createChangePasswordStyles(colors)
 	const responsive = useResponsiveDimensions()
 	const [formData, setFormData] = useState({
@@ -46,7 +46,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 	})
 	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
 		useAlertModal()
-	const { resetPassword, error } = useAuth()
+	const { resetPassword, error } = useAuthContext()
 	const [localIsLoading, setLocalIsLoading] = useState(false)
 
 	const updateField = (field: string, value: string) => {

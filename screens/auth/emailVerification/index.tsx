@@ -9,7 +9,7 @@ import {
 	Platform,
 	ScrollView,
 } from 'react-native'
-import { useAuth, useTheme } from '../../../context'
+import { useAuthContext, useThemeContext } from '../../../context'
 import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import { createEmailVerificationStyles } from '../../../styles/themedStyles'
@@ -22,7 +22,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	route,
 }) => {
 	const { email, purpose, userId } = route.params
-	const { colors } = useTheme()
+	const { colors } = useThemeContext()
 	const emailVerificationStyles = createEmailVerificationStyles(colors)
 	const responsive = useResponsiveDimensions()
 	const [code, setCode] = useState<string[]>(['', '', '', '', '', ''])
@@ -32,7 +32,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	const [countdown, setCountdown] = useState(30)
 	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
 		useAlertModal()
-	const { user, logout, verifyEmail } = useAuth()
+	const { user, logout, verifyEmail } = useAuthContext()
 
 	// Refs for input fields
 	const inputRefs = useRef<(TextInput | null)[]>([])

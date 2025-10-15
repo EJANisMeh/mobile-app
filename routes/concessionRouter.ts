@@ -1,5 +1,9 @@
 import express from 'express'
-import { getConcession, updateConcession } from '../backend/concession'
+import {
+	getConcession,
+	updateConcession,
+	toggleConcessionStatus,
+} from '../backend/concession'
 
 const router = express.Router()
 
@@ -8,5 +12,8 @@ router.get('/:concessionId', getConcession)
 
 // Update concession
 router.put('/:concessionId', updateConcession)
+
+// Toggle concession status
+router.patch('/:concessionId/toggle-status', toggleConcessionStatus)
 
 export default router

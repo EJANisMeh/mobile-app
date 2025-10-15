@@ -9,7 +9,7 @@ import {
 	Platform,
 	ScrollView,
 } from 'react-native'
-import { useAuth, useTheme } from '../../../context'
+import { useAuthContext, useThemeContext } from '../../../context'
 import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import { createProfileCreationStyles } from '../../../styles/themedStyles'
@@ -20,11 +20,11 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 	route,
 }) => {
 	const { userId } = route.params
-	const { colors } = useTheme()
+	const { colors } = useThemeContext()
 	const profileCreationStyles = createProfileCreationStyles(colors)
 	const responsive = useResponsiveDimensions()
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
-	const { completeProfile } = useAuth()
+	const { completeProfile } = useAuthContext()
 	const [isLoading, setIsLoading] = useState(false)
 	const [formData, setFormData] = useState<ProfileCreationData>({
 		fname: '',

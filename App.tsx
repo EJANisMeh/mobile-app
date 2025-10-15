@@ -1,11 +1,11 @@
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { StatusBar } from 'expo-status-bar'
-import { AppProvider, useTheme } from './context'
+import { AppProvider, useThemeContext } from './context'
 import { RootNavigator } from './navigation'
 
 const AppContent: React.FC = () => {
-	const { mode } = useTheme()
+	const { mode } = useThemeContext()
 
 	return (
 		<NavigationContainer>
