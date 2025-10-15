@@ -19,7 +19,7 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 	navigation,
 	route,
 }) => {
-	const { userId, token } = route.params
+	const { userId } = route.params
 	const { colors } = useTheme()
 	const profileCreationStyles = createProfileCreationStyles(colors)
 	const responsive = useResponsiveDimensions()

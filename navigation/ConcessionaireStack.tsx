@@ -40,7 +40,7 @@ const ConcessionaireStack: React.FC = () => {
 				name="Concession"
 				component={ConcessionScreen}
 				options={{
-					title: 'My Concession',
+					title: 'Concession',
 					tabBarLabel: 'Concession',
 				}}
 			/>

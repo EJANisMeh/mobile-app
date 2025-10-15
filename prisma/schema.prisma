@@ -45,10 +45,12 @@ model Cafeteria {
 model Concession {
   id                   Int                    @id @default(autoincrement())
   name                 String
+  description          String?
   image_url            String?
   cafeteriaId          Int?                   @map("cafeteria_id")
   is_open              Boolean                @default(false)
   payment_methods      Json                   @default("[]")
+  schedule             Json?                  @default("{}")
   createdAt            DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   cafeteria            Cafeteria?             @relation(fields: [cafeteriaId], references: [id], onUpdate: NoAction)

@@ -1,6 +1,8 @@
 import { StyleSheet } from 'react-native'
 import { ThemeColors } from '../context/ThemeContext'
 
+export { createConcessionStyles } from './concessionaire/concession'
+
 export const createLoginStyles = (colors: ThemeColors) =>
 	StyleSheet.create({
 		container: {

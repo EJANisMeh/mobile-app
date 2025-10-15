@@ -10,6 +10,7 @@ export interface AuthBackendType {
 		token?: string
 		needsEmailVerification?: boolean
 		needsProfileCreation?: boolean
+		message?: string
 	}>
 	register: (data: RegisterData) => Promise<{
 		success: boolean

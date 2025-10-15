@@ -21,7 +21,7 @@ import { useMenuModal } from '../hooks'
 const Stack = createStackNavigator<RootStackParamList>()
 
 // Debug menu toggle - set to false to hide debug menu
-const SHOW_DEBUG_MENU = true
+const SHOW_DEBUG_MENU = false
 
 const LoadingScreen: React.FC = () => {
 	const { colors } = useTheme()

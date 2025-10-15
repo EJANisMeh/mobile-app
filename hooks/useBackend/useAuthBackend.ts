@@ -23,8 +23,8 @@ export const useAuthBackend = (): AuthBackendType => {
 		try {
 			// Call backend login endpoint via API
 			const response = await authApi.login(credentials)
-
-			if (!response.token || !response.user || !response.success) {
+			console.log('Login response:', response)
+			if (!response.user || !response.success) {
 				return {
 					success: false,
 					error: response.error || 'Login failed',
@@ -36,6 +36,13 @@ export const useAuthBackend = (): AuthBackendType => {
 
 			if (response.needsEmailVerification || response.needsProfileCreation) {
 				return response
+			}
+
+			if (!response.token) {
+				return {
+					success: false,
+					error: 'No token received',
+				}
 			}
 
 			// Normal login flow - store auth data

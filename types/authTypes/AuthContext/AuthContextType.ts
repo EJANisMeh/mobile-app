@@ -3,9 +3,11 @@ import { AuthState, LoginCredentials, RegisterData, RegisterResult } from '..'
 export interface AuthContextType extends AuthState {
 	login: (credentials: LoginCredentials) => Promise<{
 		success: boolean
+		needsEmailVerification?: boolean
 		needsProfileCreation?: boolean
 		userId?: number
 		token?: string
+		message?: string
 	}>
 	register: (data: RegisterData) => Promise<RegisterResult>
 	logout: () => Promise<void>

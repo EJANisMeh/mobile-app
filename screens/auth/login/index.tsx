@@ -32,7 +32,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 	const { isLoading, error, login } = useAuth()
 	const { colors } = useTheme()
 	const loginStyles = createLoginStyles(colors)
-	const { visible, title, message, showAlert, hideAlert, handleConfirm } = useAlertModal()
+	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
+		useAlertModal()
 	const responsive = useResponsiveDimensions()
 	const [credentials, setCredentials] = useState<LoginCredentials>({
 		email: '',
@@ -81,9 +82,21 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
 		const result = await login(credentials)
 
-		if (result.success)
-		{
-			console.log("Login successful:", result);
+		if (result.success) {
+			if (result.needsEmailVerification && result.userId) {
+				showAlert({
+					title: 'Email Verification Required',
+					message: result.message,
+					onConfirm: () => {
+						hideAlert()
+						setCredentials({ email: '', password: '' })
+						navigation.navigate('EmailVerification', {
+							userId: result.userId!,
+							purpose: 'email-verification',
+						})
+					},
+				})
+			}
 			// Check if user needs to complete profile
 			if (result.needsProfileCreation && result.userId && result.token) {
 				showAlert({
@@ -94,12 +107,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 						setCredentials({ email: '', password: '' })
 						navigation.navigate('ProfileCreation', {
 							userId: result.userId!,
-							token: result.token!,
 						})
 					},
 				})
 			}
-			// If no profile creation needed, RootNavigator will handle navigation automatically
+			// Successful authentication will be handled by RootNavigator
 		} else {
 			// Error is already set in AuthContext, show it in alert
 			showAlert({

@@ -77,10 +77,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		credentials: LoginCredentials
 	): Promise<{
 		success: boolean
-		needEmailVerification?: boolean
+		needsEmailVerification?: boolean
 		needsProfileCreation?: boolean
 		userId?: number
 		token?: string
+		message?: string
 	}> => {
 		setIsLoading(true)
 		setError(null)
@@ -88,13 +89,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		const result = await authBackend.login(credentials)
 
 		// Handle post-login logic
-		if (!result.success || !result.user || !result.token) {
+		if (!result.success || !result.user) {
 			setError(result.error || 'Login failed')
 			setIsLoading(false)
 			return { success: false }
 		}
+		if (result.needsEmailVerification && result.user) {
+			setIsLoading(false)
+			return {
+				success: true,
+				needsEmailVerification: true,
+				userId: result.user.id,
+				message: result.message,
+			}
+		}
 
-		console.log(`result.needsProfileCreation: ${result.needsProfileCreation}`) // Debug log
+		if (!result.token) {
+			setError('Login failed: No token received')
+			setIsLoading(false)
+			return { success: false }
+		}
+
 		// If the backend indicates the user must complete profile, return success
 		// with the userId (don't expect a token yet)
 		if (result.needsProfileCreation && result.user) {

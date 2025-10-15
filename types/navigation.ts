@@ -17,7 +17,7 @@ export type AuthStackParamList = {
 		purpose: 'password-reset' | 'email-verification'
 	}
 	ChangePassword: { email?: string; userId?: number }
-	ProfileCreation: { userId: number; token: string }
+	ProfileCreation: { userId: number }
 }
 
 export type CustomerStackParamList = {

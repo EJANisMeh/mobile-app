@@ -53,13 +53,31 @@ export const login = async (req: express.Request, res: express.Response) => {
 			})
 		}
 
+		// Return user data (excluding password hash)
+		const userResponse = {
+			id: user.id,
+			role: user.role,
+			fname: user.fname,
+			lname: user.lname,
+			email: user.email,
+			new_login: user.new_login,
+			emailVerified: user.emailVerified,
+			contact_details: user.contact_details,
+			image_url: user.image_url,
+			concession_id: user.concession_id,
+			createdAt: user.createdAt,
+			updatedAt: user.updatedAt,
+		}
+
 		// Step 4: Check if email is verified
-		if (!user.emailVerified) {
-			return res.status(401).json({
-				success: false,
-				error: 'Please verify your email address before logging in',
+		if (!user.emailVerified)
+		{
+			console.log('Email not verified for user:', user.email)
+			return res.json({
+				success: true,
+				user: userResponse,
 				needsEmailVerification: true,
-				email: user.email,
+				message: 'Login successful - Please verify your email',
 			})
 		}
 
@@ -76,21 +94,6 @@ export const login = async (req: express.Request, res: express.Response) => {
 				JWT_SECRET,
 				{ expiresIn: JWT_EXPIRES_IN }
 			)
-
-			const userResponse = {
-				id: user.id,
-				role: user.role,
-				fname: user.fname,
-				lname: user.lname,
-				email: user.email,
-				new_login: user.new_login,
-				emailVerified: user.emailVerified,
-				contact_details: user.contact_details,
-				image_url: user.image_url,
-				concession_id: user.concession_id,
-				createdAt: user.createdAt,
-				updatedAt: user.updatedAt,
-			}
 
 			return res.json({
 				success: true,
@@ -109,22 +112,6 @@ export const login = async (req: express.Request, res: express.Response) => {
 			JWT_SECRET,
 			{ expiresIn: JWT_EXPIRES_IN }
 		)
-
-		// Return user data (excluding password hash)
-		const userResponse = {
-			id: user.id,
-			role: user.role,
-			fname: user.fname,
-			lname: user.lname,
-			email: user.email,
-			new_login: user.new_login,
-			emailVerified: user.emailVerified,
-			contact_details: user.contact_details,
-			image_url: user.image_url,
-			concession_id: user.concession_id,
-			createdAt: user.createdAt,
-			updatedAt: user.updatedAt,
-		}
 
 		res.json({
 			success: true,

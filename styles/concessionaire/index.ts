@@ -1,5 +1,5 @@
 export { concessionaireMenuStyles } from './menu'
 export { concessionaireOrdersStyles } from './orders'
-export { concessionaireConcessionStyles } from './concession'
+export { createConcessionStyles } from './concession'
 export { concessionaireNotificationsStyles } from './notifications'
 export { concessionaireProfileStyles } from './profile'
