@@ -4,14 +4,14 @@
  * These are HTTP endpoints if needed for server-side user operations
  */
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { ApiResponse, UserData } from '../../types'
+import { AuthApiResponse, UserData } from '../../types'
 import { apiCall } from './api'
 
 export const userApi = {
   /**
    * Update user profile
    */
-  updateProfile: async (data: Partial<UserData>): Promise<ApiResponse> => {
+  updateProfile: async (data: Partial<UserData>): Promise<AuthApiResponse> => {
     const token = await AsyncStorage.getItem('authToken')
 
     return await apiCall('/user/update-profile', {
@@ -24,7 +24,7 @@ export const userApi = {
   /**
    * Get user profile
    */
-  getProfile: async (userId: number): Promise<ApiResponse> => {
+  getProfile: async (userId: number): Promise<AuthApiResponse> => {
     const token = await AsyncStorage.getItem('authToken')
 
     return await apiCall(`/user/profile/${userId}`, {

@@ -2,7 +2,6 @@
  * Debug/Testing API Endpoints
  * These call backend/debug/* modules for development testing
  */
-import { ApiResponse } from '../../types'
 import { apiCall } from './api'
 
 export const debugApi = {
@@ -10,7 +9,7 @@ export const debugApi = {
 	 * Seed test users
 	 * Backend handles: creating 6 test users with various states
 	 */
-	seedTestUsers: async (): Promise<ApiResponse> => {
+	seedTestUsers: async () => {
 		return await apiCall('/debug/seed-users', {
 			method: 'POST',
 		})
@@ -20,7 +19,7 @@ export const debugApi = {
 	 * Clear test users
 	 * Backend handles: deleting test users from database
 	 */
-	clearTestUsers: async (): Promise<ApiResponse> => {
+	clearTestUsers: async () => {
 		return await apiCall('/debug/clear-users', {
 			method: 'POST',
 		})
@@ -30,7 +29,7 @@ export const debugApi = {
 	 * Test database connection
 	 * Backend handles: running test queries
 	 */
-	testDatabase: async (): Promise<ApiResponse> => {
+	testDatabase: async () => {
 		return await apiCall('/debug/test-db', {
 			method: 'GET',
 		})
@@ -40,7 +39,7 @@ export const debugApi = {
 	 * Get database statistics
 	 * Backend handles: counting users by role and verification status
 	 */
-	getDatabaseStats: async (): Promise<ApiResponse> => {
+	getDatabaseStats: async () => {
 		return await apiCall('/debug/db-stats', {
 			method: 'GET',
 		})
@@ -50,7 +49,7 @@ export const debugApi = {
 	 * Health check
 	 * Backend handles: server status, uptime, environment info
 	 */
-	healthCheck: async (): Promise<ApiResponse> => {
+	healthCheck: async () => {
 		return await apiCall('/debug/health', {
 			method: 'GET',
 		})

@@ -1,11 +1,11 @@
 import React from 'react'
 import { View, Text, ScrollView } from 'react-native'
 import { LogoutButton } from '../../../components'
-import { useAuth } from '../../../context'
+import { useAuthContext } from '../../../context'
 import { concessionaireProfileStyles } from '../../../styles/concessionaire'
 
 const ProfileScreen: React.FC = () => {
-	const { user, isLoading, error, logout } = useAuth()
+	const { user, isLoading, error, logout } = useAuthContext()
 
 	return (
 		<ScrollView style={concessionaireProfileStyles.profileContainer}>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { TouchableOpacity, Text } from 'react-native'
-import { useAuth } from '../context'
+import { useAuthContext } from '../context'
 import { ConfirmationModal, AlertModal } from './modals'
 import { useConfirmationModal, useAlertModal } from '../hooks'
 import { logoutButtonStyles as styles } from '../styles/components'
@@ -13,7 +13,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
 	textStyle,
 	title = 'Logout',
 }) => {
-	const { logout } = useAuth()
+	const { logout } = useAuthContext()
 	const confirmationModal = useConfirmationModal()
 	const alertModal = useAlertModal()
 	const [isLoggingOut, setIsLoggingOut] = useState(false)

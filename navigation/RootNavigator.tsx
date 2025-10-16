@@ -1,6 +1,6 @@
 import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
-import { useAuth, useTheme } from '../context'
+import { useAuthContext, useThemeContext } from '../context'
 import { RootStackParamList } from '../types/navigation'
 import AuthStack from './AuthStack'
 import CustomerStack from './CustomerStack'
@@ -24,7 +24,7 @@ const Stack = createStackNavigator<RootStackParamList>()
 const SHOW_DEBUG_MENU = false
 
 const LoadingScreen: React.FC = () => {
-	const { colors } = useTheme()
+	const { colors } = useThemeContext()
 
 	return (
 		<View
@@ -41,8 +41,8 @@ const LoadingScreen: React.FC = () => {
 }
 
 const RootNavigator: React.FC = () => {
-	const { user, isAuthenticated, isLoading, logout } = useAuth()
-	const { mode, toggleTheme, colors } = useTheme()
+	const { user, isAuthenticated, isLoading, logout } = useAuthContext()
+	const { mode, toggleTheme, colors } = useThemeContext()
 	const debugMenuModal = useMenuModal()
 	const [isInitializing, setIsInitializing] = React.useState(true)
 

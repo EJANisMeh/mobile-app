@@ -3,11 +3,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { CustomerStackParamList } from '../types/navigation'
 
 // Import screen components
-import MenuScreen from '../screens/customer/MenuScreen'
-import CartScreen from '../screens/customer/CartScreen'
-import OrdersScreen from '../screens/customer/OrdersScreen'
-import NotificationsScreen from '../screens/customer/NotificationsScreen'
-import ProfileScreen from '../screens/customer/ProfileScreen'
+import MenuScreen from '../screens/customer/menu'
+import CartScreen from '../screens/customer/cart'
+import OrdersScreen from '../screens/customer/orders'
+import NotificationsScreen from '../screens/customer/notification'
+import ProfileScreen from '../screens/customer/profile'
 
 const Tab = createBottomTabNavigator<CustomerStackParamList>()
 

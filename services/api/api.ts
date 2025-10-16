@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Platform } from 'react-native'
-import { ApiResponse } from '../../types'
 
 /**
  * API Service - Thin HTTP Client Layer
@@ -63,7 +62,7 @@ const API_BASE_URL = getApiBaseUrl()
 export const apiCall = async <T = any>(
 	endpoint: string,
 	options: RequestInit = {}
-): Promise<ApiResponse<T>> => {
+) => {
 	try {
 		const url = `${API_BASE_URL}${endpoint}`
 
