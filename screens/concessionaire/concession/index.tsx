@@ -7,7 +7,12 @@ import {
 	ActivityIndicator,
 } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { useThemeContext, useConcessionContext, useAuthContext } from '../../../context'
+import { useNavigation } from '@react-navigation/native'
+import {
+	useThemeContext,
+	useConcessionContext,
+	useAuthContext,
+} from '../../../context'
 import { useAlertModal } from '../../../hooks'
 import { createConcessionStyles } from '../../../styles/themedStyles'
 import { AlertModal } from '../../../components/modals'
@@ -17,12 +22,14 @@ const ConcessionScreen: React.FC = () => {
 	const { user } = useAuthContext()
 	const { concession, loading, error, getConcession, toggleConcessionStatus } =
 		useConcessionContext()
+	const navigation = useNavigation()
 	const styles = createConcessionStyles(colors)
 
-	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
+	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
+		useAlertModal()
 	const [isTogglingStatus, setIsTogglingStatus] = useState(false)
 
-	// Load concession data on mount
+	// Load concession data on mount or when concession_id changes
 	useEffect(() => {
 		if (user?.concession_id) {
 			getConcession(user.concession_id)
@@ -33,38 +40,35 @@ const ConcessionScreen: React.FC = () => {
 	const handleStatusToggle = async () => {
 		if (!concession) return
 
-		const newStatus = !concession.is_open
 		setIsTogglingStatus(true)
 
 		try {
 			const result = await toggleConcessionStatus(concession.id)
 
-			if (result) {
+			if (result.success) {
+				const newStatus = concession.is_open
 				showAlert({
 					title: 'Success',
-					message: `Concession is now ${newStatus ? 'open' : 'closed'}`,
+					message:
+						(result.message as string) ||
+						`Concession is now ${newStatus ? 'open' : 'closed'}`,
 				})
 			} else {
 				showAlert({
 					title: 'Error',
-					message: error || 'Failed to update status',
+					message: result.error || error || 'Failed to update status',
 				})
 			}
 		} catch (err) {
 			showAlert({
 				title: 'Error',
-				message: 'An unexpected error occurred',
+				message: err instanceof Error ? err.message : 'Registration failed',
 			})
-		} finally {
-			setIsTogglingStatus(false)
 		}
 	}
 
 	const handleEditDetails = () => {
-		showAlert({
-			title: 'Coming Soon',
-			message: 'Edit concession details feature is under development',
-		})
+		navigation.navigate('EditConcessionDetails' as never)
 	}
 
 	const handleManagePaymentMethods = () => {
@@ -180,41 +184,43 @@ const ConcessionScreen: React.FC = () => {
 				<View style={styles.paymentMethodsSection}>
 					<Text style={styles.sectionTitle}>Payment Methods</Text>
 					<View style={styles.paymentMethodsList}>
-						{concession?.payment_methods?.map((method: string, index: number) => (
-							<View
-								key={index}
-								style={[
-									styles.paymentMethodItem,
-									method === 'cash' && styles.paymentMethodDefault,
-								]}>
-								<View style={styles.paymentMethodContent}>
-									<MaterialCommunityIcons
-										name={
-											method === 'cash'
-												? 'cash'
-												: method === 'gcash'
-												? 'cellphone'
-												: 'credit-card'
-										}
-										size={22}
-										color={method === 'cash' ? colors.primary : colors.text}
-										style={styles.paymentMethodIcon}
-									/>
-									<Text
-										style={[
-											styles.paymentMethodText,
-											method === 'cash' && styles.paymentMethodDefaultText,
-										]}>
-										{method}
-									</Text>
-								</View>
-								{method === 'cash' && (
-									<View style={styles.defaultBadge}>
-										<Text style={styles.defaultBadgeText}>DEFAULT</Text>
+						{concession?.payment_methods?.map(
+							(method: string, index: number) => (
+								<View
+									key={index}
+									style={[
+										styles.paymentMethodItem,
+										method === 'cash' && styles.paymentMethodDefault,
+									]}>
+									<View style={styles.paymentMethodContent}>
+										<MaterialCommunityIcons
+											name={
+												method === 'cash'
+													? 'cash'
+													: method === 'gcash'
+													? 'cellphone'
+													: 'credit-card'
+											}
+											size={22}
+											color={method === 'cash' ? colors.primary : colors.text}
+											style={styles.paymentMethodIcon}
+										/>
+										<Text
+											style={[
+												styles.paymentMethodText,
+												method === 'cash' && styles.paymentMethodDefaultText,
+											]}>
+											{method}
+										</Text>
 									</View>
-								)}
-							</View>
-						))}
+									{method === 'cash' && (
+										<View style={styles.defaultBadge}>
+											<Text style={styles.defaultBadgeText}>DEFAULT</Text>
+										</View>
+									)}
+								</View>
+							)
+						)}
 
 						<TouchableOpacity
 							style={styles.addPaymentButton}
@@ -237,6 +243,7 @@ const ConcessionScreen: React.FC = () => {
 				onClose={hideAlert}
 				title={title}
 				message={message}
+				buttons={[{ text: 'OK', onPress: handleConfirm }]}
 			/>
 		</View>
 	)

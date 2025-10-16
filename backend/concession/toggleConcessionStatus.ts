@@ -9,6 +9,7 @@ import { prisma, updateQuery, selectOne } from '../db'
  * 3. Toggle is_open status
  * 4. Return updated concession data
  */
+
 export const toggleConcessionStatus = async (
 	req: express.Request,
 	res: express.Response

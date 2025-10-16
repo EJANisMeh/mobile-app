@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native'
 import { ThemeColors } from '../types/theme'
 
 export { createConcessionStyles } from './concessionaire/concession'
+export { createEditConcessionStyles } from './concessionaire/editConcession'
 
 export const createLoginStyles = (colors: ThemeColors) =>
 	StyleSheet.create({

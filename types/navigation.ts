@@ -29,9 +29,11 @@ export type CustomerStackParamList = {
 }
 
 export type ConcessionaireStackParamList = {
+	MainTabs: undefined
 	Menu: undefined
 	Orders: undefined
 	Concession: undefined
+	EditConcessionDetails: undefined
 	ScanQR: undefined
 	Notifications: undefined
 	Profile: undefined
