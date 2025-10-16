@@ -1,29 +1,7 @@
 import { useState, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { ThemeColors, ThemeMode } from '../../types'
 
-export type ThemeMode = 'light' | 'dark'
-
-export interface ThemeColors {
-	primary: string
-	primaryDark: string
-	secondary: string
-	background: string
-	surface: string
-	card: string
-	text: string
-	textSecondary: string
-	textOnPrimary: string
-	border: string
-	divider: string
-	success: string
-	warning: string
-	error: string
-	info: string
-	inputBackground: string
-	inputBorder: string
-	inputText: string
-	placeholder: string
-}
 
 const lightTheme: ThemeColors = {
 	primary: '#DC143C',

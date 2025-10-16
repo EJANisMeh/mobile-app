@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native'
-import { ThemeColors } from '../context/ThemeContext'
+import { ThemeColors } from '../types/theme'
 
 export { createConcessionStyles } from './concessionaire/concession'
 

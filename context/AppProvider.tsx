@@ -4,18 +4,20 @@
  * NO nested providers - everything in one place
  */
 import React, { createContext, useContext, ReactNode } from 'react'
-import { useThemeBackend } from '../hooks/useBackend'
-import { useAuth } from './AuthContext'
-import { useConcession } from './ConcessionContext'
+import {
+	useThemeBackend,
+	useAuthBackend,
+	useConcessionBackend,
+} from '../hooks/useBackend'
 
 const GlobalContext = createContext<any>(null)
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-	// Instantiate all modules here
+	// Instantiate all modules here - using backend hooks directly
 	const Contexts = {
 		theme: useThemeBackend(),
-		auth: useAuth(),
-		concession: useConcession(),
+		auth: useAuthBackend(),
+		concession: useConcessionBackend(),
 	}
 
 	return (

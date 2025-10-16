@@ -4,34 +4,38 @@
 import { AuthBackendType } from '../../../../types'
 import { authApi } from '../../../../services/api'
 
-export const requestPasswordReset = (): AuthBackendType['requestPasswordReset'] =>
-{
-  return async (email) =>
-  {
-    try
-    {
-      const response = await authApi.requestPasswordReset(email)
-      if (!response.success)
-      {
-        return {
-          success: false,
-          error: response.error || 'Password reset request failed',
-        }
-      }
+export const requestPasswordReset = (
+	setIsLoading: (v: boolean) => void,
+	setError: (v: string | null) => void
+): AuthBackendType['requestPasswordReset'] => {
+	return async (email) => {
+		setIsLoading(true)
+		setError(null)
 
-      return {
-        success: response.success,
-        message: response.message,
-      }
-    } catch (error)
-    {
-      return {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Password reset request failed',
-      }
-    }
-  }
+		try {
+			const response = await authApi.requestPasswordReset(email)
+			if (!response.success) {
+				setError(response.error || 'Password reset request failed')
+				return {
+					success: false,
+					error: response.error || 'Password reset request failed',
+				}
+			}
+
+			return {
+				success: response.success,
+				message: response.message,
+			}
+		} catch (error) {
+			const errorMsg =
+				error instanceof Error ? error.message : 'Password reset request failed'
+			setError(errorMsg)
+			return {
+				success: false,
+				error: errorMsg,
+			}
+		} finally {
+			setIsLoading(false)
+		}
+	}
 }

@@ -14,14 +14,8 @@ export const updateConcession = async (
 ) => {
 	try {
 		const { concessionId } = req.params
-		const {
-			name,
-			description,
-			image_url,
-			is_open,
-			payment_methods,
-			schedule,
-		} = req.body
+		const { name, description, image_url, is_open, payment_methods, schedule } =
+			req.body
 
 		// Step 1: Validate input
 		if (!concessionId) {
@@ -67,7 +61,7 @@ export const updateConcession = async (
 		// Step 3: Return updated concession data
 		res.json({
 			success: true,
-			concession: {
+			concession_data: {
 				id: concession.id,
 				name: concession.name,
 				description: concession.description,

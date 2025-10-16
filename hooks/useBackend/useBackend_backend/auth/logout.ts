@@ -8,9 +8,14 @@ import { clearAuthData } from '../../../../backend/auth/authAsyncData'
 import { response } from 'express'
 
 export const logout = (
-	setUser: (u: null) => void
+	setUser: (u: null) => void,
+	setIsLoading: (v: boolean) => void,
+	setError: (v: string | null) => void
 ): AuthBackendType['logout'] => {
 	return async () => {
+		setIsLoading(true)
+		setError(null)
+
 		try {
 			// Call backend logout endpoint
 			const response = await authApi.logout()
@@ -27,6 +32,8 @@ export const logout = (
 			await clearAuthData()
 			setUser(null)
 			return { success: true }
+		} finally {
+			setIsLoading(false)
 		}
 	}
 }

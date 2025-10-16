@@ -7,15 +7,21 @@ import { UserData } from '../../../../types/userTypes'
 import { authApi } from '../../../../services/api'
 
 export const checkAuthStatus = (
-	setUser: (user: UserData | null) => void
+	setUser: (user: UserData | null) => void,
+	setIsLoading: (v: boolean) => void,
+	setError: (v: string | null) => void
 ): AuthBackendType['checkAuthStatus'] => {
 	return async () => {
+		setIsLoading(true)
+		setError(null)
+
 		try {
 			// Call backend to verify token
 			const response = await authApi.checkAuthStatus()
 
 			if (!response.success || !response.user) {
 				setUser(null)
+				setError(response.error || 'Not authenticated')
 				return {
 					success: false,
 					error: response.error || 'Not authenticated',
@@ -25,15 +31,20 @@ export const checkAuthStatus = (
 			setUser(response.user as UserData)
 			return {
 				success: true,
-        user: response.user as UserData,
-        message: response.message || 'Authenticated',
+				user: response.user as UserData,
+				message: response.message || 'Authenticated',
 			}
 		} catch (error) {
 			setUser(null)
+			const errorMsg =
+				error instanceof Error ? error.message : 'Auth check failed'
+			setError(errorMsg)
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Auth check failed',
+				error: errorMsg,
 			}
+		} finally {
+			setIsLoading(false)
 		}
 	}
 }

@@ -12,14 +12,20 @@ import {
 } from '../../../../backend/auth/authAsyncData'
 
 export const login = (
-	setUser: (u: UserData | null) => void
+	setUser: (u: UserData | null) => void,
+	setIsLoading: (v: boolean) => void,
+	setError: (v: string | null) => void
 ): AuthBackendType['login'] => {
 	return async (credentials) => {
+		setIsLoading(true)
+		setError(null)
+
 		try {
 			// Call backend login endpoint via API
 			const response = await authApi.login(credentials)
 			console.log('Login response:', response)
 			if (!response.user || !response.success) {
+				setError(response.error || 'Login failed')
 				return {
 					success: false,
 					error: response.error || 'Login failed',
@@ -34,6 +40,7 @@ export const login = (
 			}
 
 			if (!response.token) {
+				setError('No token received')
 				return {
 					success: false,
 					error: 'No token received',
@@ -52,10 +59,14 @@ export const login = (
 
 			return response
 		} catch (error) {
+			const errorMsg = error instanceof Error ? error.message : 'Login failed'
+			setError(errorMsg)
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Login failed',
+				error: errorMsg,
 			}
+		} finally {
+			setIsLoading(false)
 		}
 	}
 }

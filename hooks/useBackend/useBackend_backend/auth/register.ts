@@ -5,8 +5,14 @@
 import { AuthBackendType } from '../../../../types'
 import { authApi } from '../../../../services/api'
 
-export const register = (): AuthBackendType['register'] => {
+export const register = (
+	setIsLoading: (v: boolean) => void,
+	setError: (v: string | null) => void
+): AuthBackendType['register'] => {
 	return async (userData) => {
+		setIsLoading(true)
+		setError(null)
+
 		try {
 			// Call backend register endpoint via API
 			const response = await authApi.register(userData)
@@ -18,16 +24,22 @@ export const register = (): AuthBackendType['register'] => {
 					needsEmailVerification: response.needsEmailVerification,
 				}
 			} else {
+				setError(response.error || 'Registration failed')
 				return {
 					success: false,
 					error: response.error || 'Registration failed',
 				}
 			}
 		} catch (error) {
+			const errorMsg =
+				error instanceof Error ? error.message : 'Registration failed'
+			setError(errorMsg)
 			return {
 				success: false,
-				error: error instanceof Error ? error.message : 'Registration failed',
+				error: errorMsg,
 			}
+		} finally {
+			setIsLoading(false)
 		}
 	}
 }

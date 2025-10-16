@@ -11,13 +11,19 @@ import {
 } from '../../../../backend/auth/authAsyncData'
 
 export const completeProfile = (
-	setUser: (u: UserData) => void
+	setUser: (u: UserData) => void,
+	setIsLoading: (v: boolean) => void,
+	setError: (v: string | null) => void
 ): AuthBackendType['completeProfile'] => {
 	return async (data) => {
+		setIsLoading(true)
+		setError(null)
+
 		try {
 			const response = await authApi.completeProfile(data)
 
 			if (!response.success || !response.user || !response.token) {
+				setError(response.error || 'Profile completion failed')
 				return {
 					success: false,
 					error: response.error || 'Profile completion failed',
@@ -37,11 +43,15 @@ export const completeProfile = (
 				user: updatedUser,
 			}
 		} catch (error) {
+			const errorMsg =
+				error instanceof Error ? error.message : 'Profile completion failed'
+			setError(errorMsg)
 			return {
 				success: false,
-				error:
-					error instanceof Error ? error.message : 'Profile completion failed',
+				error: errorMsg,
 			}
+		} finally {
+			setIsLoading(false)
 		}
 	}
 }

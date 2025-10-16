@@ -8,9 +8,14 @@ import { storeUser } from '../../../../backend/auth/authAsyncData'
 
 export const verifyEmail = (
 	user: UserData | null,
-	setUser: (u: UserData) => void
+	setUser: (u: UserData) => void,
+	setIsLoading: (v: boolean) => void,
+	setError: (v: string | null) => void
 ): AuthBackendType['verifyEmail'] => {
 	return async (data) => {
+		setIsLoading(true)
+		setError(null)
+
 		try {
 			const response = await authApi.verifyEmail(data)
 
@@ -21,16 +26,24 @@ export const verifyEmail = (
 				await storeUser(updatedUser)
 			}
 
+			if (!response.success) {
+				setError(response.error || 'Email verification failed')
+			}
+
 			return {
 				success: response.success,
 				error: response.error,
 			}
 		} catch (error) {
+			const errorMsg =
+				error instanceof Error ? error.message : 'Email verification failed'
+			setError(errorMsg)
 			return {
 				success: false,
-				error:
-					error instanceof Error ? error.message : 'Email verification failed',
+				error: errorMsg,
 			}
+		} finally {
+			setIsLoading(false)
 		}
 	}
 }

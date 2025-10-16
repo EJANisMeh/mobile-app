@@ -16,7 +16,7 @@ export const concessionApi = {
 	): Promise<ConcessionApiResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
-		return await apiCall(`/api/concession/${concessionId}`, {
+		return await apiCall(`/concession/${concessionId}`, {
 			method: 'GET',
 			headers: token ? { Authorization: `Bearer ${token}` } : {},
 		})
@@ -39,7 +39,7 @@ export const concessionApi = {
 	): Promise<ConcessionApiResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
-		return await apiCall(`/api/concession/${concessionId}`, {
+		return await apiCall(`/concession/${concessionId}`, {
 			method: 'PUT',
 			headers: token ? { Authorization: `Bearer ${token}` } : {},
 			body: JSON.stringify(data),
@@ -55,7 +55,7 @@ export const concessionApi = {
 	): Promise<ConcessionApiResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
-		return await apiCall(`/api/concession/${concessionId}/toggle-status`, {
+		return await apiCall(`/concession/${concessionId}/toggle-status`, {
 			method: 'PATCH',
 			headers: token ? { Authorization: `Bearer ${token}` } : {},
 		})

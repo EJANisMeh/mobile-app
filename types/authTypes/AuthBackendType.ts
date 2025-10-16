@@ -3,6 +3,9 @@ import { LoginCredentials, RegisterData } from '.'
 
 export interface AuthBackendType {
 	user: UserData | null
+	isAuthenticated: boolean
+	isLoading: boolean
+	error: string | null
 	login: (credentials: LoginCredentials) => Promise<{
 		success: boolean
 		error?: string

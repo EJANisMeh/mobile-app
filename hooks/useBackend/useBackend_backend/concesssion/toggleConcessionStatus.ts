@@ -6,7 +6,8 @@ import { concessionApi } from '../../../../services/api'
 
 export const toggleConcessionStatus = (
 	setLoading: (v: boolean) => void,
-	setError: (v: string | null) => void
+	setError: (v: string | null) => void,
+	setConcession: (concession: ConcessionData | null) => void
 ) => {
 	return async (
 		concessionId: number
@@ -31,10 +32,16 @@ export const toggleConcessionStatus = (
 				}
 			}
 
+			const updatedConcession = response.concession_data as ConcessionData
+
+			setConcession(updatedConcession)
+
 			return {
 				success: true,
-				concession_data: response.concession_data,
+				message: response.message || 'Concession status toggled successfully',
+				concession_data: updatedConcession
 			}
+
 		} catch (err) {
 			const errorMessage =
 				err instanceof Error ? err.message : 'Unknown error occurred'

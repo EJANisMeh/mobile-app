@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native'
-import { ThemeColors } from '../../context/ThemeContext'
+import { ThemeColors } from '../../types'
 
 export const createProfileCreationStyles = (colors: ThemeColors) =>
 	StyleSheet.create({

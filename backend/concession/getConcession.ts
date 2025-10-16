@@ -41,7 +41,7 @@ export const getConcession = async (
 		// Step 3: Return concession data
 		res.json({
 			success: true,
-			concession: {
+			concession_data: {
 				id: concession.id,
 				name: concession.name,
 				description: concession.description,
