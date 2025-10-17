@@ -11,15 +11,7 @@ import {
 } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
-let NavigationBar: any = null
-try {
-	// lazy require so TypeScript doesn't fail if module not installed in some environments
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	NavigationBar = require('expo-navigation-bar')
-} catch (e) {
-	NavigationBar = null
-}
-import { StatusBar as RNStatusBar } from 'react-native'
+import * as NavigationBar from 'expo-navigation-bar'
 import {
 	useThemeContext,
 	useConcessionContext,
@@ -39,7 +31,6 @@ const EditConcessionDetailsScreen: React.FC = () => {
 
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
 	const [isSaving, setIsSaving] = useState(false)
-	const [isFullscreen, setIsFullscreen] = useState(false)
 
 	// Form state
 	const [name, setName] = useState('')
@@ -55,18 +46,37 @@ const EditConcessionDetailsScreen: React.FC = () => {
 		}
 	}, [concession])
 
-	// Cleanup: ensure system UI is restored when leaving the screen
+	// Hide system navigation buttons on Android when screen mounts
 	useEffect(() => {
-		return () => {
-			// restore status and navigation bars
-			try {
-				RNStatusBar.setHidden(false)
-				if (Platform.OS === 'android' && NavigationBar && NavigationBar.setVisibilityAsync) {
-					NavigationBar.setVisibilityAsync('visible')
+		const hideNavigationBar = async () => {
+			if (Platform.OS === 'android') {
+				try {
+					// Hide the navigation bar (system buttons)
+					await NavigationBar.setVisibilityAsync('hidden')
+					// Note: setBehaviorAsync is not needed with edge-to-edge mode
+					// The system automatically handles swipe-to-show behavior
+				} catch (error) {
+					console.log('Error hiding navigation bar:', error)
 				}
-			} catch (e) {
-				// ignore
 			}
+		}
+
+		const showNavigationBar = async () => {
+			if (Platform.OS === 'android') {
+				try {
+					// Show the navigation bar when leaving the screen
+					await NavigationBar.setVisibilityAsync('visible')
+				} catch (error) {
+					console.log('Error showing navigation bar:', error)
+				}
+			}
+		}
+
+		hideNavigationBar()
+
+		// Cleanup: show navigation bar when component unmounts
+		return () => {
+			showNavigationBar()
 		}
 	}, [])
 
@@ -127,21 +137,6 @@ const EditConcessionDetailsScreen: React.FC = () => {
 
 	const handleCancel = () => {
 		navigation.goBack()
-	}
-
-	const toggleFullscreen = async () => {
-		const next = !isFullscreen
-		setIsFullscreen(next)
-		try {
-			RNStatusBar.setHidden(next)
-			if (Platform.OS === 'android' && NavigationBar && NavigationBar.setVisibilityAsync) {
-				// set behavior so the nav can be revealed with a swipe
-				if (NavigationBar.setBehaviorAsync) await NavigationBar.setBehaviorAsync('overlay-swipe')
-				await NavigationBar.setVisibilityAsync(next ? 'hidden' : 'visible')
-			}
-		} catch (err) {
-			// ignore errors on unsupported platforms
-		}
 	}
 
 	// Loading state
@@ -208,23 +203,6 @@ const EditConcessionDetailsScreen: React.FC = () => {
 						/>
 					</View>
 
-					{/* Image URL Field */}
-					<View style={styles.inputGroup}>
-						<Text style={styles.label}>Image URL</Text>
-						<TextInput
-							style={styles.input}
-							placeholder="https://example.com/image.jpg"
-							placeholderTextColor={colors.placeholder}
-							value={imageUrl}
-							onChangeText={setImageUrl}
-							autoCapitalize="none"
-							keyboardType="url"
-						/>
-						<Text style={styles.hint}>
-							Enter a direct link to an image (optional)
-						</Text>
-					</View>
-
 					{/* Description Field */}
 					<View style={styles.inputGroup}>
 						<Text style={styles.label}>Description</Text>
@@ -235,12 +213,12 @@ const EditConcessionDetailsScreen: React.FC = () => {
 							value={description}
 							onChangeText={setDescription}
 							multiline
-							numberOfLines={4}
+							numberOfLines={7}
 							textAlignVertical="top"
-							maxLength={500}
+							maxLength={1500}
 						/>
 						<Text style={styles.charCount}>
-							{description.length}/500 characters
+							{description.length}/1500 characters
 						</Text>
 					</View>
 

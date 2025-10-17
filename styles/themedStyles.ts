@@ -3,6 +3,7 @@ import { ThemeColors } from '../types/theme'
 
 export { createConcessionStyles } from './concessionaire/concession'
 export { createEditConcessionStyles } from './concessionaire/editConcession'
+export { createPaymentMethodsStyles } from './concessionaire/paymentMethods'
 
 export const createLoginStyles = (colors: ThemeColors) =>
 	StyleSheet.create({

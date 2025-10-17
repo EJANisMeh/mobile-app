@@ -24,7 +24,6 @@ export const getConcession = (
     try
     {
       const response = await concessionApi.getConcession(concessionId)
-      console.log('getConcession response:', response)
       if (response.success && response.concession_data)
       {
         const concession = response.concession_data as ConcessionData

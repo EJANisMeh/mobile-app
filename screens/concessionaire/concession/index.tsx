@@ -13,9 +13,9 @@ import {
 	useConcessionContext,
 	useAuthContext,
 } from '../../../context'
-import { useAlertModal } from '../../../hooks'
+import { useAlertModal, useConfirmationModal } from '../../../hooks'
 import { createConcessionStyles } from '../../../styles/themedStyles'
-import { AlertModal } from '../../../components/modals'
+import { AlertModal, ConfirmationModal } from '../../../components/modals'
 
 const ConcessionScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -27,7 +27,17 @@ const ConcessionScreen: React.FC = () => {
 
 	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
 		useAlertModal()
-	const [isTogglingStatus, setIsTogglingStatus] = useState(false)
+
+	const {
+		visible: confirmVisible,
+		props: confirmProps,
+		showConfirmation,
+		hideConfirmation,
+	} = useConfirmationModal()
+
+	const [isTogglingStatus, setIsTogglingStatus] = useState<boolean>(false)
+	const [descExpanded, setDescExpanded] = useState(false)
+	const DESC_COLLAPSE_LENGTH = 240
 
 	// Load concession data on mount or when concession_id changes
 	useEffect(() => {
@@ -36,35 +46,51 @@ const ConcessionScreen: React.FC = () => {
 		}
 	}, [user?.concession_id])
 
-	// Handle status toggle
-	const handleStatusToggle = async () => {
+	// Handle status toggle with confirmation
+	const handleStatusToggle = () => {
 		if (!concession) return
 
-		setIsTogglingStatus(true)
+		const action = async () => {
+			setIsTogglingStatus(true)
 
-		try {
-			const result = await toggleConcessionStatus(concession.id)
+			try {
+				const result = await toggleConcessionStatus(concession.id)
 
-			if (result.success) {
-				const newStatus = concession.is_open
+				if (!result.success && !result.Success) {
+					showAlert({
+						title: 'Error',
+						message: result.error || error || 'Failed to update status',
+					})
+					return
+				}
+
+				const newStatus = !concession.is_open
+
 				showAlert({
 					title: 'Success',
 					message:
 						(result.message as string) ||
 						`Concession is now ${newStatus ? 'open' : 'closed'}`,
 				})
-			} else {
+			} catch (err) {
 				showAlert({
 					title: 'Error',
-					message: result.error || error || 'Failed to update status',
+					message:
+						err instanceof Error ? err.message : 'An unexpected error occurred',
 				})
+			} finally {
+				setIsTogglingStatus(false)
 			}
-		} catch (err) {
-			showAlert({
-				title: 'Error',
-				message: err instanceof Error ? err.message : 'Registration failed',
-			})
 		}
+
+		// Prompt user for confirmation before performing the action
+		showConfirmation({
+			title: 'Confirm status change',
+			message: `Are you sure you want to ${
+				concession.is_open ? 'close' : 'open'
+			} the concession?`,
+			onConfirm: action,
+		})
 	}
 
 	const handleEditDetails = () => {
@@ -72,10 +98,7 @@ const ConcessionScreen: React.FC = () => {
 	}
 
 	const handleManagePaymentMethods = () => {
-		showAlert({
-			title: 'Coming Soon',
-			message: 'Payment methods management is under development',
-		})
+		navigation.navigate('ManagePaymentMethods' as never)
 	}
 
 	// Loading state
@@ -116,9 +139,20 @@ const ConcessionScreen: React.FC = () => {
 				<View style={styles.headerSection}>
 					<Text style={styles.concessionName}>{concession?.name}</Text>
 					{concession?.description ? (
-						<Text style={styles.concessionDescription}>
-							{concession.description}
-						</Text>
+						<>
+							<Text
+								style={styles.concessionDescription}
+								numberOfLines={descExpanded ? undefined : 4}>
+								{concession.description}
+							</Text>
+							{concession.description.length > DESC_COLLAPSE_LENGTH && (
+								<TouchableOpacity onPress={() => setDescExpanded((s) => !s)}>
+									<Text style={styles.showMoreText}>
+										{descExpanded ? 'Show less' : 'Show more'}
+									</Text>
+								</TouchableOpacity>
+							)}
+						</>
 					) : (
 						<Text style={styles.noDescription}>No description available</Text>
 					)}
@@ -244,6 +278,18 @@ const ConcessionScreen: React.FC = () => {
 				title={title}
 				message={message}
 				buttons={[{ text: 'OK', onPress: handleConfirm }]}
+			/>
+
+			<ConfirmationModal
+				visible={confirmVisible}
+				onClose={hideConfirmation}
+				title={confirmProps.title}
+				message={confirmProps.message}
+				onConfirm={() => {
+					confirmProps.onConfirm()
+					hideConfirmation()
+				}}
+				onCancel={() => hideConfirmation()}
 			/>
 		</View>
 	)

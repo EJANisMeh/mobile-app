@@ -15,7 +15,7 @@ export const logout = async (req: express.Request, res: express.Response) => {
 	try {
 		const { userId } = req.body
 
-		// Log logout event (optional - for analytics/security)
+		
 		if (userId) {
 			console.log(`User ${userId} logged out at ${new Date().toISOString()}`)
 		}

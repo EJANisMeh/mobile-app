@@ -23,7 +23,6 @@ export const login = (
 		try {
 			// Call backend login endpoint via API
 			const response = await authApi.login(credentials)
-			console.log('Login response:', response)
 			if (!response.user || !response.success) {
 				setError(response.error || 'Login failed')
 				return {

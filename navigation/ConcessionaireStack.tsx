@@ -2,15 +2,16 @@ import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
 import { ConcessionaireStackParamList } from '../types/navigation'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 // Import screen components
 import MenuScreen from '../screens/concessionaire/menu'
 import OrdersScreen from '../screens/concessionaire/orders'
 import ConcessionScreen from '../screens/concessionaire/concession'
 import EditConcessionDetailsScreen from '../screens/concessionaire/concession/editDetails'
+import ManagePaymentMethodsScreen from '../screens/concessionaire/concession/managePaymentMethods'
 import NotificationsScreen from '../screens/concessionaire/notification'
 import ProfileScreen from '../screens/concessionaire/profile'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 const Tab = createBottomTabNavigator()
 const Stack = createStackNavigator<ConcessionaireStackParamList>()
@@ -31,6 +32,13 @@ const MainTabs: React.FC = () => {
 				options={{
 					title: 'Orders',
 					tabBarLabel: 'Orders',
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							name="food"
+							size={size}
+							color={color}
+						/>
+					),
 				}}
 			/>
 			<Tab.Screen
@@ -39,6 +47,13 @@ const MainTabs: React.FC = () => {
 				options={{
 					title: 'Menu',
 					tabBarLabel: 'Menu',
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							name="bulletin-board"
+							size={size}
+							color={color}
+						/>
+					),
 				}}
 			/>
 			<Tab.Screen
@@ -47,6 +62,13 @@ const MainTabs: React.FC = () => {
 				options={{
 					title: 'Concession',
 					tabBarLabel: 'Concession',
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							name="store"
+							size={size}
+							color={color}
+						/>
+					),
 				}}
 			/>
 			<Tab.Screen
@@ -55,6 +77,13 @@ const MainTabs: React.FC = () => {
 				options={{
 					title: 'Notifications',
 					tabBarLabel: 'Alerts',
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							name="bell"
+							size={size}
+							color={color}
+						/>
+					),
 				}}
 			/>
 			<Tab.Screen
@@ -63,6 +92,13 @@ const MainTabs: React.FC = () => {
 				options={{
 					title: 'Profile',
 					tabBarLabel: 'Profile',
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							name="account"
+							size={size}
+							color={color}
+						/>
+					),
 				}}
 			/>
 		</Tab.Navigator>
@@ -84,6 +120,15 @@ const ConcessionaireStack: React.FC = () => {
 				options={{
 					headerShown: true,
 					title: 'Edit Concession Details',
+					presentation: 'modal',
+				}}
+			/>
+			<Stack.Screen
+				name="ManagePaymentMethods"
+				component={ManagePaymentMethodsScreen}
+				options={{
+					headerShown: true,
+					title: 'Manage Payment Methods',
 					presentation: 'modal',
 				}}
 			/>

@@ -86,8 +86,24 @@ export const createEditConcessionStyles = (colors: ThemeColors) =>
 			color: colors.text,
 		},
 		textArea: {
-			height: 120,
+			height: 180,
 			paddingTop: 14,
+		},
+		textAreaCollapsed: {
+			height: 80,
+			paddingTop: 10,
+		},
+		textAreaExpanded: {
+			height: 220,
+			paddingTop: 14,
+		},
+		showMoreButton: {
+			marginTop: 8,
+		},
+		showMoreText: {
+			color: colors.primary,
+			fontWeight: '600',
+			textAlign: 'right',
 		},
 		hint: {
 			fontSize: 13,

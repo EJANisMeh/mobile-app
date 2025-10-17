@@ -72,7 +72,6 @@ export const login = async (req: express.Request, res: express.Response) => {
 		// Step 4: Check if email is verified
 		if (!user.emailVerified)
 		{
-			console.log('Email not verified for user:', user.email)
 			return res.json({
 				success: true,
 				user: userResponse,

@@ -34,6 +34,7 @@ export type ConcessionaireStackParamList = {
 	Orders: undefined
 	Concession: undefined
 	EditConcessionDetails: undefined
+	ManagePaymentMethods: undefined
 	ScanQR: undefined
 	Notifications: undefined
 	Profile: undefined

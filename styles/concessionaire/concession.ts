@@ -175,4 +175,10 @@ export const createConcessionStyles = (colors: ThemeColors) =>
 			fontWeight: '600',
 			marginLeft: 8,
 		},
+		showMoreText: {
+			color: colors.primary,
+			fontWeight: '600',
+			marginTop: 6,
+			textAlign: 'right',
+		},
 	})
