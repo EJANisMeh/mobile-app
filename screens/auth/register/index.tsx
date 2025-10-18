@@ -18,6 +18,8 @@ import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { createRegisterStyles } from '../../../styles/themedStyles'
+import DynamicScrollView from '../../../components/DynamicScrollView'
+import RegisterForm from '../../../components/auth/register'
 
 type RegisterScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,
@@ -32,7 +34,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 	const { isLoading, error, register } = useAuthContext()
 	const { colors } = useThemeContext()
 	const registerStyles = createRegisterStyles(colors)
-	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
+	const { visible, title, message, hideAlert, handleConfirm } = useAlertModal()
 	const responsive = useResponsiveDimensions()
 	const [formData, setFormData] = useState<RegisterData>({
 		email: '',
@@ -62,174 +64,61 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 		},
 	}
 
-	const handleRegister = async () => {
-		// Validate all fields
-		if (!formData.email || !formData.password || !formData.confirmPassword) {
-			showAlert({
-				title: 'Missing Information',
-				message: 'All fields are required',
-			})
-			return
-		}
-
-		// Validate password match
-		if (formData.password !== formData.confirmPassword) {
-			showAlert({
-				title: 'Password Mismatch',
-				message: 'Passwords do not match',
-			})
-			return
-		}
-
-		// Validate email format
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-		if (!emailRegex.test(formData.email)) {
-			showAlert({
-				title: 'Invalid Email',
-				message: 'Email format is incorrect',
-			})
-			return
-		}
-
-		// Validate password length
-		if (formData.password.length < 6) {
-			showAlert({
-				title: 'Weak Password',
-				message: 'Password must be at least 6 characters long',
-			})
-			return
-		}
-
-		const result = await register(formData)
-
-		if (!result.success) {
-			// Handle specific backend errors
-			if (error?.includes('already exists')) {
-				showAlert({
-					title: 'Email Already Exists',
-					message: 'Email already exists',
-				})
-			} else {
-				showAlert({
-					title: 'Registration Failed',
-					message: error || 'Failed to create account. Please try again.',
-				})
-			}
-		} else {
-			// Navigate to email verification screen on success
-			navigation.navigate('EmailVerification', {
-				userId: result.userId,
-				purpose: 'email-verification',
-			})
-		}
-	}
-
-	const updateField = (field: keyof RegisterData, value: string) => {
-		setFormData((prev: RegisterData) => ({ ...prev, [field]: value }))
-	}
-
 	return (
 		<>
-			<KeyboardAvoidingView
-				key={responsive.isLandscape ? 'landscape' : 'portrait'}
-				style={dynamicStyles.container}
-				behavior="padding"
-				enabled={true}
-				keyboardVerticalOffset={Platform.OS === 'android' ? -100 : 0}>
-				<ScrollView
-					contentContainerStyle={{ flexGrow: 1 }}
-					keyboardShouldPersistTaps="handled"
-					bounces={false}
-					showsVerticalScrollIndicator={false}>
-					<View style={registerStyles.content}>
-						<Text style={dynamicStyles.title}>Create Account</Text>
-						<Text style={dynamicStyles.subtitle}>Sign up to get started</Text>
+			<DynamicScrollView
+				styles={registerStyles}
+				autoCenter="center"
+				fallbackAlign="flex-start"
+				contentContainerStyle={{
+					alignItems: 'center',
+					paddingHorizontal: responsive.getResponsivePadding().horizontal,
+					paddingVertical: responsive.getResponsivePadding().vertical,
+				}}>
+				<View
+					style={[
+						registerStyles.content,
+						{
+							width: '100%' as const,
+							maxWidth: responsive.getContentMaxWidth(),
+						},
+					]}>
+					<Text style={dynamicStyles.title}>Create Account</Text>
+					<Text style={dynamicStyles.subtitle}>Sign up to get started</Text>
 
-						<View style={registerStyles.form}>
-							<TextInput
-								style={registerStyles.input}
-								placeholder="Email (yourEmail@example.com)"
-								value={formData.email}
-								onChangeText={(value) => updateField('email', value)}
-								keyboardType="email-address"
-								autoCapitalize="none"
-								autoCorrect={false}
-								editable={!isLoading}
-							/>
+					<RegisterForm
+						formData={formData}
+						setFormData={setFormData}
+						colors={colors}
+						registerStyles={registerStyles}
+					/>
 
-							<TextInput
-								style={registerStyles.input}
-								placeholder="Password"
-								value={formData.password}
-								onChangeText={(value) => updateField('password', value)}
-								secureTextEntry
-								autoCapitalize="none"
-								editable={!isLoading}
-							/>
-
-							<TextInput
-								style={registerStyles.input}
-								placeholder="Confirm Password"
-								value={formData.confirmPassword}
-								onChangeText={(value) => updateField('confirmPassword', value)}
-								secureTextEntry
-								autoCapitalize="none"
-								editable={!isLoading}
-							/>
-
-							<TouchableOpacity
+					<View style={registerStyles.footer}>
+						<Text style={registerStyles.footerText}>
+							Already have an account?{' '}
+						</Text>
+						<TouchableOpacity
+							onPress={() => navigation.navigate('Login')}
+							disabled={isLoading}
+							activeOpacity={isLoading ? 1 : 0.7}>
+							<Text
 								style={[
-									registerStyles.registerButton,
-									isLoading && registerStyles.disabledButton,
-								]}
-								onPress={handleRegister}
-								disabled={isLoading}
-								activeOpacity={isLoading ? 1 : 0.7}>
-								{isLoading ? (
-									<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-										<ActivityIndicator
-											size="small"
-											color={colors.textOnPrimary}
-											style={{ marginRight: 8 }}
-										/>
-										<Text style={registerStyles.registerButtonText}>
-											Creating Account...
-										</Text>
-									</View>
-								) : (
-									<Text style={registerStyles.registerButtonText}>
-										Create Account
-									</Text>
-								)}
-							</TouchableOpacity>
-						</View>
-
-						<View style={registerStyles.footer}>
-							<Text style={registerStyles.footerText}>
-								Already have an account?{' '}
+									registerStyles.signInText,
+									isLoading && { opacity: 0.5 },
+								]}>
+								Sign In
 							</Text>
-							<TouchableOpacity
-								onPress={() => navigation.navigate('Login')}
-								disabled={isLoading}
-								activeOpacity={isLoading ? 1 : 0.7}>
-								<Text
-									style={[
-										registerStyles.signInText,
-										isLoading && { opacity: 0.5 },
-									]}>
-									Sign In
-								</Text>
-							</TouchableOpacity>
-						</View>
+						</TouchableOpacity>
 					</View>
-				</ScrollView>
-			</KeyboardAvoidingView>
+				</View>
+			</DynamicScrollView>
 
 			<AlertModal
 				visible={visible}
 				onClose={hideAlert}
 				title={title}
 				message={message}
+				buttons={[{ text: 'OK', onPress: handleConfirm }]}
 			/>
 		</>
 	)

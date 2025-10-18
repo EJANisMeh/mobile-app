@@ -78,12 +78,45 @@ export const useResponsiveDimensions = () => {
 		large: getResponsiveValue(32, 24),
 	})
 
+	// Get percentage of screen width
+	const getWidthPercent = (percent: number) => {
+		return (orientation.width * percent) / 100
+	}
+
+	// Get percentage of screen height
+	const getHeightPercent = (percent: number) => {
+		return (orientation.height * percent) / 100
+	}
+
+	// Get responsive max width for forms/content (prevents stretching on tablets)
+	const getContentMaxWidth = () => {
+		if (orientation.width < 375) return orientation.width - 48 // small phones
+		if (orientation.width < 768) return orientation.width - 48 // normal phones
+		return Math.min(480, orientation.width * 0.6) // tablets: max 480 or 60% of width
+	}
+
+	// Get dynamic spacing based on screen size
+	const getResponsiveSpacing = () => {
+		const baseSpacing = orientation.width < 375 ? 12 : 16
+		return {
+			xs: baseSpacing * 0.5,
+			sm: baseSpacing,
+			md: baseSpacing * 1.5,
+			lg: baseSpacing * 2,
+			xl: baseSpacing * 3,
+		}
+	}
+
 	return {
 		...orientation,
 		getResponsiveValue,
 		getResponsivePadding,
 		getResponsiveFontSize,
 		getResponsiveMargin,
+		getWidthPercent,
+		getHeightPercent,
+		getContentMaxWidth,
+		getResponsiveSpacing,
 		// Quick access to common responsive values
 		isSmallScreen: orientation.width < 375,
 		isMediumScreen: orientation.width >= 375 && orientation.width < 768,
