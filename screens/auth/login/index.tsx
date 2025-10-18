@@ -2,13 +2,8 @@ import React, { useState } from 'react'
 import {
 	View,
 	Text,
-	TextInput,
 	TouchableOpacity,
-	KeyboardAvoidingView,
-	Platform,
 	Keyboard,
-	ScrollView,
-	Dimensions,
 	ActivityIndicator,
 } from 'react-native'
 import { useAuthContext, useThemeContext } from '../../../context'
@@ -19,6 +14,7 @@ import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { createLoginStyles } from '../../../styles/themedStyles'
 import DynamicScrollView from '../../../components/DynamicScrollView'
+import LoginForm from '../../../components/auth/login/LoginForm'
 
 type LoginScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,
@@ -30,10 +26,10 @@ interface LoginScreenProps {
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
-	const { isLoading, error, login } = useAuthContext()
+	const { isLoading} = useAuthContext()
 	const { colors } = useThemeContext()
 	const loginStyles = createLoginStyles(colors)
-	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
+	const { visible, title, message, hideAlert, handleConfirm } =
 		useAlertModal()
 	const responsive = useResponsiveDimensions()
 	const [credentials, setCredentials] = useState<LoginCredentials>({
@@ -72,70 +68,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 		},
 	}
 
-	const handleLogin = async () => {
-		if (!credentials.email || !credentials.password) {
-			showAlert({
-				title: 'Missing Information',
-				message: 'Please enter both email and password.',
-			})
-			return
-		}
 
-		const result = await login(credentials)
-
-		if (result.success) {
-			if (result.needsEmailVerification && result.userId) {
-				showAlert({
-					title: 'Email Verification Required',
-					message: result.message,
-					onConfirm: () => {
-						hideAlert()
-						setCredentials({ email: '', password: '' })
-						navigation.navigate('EmailVerification', {
-							userId: result.userId!,
-							purpose: 'email-verification',
-						})
-					},
-				})
-			}
-			// Check if user needs to complete profile
-			if (result.needsProfileCreation && result.userId && result.token) {
-				showAlert({
-					title: 'Welcome!',
-					message: 'Please complete your profile to continue.',
-					onConfirm: () => {
-						hideAlert()
-						setCredentials({ email: '', password: '' })
-						navigation.navigate('ProfileCreation', {
-							userId: result.userId!,
-						})
-					},
-				})
-			}
-			// Successful authentication will be handled by RootNavigator
-		} else {
-			// Error is already set in AuthContext, show it in alert
-			showAlert({
-				title: 'Login Failed',
-				message: error || 'Invalid email or password. Please try again.',
-			})
-		}
-	}
-
-	const handleEmailChange = (email: string) => {
-		setCredentials((prev: LoginCredentials) => ({ ...prev, email }))
-	}
-
-	const handlePasswordChange = (password: string) => {
-		setCredentials((prev: LoginCredentials) => ({ ...prev, password }))
-	}
-
-	const handleForgotPassword = () => {
-		Keyboard.dismiss()
-		setTimeout(() => {
-			navigation.navigate('ForgotPassword')
-		}, 100)
-	}
 
 	const handleRegisterNavigation = () => {
 		Keyboard.dismiss()
@@ -151,96 +84,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 					<Text style={dynamicStyles.title}>Hello User</Text>
 					<Text style={dynamicStyles.subtitle}>Sign in to your account</Text>
 
-					<View style={dynamicStyles.form}>
-						<TextInput
-							style={[
-								loginStyles.input,
-								isLoading && {
-									opacity: 0.6,
-									backgroundColor: colors.surface,
-								},
-							]}
-							placeholder="Email (yourEmail@example.com)"
-							value={credentials.email}
-							onChangeText={handleEmailChange}
-							keyboardType="email-address"
-							autoCapitalize="none"
-							autoCorrect={false}
-							textContentType="none"
-							importantForAutofill="no"
-							contextMenuHidden={true}
-							editable={!isLoading}
-						/>
-
-						<TextInput
-							style={[
-								loginStyles.input,
-								isLoading && {
-									opacity: 0.6,
-									backgroundColor: colors.surface,
-								},
-							]}
-							placeholder="Password"
-							value={credentials.password}
-							onChangeText={handlePasswordChange}
-							secureTextEntry
-							autoCapitalize="none"
-							textContentType="none"
-							importantForAutofill="no"
-							contextMenuHidden={true}
-							passwordRules=""
-							editable={!isLoading}
-						/>
-
-						<TouchableOpacity
-							style={[
-								loginStyles.loginButton,
-								isLoading && loginStyles.disabledButton,
-							]}
-							onPress={handleLogin}
-							disabled={isLoading}
-							activeOpacity={isLoading ? 1 : 0.7}>
-							{isLoading ? (
-								<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-									<ActivityIndicator
-										size="small"
-										color={colors.textOnPrimary}
-										style={{ marginRight: 8 }}
-									/>
-									<Text style={loginStyles.loginButtonText}>Signing In...</Text>
-								</View>
-							) : (
-								<Text style={loginStyles.loginButtonText}>Sign In</Text>
-							)}
-						</TouchableOpacity>
-
-						<TouchableOpacity
-							style={loginStyles.forgotPassword}
-							onPress={handleForgotPassword}
-							disabled={isLoading}
-							activeOpacity={isLoading ? 1 : 0.7}>
-							<Text
-								style={[
-									loginStyles.forgotPasswordText,
-									isLoading && { opacity: 0.5 },
-								]}>
-								Forgot Password?
-							</Text>
-						</TouchableOpacity>
-					</View>
-
-					<View style={loginStyles.footer}>
-						<Text style={loginStyles.footerText}>Don't have an account? </Text>
-						<TouchableOpacity
-							onPress={handleRegisterNavigation}
-							disabled={isLoading}
-							activeOpacity={isLoading ? 1 : 0.7}>
-							<Text
-								style={[loginStyles.signUpText, isLoading && { opacity: 0.5 }]}>
-								Sign Up
-							</Text>
-						</TouchableOpacity>
-					</View>
+					<LoginForm
+						credentials={credentials}
+						setCredentials={setCredentials}
+						isLoading={isLoading}
+						colors={colors}
+						loginStyles={loginStyles}
+						dynamicStyles={dynamicStyles}
+					/>
 				</View>
 			</DynamicScrollView>
 
