@@ -5,7 +5,7 @@ import {
 	StyleProp,
 	ViewStyle,
 } from 'react-native'
-import { LoginCredentials } from '../../../types'
+import { LoginCredentials, UseAlertModalProps } from '../../../types'
 import LoginInputs from './LoginInputs'
 import LoginButton from './LoginButton'
 import ForgotPasswordNavButton from './ForgotPasswordNavButton'
@@ -19,11 +19,12 @@ interface LoginFormProps {
 		surface: string
 		textOnPrimary: string
 	}
-	// style objects produced by createLoginStyles / dynamicStyles
 	loginStyles: Record<string, StyleProp<any>>
 	dynamicStyles: {
 		form: StyleProp<ViewStyle>
 	}
+	showAlert: (opts: UseAlertModalProps) => void
+	hideAlert: () => void
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
@@ -32,6 +33,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
 	colors,
 	loginStyles,
 	dynamicStyles,
+	showAlert,
+	hideAlert
 }) => {
 	return (
 		<View style={dynamicStyles.form}>
@@ -50,6 +53,8 @@ const LoginForm: React.FC<LoginFormProps> = ({
 				setCredentials={setCredentials}
 				colors={colors}
 				loginStyles={loginStyles}
+				showAlert={showAlert}
+				hideAlert={hideAlert}
 			/>
 
 			<ForgotPasswordNavButton loginStyles={loginStyles} />

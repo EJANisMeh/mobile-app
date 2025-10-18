@@ -17,18 +17,19 @@ export const register = (
 			// Call backend register endpoint via API
 			const response = await authApi.register(userData)
 
-			if (response.success) {
-				return {
-					success: true,
-					userId: response.userId as number,
-					needsEmailVerification: response.needsEmailVerification,
-				}
-			} else {
+			if (!response.success) {
 				setError(response.error || 'Registration failed')
 				return {
 					success: false,
 					error: response.error || 'Registration failed',
 				}
+			}
+
+			return {
+				success: true,
+				userId: response.userId as number,
+				needsEmailVerification: response.needsEmailVerification,
+				message: response.message,
 			}
 		} catch (error) {
 			const errorMsg =

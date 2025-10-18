@@ -34,10 +34,20 @@ export const register = async (req: express.Request, res: express.Response) => {
 		}
 
 		// Validate password length
-		if (password.length < 6) {
+		if (password.length < 8) {
 			return res.status(400).json({
 				success: false,
-				error: 'Password must be at least 6 characters long',
+				error: 'Password must be at least 8 characters long',
+			})
+		}
+
+		// Validate password complexity: at least one uppercase, one lowercase, and one number
+		const complexityRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/
+		console.log(`Complexity test for password: ${password} :`, complexityRegex.test(password))
+		if (!complexityRegex.test(password)) {
+			return res.status(400).json({
+				success: false,
+				error: 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
 			})
 		}
 
@@ -78,7 +88,7 @@ export const register = async (req: express.Request, res: express.Response) => {
 
 		const user = userResult.data
 
-		res.status(201).json({
+		return res.status(201).json({
 			success: true,
 			userId: user.id,
 			needsEmailVerification: true, // Flag that email verification is needed
@@ -86,7 +96,7 @@ export const register = async (req: express.Request, res: express.Response) => {
 		})
 	} catch (error) {
 		console.error('Registration error:', error)
-		res.status(500).json({
+		return res.status(500).json({
 			success: false,
 			error: 'Internal server error during registration',
 		})

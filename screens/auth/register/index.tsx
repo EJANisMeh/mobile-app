@@ -31,10 +31,10 @@ interface RegisterScreenProps {
 }
 
 const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
-	const { isLoading, error, register } = useAuthContext()
+	const { isLoading } = useAuthContext()
 	const { colors } = useThemeContext()
 	const registerStyles = createRegisterStyles(colors)
-	const { visible, title, message, hideAlert, handleConfirm } = useAlertModal()
+	const { visible, title, message, showAlert, hideAlert, handleConfirm } = useAlertModal()
 	const responsive = useResponsiveDimensions()
 	const [formData, setFormData] = useState<RegisterData>({
 		email: '',
@@ -91,6 +91,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 						setFormData={setFormData}
 						colors={colors}
 						registerStyles={registerStyles}
+						showAlert={showAlert}
 					/>
 
 					<View style={registerStyles.footer}>

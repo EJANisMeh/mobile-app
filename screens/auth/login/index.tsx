@@ -23,7 +23,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
 	const { isLoading } = useAuthContext()
 	const { colors } = useThemeContext()
 	const loginStyles = createLoginStyles(colors)
-	const { visible, title, message, hideAlert, handleConfirm } = useAlertModal()
+	const { visible, title, message, showAlert, hideAlert, handleConfirm } = useAlertModal()
 	const responsive = useResponsiveDimensions()
 	const [credentials, setCredentials] = useState<LoginCredentials>({
 		email: '',
@@ -79,6 +79,8 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
 						colors={colors}
 						loginStyles={loginStyles}
 						dynamicStyles={dynamicStyles}
+						showAlert={showAlert}
+						hideAlert={hideAlert}
 					/>
 				</View>
 			</DynamicScrollView>

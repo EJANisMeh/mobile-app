@@ -8,20 +8,20 @@ import {
 import { useAuthContext } from '../../../context'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
 
-interface RegisterButtonProps {
+interface RegisteNavButtonProps {
 	loginStyles: Record<string, StyleProp<any>>
 }
 
-const RegisterButton: React.FC<RegisterButtonProps> = ({ loginStyles }) => {
+const RegisterButton: React.FC<RegisteNavButtonProps> = ({ loginStyles }) => {
 	const { isLoading } = useAuthContext()
-  const navigation = useAuthNavigation()
-  
-  const handleRegisterNavigation = () => {
-    Keyboard.dismiss()
-    setTimeout(() => {
-      navigation.navigate('Register')
-    }, 100)
-  }
+	const navigation = useAuthNavigation()
+
+	const handleRegisterNavigation = () => {
+		Keyboard.dismiss()
+		setTimeout(() => {
+			navigation.navigate('Register')
+		}, 100)
+	}
 
 	return (
 		<TouchableOpacity

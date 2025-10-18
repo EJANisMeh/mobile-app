@@ -6,8 +6,7 @@ import {
 	ActivityIndicator,
 	StyleProp,
 } from 'react-native'
-import { LoginCredentials } from '../../../types'
-import { useAlertModal } from '../../../hooks'
+import { LoginCredentials, UseAlertModalProps } from '../../../types'
 import { useAuthContext } from '../../../context'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
 
@@ -16,6 +15,8 @@ interface LoginButtonProps {
 	setCredentials: React.Dispatch<React.SetStateAction<LoginCredentials>>
 	colors: { surface: string; textOnPrimary: string }
 	loginStyles: Record<string, StyleProp<any>>
+	showAlert: (opts: UseAlertModalProps) => void
+	hideAlert: () => void
 }
 
 const LoginButton: React.FC<LoginButtonProps> = ({
@@ -23,8 +24,9 @@ const LoginButton: React.FC<LoginButtonProps> = ({
 	setCredentials,
 	colors,
 	loginStyles,
+	showAlert,
+	hideAlert
 }) => {
-	const { showAlert, hideAlert } = useAlertModal()
 	const { isLoading, error, login } = useAuthContext()
 	const navigation = useAuthNavigation()
 
