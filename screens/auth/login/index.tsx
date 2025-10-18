@@ -18,6 +18,7 @@ import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { createLoginStyles } from '../../../styles/themedStyles'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 
 type LoginScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,
@@ -145,121 +146,103 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
 	return (
 		<>
-			<KeyboardAvoidingView
-				key={responsive.isLandscape ? 'landscape' : 'portrait'}
-				style={dynamicStyles.container}
-				behavior="padding"
-				enabled={true}
-				keyboardVerticalOffset={Platform.OS === 'android' ? -100 : 0}>
-				<ScrollView
-					contentContainerStyle={{ flexGrow: 1 }}
-					keyboardShouldPersistTaps="handled"
-					bounces={false}
-					showsVerticalScrollIndicator={false}>
-					<View style={dynamicStyles.content}>
-						<Text style={dynamicStyles.title}>Hello User</Text>
-						<Text style={dynamicStyles.subtitle}>Sign in to your account</Text>
+			<DynamicScrollView styles={loginStyles}>
+				<View style={dynamicStyles.content}>
+					<Text style={dynamicStyles.title}>Hello User</Text>
+					<Text style={dynamicStyles.subtitle}>Sign in to your account</Text>
 
-						<View style={dynamicStyles.form}>
-							<TextInput
+					<View style={dynamicStyles.form}>
+						<TextInput
+							style={[
+								loginStyles.input,
+								isLoading && {
+									opacity: 0.6,
+									backgroundColor: colors.surface,
+								},
+							]}
+							placeholder="Email (yourEmail@example.com)"
+							value={credentials.email}
+							onChangeText={handleEmailChange}
+							keyboardType="email-address"
+							autoCapitalize="none"
+							autoCorrect={false}
+							textContentType="none"
+							importantForAutofill="no"
+							contextMenuHidden={true}
+							editable={!isLoading}
+						/>
+
+						<TextInput
+							style={[
+								loginStyles.input,
+								isLoading && {
+									opacity: 0.6,
+									backgroundColor: colors.surface,
+								},
+							]}
+							placeholder="Password"
+							value={credentials.password}
+							onChangeText={handlePasswordChange}
+							secureTextEntry
+							autoCapitalize="none"
+							textContentType="none"
+							importantForAutofill="no"
+							contextMenuHidden={true}
+							passwordRules=""
+							editable={!isLoading}
+						/>
+
+						<TouchableOpacity
+							style={[
+								loginStyles.loginButton,
+								isLoading && loginStyles.disabledButton,
+							]}
+							onPress={handleLogin}
+							disabled={isLoading}
+							activeOpacity={isLoading ? 1 : 0.7}>
+							{isLoading ? (
+								<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+									<ActivityIndicator
+										size="small"
+										color={colors.textOnPrimary}
+										style={{ marginRight: 8 }}
+									/>
+									<Text style={loginStyles.loginButtonText}>Signing In...</Text>
+								</View>
+							) : (
+								<Text style={loginStyles.loginButtonText}>Sign In</Text>
+							)}
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={loginStyles.forgotPassword}
+							onPress={handleForgotPassword}
+							disabled={isLoading}
+							activeOpacity={isLoading ? 1 : 0.7}>
+							<Text
 								style={[
-									loginStyles.input,
-									isLoading && {
-										opacity: 0.6,
-										backgroundColor: colors.surface,
-									},
-								]}
-								placeholder="Email (yourEmail@example.com)"
-								value={credentials.email}
-								onChangeText={handleEmailChange}
-								keyboardType="email-address"
-								autoCapitalize="none"
-								autoCorrect={false}
-								textContentType="none"
-								importantForAutofill="no"
-								contextMenuHidden={true}
-								editable={!isLoading}
-							/>
-
-							<TextInput
-								style={[
-									loginStyles.input,
-									isLoading && {
-										opacity: 0.6,
-										backgroundColor: colors.surface,
-									},
-								]}
-								placeholder="Password"
-								value={credentials.password}
-								onChangeText={handlePasswordChange}
-								secureTextEntry
-								autoCapitalize="none"
-								textContentType="none"
-								importantForAutofill="no"
-								contextMenuHidden={true}
-								passwordRules=""
-								editable={!isLoading}
-							/>
-
-							<TouchableOpacity
-								style={[
-									loginStyles.loginButton,
-									isLoading && loginStyles.disabledButton,
-								]}
-								onPress={handleLogin}
-								disabled={isLoading}
-								activeOpacity={isLoading ? 1 : 0.7}>
-								{isLoading ? (
-									<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-										<ActivityIndicator
-											size="small"
-											color={colors.textOnPrimary}
-											style={{ marginRight: 8 }}
-										/>
-										<Text style={loginStyles.loginButtonText}>
-											Signing In...
-										</Text>
-									</View>
-								) : (
-									<Text style={loginStyles.loginButtonText}>Sign In</Text>
-								)}
-							</TouchableOpacity>
-
-							<TouchableOpacity
-								style={loginStyles.forgotPassword}
-								onPress={handleForgotPassword}
-								disabled={isLoading}
-								activeOpacity={isLoading ? 1 : 0.7}>
-								<Text
-									style={[
-										loginStyles.forgotPasswordText,
-										isLoading && { opacity: 0.5 },
-									]}>
-									Forgot Password?
-								</Text>
-							</TouchableOpacity>
-						</View>
-
-						<View style={loginStyles.footer}>
-							<Text style={loginStyles.footerText}>
-								Don't have an account?{' '}
+									loginStyles.forgotPasswordText,
+									isLoading && { opacity: 0.5 },
+								]}>
+								Forgot Password?
 							</Text>
-							<TouchableOpacity
-								onPress={handleRegisterNavigation}
-								disabled={isLoading}
-								activeOpacity={isLoading ? 1 : 0.7}>
-								<Text
-									style={[
-										loginStyles.signUpText,
-										isLoading && { opacity: 0.5 },
-									]}>
-									Sign Up
-								</Text>
-							</TouchableOpacity>
-						</View>
+						</TouchableOpacity>
 					</View>
-				</ScrollView>
-			</KeyboardAvoidingView>
+
+					<View style={loginStyles.footer}>
+						<Text style={loginStyles.footerText}>Don't have an account? </Text>
+						<TouchableOpacity
+							onPress={handleRegisterNavigation}
+							disabled={isLoading}
+							activeOpacity={isLoading ? 1 : 0.7}>
+							<Text
+								style={[loginStyles.signUpText, isLoading && { opacity: 0.5 }]}>
+								Sign Up
+							</Text>
+						</TouchableOpacity>
+					</View>
+				</View>
+			</DynamicScrollView>
 
 			<AlertModal
 				visible={visible}
