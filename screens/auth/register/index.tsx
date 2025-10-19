@@ -20,6 +20,7 @@ import type { StackNavigationProp } from '@react-navigation/stack'
 import { createRegisterStyles } from '../../../styles/themedStyles'
 import DynamicScrollView from '../../../components/DynamicScrollView'
 import RegisterForm from '../../../components/auth/register'
+import BackToLoginButton from '../../../components/auth/register/BackToLoginButton'
 
 type RegisterScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,
@@ -98,18 +99,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 						<Text style={registerStyles.footerText}>
 							Already have an account?{' '}
 						</Text>
-						<TouchableOpacity
-							onPress={() => navigation.navigate('Login')}
-							disabled={isLoading}
-							activeOpacity={isLoading ? 1 : 0.7}>
-							<Text
-								style={[
-									registerStyles.signInText,
-									isLoading && { opacity: 0.5 },
-								]}>
-								Sign In
-							</Text>
-						</TouchableOpacity>
+						<BackToLoginButton registerStyles={registerStyles} />
 					</View>
 				</View>
 			</DynamicScrollView>
