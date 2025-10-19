@@ -1,5 +1,19 @@
 import { useState, useCallback } from 'react'
-import { UseAlertModalProps } from '../../types/'
+
+export interface UseAlertModalProps {
+  title: string
+  message: string
+  onConfirm?: () => void
+}
+
+export interface UseAlertModalReturn {
+  visible: boolean
+  title: string
+  message: string
+  showAlert: (props: UseAlertModalProps) => void
+  hideAlert: () => void
+  handleConfirm: () => void
+}
 
 export const useAlertModal = () =>
 {
