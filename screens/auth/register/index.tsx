@@ -12,12 +12,16 @@ import {
 	ActivityIndicator,
 } from 'react-native'
 import { useAuthContext, useThemeContext } from '../../../context'
-import { RegisterData } from '../../../types'
-import { AlertModal } from '../../../components'
+// hooks
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
+// types
 import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
+import { RegisterData } from '../../../types'
+//styles
 import { createRegisterStyles } from '../../../styles/themedStyles'
+// components
+import { AlertModal } from '../../../components'
 import DynamicScrollView from '../../../components/DynamicScrollView'
 import RegisterForm from '../../../components/auth/register'
 import BackToLoginButton from '../../../components/auth/register/BackToLoginButton'
@@ -31,11 +35,11 @@ interface RegisterScreenProps {
 	navigation: RegisterScreenNavigationProp
 }
 
-const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
-	const { isLoading } = useAuthContext()
+const RegisterScreen: React.FC<RegisterScreenProps> = () => {
 	const { colors } = useThemeContext()
 	const registerStyles = createRegisterStyles(colors)
-	const { visible, title, message, showAlert, hideAlert, handleConfirm } = useAlertModal()
+	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
+		useAlertModal()
 	const responsive = useResponsiveDimensions()
 	const [formData, setFormData] = useState<RegisterData>({
 		email: '',
