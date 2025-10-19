@@ -5,7 +5,8 @@ import {
 	StyleProp,
 	ViewStyle,
 } from 'react-native'
-import { LoginCredentials, UseAlertModalProps } from '../../../types'
+import { LoginCredentials } from '../../../types'
+import { UseAlertModalProps } from '../../../hooks/useModals/types'
 import LoginInputs from './LoginInputs'
 import LoginButton from './LoginButton'
 import ForgotPasswordNavButton from './ForgotPasswordNavButton'

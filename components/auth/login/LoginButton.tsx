@@ -6,7 +6,8 @@ import {
 	ActivityIndicator,
 	StyleProp,
 } from 'react-native'
-import { LoginCredentials, UseAlertModalProps } from '../../../types'
+import { LoginCredentials } from '../../../types'
+import { UseAlertModalProps } from '../../../hooks/useModals/types'
 import { useAuthContext } from '../../../context'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
 

@@ -4,7 +4,8 @@ import {
 	StyleProp,
 } from 'react-native'
 
-import { RegisterData, UseAlertModalProps } from '../../../types'
+import { RegisterData } from '../../../types'
+import { UseAlertModalProps } from '../../../hooks/useModals/types'
 import RegisterInputs from './RegisterInputs'
 import RegisterButton from './RegisterButton'
 

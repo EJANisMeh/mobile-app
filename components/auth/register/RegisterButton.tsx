@@ -9,7 +9,7 @@ import {
 import type { RegisterData } from '../../../types'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
 import { useAuthContext } from '../../../context'
-import { UseAlertModalProps } from '../../../types/hookTypes/useModals'
+import { UseAlertModalProps } from '../../../hooks/useModals/types'
   
 interface RegisterButtonProps {
 	formData: RegisterData
