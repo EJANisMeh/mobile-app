@@ -7,7 +7,7 @@ import {
 	StyleProp,
 } from 'react-native'
 import { LoginCredentials } from '../../../types'
-import { UseAlertModalProps } from '../../../hooks/useModals/types'
+import { UseAlertModalType } from '../../../hooks/useModals/types'
 import { useAuthContext } from '../../../context'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
 
@@ -16,8 +16,8 @@ interface LoginButtonProps {
 	setCredentials: React.Dispatch<React.SetStateAction<LoginCredentials>>
 	colors: { surface: string; textOnPrimary: string }
 	loginStyles: Record<string, StyleProp<any>>
-	showAlert: (opts: UseAlertModalProps) => void
-	hideAlert: () => void
+	showAlert: UseAlertModalType['showAlert']
+	hideAlert: UseAlertModalType['hideAlert']
 }
 
 const LoginButton: React.FC<LoginButtonProps> = ({
@@ -26,7 +26,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({
 	colors,
 	loginStyles,
 	showAlert,
-	hideAlert
+	hideAlert,
 }) => {
 	const { isLoading, error, login } = useAuthContext()
 	const navigation = useAuthNavigation()
@@ -53,10 +53,9 @@ const LoginButton: React.FC<LoginButtonProps> = ({
 			showAlert({
 				title: 'Email Verification Required',
 				message: result.message,
-				onConfirm: () => {
-					hideAlert()
+				onClose: () => {
+					// clear credentials and navigate when the alert is closed (button or back)
 					setCredentials({ email: '', password: '' })
-
 					navigation.navigate('EmailVerification', {
 						userId: result.userId!,
 						purpose: 'email-verification',
@@ -69,8 +68,7 @@ const LoginButton: React.FC<LoginButtonProps> = ({
 			showAlert({
 				title: 'Welcome!',
 				message: 'Please complete your profile to continue.',
-				onConfirm: () => {
-					hideAlert()
+				onClose: () => {
 					setCredentials({ email: '', password: '' })
 					navigation.navigate('ProfileCreation', {
 						userId: result.userId!,
