@@ -38,7 +38,7 @@ interface RegisterScreenProps {
 const RegisterScreen: React.FC<RegisterScreenProps> = () => {
 	const { colors } = useThemeContext()
 	const registerStyles = createRegisterStyles(colors)
-	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
+	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
 	const responsive = useResponsiveDimensions()
 	const [formData, setFormData] = useState<RegisterData>({
@@ -113,7 +113,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = () => {
 				onClose={hideAlert}
 				title={title}
 				message={message}
-				buttons={[{ text: 'OK', onPress: handleConfirm }]}
+				buttons={[{ text: 'OK', onPress: handleClose }]}
 			/>
 		</>
 	)

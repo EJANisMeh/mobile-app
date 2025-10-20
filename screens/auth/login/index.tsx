@@ -23,7 +23,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
 	const { isLoading } = useAuthContext()
 	const { colors } = useThemeContext()
 	const loginStyles = createLoginStyles(colors)
-	const { visible, title, message, showAlert, hideAlert, handleConfirm } = useAlertModal()
+	const { visible, title, message, showAlert, hideAlert, handleClose } = useAlertModal()
 	const responsive = useResponsiveDimensions()
 	const [credentials, setCredentials] = useState<LoginCredentials>({
 		email: '',
@@ -90,7 +90,7 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
 				onClose={hideAlert}
 				title={title}
 				message={message}
-				buttons={[{ text: 'OK', onPress: handleConfirm }]}
+				buttons={[{ text: 'OK', onPress: handleClose }]}
 			/>
 		</>
 	)

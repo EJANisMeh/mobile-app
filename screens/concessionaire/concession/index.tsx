@@ -25,7 +25,7 @@ const ConcessionScreen: React.FC = () => {
 	const navigation = useNavigation()
 	const styles = createConcessionStyles(colors)
 
-	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
+	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
 
 	const {
@@ -277,7 +277,7 @@ const ConcessionScreen: React.FC = () => {
 				onClose={hideAlert}
 				title={title}
 				message={message}
-				buttons={[{ text: 'OK', onPress: handleConfirm }]}
+				buttons={[{ text: 'OK', onPress: handleClose }]}
 			/>
 
 			<ConfirmationModal

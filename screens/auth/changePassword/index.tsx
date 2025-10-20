@@ -44,7 +44,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 		new: false,
 		confirm: false,
 	})
-	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
+	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
 	const { resetPassword, error } = useAuthContext()
 	const [localIsLoading, setLocalIsLoading] = useState(false)
@@ -116,7 +116,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 			showAlert({
 				title: 'Success',
 				message: 'Your password has been changed successfully.',
-				onConfirm: () => {
+				onClose: () => {
 					navigation.reset({
 						index: 0,
 						routes: [{ name: 'Login' }],
@@ -224,7 +224,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 				onClose={hideAlert}
 				title={title}
 				message={message}
-				buttons={[{ text: 'OK', onPress: handleConfirm }]}
+				buttons={[{ text: 'OK', onPress: handleClose }]}
 			/>
 		</>
 	)

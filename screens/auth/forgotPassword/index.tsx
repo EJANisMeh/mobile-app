@@ -34,7 +34,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 	const responsive = useResponsiveDimensions()
 	const [email, setEmail] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
-	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
+	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
 
 	const handleSendResetEmail = async () => {
@@ -74,7 +74,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 			showAlert({
 				title: resetTitle,
 				message: resetMsg,
-				onConfirm: () => {
+				onClose: () => {
 					hideAlert()
 					// Navigate to EmailVerification with password-reset purpose
 					navigation.navigate('EmailVerification', {
@@ -143,7 +143,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 				onClose={hideAlert}
 				title={title}
 				message={message}
-				buttons={[{ text: 'Confirm', onPress: handleConfirm }]}
+				buttons={[{ text: 'Confirm', onPress: handleClose }]}
 			/>
 		</>
 	)

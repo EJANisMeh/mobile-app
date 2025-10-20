@@ -30,7 +30,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	const [isResending, setIsResending] = useState(false)
 	const [canResend, setCanResend] = useState(false)
 	const [countdown, setCountdown] = useState(30)
-	const { visible, title, message, showAlert, hideAlert, handleConfirm } =
+	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
 	const { user, logout, verifyEmail } = useAuthContext()
 
@@ -101,7 +101,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 				showAlert({
 					title: 'Success',
 					message: 'Email verified! You can now reset your password.',
-							onConfirm: () => {
+					onClose: () => {
 								hideAlert()
 								navigation.navigate('ChangePassword', { email: email! })
 							},
@@ -125,7 +125,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 					showAlert({
 						title: 'Success',
 						message: 'Your email has been verified successfully!',
-						onConfirm: () => {
+						onClose: () => {
 							hideAlert()
 							navigation.navigate('Login')
 						},
@@ -329,7 +329,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 				onClose={hideAlert}
 				title={title}
 				message={message}
-				buttons={[{ text: 'OK', onPress: handleConfirm }]}
+				buttons={[{ text: 'OK', onPress: handleClose }]}
 			/>
 		</>
 	)
