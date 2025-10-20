@@ -6,7 +6,7 @@ import {
 	ViewStyle,
 } from 'react-native'
 import { LoginCredentials } from '../../../types'
-import { UseAlertModalProps } from '../../../hooks/useModals/types'
+import { UseAlertModalType } from '../../../hooks/useModals/types'
 import LoginInputs from './LoginInputs'
 import LoginButton from './LoginButton'
 import ForgotPasswordNavButton from './ForgotPasswordNavButton'
@@ -24,8 +24,8 @@ interface LoginFormProps {
 	dynamicStyles: {
 		form: StyleProp<ViewStyle>
 	}
-	showAlert: (opts: UseAlertModalProps) => void
-	hideAlert: () => void
+	showAlert: UseAlertModalType['showAlert']
+	hideAlert: UseAlertModalType['hideAlert']
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({

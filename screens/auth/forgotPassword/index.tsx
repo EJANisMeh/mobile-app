@@ -14,7 +14,7 @@ import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { createForgotPasswordStyles } from '../../../styles/themedStyles'
-import { authApi } from '../../../services/api'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 
 type ForgotPasswordScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,
@@ -60,13 +60,13 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 		try {
 			// Call backend to check if email exists and send reset email
 			const success = await requestPasswordReset(email)
-			const resetTitle = "Password Reset"
-			const resetMsg = "Password reset request sent to the email"
+			const resetTitle = 'Password Reset'
+			const resetMsg = 'Password reset request sent to the email'
 
 			if (!success) {
 				showAlert({
 					title: resetTitle,
-					message: resetMsg
+					message: resetMsg,
 				})
 				return
 			}
@@ -95,59 +95,48 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 
 	return (
 		<>
-			<KeyboardAvoidingView
-				key={responsive.isLandscape ? 'landscape' : 'portrait'}
-				style={forgotPasswordStyles.container}
-				behavior="padding"
-				enabled={true}
-				keyboardVerticalOffset={Platform.OS === 'android' ? -100 : 0}>
-				<ScrollView
-					contentContainerStyle={{ flexGrow: 1 }}
-					keyboardShouldPersistTaps="handled"
-					bounces={false}
-					showsVerticalScrollIndicator={false}>
-					<View style={forgotPasswordStyles.content}>
-						<Text style={forgotPasswordStyles.title}>Reset Password</Text>
-						<Text style={forgotPasswordStyles.subtitle}>
-							Enter your email address and we'll send you instructions to reset
-							your password.
-						</Text>
+			<DynamicScrollView>
+				<View style={forgotPasswordStyles.content}>
+					<Text style={forgotPasswordStyles.title}>Reset Password</Text>
+					<Text style={forgotPasswordStyles.subtitle}>
+						Enter your email address and we'll send you instructions to reset
+						your password.
+					</Text>
 
-						<View style={forgotPasswordStyles.form}>
-							<TextInput
-								style={forgotPasswordStyles.input}
-								placeholder="Email Address"
-								value={email}
-								onChangeText={setEmail}
-								keyboardType="email-address"
-								autoCapitalize="none"
-								autoCorrect={false}
-								editable={!isLoading}
-							/>
+					<View style={forgotPasswordStyles.form}>
+						<TextInput
+							style={forgotPasswordStyles.input}
+							placeholder="Email Address"
+							value={email}
+							onChangeText={setEmail}
+							keyboardType="email-address"
+							autoCapitalize="none"
+							autoCorrect={false}
+							editable={!isLoading}
+						/>
 
-							<TouchableOpacity
-								style={[
-									forgotPasswordStyles.submitButton,
-									isLoading && forgotPasswordStyles.disabledButton,
-								]}
-								onPress={handleSendResetEmail}
-								disabled={isLoading}>
-								<Text style={forgotPasswordStyles.submitButtonText}>
-									{isLoading ? 'Sending...' : 'Send Reset Instructions'}
-								</Text>
-							</TouchableOpacity>
+						<TouchableOpacity
+							style={[
+								forgotPasswordStyles.submitButton,
+								isLoading && forgotPasswordStyles.disabledButton,
+							]}
+							onPress={handleSendResetEmail}
+							disabled={isLoading}>
+							<Text style={forgotPasswordStyles.submitButtonText}>
+								{isLoading ? 'Sending...' : 'Send Reset Instructions'}
+							</Text>
+						</TouchableOpacity>
 
-							<TouchableOpacity
-								style={forgotPasswordStyles.backButton}
-								onPress={() => navigation.goBack()}>
-								<Text style={forgotPasswordStyles.backButtonText}>
-									Back to Login
-								</Text>
-							</TouchableOpacity>
-						</View>
+						<TouchableOpacity
+							style={forgotPasswordStyles.backButton}
+							onPress={() => navigation.goBack()}>
+							<Text style={forgotPasswordStyles.backButtonText}>
+								Back to Login
+							</Text>
+						</TouchableOpacity>
 					</View>
-				</ScrollView>
-			</KeyboardAvoidingView>
+				</View>
+			</DynamicScrollView>
 
 			<AlertModal
 				visible={visible}

@@ -35,9 +35,16 @@ export const login = (
 			// If so, don't store auth data yet - just return the info
 
 			if (response.needsEmailVerification || response.needsProfileCreation) {
-				return response
+				console.log(response)
+				return {
+					success: true,
+					userId: response.user.id,
+					needsEmailVerification: response.needsEmailVerification,
+					message: response.message,
+				}
 			}
 
+			// Ensure user login is complete - token must be present
 			if (!response.token) {
 				setError('No token received')
 				return {

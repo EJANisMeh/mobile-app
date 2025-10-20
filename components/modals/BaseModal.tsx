@@ -1,4 +1,5 @@
 import React from 'react'
+import { ModalProps } from './types'
 import {
 	Modal,
 	View,
@@ -8,10 +9,7 @@ import {
 	Dimensions,
 } from 'react-native'
 
-interface BaseModalProps {
-	visible: boolean
-	onClose: () => void
-	title: string
+interface BaseModalProps extends ModalProps {
 	children: React.ReactNode
 	showCloseButton?: boolean
 }
