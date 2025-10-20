@@ -1,1 +1,1 @@
-export { UseAlertModalProps, UseAlertModalReturn } from '../useAlertModal'
+export { UseAlertModalProps, UseAlertModalType } from '../useAlertModal'
