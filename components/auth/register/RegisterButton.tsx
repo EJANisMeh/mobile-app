@@ -9,14 +9,14 @@ import {
 import type { RegisterData } from '../../../types'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
 import { useAuthContext } from '../../../context'
-import { UseAlertModalProps } from '../../../hooks/useModals/types'
+import { UseAlertModalType } from '../../../hooks/useModals/types'
   
 interface RegisterButtonProps {
 	formData: RegisterData
 	colors: { textOnPrimary: string }
 	buttonStyles: Record<string, StyleProp<any>>
-	showAlert: (opts: UseAlertModalProps) => void
-	hideAlert?: () => void
+	showAlert: UseAlertModalType['showAlert']
+	hideAlert?: UseAlertModalType['hideAlert']
 }
 
 const RegisterButton: React.FC<RegisterButtonProps> = ({
