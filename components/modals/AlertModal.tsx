@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import BaseModal from './BaseModal'
+import { ModalProps } from './types'
 
 interface AlertModalButton {
 	text: string
@@ -8,10 +9,7 @@ interface AlertModalButton {
 	style?: 'default' | 'cancel' | 'destructive'
 }
 
-interface AlertModalProps {
-	visible: boolean
-	onClose: () => void
-	title: string
+interface AlertModalProps extends ModalProps {
 	message?: string
 	buttons?: AlertModalButton[]
 }
