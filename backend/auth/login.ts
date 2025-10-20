@@ -76,7 +76,7 @@ export const login = async (req: express.Request, res: express.Response) => {
 				success: true,
 				user: userResponse,
 				needsEmailVerification: true,
-				message: 'Login successful - Please verify your email',
+				message: 'Email is still not verified - Please verify your email',
 			})
 		}
 
