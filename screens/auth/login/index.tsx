@@ -22,55 +22,24 @@ interface LoginScreenProps {
 const LoginScreen: React.FC<LoginScreenProps> = () => {
 	const { isLoading } = useAuthContext()
 	const { colors } = useThemeContext()
-	const loginStyles = createLoginStyles(colors)
-	const { visible, title, message, showAlert, hideAlert, handleClose } = useAlertModal()
 	const responsive = useResponsiveDimensions()
+	const loginStyles = createLoginStyles(colors, responsive)
+	const { visible, title, message, showAlert, hideAlert, handleClose } =
+		useAlertModal()
 	const [credentials, setCredentials] = useState<LoginCredentials>({
 		email: '',
 		password: '',
 	})
 
-	// Get responsive styles based on orientation
-	const dynamicStyles = {
-		container: {
-			...loginStyles.container,
-			paddingHorizontal: responsive.getResponsivePadding().horizontal,
-		},
-		content: {
-			...loginStyles.content,
-			paddingVertical: responsive.getResponsivePadding().vertical,
-			maxWidth: responsive.getContentMaxWidth(),
-			width: '100%' as const,
-			alignSelf: 'center' as const,
-		},
-		title: {
-			...loginStyles.title,
-			fontSize: responsive.getResponsiveFontSize(32),
-			marginBottom: responsive.getResponsiveMargin().small,
-		},
-		subtitle: {
-			...loginStyles.subtitle,
-			fontSize: responsive.getResponsiveFontSize(16),
-			marginBottom: responsive.getResponsiveMargin().medium,
-		},
-		form: {
-			...loginStyles.form,
-			marginBottom: responsive.getResponsiveMargin().medium,
-		},
-	}
-
 	return (
 		<>
 			<DynamicScrollView
-				styles={loginStyles}
+				styles={loginStyles.container}
 				autoCenter="center"
-				fallbackAlign="flex-start"
-				contentContainerStyle={{
-					alignItems: 'center',
-				}}>
-				<View style={dynamicStyles.content}>
-					<Text style={dynamicStyles.title}>Hello User</Text>
-					<Text style={dynamicStyles.subtitle}>Sign in to your account</Text>
+				fallbackAlign="flex-start">
+				<View style={loginStyles.content}>
+					<Text style={loginStyles.title}>Hello User</Text>
+					<Text style={loginStyles.subtitle}>Sign in to your account</Text>
 
 					<LoginForm
 						credentials={credentials}
@@ -78,7 +47,6 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
 						isLoading={isLoading}
 						colors={colors}
 						loginStyles={loginStyles}
-						dynamicStyles={dynamicStyles}
 						showAlert={showAlert}
 						hideAlert={hideAlert}
 					/>

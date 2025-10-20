@@ -37,59 +37,25 @@ interface RegisterScreenProps {
 
 const RegisterScreen: React.FC<RegisterScreenProps> = () => {
 	const { colors } = useThemeContext()
-	const registerStyles = createRegisterStyles(colors)
+	const responsive = useResponsiveDimensions()
+	const registerStyles = createRegisterStyles(colors, responsive)
 	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
-	const responsive = useResponsiveDimensions()
 	const [formData, setFormData] = useState<RegisterData>({
 		email: '',
 		password: '',
 		confirmPassword: '',
 	})
 
-	// Get responsive styles
-	const dynamicStyles = {
-		container: {
-			...registerStyles.container,
-		},
-		scrollContent: {
-			...registerStyles.scrollContent,
-			paddingHorizontal: responsive.getResponsivePadding().horizontal,
-			paddingVertical: responsive.getResponsivePadding().vertical,
-		},
-		title: {
-			...registerStyles.title,
-			fontSize: responsive.getResponsiveFontSize(32),
-			marginBottom: responsive.getResponsiveMargin().small,
-		},
-		subtitle: {
-			...registerStyles.subtitle,
-			fontSize: responsive.getResponsiveFontSize(16),
-			marginBottom: responsive.getResponsiveMargin().medium,
-		},
-	}
-
 	return (
 		<>
 			<DynamicScrollView
-				styles={registerStyles}
+				styles={registerStyles.container}
 				autoCenter="center"
-				fallbackAlign="flex-start"
-				contentContainerStyle={{
-					alignItems: 'center',
-					paddingHorizontal: responsive.getResponsivePadding().horizontal,
-					paddingVertical: responsive.getResponsivePadding().vertical,
-				}}>
-				<View
-					style={[
-						registerStyles.content,
-						{
-							width: '100%' as const,
-							maxWidth: responsive.getContentMaxWidth(),
-						},
-					]}>
-					<Text style={dynamicStyles.title}>Create Account</Text>
-					<Text style={dynamicStyles.subtitle}>Sign up to get started</Text>
+				fallbackAlign="flex-start">
+				<View style={registerStyles.content}>
+					<Text style={registerStyles.title}>Create Account</Text>
+					<Text style={registerStyles.subtitle}>Sign up to get started</Text>
 
 					<RegisterForm
 						formData={formData}

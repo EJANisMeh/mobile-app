@@ -95,7 +95,10 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 
 	return (
 		<>
-			<DynamicScrollView>
+			<DynamicScrollView
+				styles={forgotPasswordStyles.container}
+				autoCenter="center"
+				fallbackAlign="flex-start">
 				<View style={forgotPasswordStyles.content}>
 					<Text style={forgotPasswordStyles.title}>Reset Password</Text>
 					<Text style={forgotPasswordStyles.subtitle}>
@@ -103,38 +106,14 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 						your password.
 					</Text>
 
-					<View style={forgotPasswordStyles.form}>
-						<TextInput
-							style={forgotPasswordStyles.input}
-							placeholder="Email Address"
-							value={email}
-							onChangeText={setEmail}
-							keyboardType="email-address"
-							autoCapitalize="none"
-							autoCorrect={false}
-							editable={!isLoading}
-						/>
-
-						<TouchableOpacity
-							style={[
-								forgotPasswordStyles.submitButton,
-								isLoading && forgotPasswordStyles.disabledButton,
-							]}
-							onPress={handleSendResetEmail}
-							disabled={isLoading}>
-							<Text style={forgotPasswordStyles.submitButtonText}>
-								{isLoading ? 'Sending...' : 'Send Reset Instructions'}
-							</Text>
-						</TouchableOpacity>
-
-						<TouchableOpacity
-							style={forgotPasswordStyles.backButton}
-							onPress={() => navigation.goBack()}>
-							<Text style={forgotPasswordStyles.backButtonText}>
-								Back to Login
-							</Text>
-						</TouchableOpacity>
-					</View>
+					{/* Form */}
+					<TouchableOpacity
+						style={forgotPasswordStyles.backButton}
+						onPress={() => navigation.goBack()}>
+						<Text style={forgotPasswordStyles.backButtonText}>
+							Back to Login
+						</Text>
+					</TouchableOpacity>
 				</View>
 			</DynamicScrollView>
 

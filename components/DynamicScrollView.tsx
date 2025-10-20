@@ -24,21 +24,16 @@ import { useResponsiveDimensions } from '../hooks'
  * 1. Auto-center when content fits:
  *    <DynamicScrollView autoCenter="center" fallbackAlign="flex-start">
  *
- * 2. Alwaysstart from top:
+ * 2. Always start from top:
  *    <DynamicScrollView autoCenter={false}>
  *
- * 3. With custom styles object:
- *    <DynamicScrollView styles={myStyles} containerKey="wrapper">
+ * 3. With custom styles:
+ *    <DynamicScrollView styles={myStyles.container}>
  */
 
-interface DynamicScrollViewProps<
-	T extends Record<string, StyleProp<any>> = Record<string, StyleProp<any>>
-> extends ScrollViewProps {
+interface DynamicScrollViewProps extends ScrollViewProps {
 	children: React.ReactNode
-	styles?: T
-	containerKey?: keyof T
-	/** allow screens to pass styles that will be merged into ScrollView's contentContainerStyle */
-	contentContainerStyle?: StyleProp<ViewStyle>
+	styles?: StyleProp<ViewStyle>
 	enableKeyboardAvoiding?: boolean
 	behavior?: 'height' | 'position' | 'padding' | undefined
 	keyboardVerticalOffset?: number
@@ -62,31 +57,17 @@ interface DynamicScrollViewProps<
 	fallbackAlign?: 'flex-start' | 'flex-end' | 'center'
 }
 
-const DynamicScrollView = <
-	T extends Record<string, StyleProp<any>> = Record<string, StyleProp<any>>
->({
+const DynamicScrollView = ({
 	children,
 	styles,
-	containerKey = 'container',
 	enableKeyboardAvoiding = true,
 	behavior = 'padding',
 	keyboardVerticalOffset,
-	contentContainerStyle,
 	autoCenter = false,
 	fallbackAlign = 'flex-start',
 	...scrollProps
-}: DynamicScrollViewProps<T>) => {
+}: DynamicScrollViewProps) => {
 	const responsive = useResponsiveDimensions()
-
-	// Pull the container style from the provided styles object (if present)
-	const providedContainerStyle =
-		(styles && (styles[containerKey as string] as StyleProp<ViewStyle>)) ||
-		undefined
-
-	const dynamicContainer: StyleProp<ViewStyle> = [
-		providedContainerStyle,
-		{ paddingHorizontal: responsive.getResponsivePadding().horizontal },
-	]
 
 	const offset =
 		keyboardVerticalOffset ?? (Platform.OS === 'android' ? -100 : 0)
@@ -111,21 +92,27 @@ const DynamicScrollView = <
 		return hasEnoughHeight ? autoCenter : fallbackAlign
 	}
 
-	const dynamicContentStyle: StyleProp<ViewStyle> = [
-		{ flexGrow: 1 },
+	// Separate visual styles (for ScrollView style prop)
+	const scrollViewStyle: StyleProp<ViewStyle> = [{ flex: 1 }, styles]
+
+	// Layout styles (for ScrollView contentContainerStyle prop)
+	const contentContainerStyle: StyleProp<ViewStyle> = [
 		autoCenter ? { justifyContent: getJustifyContent() } : undefined,
-		contentContainerStyle,
+		{ paddingHorizontal: responsive.getResponsivePadding().horizontal },
+		{ paddingVertical: responsive.getResponsivePadding().vertical },
+		{ flexGrow: 1 },
+		{ alignItems: 'center' as const },
 	]
 
 	return (
 		<KeyboardAvoidingView
 			key={responsive.isLandscape ? 'landscape' : 'portrait'}
-			style={dynamicContainer}
 			behavior={behavior}
 			enabled={enableKeyboardAvoiding}
 			keyboardVerticalOffset={offset}>
 			<ScrollView
-				contentContainerStyle={dynamicContentStyle}
+				style={scrollViewStyle}
+				contentContainerStyle={contentContainerStyle}
 				keyboardShouldPersistTaps="handled"
 				bounces={false}
 				showsVerticalScrollIndicator={false}

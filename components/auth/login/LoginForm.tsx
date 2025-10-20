@@ -21,9 +21,6 @@ interface LoginFormProps {
 		textOnPrimary: string
 	}
 	loginStyles: Record<string, StyleProp<any>>
-	dynamicStyles: {
-		form: StyleProp<ViewStyle>
-	}
 	showAlert: UseAlertModalType['showAlert']
 	hideAlert: UseAlertModalType['hideAlert']
 }
@@ -33,12 +30,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
 	setCredentials,
 	colors,
 	loginStyles,
-	dynamicStyles,
 	showAlert,
 	hideAlert
 }) => {
 	return (
-		<View style={dynamicStyles.form}>
+		<View style={loginStyles.form}>
 			<LoginInputs
 				credentials={credentials}
 				setCredentials={setCredentials}
