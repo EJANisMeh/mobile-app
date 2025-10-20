@@ -13,7 +13,6 @@ export interface UseAlertModalType {
 	message: string
 	showAlert: (props: UseAlertModalProps) => void
 	hideAlert: () => void
-	handleConfirm: () => void
 	handleClose: () => void
 }
 
@@ -49,14 +48,10 @@ export const useAlertModal = (): UseAlertModalType => {
 		}
 	}, [props.onClose])
 
-	const handleConfirm = useCallback(() => {
-		props.onConfirm?.()
-		hideAlert()
-	}, [props.onConfirm, hideAlert])
-
 	const handleClose = useCallback(() => {
-		props.onClose?.()
-	}, [props.onClose])
+    props.onClose?.()
+    hideAlert()
+	}, [props.onClose, hideAlert])
 
 	return {
 		visible,
@@ -64,7 +59,6 @@ export const useAlertModal = (): UseAlertModalType => {
 		message: props.message,
 		showAlert,
 		hideAlert,
-		handleConfirm,
 		handleClose,
 	}
 }
