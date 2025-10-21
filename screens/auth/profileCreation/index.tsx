@@ -14,6 +14,7 @@ import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import { createProfileCreationStyles } from '../../../styles/themedStyles'
 import { ProfileCreationScreenProps, ProfileCreationData } from '../../../types'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 
 const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 	route,
@@ -104,138 +105,128 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 
 	return (
 		<>
-			<KeyboardAvoidingView
-				key={responsive.isLandscape ? 'landscape' : 'portrait'}
-				style={profileCreationStyles.container}
-				behavior="padding"
-				enabled={true}
-				keyboardVerticalOffset={Platform.OS === 'android' ? -100 : 0}>
-				<ScrollView
-					contentContainerStyle={{ flexGrow: 1 }}
-					keyboardShouldPersistTaps="handled"
-					bounces={false}
-					showsVerticalScrollIndicator={false}>
-					<View style={profileCreationStyles.content}>
-						<Text style={profileCreationStyles.title}>
-							Complete Your Profile
-						</Text>
-						<Text style={profileCreationStyles.subtitle}>
-							Enter your details to get started
-						</Text>
+			<DynamicScrollView
+				styles={profileCreationStyles.container}
+				autoCenter="center"
+				fallbackAlign="flex-start">
+				<View style={profileCreationStyles.content}>
+					<Text style={profileCreationStyles.title}>Complete Your Profile</Text>
+					<Text style={profileCreationStyles.subtitle}>
+						Enter your details to get started
+					</Text>
 
-						<View style={profileCreationStyles.form}>
-							<TextInput
-								style={[
-									profileCreationStyles.input,
-									isLoading && { opacity: 0.6 },
-								]}
-								placeholder="First Name *"
-								value={formData.fname}
-								onChangeText={(text) => updateField('fname', text)}
-								editable={!isLoading}
-								autoCapitalize="words"
-							/>
+					<View style={profileCreationStyles.form}>
+						<TextInput
+							style={[
+								profileCreationStyles.input,
+								isLoading && { opacity: 0.6 },
+							]}
+							placeholder="First Name *"
+							value={formData.fname}
+							onChangeText={(text) => updateField('fname', text)}
+							editable={!isLoading}
+							autoCapitalize="words"
+						/>
 
-							<TextInput
-								style={[
-									profileCreationStyles.input,
-									isLoading && { opacity: 0.6 },
-								]}
-								placeholder="Last Name *"
-								value={formData.lname}
-								onChangeText={(text) => updateField('lname', text)}
-								editable={!isLoading}
-								autoCapitalize="words"
-							/>
+						<TextInput
+							style={[
+								profileCreationStyles.input,
+								isLoading && { opacity: 0.6 },
+							]}
+							placeholder="Last Name *"
+							value={formData.lname}
+							onChangeText={(text) => updateField('lname', text)}
+							editable={!isLoading}
+							autoCapitalize="words"
+						/>
 
-							<TouchableOpacity
-								style={[
-									profileCreationStyles.imagePickerButton,
-									isLoading && { opacity: 0.6 },
-								]}
-								disabled={isLoading}
-								onPress={() => {
-									// TODO: Implement image picker
-									showAlert({
-										title: 'Coming Soon',
-										message: 'Image upload feature will be available soon.',
-									})
-								}}>
-								<Text style={profileCreationStyles.imagePickerText}>
-									{formData.image_url
-										? '✓ Profile Picture Selected'
-										: '📷 Add Profile Picture (Optional)'}
+						<TouchableOpacity
+							style={[
+								profileCreationStyles.imagePickerButton,
+								isLoading && { opacity: 0.6 },
+							]}
+							disabled={isLoading}
+							onPress={() => {
+								// TODO: Implement image picker
+								showAlert({
+									title: 'Coming Soon',
+									message: 'Image upload feature will be available soon.',
+								})
+							}}>
+							<Text style={profileCreationStyles.imagePickerText}>
+								{formData.image_url
+									? '✓ Profile Picture Selected'
+									: '📷 Add Profile Picture (Optional)'}
+							</Text>
+							{formData.image_url && (
+								<Text style={profileCreationStyles.selectedImageText}>
+									Tap to change
 								</Text>
-								{formData.image_url && (
-									<Text style={profileCreationStyles.selectedImageText}>
-										Tap to change
-									</Text>
-								)}
-							</TouchableOpacity>
+							)}
+						</TouchableOpacity>
 
-							<View style={profileCreationStyles.contactDetailsContainer}>
-								<Text style={profileCreationStyles.contactDetailsLabel}>
-									Contact Details (Optional)
-								</Text>
-								<Text style={profileCreationStyles.contactDetailsHint}>
-									Add phone numbers, social media, etc.
-								</Text>
+						<View style={profileCreationStyles.contactDetailsContainer}>
+							<Text style={profileCreationStyles.contactDetailsLabel}>
+								Contact Details (Optional)
+							</Text>
+							<Text style={profileCreationStyles.contactDetailsHint}>
+								Add phone numbers, social media, etc.
+							</Text>
 
-								{(formData.contact_details || []).map((contact, index) => (
-									<View
-										key={index}
-										style={profileCreationStyles.contactItem}>
-										<TextInput
-											style={profileCreationStyles.contactInput}
-											placeholder="e.g., +639123456789 or @username"
-											value={contact}
-											onChangeText={(text) => updateContactDetail(index, text)}
-											editable={!isLoading}
-										/>
-										<TouchableOpacity
-											style={profileCreationStyles.removeContactButton}
-											onPress={() => removeContactDetail(index)}
-											disabled={isLoading}>
-											<Text style={profileCreationStyles.removeContactText}>
-												×
-											</Text>
-										</TouchableOpacity>
-									</View>
-								))}
-
-								<TouchableOpacity
-									style={profileCreationStyles.addContactButton}
-									onPress={addContactDetail}
-									disabled={isLoading}>
-									<Text style={profileCreationStyles.addContactButtonText}>
-										+ Add Contact Detail
-									</Text>
-								</TouchableOpacity>
-							</View>
-
-							<TouchableOpacity
-								style={[
-									profileCreationStyles.submitButton,
-									isLoading && profileCreationStyles.disabledButton,
-								]}
-								onPress={handleSubmit}
-								disabled={isLoading}
-								activeOpacity={isLoading ? 1 : 0.7}>
-								{isLoading ? (
-									<ActivityIndicator
-										size="small"
-										color={colors.textOnPrimary}
+							{(formData.contact_details || []).map((contact, index) => (
+								<View
+									key={index}
+									style={profileCreationStyles.contactItem}>
+									<TextInput
+										style={profileCreationStyles.contactInput}
+										placeholder="e.g., +639123456789 or @username"
+										value={contact}
+										onChangeText={(text) => updateContactDetail(index, text)}
+										editable={!isLoading}
 									/>
-								) : (
-									<Text style={profileCreationStyles.submitButtonText}>
-										Complete Profile
-									</Text>
-								)}
+									<TouchableOpacity
+										style={profileCreationStyles.removeContactButton}
+										onPress={() => removeContactDetail(index)}
+										disabled={isLoading}>
+										<Text style={profileCreationStyles.removeContactText}>
+											×
+										</Text>
+									</TouchableOpacity>
+								</View>
+							))}
+
+							<TouchableOpacity
+								style={profileCreationStyles.addContactButton}
+								onPress={addContactDetail}
+								disabled={isLoading}>
+								<Text style={profileCreationStyles.addContactButtonText}>
+									+ Add Contact Detail
+								</Text>
 							</TouchableOpacity>
 						</View>
+
+						<TouchableOpacity
+							style={[
+								profileCreationStyles.submitButton,
+								isLoading && profileCreationStyles.disabledButton,
+							]}
+							onPress={handleSubmit}
+							disabled={isLoading}
+							activeOpacity={isLoading ? 1 : 0.7}>
+							{isLoading ? (
+								<ActivityIndicator
+									size="small"
+									color={colors.textOnPrimary}
+								/>
+							) : (
+								<Text style={profileCreationStyles.submitButtonText}>
+									Complete Profile
+								</Text>
+							)}
+						</TouchableOpacity>
 					</View>
-				</ScrollView>
-			</KeyboardAvoidingView>
+				</View>
+			</DynamicScrollView>
 
 			<AlertModal
 				visible={visible}

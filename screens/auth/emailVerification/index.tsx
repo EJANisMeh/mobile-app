@@ -14,6 +14,7 @@ import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import { createEmailVerificationStyles } from '../../../styles/themedStyles'
 import { EmailVerificationScreenProps } from '../../../types/authTypes'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 
 const VERIFICATION_CODE = '123456'
 
@@ -213,119 +214,109 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 
 	return (
 		<>
-			<KeyboardAvoidingView
-				key={responsive.isLandscape ? 'landscape' : 'portrait'}
-				style={emailVerificationStyles.container}
-				behavior="padding"
-				enabled={true}
-				keyboardVerticalOffset={Platform.OS === 'android' ? -100 : 0}>
-				<ScrollView
-					contentContainerStyle={{ flexGrow: 1 }}
-					keyboardShouldPersistTaps="handled"
-					bounces={false}
-					showsVerticalScrollIndicator={false}>
-					<View style={emailVerificationStyles.content}>
-						<View style={emailVerificationStyles.iconContainer}>
-							<Text style={emailVerificationStyles.icon}>🔐</Text>
-						</View>
-
-						<Text style={emailVerificationStyles.title}>
-							{getScreenTitle()}
-						</Text>
-						<Text style={emailVerificationStyles.description}>
-							{getScreenDescription()}
-						</Text>
-
-						{/* 6-digit code input */}
-						<View
-							style={{
-								flexDirection: 'row',
-								justifyContent: 'center',
-								gap: 10,
-								marginVertical: 30,
-							}}>
-							{code.map((digit, index) => (
-								<TextInput
-									key={index}
-									ref={(ref) => {
-										inputRefs.current[index] = ref
-									}}
-									style={{
-										width: 50,
-										height: 60,
-										borderWidth: 2,
-										borderColor: digit ? colors.primary : colors.border,
-										borderRadius: 8,
-										fontSize: 24,
-										fontWeight: 'bold',
-										textAlign: 'center',
-										color: colors.text,
-										backgroundColor: colors.background,
-									}}
-									value={digit}
-									onChangeText={(text) => handleCodeChange(text, index)}
-									onKeyPress={(e) => handleKeyPress(e, index)}
-									keyboardType="number-pad"
-									maxLength={1}
-									editable={!isVerifying}
-									autoFocus={index === 0}
-								/>
-							))}
-						</View>
-
-						<View style={emailVerificationStyles.actions}>
-							<TouchableOpacity
-								style={[
-									emailVerificationStyles.primaryButton,
-									isVerifying && emailVerificationStyles.disabledButton,
-								]}
-								onPress={handleVerifyCode}
-								disabled={isVerifying}>
-								{isVerifying ? (
-									<ActivityIndicator
-										color="#fff"
-										size="small"
-									/>
-								) : (
-									<Text style={emailVerificationStyles.primaryButtonText}>
-										Verify Code
-									</Text>
-								)}
-							</TouchableOpacity>
-
-							<TouchableOpacity
-								style={[
-									emailVerificationStyles.secondaryButton,
-									(!canResend || isResending) &&
-										emailVerificationStyles.disabledButton,
-								]}
-								onPress={handleResendCode}
-								disabled={!canResend || isResending}>
-								{isResending ? (
-									<ActivityIndicator
-										color="#007bff"
-										size="small"
-									/>
-								) : (
-									<Text style={emailVerificationStyles.secondaryButtonText}>
-										{canResend ? 'Resend Code' : `Resend in ${countdown}s`}
-									</Text>
-								)}
-							</TouchableOpacity>
-
-							<TouchableOpacity
-								style={emailVerificationStyles.logoutButton}
-								onPress={handleBackToLogin}>
-								<Text style={emailVerificationStyles.logoutButtonText}>
-									{purpose === 'password-reset'
-										? 'Back to Forgot Password'
-										: 'Back to Login'}
-								</Text>
-							</TouchableOpacity>
-						</View>
+			<DynamicScrollView
+				styles={emailVerificationStyles.container}
+				autoCenter="center"
+				fallbackAlign="flex-start">
+				<View style={emailVerificationStyles.content}>
+					<View style={emailVerificationStyles.iconContainer}>
+						<Text style={emailVerificationStyles.icon}>🔐</Text>
 					</View>
-				</ScrollView>
-			</KeyboardAvoidingView>
+
+					<Text style={emailVerificationStyles.title}>{getScreenTitle()}</Text>
+					<Text style={emailVerificationStyles.description}>
+						{getScreenDescription()}
+					</Text>
+
+					{/* 6-digit code input */}
+					<View
+						style={{
+							flexDirection: 'row',
+							justifyContent: 'center',
+							gap: 10,
+							marginVertical: 30,
+						}}>
+						{code.map((digit, index) => (
+							<TextInput
+								key={index}
+								ref={(ref) => {
+									inputRefs.current[index] = ref
+								}}
+								style={{
+									width: 50,
+									height: 60,
+									borderWidth: 2,
+									borderColor: digit ? colors.primary : colors.border,
+									borderRadius: 8,
+									fontSize: 24,
+									fontWeight: 'bold',
+									textAlign: 'center',
+									color: colors.text,
+									backgroundColor: colors.background,
+								}}
+								value={digit}
+								onChangeText={(text) => handleCodeChange(text, index)}
+								onKeyPress={(e) => handleKeyPress(e, index)}
+								keyboardType="number-pad"
+								maxLength={1}
+								editable={!isVerifying}
+								autoFocus={index === 0}
+							/>
+						))}
+					</View>
+
+					<View style={emailVerificationStyles.actions}>
+						<TouchableOpacity
+							style={[
+								emailVerificationStyles.primaryButton,
+								isVerifying && emailVerificationStyles.disabledButton,
+							]}
+							onPress={handleVerifyCode}
+							disabled={isVerifying}>
+							{isVerifying ? (
+								<ActivityIndicator
+									color="#fff"
+									size="small"
+								/>
+							) : (
+								<Text style={emailVerificationStyles.primaryButtonText}>
+									Verify Code
+								</Text>
+							)}
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={[
+								emailVerificationStyles.secondaryButton,
+								(!canResend || isResending) &&
+									emailVerificationStyles.disabledButton,
+							]}
+							onPress={handleResendCode}
+							disabled={!canResend || isResending}>
+							{isResending ? (
+								<ActivityIndicator
+									color="#007bff"
+									size="small"
+								/>
+							) : (
+								<Text style={emailVerificationStyles.secondaryButtonText}>
+									{canResend ? 'Resend Code' : `Resend in ${countdown}s`}
+								</Text>
+							)}
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={emailVerificationStyles.logoutButton}
+							onPress={handleBackToLogin}>
+							<Text style={emailVerificationStyles.logoutButtonText}>
+								{purpose === 'password-reset'
+									? 'Back to Forgot Password'
+									: 'Back to Login'}
+							</Text>
+						</TouchableOpacity>
+					</View>
+				</View>
+			</DynamicScrollView>
 
 			<AlertModal
 				visible={visible}
