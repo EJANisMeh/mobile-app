@@ -329,13 +329,6 @@ export const createEmailVerificationStyles = (
 		marginBottom: responsive.getResponsiveMargin().small,
 		color: colors.textSecondary,
 	},
-	email: {
-		fontSize: 18,
-		fontWeight: '600' as const,
-		textAlign: 'center' as const,
-		marginBottom: 16,
-		color: colors.primary,
-	},
 	description: {
 		fontSize: responsive.getResponsiveFontSize(16),
 		textAlign: 'center' as const,
@@ -343,7 +336,30 @@ export const createEmailVerificationStyles = (
 		color: colors.textSecondary,
 		lineHeight: 24,
 	},
-	actions: {
+	codeInputContainer: {
+		flexDirection: 'row' as const,
+		justifyContent: 'center' as const,
+		gap: 10,
+		marginVertical: 30,
+	},
+	codeInput: {
+		width: 50,
+		height: 60,
+		borderWidth: 2,
+		borderRadius: 8,
+		fontSize: 24,
+		fontWeight: 'bold' as const,
+		textAlign: 'center' as const,
+		color: colors.text,
+		backgroundColor: colors.background,
+	},
+	codeInputFilled: {
+		borderColor: colors.primary,
+	},
+	codeInputEmpty: {
+		borderColor: colors.border,
+	},
+	actionsContainer: {
 		gap: 16,
 	},
 	primaryButton: {
@@ -374,11 +390,11 @@ export const createEmailVerificationStyles = (
 	disabledButton: {
 		borderColor: colors.textSecondary,
 	},
-	logoutButton: {
+	backToLoginButton: {
 		alignItems: 'center' as const,
 		paddingVertical: 12,
 	},
-	logoutButtonText: {
+	backToLoginButtonText: {
 		color: colors.textSecondary,
 		fontSize: 16,
 		fontWeight: '500' as const,

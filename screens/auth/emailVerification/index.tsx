@@ -236,31 +236,19 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 					</Text>
 
 					{/* 6-digit code input */}
-					<View
-						style={{
-							flexDirection: 'row',
-							justifyContent: 'center',
-							gap: 10,
-							marginVertical: 30,
-						}}>
+					<View style={emailVerificationStyles.codeInputContainer}>
 						{code.map((digit, index) => (
 							<TextInput
 								key={index}
 								ref={(ref) => {
 									inputRefs.current[index] = ref
 								}}
-								style={{
-									width: 50,
-									height: 60,
-									borderWidth: 2,
-									borderColor: digit ? colors.primary : colors.border,
-									borderRadius: 8,
-									fontSize: 24,
-									fontWeight: 'bold',
-									textAlign: 'center',
-									color: colors.text,
-									backgroundColor: colors.background,
-								}}
+								style={[
+									emailVerificationStyles.codeInput,
+									digit
+										? emailVerificationStyles.codeInputFilled
+										: emailVerificationStyles.codeInputEmpty,
+								]}
 								value={digit}
 								onChangeText={(text) => handleCodeChange(text, index)}
 								onKeyPress={(e) => handleKeyPress(e, index)}
@@ -272,7 +260,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 						))}
 					</View>
 
-					<View style={emailVerificationStyles.actions}>
+					<View style={emailVerificationStyles.actionsContainer}>
 						<TouchableOpacity
 							style={[
 								emailVerificationStyles.primaryButton,
@@ -313,9 +301,9 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 						</TouchableOpacity>
 
 						<TouchableOpacity
-							style={emailVerificationStyles.logoutButton}
+							style={emailVerificationStyles.backToLoginButton}
 							onPress={handleBackToLogin}>
-							<Text style={emailVerificationStyles.logoutButtonText}>
+							<Text style={emailVerificationStyles.backToLoginButtonText}>
 								{purpose === 'password-reset'
 									? 'Back to Forgot Password'
 									: 'Back to Login'}
