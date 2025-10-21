@@ -2,11 +2,6 @@ import React, { useState } from 'react'
 import {
 	View,
 	Text,
-	TextInput,
-	TouchableOpacity,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
 } from 'react-native'
 import { useAuthContext, useThemeContext } from '../../../context'
 import { AlertModal } from '../../../components'
