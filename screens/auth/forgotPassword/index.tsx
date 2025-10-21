@@ -1,8 +1,5 @@
 import React, { useState } from 'react'
-import {
-	View,
-	Text,
-} from 'react-native'
+import { View, Text } from 'react-native'
 import { useAuthContext, useThemeContext } from '../../../context'
 import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
@@ -10,7 +7,7 @@ import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { createForgotPasswordStyles } from '../../../styles/themedStyles'
 import DynamicScrollView from '../../../components/DynamicScrollView'
-import {ForgotPassForm} from '../../../components/auth/forgotPassword'
+import { ForgotPassForm } from '../../../components/auth/forgotPassword'
 
 type ForgotPasswordScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,
@@ -26,14 +23,12 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 }) => {
 	const { colors } = useThemeContext()
 	const { error, requestPasswordReset } = useAuthContext()
-	const forgotPasswordStyles = createForgotPasswordStyles(colors)
 	const responsive = useResponsiveDimensions()
+	const forgotPasswordStyles = createForgotPasswordStyles(colors, responsive)
 	const [email, setEmail] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
 	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
-
-	
 
 	return (
 		<>
@@ -55,8 +50,6 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 						showAlert={showAlert}
 						hideAlert={hideAlert}
 					/>
-					
-					
 				</View>
 			</DynamicScrollView>
 

@@ -16,13 +16,12 @@ import { createProfileCreationStyles } from '../../../styles/themedStyles'
 import { ProfileCreationScreenProps, ProfileCreationData } from '../../../types'
 
 const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
-	navigation,
 	route,
 }) => {
 	const { userId } = route.params
 	const { colors } = useThemeContext()
-	const profileCreationStyles = createProfileCreationStyles(colors)
 	const responsive = useResponsiveDimensions()
+	const profileCreationStyles = createProfileCreationStyles(colors, responsive)
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
 	const { completeProfile } = useAuthContext()
 	const [isLoading, setIsLoading] = useState(false)
@@ -56,7 +55,8 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 			if (success) {
 				showAlert({
 					title: 'Success',
-					message: 'Profile created successfully! You can now access your account.',
+					message:
+						'Profile created successfully! You can now access your account.',
 					onConfirm: () => {
 						hideAlert()
 						// RootNavigator will automatically handle navigation based on auth state
@@ -116,7 +116,9 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 					bounces={false}
 					showsVerticalScrollIndicator={false}>
 					<View style={profileCreationStyles.content}>
-						<Text style={profileCreationStyles.title}>Complete Your Profile</Text>
+						<Text style={profileCreationStyles.title}>
+							Complete Your Profile
+						</Text>
 						<Text style={profileCreationStyles.subtitle}>
 							Enter your details to get started
 						</Text>

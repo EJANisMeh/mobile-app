@@ -23,8 +23,11 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 }) => {
 	const { email, purpose, userId } = route.params
 	const { colors } = useThemeContext()
-	const emailVerificationStyles = createEmailVerificationStyles(colors)
 	const responsive = useResponsiveDimensions()
+	const emailVerificationStyles = createEmailVerificationStyles(
+		colors,
+		responsive
+	)
 	const [code, setCode] = useState<string[]>(['', '', '', '', '', ''])
 	const [isVerifying, setIsVerifying] = useState(false)
 	const [isResending, setIsResending] = useState(false)
@@ -102,9 +105,9 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 					title: 'Success',
 					message: 'Email verified! You can now reset your password.',
 					onClose: () => {
-								hideAlert()
-								navigation.navigate('ChangePassword', { email: email! })
-							},
+						hideAlert()
+						navigation.navigate('ChangePassword', { email: email! })
+					},
 				})
 			} else {
 				// Email verification purpose - update email_verified field

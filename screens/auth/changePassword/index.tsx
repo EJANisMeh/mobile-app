@@ -15,6 +15,7 @@ import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { createChangePasswordStyles } from '../../../styles/themedStyles'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 
 type ChangePasswordScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,
@@ -32,8 +33,8 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 }) => {
 	const { email, userId } = route.params
 	const { colors } = useThemeContext()
-	const changePasswordStyles = createChangePasswordStyles(colors)
 	const responsive = useResponsiveDimensions()
+	const changePasswordStyles = createChangePasswordStyles(colors, responsive)
 	const [formData, setFormData] = useState({
 		currentPassword: '',
 		newPassword: '',
@@ -135,89 +136,77 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 
 	return (
 		<>
-			<KeyboardAvoidingView
-				key={responsive.isLandscape ? 'landscape' : 'portrait'}
-				style={changePasswordStyles.container}
-				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-				enabled={true}
-				keyboardVerticalOffset={Platform.OS === 'android' ? -100 : 0}>
-				<ScrollView
-					contentContainerStyle={{ flexGrow: 1 }}
-					keyboardShouldPersistTaps="handled"
-					bounces={false}
-					showsVerticalScrollIndicator={false}>
-					<View style={changePasswordStyles.content}>
-						<Text style={changePasswordStyles.title}>Change Password</Text>
-						<Text style={changePasswordStyles.subtitle}>
-							Enter your new password
-						</Text>
+			<DynamicScrollView
+				styles={changePasswordStyles.container}
+				autoCenter="center"
+				fallbackAlign="flex-start">
+				<View style={changePasswordStyles.content}>
+					<Text style={changePasswordStyles.title}>Change Password</Text>
+					<Text style={changePasswordStyles.subtitle}>
+						Enter your new password
+					</Text>
 
-						<View style={changePasswordStyles.form}>
-							<View style={changePasswordStyles.inputContainer}>
-								<TextInput
-									style={changePasswordStyles.input}
-									placeholder="New Password"
-									value={formData.newPassword}
-									onChangeText={(value) => updateField('newPassword', value)}
-									secureTextEntry={!showPasswords.new}
-									autoCapitalize="none"
-								/>
-								<TouchableOpacity
-									style={changePasswordStyles.eyeButton}
-									onPress={() => togglePasswordVisibility('new')}>
-									<MaterialCommunityIcons
-										name={showPasswords.new ? 'eye-off' : 'eye'}
-										size={24}
-										color={colors.text}
-									/>
-								</TouchableOpacity>
-							</View>
-
-							<View style={changePasswordStyles.inputContainer}>
-								<TextInput
-									style={changePasswordStyles.input}
-									placeholder="Confirm New Password"
-									value={formData.confirmPassword}
-									onChangeText={(value) =>
-										updateField('confirmPassword', value)
-									}
-									secureTextEntry={!showPasswords.confirm}
-									autoCapitalize="none"
-								/>
-								<TouchableOpacity
-									style={changePasswordStyles.eyeButton}
-									onPress={() => togglePasswordVisibility('confirm')}>
-									<MaterialCommunityIcons
-										name={showPasswords.confirm ? 'eye-off' : 'eye'}
-										size={24}
-										color={colors.text}
-									/>
-								</TouchableOpacity>
-							</View>
-
+					<View style={changePasswordStyles.form}>
+						<View style={changePasswordStyles.inputContainer}>
+							<TextInput
+								style={changePasswordStyles.input}
+								placeholder="New Password"
+								value={formData.newPassword}
+								onChangeText={(value) => updateField('newPassword', value)}
+								secureTextEntry={!showPasswords.new}
+								autoCapitalize="none"
+							/>
 							<TouchableOpacity
-								style={[
-									changePasswordStyles.submitButton,
-									localIsLoading && changePasswordStyles.disabledButton,
-								]}
-								onPress={handleChangePassword}
-								disabled={localIsLoading}>
-								<Text style={changePasswordStyles.submitButtonText}>
-									{localIsLoading ? 'Changing Password...' : 'Change Password'}
-								</Text>
-							</TouchableOpacity>
-
-							<TouchableOpacity
-								style={changePasswordStyles.cancelButton}
-								onPress={() => navigation.goBack()}>
-								<Text style={changePasswordStyles.cancelButtonText}>
-									Cancel
-								</Text>
+								style={changePasswordStyles.eyeButton}
+								onPress={() => togglePasswordVisibility('new')}>
+								<MaterialCommunityIcons
+									name={showPasswords.new ? 'eye-off' : 'eye'}
+									size={24}
+									color={colors.text}
+								/>
 							</TouchableOpacity>
 						</View>
+
+						<View style={changePasswordStyles.inputContainer}>
+							<TextInput
+								style={changePasswordStyles.input}
+								placeholder="Confirm New Password"
+								value={formData.confirmPassword}
+								onChangeText={(value) => updateField('confirmPassword', value)}
+								secureTextEntry={!showPasswords.confirm}
+								autoCapitalize="none"
+							/>
+							<TouchableOpacity
+								style={changePasswordStyles.eyeButton}
+								onPress={() => togglePasswordVisibility('confirm')}>
+								<MaterialCommunityIcons
+									name={showPasswords.confirm ? 'eye-off' : 'eye'}
+									size={24}
+									color={colors.text}
+								/>
+							</TouchableOpacity>
+						</View>
+
+						<TouchableOpacity
+							style={[
+								changePasswordStyles.submitButton,
+								localIsLoading && changePasswordStyles.disabledButton,
+							]}
+							onPress={handleChangePassword}
+							disabled={localIsLoading}>
+							<Text style={changePasswordStyles.submitButtonText}>
+								{localIsLoading ? 'Changing Password...' : 'Change Password'}
+							</Text>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={changePasswordStyles.cancelButton}
+							onPress={() => navigation.goBack()}>
+							<Text style={changePasswordStyles.cancelButtonText}>Cancel</Text>
+						</TouchableOpacity>
 					</View>
-				</ScrollView>
-			</KeyboardAvoidingView>
+				</View>
+			</DynamicScrollView>
 
 			<AlertModal
 				visible={visible}
