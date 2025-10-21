@@ -5,9 +5,6 @@ import {
 	TextInput,
 	TouchableOpacity,
 	ActivityIndicator,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
 } from 'react-native'
 import { useAuthContext, useThemeContext } from '../../../context'
 import { AlertModal } from '../../../components'
@@ -16,6 +13,7 @@ import { createEmailVerificationStyles } from '../../../styles/themedStyles'
 import { EmailVerificationScreenProps } from '../../../types/authTypes'
 import DynamicScrollView from '../../../components/DynamicScrollView'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import CodeInput from '../../../components/auth/emailVerification'
 
 const VERIFICATION_CODE = '123456'
 
@@ -56,29 +54,6 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 
 		return () => clearInterval(timer)
 	}, [])
-
-	const handleCodeChange = (text: string, index: number) => {
-		// Only allow numbers
-		if (text && !/^\d$/.test(text)) return
-
-		const newCode = [...code]
-		newCode[index] = text
-		setCode(newCode)
-
-		// Auto-focus next input
-		if (text && index < 5) {
-			inputRefs.current[index + 1]?.focus()
-		}
-	}
-
-	const handleKeyPress = (
-		e: { nativeEvent: { key: string } },
-		index: number
-	) => {
-		if (e.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
-			inputRefs.current[index - 1]?.focus()
-		}
-	}
 
 	const handleVerifyCode = async () => {
 		const enteredCode = code.join('')
@@ -236,29 +211,13 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 					</Text>
 
 					{/* 6-digit code input */}
-					<View style={emailVerificationStyles.codeInputContainer}>
-						{code.map((digit, index) => (
-							<TextInput
-								key={index}
-								ref={(ref) => {
-									inputRefs.current[index] = ref
-								}}
-								style={[
-									emailVerificationStyles.codeInput,
-									digit
-										? emailVerificationStyles.codeInputFilled
-										: emailVerificationStyles.codeInputEmpty,
-								]}
-								value={digit}
-								onChangeText={(text) => handleCodeChange(text, index)}
-								onKeyPress={(e) => handleKeyPress(e, index)}
-								keyboardType="number-pad"
-								maxLength={1}
-								editable={!isVerifying}
-								autoFocus={index === 0}
-							/>
-						))}
-					</View>
+					<CodeInput
+						code={code}
+						setCode={setCode}
+						isVerifying={isVerifying}
+						inputRefs={inputRefs}
+						emailVerificationStyles={emailVerificationStyles}
+					/>
 
 					<View style={emailVerificationStyles.actionsContainer}>
 						<TouchableOpacity
