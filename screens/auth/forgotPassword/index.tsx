@@ -15,6 +15,7 @@ import type { AuthStackParamList } from '../../../types/navigation'
 import type { StackNavigationProp } from '@react-navigation/stack'
 import { createForgotPasswordStyles } from '../../../styles/themedStyles'
 import DynamicScrollView from '../../../components/DynamicScrollView'
+import {ForgotPassForm} from '../../../components/auth/forgotPassword'
 
 type ForgotPasswordScreenNavigationProp = StackNavigationProp<
 	AuthStackParamList,
@@ -37,61 +38,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
 
-	const handleSendResetEmail = async () => {
-		if (!email) {
-			showAlert({
-				title: 'Error',
-				message: 'Please enter your email address',
-			})
-			return
-		}
-
-		// Basic email validation
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-		if (!emailRegex.test(email)) {
-			showAlert({
-				title: 'Error',
-				message: 'Please enter a valid email address',
-			})
-			return
-		}
-
-		setIsLoading(true)
-		try {
-			// Call backend to check if email exists and send reset email
-			const success = await requestPasswordReset(email)
-			const resetTitle = 'Password Reset'
-			const resetMsg = 'Password reset request sent to the email'
-
-			if (!success) {
-				showAlert({
-					title: resetTitle,
-					message: resetMsg,
-				})
-				return
-			}
-
-			showAlert({
-				title: resetTitle,
-				message: resetMsg,
-				onClose: () => {
-					hideAlert()
-					// Navigate to EmailVerification with password-reset purpose
-					navigation.navigate('EmailVerification', {
-						email,
-						purpose: 'password-reset',
-					})
-				},
-			})
-		} catch (error) {
-			showAlert({
-				title: 'Error',
-				message: 'Failed to send reset email. Please try again.',
-			})
-		} finally {
-			setIsLoading(false)
-		}
-	}
+	
 
 	return (
 		<>
@@ -106,14 +53,15 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
 						your password.
 					</Text>
 
-					{/* Form */}
-					<TouchableOpacity
-						style={forgotPasswordStyles.backButton}
-						onPress={() => navigation.goBack()}>
-						<Text style={forgotPasswordStyles.backButtonText}>
-							Back to Login
-						</Text>
-					</TouchableOpacity>
+					<ForgotPassForm
+						email={email}
+						setEmail={setEmail}
+						forgotPasswordStyles={forgotPasswordStyles}
+						showAlert={showAlert}
+						hideAlert={hideAlert}
+					/>
+					
+					
 				</View>
 			</DynamicScrollView>
 
