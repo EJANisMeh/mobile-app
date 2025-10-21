@@ -48,7 +48,6 @@ const LoginScreen: React.FC<LoginScreenProps> = () => {
 						colors={colors}
 						loginStyles={loginStyles}
 						showAlert={showAlert}
-						hideAlert={hideAlert}
 					/>
 				</View>
 			</DynamicScrollView>

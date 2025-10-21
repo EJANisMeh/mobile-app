@@ -17,7 +17,6 @@ interface LoginButtonProps {
 	colors: { surface: string; textOnPrimary: string }
 	loginStyles: Record<string, StyleProp<any>>
 	showAlert: UseAlertModalType['showAlert']
-	hideAlert: UseAlertModalType['hideAlert']
 }
 
 const LoginButton: React.FC<LoginButtonProps> = ({
@@ -26,7 +25,6 @@ const LoginButton: React.FC<LoginButtonProps> = ({
 	colors,
 	loginStyles,
 	showAlert,
-	hideAlert,
 }) => {
 	const { isLoading, error, login } = useAuthContext()
 	const navigation = useAuthNavigation()

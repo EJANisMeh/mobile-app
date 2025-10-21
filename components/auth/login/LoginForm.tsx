@@ -22,7 +22,6 @@ interface LoginFormProps {
 	}
 	loginStyles: Record<string, StyleProp<any>>
 	showAlert: UseAlertModalType['showAlert']
-	hideAlert: UseAlertModalType['hideAlert']
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({
@@ -30,8 +29,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 	setCredentials,
 	colors,
 	loginStyles,
-	showAlert,
-	hideAlert
+	showAlert
 }) => {
 	return (
 		<View style={loginStyles.form}>
@@ -51,7 +49,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
 				colors={colors}
 				loginStyles={loginStyles}
 				showAlert={showAlert}
-				hideAlert={hideAlert}
 			/>
 
 			<ForgotPasswordNavButton loginStyles={loginStyles} />
