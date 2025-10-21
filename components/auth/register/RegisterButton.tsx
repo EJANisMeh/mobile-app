@@ -67,10 +67,6 @@ const RegisterButton: React.FC<RegisterButtonProps> = ({
     }
     
     const complexityRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/
-		console.log(
-			`Complexity test for password: ${formData.password} :`,
-			complexityRegex.test(formData.password)
-		)
     if (!complexityRegex.test(formData.password))
     {
       showAlert({

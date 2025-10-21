@@ -15,6 +15,7 @@ import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import { createEmailVerificationStyles } from '../../../styles/themedStyles'
 import { EmailVerificationScreenProps } from '../../../types/authTypes'
 import DynamicScrollView from '../../../components/DynamicScrollView'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 const VERIFICATION_CODE = '123456'
 
@@ -220,7 +221,13 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 				fallbackAlign="flex-start">
 				<View style={emailVerificationStyles.content}>
 					<View style={emailVerificationStyles.iconContainer}>
-						<Text style={emailVerificationStyles.icon}>🔐</Text>
+						<Text style={emailVerificationStyles.icon}>
+							<MaterialCommunityIcons
+								name="email-check-outline"
+								size={48}
+								color={colors.primary}
+							/>
+						</Text>
 					</View>
 
 					<Text style={emailVerificationStyles.title}>{getScreenTitle()}</Text>

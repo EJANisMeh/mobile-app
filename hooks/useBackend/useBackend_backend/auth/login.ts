@@ -35,7 +35,6 @@ export const login = (
 			// If so, don't store auth data yet - just return the info
 
 			if (response.needsEmailVerification || response.needsProfileCreation) {
-				console.log(response)
 				return {
 					success: true,
 					userId: response.user.id,
