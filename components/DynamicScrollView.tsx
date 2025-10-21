@@ -107,6 +107,7 @@ const DynamicScrollView = ({
 	return (
 		<KeyboardAvoidingView
 			key={responsive.isLandscape ? 'landscape' : 'portrait'}
+			style={{ flex: 1 }}
 			behavior={behavior}
 			enabled={enableKeyboardAvoiding}
 			keyboardVerticalOffset={offset}>
