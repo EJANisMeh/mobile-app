@@ -2,26 +2,20 @@ import React from 'react'
 import {
 	TouchableOpacity,
 	Text,
-	Keyboard,
 	StyleProp,
 } from 'react-native'
 import { useAuthContext } from '../../../context'
-import { useAuthNavigation } from '../../../hooks/useNavigation/useAuthNavigation'
 
 interface BackToLoginButtonProps {
 	registerStyles: Record<string, StyleProp<any>>
+	handlePress: () => void
 }
 
 const BackToLoginButton: React.FC<BackToLoginButtonProps> = ({
 	registerStyles,
+	handlePress,
 }) => {
 	const { isLoading } = useAuthContext()
-	const navigation = useAuthNavigation()
-
-	const handlePress = () => {
-		Keyboard.dismiss()
-		setTimeout(() => navigation.navigate('Login'), 100)
-	}
 
 	return (
 		<TouchableOpacity
