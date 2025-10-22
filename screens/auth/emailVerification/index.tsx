@@ -13,7 +13,8 @@ import { createEmailVerificationStyles } from '../../../styles/themedStyles'
 import { EmailVerificationScreenProps } from '../../../types/authTypes'
 import DynamicScrollView from '../../../components/DynamicScrollView'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import CodeInput from '../../../components/auth/emailVerification'
+import { CodeInput } from '../../../components/auth/emailVerification'
+import { VerifyCodeButton } from '../../../components/auth/emailVerification'
 
 const VERIFICATION_CODE = '123456'
 
@@ -21,7 +22,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	navigation,
 	route,
 }) => {
-	const { email, purpose, userId } = route.params
+	const { purpose, userId } = route.params
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const emailVerificationStyles = createEmailVerificationStyles(
@@ -35,7 +36,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	const [countdown, setCountdown] = useState(30)
 	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
-	const { user, logout, verifyEmail } = useAuthContext()
+	const { verifyEmail } = useAuthContext()
 
 	// Refs for input fields
 	const inputRefs = useRef<(TextInput | null)[]>([])
@@ -54,78 +55,6 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 
 		return () => clearInterval(timer)
 	}, [])
-
-	const handleVerifyCode = async () => {
-		const enteredCode = code.join('')
-
-		if (enteredCode.length !== 6) {
-			showAlert({
-				title: 'Error',
-				message: 'Please enter the complete 6-digit verification code.',
-			})
-			return
-		}
-
-		if (enteredCode !== VERIFICATION_CODE) {
-			showAlert({
-				title: 'Error',
-				message: 'Invalid verification code. Please try again.',
-			})
-			return
-		}
-
-		setIsVerifying(true)
-		try {
-			if (purpose === 'password-reset') {
-				// Navigate to change password screen for password reset
-				showAlert({
-					title: 'Success',
-					message: 'Email verified! You can now reset your password.',
-					onClose: () => {
-						hideAlert()
-						navigation.navigate('ChangePassword', { email: email! })
-					},
-				})
-			} else {
-				// Email verification purpose - update email_verified field
-				if (!userId) {
-					showAlert({
-						title: 'Error',
-						message: 'User ID is missing. Please try registering again.',
-					})
-					return
-				}
-
-				const success = await verifyEmail({
-					userId,
-					verificationCode: enteredCode,
-				})
-
-				if (success) {
-					showAlert({
-						title: 'Success',
-						message: 'Your email has been verified successfully!',
-						onClose: () => {
-							hideAlert()
-							navigation.navigate('Login')
-						},
-					})
-				} else {
-					showAlert({
-						title: 'Error',
-						message: 'Failed to verify email. Please try again.',
-					})
-				}
-			}
-		} catch (error) {
-			showAlert({
-				title: 'Error',
-				message: 'Failed to verify code. Please try again.',
-			})
-		} finally {
-			setIsVerifying(false)
-		}
-	}
 
 	const handleResendCode = async () => {
 		if (!canResend) return
@@ -165,7 +94,6 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 			navigation.goBack()
 		} else {
 			try {
-				await logout()
 				navigation.navigate('Login')
 			} catch (error) {
 				showAlert({
@@ -220,24 +148,16 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 					/>
 
 					<View style={emailVerificationStyles.actionsContainer}>
-						<TouchableOpacity
-							style={[
-								emailVerificationStyles.primaryButton,
-								isVerifying && emailVerificationStyles.disabledButton,
-							]}
-							onPress={handleVerifyCode}
-							disabled={isVerifying}>
-							{isVerifying ? (
-								<ActivityIndicator
-									color="#fff"
-									size="small"
-								/>
-							) : (
-								<Text style={emailVerificationStyles.primaryButtonText}>
-									Verify Code
-								</Text>
-							)}
-						</TouchableOpacity>
+						<VerifyCodeButton
+							purpose={purpose}
+							userId={userId}
+							code={code}
+							emailVerificationStyles={emailVerificationStyles}
+							isVerifying={isVerifying}
+							setIsVerifying={setIsVerifying}
+							showAlert={showAlert}
+							hideAlert={hideAlert}
+						/>
 
 						<TouchableOpacity
 							style={[
