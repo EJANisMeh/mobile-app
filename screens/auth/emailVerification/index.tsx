@@ -15,6 +15,7 @@ import DynamicScrollView from '../../../components/DynamicScrollView'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { CodeInput, ResendCodeButton } from '../../../components/auth/emailVerification'
 import { VerifyCodeButton } from '../../../components/auth/emailVerification'
+import BackToLoginButton from '../../../components/auth/emailVerification/BackToLoginButton'
 
 const VERIFICATION_CODE = '123456'
 
@@ -135,16 +136,12 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 							setCountdown={setCountdown}
 							showAlert={showAlert}
 						/>
-
-						<TouchableOpacity
-							style={emailVerificationStyles.backToLoginButton}
-							onPress={handleBackToLogin}>
-							<Text style={emailVerificationStyles.backToLoginButtonText}>
-								{purpose === 'password-reset'
-									? 'Back to Forgot Password'
-									: 'Back to Login'}
-							</Text>
-						</TouchableOpacity>
+						
+						<BackToLoginButton
+							emailVerificationStyles={emailVerificationStyles}
+							purpose={purpose}
+							showAlert={showAlert}
+						/>
 					</View>
 				</View>
 			</DynamicScrollView>
