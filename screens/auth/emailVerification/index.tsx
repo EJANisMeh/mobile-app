@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import {
-	View,
-	Text,
-	TextInput,
-	BackHandler,
-} from 'react-native'
+import { View, Text, TextInput, BackHandler } from 'react-native'
 import { useThemeContext } from '../../../context'
 import { AlertModal, ConfirmationModal } from '../../../components'
 import {
@@ -57,6 +52,29 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 
 	const navigation = useAuthNavigation()
 
+	const handleBackToLogin = async () => {
+		showConfirmation({
+			title: 'Leave Verification?',
+			message:
+				purpose === 'password-reset'
+					? 'Are you sure you want to go back? You will need to request a new verification code.'
+					: 'Are you sure you want to leave? Your verification progress will be lost.',
+			confirmText: 'Leave',
+			cancelText: 'Stay',
+			confirmStyle: 'destructive',
+			onConfirm: () => {
+				if (purpose === 'password-reset') {
+					navigation.goBack()
+				} else {
+					navigation.reset({
+						index: 0,
+						routes: [{ name: 'Login' }],
+					})
+				}
+			},
+		})
+	}
+
 	// Countdown timer for resending code
 	useEffect(() => {
 		const timer = setInterval(() => {
@@ -85,29 +103,6 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 
 		return () => backHandler.remove()
 	}, [purpose])
-
-	const handleBackToLogin = async () => {
-		showConfirmation({
-			title: 'Leave Verification?',
-			message:
-				purpose === 'password-reset'
-					? 'Are you sure you want to go back? You will need to request a new verification code.'
-					: 'Are you sure you want to leave? Your verification progress will be lost.',
-			confirmText: 'Leave',
-			cancelText: 'Stay',
-			confirmStyle: 'destructive',
-			onConfirm: () => {
-				if (purpose === 'password-reset') {
-					navigation.goBack()
-				} else {
-					navigation.reset({
-						index: 0,
-						routes: [{ name: 'Login' }],
-					})
-				}
-			},
-		})
-	}
 
 	const getScreenTitle = () => {
 		return purpose === 'password-reset'
