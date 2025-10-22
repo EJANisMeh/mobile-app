@@ -5,15 +5,23 @@ import {
 	TextInput,
 	TouchableOpacity,
 	ActivityIndicator,
+	BackHandler,
 } from 'react-native'
 import { useAuthContext, useThemeContext } from '../../../context'
-import { AlertModal } from '../../../components'
-import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
+import { AlertModal, ConfirmationModal } from '../../../components'
+import {
+	useAlertModal,
+	useResponsiveDimensions,
+	useConfirmationModal,
+} from '../../../hooks'
 import { createEmailVerificationStyles } from '../../../styles/themedStyles'
 import { EmailVerificationScreenProps } from '../../../types/authTypes'
 import DynamicScrollView from '../../../components/DynamicScrollView'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { CodeInput, ResendCodeButton } from '../../../components/auth/emailVerification'
+import {
+	CodeInput,
+	ResendCodeButton,
+} from '../../../components/auth/emailVerification'
 import { VerifyCodeButton } from '../../../components/auth/emailVerification'
 import BackToLoginButton from '../../../components/auth/emailVerification/BackToLoginButton'
 
@@ -36,8 +44,14 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	const [canResend, setCanResend] = useState(false)
 	const [countdown, setCountdown] = useState(30)
 	const inputRefs = useRef<(TextInput | null)[]>([])
-	const { visible, title, message, showAlert, hideAlert, handleClose } =
+	const { visible: alertVisible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
+	const {
+		visible: confirmVisible,
+		props: confirmProps,
+		showConfirmation,
+		hideConfirmation,
+	} = useConfirmationModal()
 
 	useEffect(() => {
 		const timer = setInterval(() => {
@@ -54,19 +68,39 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 		return () => clearInterval(timer)
 	}, [])
 
-	const handleBackToLogin = async () => {
-		if (purpose === 'password-reset') {
-			navigation.goBack()
-		} else {
-			try {
-				navigation.navigate('Login')
-			} catch (error) {
-				showAlert({
-					title: 'Error',
-					message: 'Failed to logout. Please try again.',
-				})
+	useEffect(() => {
+		const backHandler = BackHandler.addEventListener(
+			'hardwareBackPress',
+			() => {
+				handleBackToLogin()
+				return true // Prevent default back behavior
 			}
-		}
+		)
+
+		return () => backHandler.remove()
+	}, [purpose])
+
+	const handleBackToLogin = async () => {
+		showConfirmation({
+			title: 'Leave Verification?',
+			message:
+				purpose === 'password-reset'
+					? 'Are you sure you want to go back? You will need to request a new verification code.'
+					: 'Are you sure you want to leave? Your verification progress will be lost.',
+			confirmText: 'Leave',
+			cancelText: 'Stay',
+			confirmStyle: 'destructive',
+			onConfirm: () => {
+				if (purpose === 'password-reset') {
+					navigation.goBack()
+				} else {
+					navigation.reset({
+						index: 0,
+						routes: [{ name: 'Login' }],
+					})
+				}
+			},
+		})
 	}
 
 	const getScreenTitle = () => {
@@ -136,22 +170,33 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 							setCountdown={setCountdown}
 							showAlert={showAlert}
 						/>
-						
+
 						<BackToLoginButton
 							emailVerificationStyles={emailVerificationStyles}
+							handlePress={handleBackToLogin}
 							purpose={purpose}
-							showAlert={showAlert}
 						/>
 					</View>
 				</View>
 			</DynamicScrollView>
 
 			<AlertModal
-				visible={visible}
+				visible={alertVisible}
 				onClose={hideAlert}
 				title={title}
 				message={message}
 				buttons={[{ text: 'OK', onPress: handleClose }]}
+			/>
+
+			<ConfirmationModal
+				visible={confirmVisible}
+				onClose={hideConfirmation}
+				title={confirmProps.title}
+				message={confirmProps.message}
+				confirmText={confirmProps.confirmText}
+				cancelText={confirmProps.cancelText}
+				confirmStyle={confirmProps.confirmStyle}
+				onConfirm={confirmProps.onConfirm}
 			/>
 		</>
 	)
