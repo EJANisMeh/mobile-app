@@ -18,7 +18,6 @@ const BackToLoginButton: React.FC<BackToLoginButtonProps> = ({
 	purpose,
 	handlePress,
 }) => {
-  const navigation = useAuthNavigation()
 
 
   
