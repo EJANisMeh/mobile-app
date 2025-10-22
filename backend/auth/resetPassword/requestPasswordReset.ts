@@ -49,14 +49,20 @@ export const requestPasswordReset = async (
 		// TODO: send token via email service instead of returning it
 		console.log(`Password reset requested for email: ${email} token=${token}`)
 
-		const responsePayload: any = { success: true, message: 'Verification code has been sent to your email.' }
-		// For development convenience, return token in response. DO NOT do this in production.
-		if (process.env.NODE_ENV !== 'production') responsePayload.resetToken = token
+		const responsePayload: any = {
+			success: true,
+			userId: userResult.data.id,
+			message: 'Verification code has been sent to your email.',
+		}
 
-		res.json(responsePayload)
+		// For development convenience, return token in response. DO NOT do this in production.
+		if (process.env.NODE_ENV !== 'production')
+			responsePayload.resetToken = token
+
+		return res.json(responsePayload)
 	} catch (error) {
 		console.error('Request password reset error:', error)
-		res.status(500).json({
+		return res.status(500).json({
 			success: false,
 			error: 'Internal server error while requesting password reset',
 		})
