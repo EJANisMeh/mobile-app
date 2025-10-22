@@ -3,11 +3,9 @@ import {
 	View,
 	Text,
 	TextInput,
-	TouchableOpacity,
-	ActivityIndicator,
 	BackHandler,
 } from 'react-native'
-import { useAuthContext, useThemeContext } from '../../../context'
+import { useThemeContext } from '../../../context'
 import { AlertModal, ConfirmationModal } from '../../../components'
 import {
 	useAlertModal,
@@ -24,11 +22,9 @@ import {
 } from '../../../components/auth/emailVerification'
 import { VerifyCodeButton } from '../../../components/auth/emailVerification'
 import BackToLoginButton from '../../../components/auth/emailVerification/BackToLoginButton'
-
-const VERIFICATION_CODE = '123456'
+import { useAuthNavigation } from '../../../hooks/useNavigation'
 
 const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
-	navigation,
 	route,
 }) => {
 	const { purpose, userId } = route.params
@@ -44,8 +40,14 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	const [canResend, setCanResend] = useState(false)
 	const [countdown, setCountdown] = useState(30)
 	const inputRefs = useRef<(TextInput | null)[]>([])
-	const { visible: alertVisible, title, message, showAlert, hideAlert, handleClose } =
-		useAlertModal()
+	const {
+		visible: alertVisible,
+		title,
+		message,
+		showAlert,
+		hideAlert,
+		handleClose,
+	} = useAlertModal()
 	const {
 		visible: confirmVisible,
 		props: confirmProps,
@@ -53,6 +55,9 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 		hideConfirmation,
 	} = useConfirmationModal()
 
+	const navigation = useAuthNavigation()
+
+	// Countdown timer for resending code
 	useEffect(() => {
 		const timer = setInterval(() => {
 			setCountdown((prev) => {
@@ -68,6 +73,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 		return () => clearInterval(timer)
 	}, [])
 
+	// Handle Android hardware back button
 	useEffect(() => {
 		const backHandler = BackHandler.addEventListener(
 			'hardwareBackPress',
