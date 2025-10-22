@@ -11,17 +11,15 @@ import {
 import { AuthStackParamList } from '../../../types/navigation'
 import { UseAlertModalType } from '../../../hooks/useModals/types'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
-import { useAuthContext } from '../../../context'
+import { useAuthContext, useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
+import { createEmailVerificationStyles } from '../../../styles/auth'
+
 
 interface VerifyCodeButtonProps {
   purpose: AuthStackParamList['EmailVerification']['purpose']
   userId: number
 	code: string[]
-	emailVerificationStyles: {
-		primaryButton: StyleProp<ViewStyle>
-		disabledButton: StyleProp<ViewStyle>
-		primaryButtonText: StyleProp<TextStyle>
-	}
 	isVerifying: boolean
 	setIsVerifying: React.Dispatch<React.SetStateAction<boolean>>
   showAlert: UseAlertModalType['showAlert']
@@ -34,12 +32,15 @@ const VerifyCodeButton: React.FC<VerifyCodeButtonProps> = ({
   purpose,
   userId,
 	code,
-	emailVerificationStyles,
 	isVerifying,
 	setIsVerifying,
   showAlert,
   hideAlert
-}) => {
+}) =>
+{
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const emailVerificationStyles = createEmailVerificationStyles(colors, responsive)
   const navigation = useAuthNavigation()
   const { verifyEmail } = useAuthContext()
 

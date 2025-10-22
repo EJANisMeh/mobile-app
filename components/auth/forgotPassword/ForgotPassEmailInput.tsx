@@ -1,18 +1,22 @@
 import React from 'react'
-import { TextInput, StyleProp, TextStyle } from 'react-native'
+import { TextInput} from 'react-native'
 import { useAuthContext } from '../../../context'
+import { createForgotPasswordStyles } from '../../../styles/auth'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
 
 interface ForgotPassEmailInputProps {
 	email: string
 	setEmail: (email: string) => void
-	forgotPasswordStyles: Record<string, StyleProp<any>>
 }
 
 const ForgotPassEmailInput: React.FC<ForgotPassEmailInputProps> = ({
 	email,
 	setEmail,
-	forgotPasswordStyles,
 }) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const forgotPasswordStyles = createForgotPasswordStyles(colors, responsive)
 	const { isLoading } = useAuthContext()
 
 	return (

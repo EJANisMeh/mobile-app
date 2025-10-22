@@ -1,23 +1,26 @@
 import React from 'react'
 import { TouchableOpacity, Text, Keyboard, StyleProp } from 'react-native'
 import { UseAlertModalType } from '../../../hooks/useModals/useAlertModal'
-
 import { useAuthContext } from '../../../context'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
+import { createForgotPasswordStyles } from '../../../styles/auth'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
 
 interface RequestPassResetButtonProps {
 	email: string
-	forgotPasswordStyles: Record<string, StyleProp<any>>
 	showAlert: UseAlertModalType['showAlert']
 	hideAlert: UseAlertModalType['hideAlert']
 }
 
 const RequestPassResetButton: React.FC<RequestPassResetButtonProps> = ({
 	email,
-	forgotPasswordStyles,
 	showAlert,
 	hideAlert,
 }) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const forgotPasswordStyles = createForgotPasswordStyles(colors, responsive)
 	const { isLoading, requestPasswordReset } = useAuthContext()
 	const navigation = useAuthNavigation()
 

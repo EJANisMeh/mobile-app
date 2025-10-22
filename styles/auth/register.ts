@@ -1,116 +1,83 @@
 import { StyleSheet } from 'react-native'
+import { ThemeColors } from '../../types/theme'
+import type { ResponsiveDimensionsReturn } from '../../types/hookTypes/useResponsiveDimensions'
 
-export const registerStyles = StyleSheet.create({
+export const createRegisterStyles = (
+	colors: ThemeColors,
+	responsive: ResponsiveDimensionsReturn
+) => StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#f8f9fa',
+		backgroundColor: colors.background,
 	},
 	scrollContent: {
 		flexGrow: 1,
+		justifyContent: 'center' as const,
+		paddingHorizontal: 24,
+		paddingVertical: 20,
 	},
 	content: {
 		flex: 1,
-		justifyContent: 'center',
-		paddingHorizontal: 24,
-		paddingVertical: 32,
+		justifyContent: 'center' as const,
+		paddingVertical: responsive.getResponsivePadding().vertical,
+		maxWidth: responsive.getContentMaxWidth(),
+		width: '100%' as const,
+		alignSelf: 'center' as const,
 	},
 	title: {
-		fontSize: 32,
-		fontWeight: 'bold',
-		textAlign: 'center',
-		marginBottom: 8,
-		color: '#333',
+		fontSize: responsive.getResponsiveFontSize(32),
+		fontWeight: 'bold' as const,
+		textAlign: 'center' as const,
+		marginBottom: responsive.getResponsiveMargin().small,
+		color: colors.text,
 	},
 	subtitle: {
-		fontSize: 16,
-		textAlign: 'center',
-		marginBottom: 32,
-		color: '#666',
+		fontSize: responsive.getResponsiveFontSize(16),
+		textAlign: 'center' as const,
+		marginBottom: responsive.getResponsiveMargin().medium,
+		color: colors.textSecondary,
 	},
 	form: {
-		marginBottom: 32,
-	},
-	nameRow: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		marginBottom: 16,
+		marginBottom: responsive.getResponsiveMargin().medium,
 	},
 	input: {
-		backgroundColor: '#fff',
+		backgroundColor: colors.inputBackground,
 		borderRadius: 8,
-		padding: 16,
+		paddingHorizontal: 16,
+		paddingVertical: 12,
 		marginBottom: 16,
-		fontSize: 16,
 		borderWidth: 1,
-		borderColor: '#e1e5e9',
-	},
-	nameInput: {
-		flex: 1,
-		marginBottom: 0,
-		marginRight: 8,
-	},
-	roleContainer: {
-		marginBottom: 16,
-	},
-	roleLabel: {
+		borderColor: colors.inputBorder,
 		fontSize: 16,
-		fontWeight: '600',
-		marginBottom: 8,
-		color: '#333',
-	},
-	roleButtons: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-	},
-	roleButton: {
-		flex: 1,
-		backgroundColor: '#fff',
-		borderRadius: 8,
-		padding: 16,
-		alignItems: 'center',
-		marginRight: 8,
-		borderWidth: 2,
-		borderColor: '#e1e5e9',
-	},
-	roleButtonActive: {
-		borderColor: '#007bff',
-		backgroundColor: '#f0f8ff',
-	},
-	roleButtonText: {
-		fontSize: 14,
-		fontWeight: '600',
-		color: '#666',
-	},
-	roleButtonTextActive: {
-		color: '#007bff',
+		color: colors.inputText,
 	},
 	registerButton: {
-		backgroundColor: '#007bff',
+		backgroundColor: colors.primary,
 		borderRadius: 8,
-		padding: 16,
+		paddingVertical: 14,
 		alignItems: 'center',
-		marginTop: 8,
-	},
-	disabledButton: {
-		backgroundColor: '#6c757d',
+		marginBottom: 16,
 	},
 	registerButtonText: {
-		color: '#fff',
-		fontSize: 16,
-		fontWeight: '600',
+		color: colors.textOnPrimary,
+		fontSize: 18,
+		fontWeight: 'bold',
+	},
+	disabledButton: {
+		backgroundColor: colors.textSecondary,
 	},
 	footer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignItems: 'center',
+		flexDirection: 'row' as const,
+		justifyContent: 'center' as const,
+		alignItems: 'center' as const,
 	},
 	footerText: {
-		color: '#666',
-		fontSize: 14,
+		fontSize: 16,
+		color: colors.textSecondary,
 	},
 	signInText: {
-		color: '#007bff',
-		fontSize: 14,
+		fontSize: 16,
+		color: colors.primary,
 		fontWeight: '600',
 	},
 })

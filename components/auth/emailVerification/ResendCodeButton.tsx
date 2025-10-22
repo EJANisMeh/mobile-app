@@ -1,14 +1,12 @@
 import React from 'react'
 import { ActivityIndicator, Text, TextInput, TouchableOpacity, StyleProp, ViewStyle, TextStyle } from 'react-native'
 import { UseAlertModalType } from '../../../hooks/useModals/types'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
+import { createEmailVerificationStyles } from '../../../styles/auth'
 
 interface ResendCodeButtonProps
 {
-  emailVerificationStyles: {
-    secondaryButton: StyleProp<ViewStyle>
-    disabledButton: StyleProp<ViewStyle>
-    secondaryButtonText: StyleProp<TextStyle>
-  }
   inputRefs: React.RefObject<(TextInput | null)[]>
   setCode: React.Dispatch<React.SetStateAction<string[]>>
   canResend: boolean
@@ -21,7 +19,6 @@ interface ResendCodeButtonProps
 }
 
 const ResendCodeButton: React.FC<ResendCodeButtonProps> = ({
-  emailVerificationStyles,
   inputRefs,
   setCode,
   canResend,
@@ -33,6 +30,10 @@ const ResendCodeButton: React.FC<ResendCodeButtonProps> = ({
   showAlert
 }) =>
 {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const emailVerificationStyles = createEmailVerificationStyles(colors, responsive)
+
   const handleResendCode = async () => {
 		if (!canResend) return
 

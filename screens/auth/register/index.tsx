@@ -11,7 +11,7 @@ import { useAuthNavigation } from '../../../hooks/useNavigation'
 //types
 import { RegisterData } from '../../../types'
 //styles
-import { createRegisterStyles } from '../../../styles/themedStyles'
+import { createRegisterStyles } from '../../../styles/auth'
 // components
 import { AlertModal, ConfirmationModal } from '../../../components'
 import DynamicScrollView from '../../../components/DynamicScrollView'
@@ -87,8 +87,6 @@ const RegisterScreen: React.FC = () => {
 					<RegisterForm
 						formData={formData}
 						setFormData={setFormData}
-						colors={colors}
-						registerStyles={registerStyles}
 						showAlert={showAlert}
 						setEdited={setEdited}
 					/>
@@ -98,7 +96,6 @@ const RegisterScreen: React.FC = () => {
 							Already have an account?{' '}
 						</Text>
 						<BackToLoginButton
-							registerStyles={registerStyles}
 							handlePress={handleBackToLogin}
 						/>
 					</View>

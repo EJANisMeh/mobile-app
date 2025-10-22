@@ -3,16 +3,17 @@ import {
 	Keyboard,
 	TouchableOpacity,
 	Text,
-	StyleProp,
 } from 'react-native'
 import { useAuthContext } from '../../../context'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
+import { createLoginStyles } from '../../../styles/auth'
 
-interface RegisteNavButtonProps {
-	loginStyles: Record<string, StyleProp<any>>
-}
-
-const RegisterButton: React.FC<RegisteNavButtonProps> = ({ loginStyles }) => {
+const RegisterButton: React.FC = () => {
+	const {colors} = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const loginStyles = createLoginStyles(colors, responsive)
 	const { isLoading } = useAuthContext()
 	const navigation = useAuthNavigation()
 

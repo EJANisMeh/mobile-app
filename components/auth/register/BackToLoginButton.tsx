@@ -2,19 +2,22 @@ import React from 'react'
 import {
 	TouchableOpacity,
 	Text,
-	StyleProp,
 } from 'react-native'
 import { useAuthContext } from '../../../context'
+import { createRegisterStyles } from '../../../styles/auth'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
 
 interface BackToLoginButtonProps {
-	registerStyles: Record<string, StyleProp<any>>
 	handlePress: () => void
 }
 
 const BackToLoginButton: React.FC<BackToLoginButtonProps> = ({
-	registerStyles,
 	handlePress,
 }) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const registerStyles = createRegisterStyles(colors, responsive)
 	const { isLoading } = useAuthContext()
 
 	return (

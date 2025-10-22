@@ -1,15 +1,15 @@
 import React from 'react'
-import { TouchableOpacity, Text, Keyboard, StyleProp } from 'react-native'
+import { TouchableOpacity, Text, Keyboard } from 'react-native'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
+import { createForgotPasswordStyles } from '../../../styles/auth'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
 
-interface BackToLoginButtonProps {
-	forgotPasswordStyles: Record<string, StyleProp<any>>
-}
-
-const BackToLoginButton: React.FC<BackToLoginButtonProps> = ({
-	forgotPasswordStyles,
-}) => {
+const BackToLoginButton: React.FC = () => {
 	const navigation = useAuthNavigation()
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const forgotPasswordStyles = createForgotPasswordStyles(colors, responsive)
 
 	const handlePress = () => {
 		Keyboard.dismiss()

@@ -7,8 +7,8 @@ import {
 	useResponsiveDimensions,
 	useConfirmationModal,
 } from '../../../hooks'
-import { createEmailVerificationStyles } from '../../../styles/themedStyles'
-import { EmailVerificationScreenProps } from '../../../types/authTypes'
+import type { AuthStackParamList } from '../../../types/navigation'
+import { createEmailVerificationStyles } from '../../../styles/auth'
 import DynamicScrollView from '../../../components/DynamicScrollView'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import {
@@ -18,6 +18,16 @@ import {
 import { VerifyCodeButton } from '../../../components/auth/emailVerification'
 import BackToLoginButton from '../../../components/auth/emailVerification/BackToLoginButton'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
+
+interface EmailVerificationScreenProps
+{
+	route: {
+		params: {
+			purpose: AuthStackParamList['EmailVerification']['purpose'];
+			userId: number
+		}
+	}
+}
 
 const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	route,
@@ -144,7 +154,6 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 						setCode={setCode}
 						isVerifying={isVerifying}
 						inputRefs={inputRefs}
-						emailVerificationStyles={emailVerificationStyles}
 					/>
 
 					<View style={emailVerificationStyles.actionsContainer}>
@@ -152,7 +161,6 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 							purpose={purpose}
 							userId={userId}
 							code={code}
-							emailVerificationStyles={emailVerificationStyles}
 							isVerifying={isVerifying}
 							setIsVerifying={setIsVerifying}
 							showAlert={showAlert}
@@ -160,7 +168,6 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 						/>
 
 						<ResendCodeButton
-							emailVerificationStyles={emailVerificationStyles}
 							inputRefs={inputRefs}
 							setCode={setCode}
 							canResend={canResend}
@@ -173,7 +180,6 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 						/>
 
 						<BackToLoginButton
-							emailVerificationStyles={emailVerificationStyles}
 							handlePress={handleBackToLogin}
 							purpose={purpose}
 						/>

@@ -4,28 +4,29 @@ import {
 	Text,
 	TouchableOpacity,
 	ActivityIndicator,
-	StyleProp,
 } from 'react-native'
 import { LoginCredentials } from '../../../types'
 import { UseAlertModalType } from '../../../hooks/useModals/types'
 import { useAuthContext } from '../../../context'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
+import { createLoginStyles } from '../../../styles/auth'
 
 interface LoginButtonProps {
 	credentials: LoginCredentials
 	setCredentials: React.Dispatch<React.SetStateAction<LoginCredentials>>
-	colors: { surface: string; textOnPrimary: string }
-	loginStyles: Record<string, StyleProp<any>>
 	showAlert: UseAlertModalType['showAlert']
 }
 
 const LoginButton: React.FC<LoginButtonProps> = ({
 	credentials,
 	setCredentials,
-	colors,
-	loginStyles,
 	showAlert,
 }) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const loginStyles = createLoginStyles(colors, responsive)
 	const { isLoading, error, login } = useAuthContext()
 	const navigation = useAuthNavigation()
 

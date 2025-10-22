@@ -3,20 +3,17 @@ import {
 	Keyboard,
 	TouchableOpacity,
 	Text,
-	StyleProp,
-	TextStyle,
-	ViewStyle,
 } from 'react-native'
 import { useAuthContext } from '../../../context'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
+import { createLoginStyles } from '../../../styles/auth'
 
-interface ForgotPasswordButtonProps {
-	loginStyles: Record<string, StyleProp<any>>
-}
-
-const ForgotPasswordButton: React.FC<ForgotPasswordButtonProps> = ({
-	loginStyles,
-}) => {
+const ForgotPasswordButton: React.FC = () => {
+	const {colors} = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const loginStyles = createLoginStyles(colors, responsive)
 	const { isLoading } = useAuthContext()
 	const navigation = useAuthNavigation()
 

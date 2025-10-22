@@ -1,108 +1,112 @@
 import { StyleSheet } from 'react-native'
+import { ThemeColors } from '../../types/theme'
+import type { ResponsiveDimensionsReturn } from '../../types/hookTypes/useResponsiveDimensions'
 
-export const emailVerificationStyles = StyleSheet.create({
+export const createEmailVerificationStyles = (
+	colors: ThemeColors,
+	responsive: ResponsiveDimensionsReturn
+) => StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#f8f9fa',
+		backgroundColor: colors.background,
 	},
 	content: {
 		flex: 1,
+		justifyContent: 'center' as const,
 		paddingHorizontal: 24,
-		paddingTop: 80,
-		alignItems: 'center',
+		paddingVertical: responsive.getResponsivePadding().vertical,
+		maxWidth: responsive.getContentMaxWidth(),
+		width: '100%' as const,
+		alignSelf: 'center' as const,
 	},
 	iconContainer: {
-		marginBottom: 32,
+		alignItems: 'center' as const,
+		marginBottom: 24,
 	},
 	icon: {
 		fontSize: 64,
 	},
 	title: {
-		fontSize: 28,
-		fontWeight: 'bold',
-		color: '#333',
-		textAlign: 'center',
+		fontSize: responsive.getResponsiveFontSize(32),
+		fontWeight: 'bold' as const,
+		textAlign: 'center' as const,
 		marginBottom: 16,
+		color: colors.text,
 	},
 	subtitle: {
-		fontSize: 16,
-		color: '#666',
-		textAlign: 'center',
-		marginBottom: 8,
-	},
-	email: {
-		fontSize: 16,
-		fontWeight: 'bold',
-		color: '#007bff',
-		textAlign: 'center',
-		marginBottom: 16,
+		fontSize: responsive.getResponsiveFontSize(16),
+		textAlign: 'center' as const,
+		marginBottom: responsive.getResponsiveMargin().small,
+		color: colors.textSecondary,
 	},
 	description: {
-		fontSize: 14,
-		color: '#666',
-		textAlign: 'center',
-		lineHeight: 20,
+		fontSize: responsive.getResponsiveFontSize(16),
+		textAlign: 'center' as const,
 		marginBottom: 40,
-		paddingHorizontal: 20,
+		color: colors.textSecondary,
+		lineHeight: 24,
 	},
-	actions: {
-		width: '100%',
-		paddingHorizontal: 20,
+	codeInputContainer: {
+		flexDirection: 'row' as const,
+		justifyContent: 'center' as const,
+		gap: 10,
+		marginVertical: 30,
+	},
+	codeInput: {
+		width: 50,
+		height: 60,
+		borderWidth: 2,
+		borderRadius: 8,
+		fontSize: 24,
+		fontWeight: 'bold' as const,
+		textAlign: 'center' as const,
+		color: colors.text,
+		backgroundColor: colors.background,
+	},
+	codeInputFilled: {
+		borderColor: colors.primary,
+	},
+	codeInputEmpty: {
+		borderColor: colors.border,
+	},
+	actionsContainer: {
+		gap: 16,
 	},
 	primaryButton: {
-		backgroundColor: '#007bff',
-		paddingVertical: 16,
-		borderRadius: 12,
-		alignItems: 'center',
-		marginBottom: 16,
-		shadowColor: '#007bff',
-		shadowOffset: {
-			width: 0,
-			height: 4,
-		},
-		shadowOpacity: 0.3,
-		shadowRadius: 8,
-		elevation: 4,
+		backgroundColor: colors.primary,
+		borderRadius: 8,
+		paddingVertical: 14,
+		alignItems: 'center' as const,
 	},
 	primaryButtonText: {
-		color: 'white',
-		fontSize: 16,
-		fontWeight: 'bold',
+		color: colors.textOnPrimary,
+		fontSize: 18,
+		fontWeight: 'bold' as const,
 	},
 	secondaryButton: {
-		backgroundColor: 'white',
-		paddingVertical: 16,
-		borderRadius: 12,
-		alignItems: 'center',
-		marginBottom: 16,
-		borderWidth: 1,
-		borderColor: '#007bff',
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		elevation: 2,
-	},
-	disabledButton: {
-		backgroundColor: '#f5f5f5',
-		borderColor: '#ccc',
-		shadowOpacity: 0,
+		borderWidth: 2,
+		borderColor: colors.primary,
+		borderRadius: 8,
+		paddingVertical: 14,
+		alignItems: 'center' as const,
+		minHeight: 48,
+		justifyContent: 'center' as const,
 	},
 	secondaryButtonText: {
-		color: '#007bff',
+		color: colors.primary,
 		fontSize: 16,
-		fontWeight: '600',
+		fontWeight: '600' as const,
 	},
-	logoutButton: {
+	disabledButton: {
+		borderColor: colors.textSecondary,
+	},
+	backToLoginButton: {
+		alignItems: 'center' as const,
 		paddingVertical: 12,
-		alignItems: 'center',
 	},
-	logoutButtonText: {
-		color: '#666',
+	backToLoginButtonText: {
+		color: colors.textSecondary,
 		fontSize: 16,
-		fontWeight: '500',
+		fontWeight: '500' as const,
 	},
 })

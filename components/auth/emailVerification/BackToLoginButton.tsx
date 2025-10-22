@@ -1,26 +1,23 @@
 import React from 'react'
 import { TouchableOpacity, Text, StyleProp, ViewStyle, TextStyle } from 'react-native'
-import { UseAlertModalType } from '../../../hooks/useModals/types'
 import { AuthStackParamList } from '../../../types/navigation'
-import { useAuthNavigation } from '../../../hooks/useNavigation'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
+import { createEmailVerificationStyles } from '../../../styles/auth'
 
 interface BackToLoginButtonProps {
-	emailVerificationStyles: {
-		backToLoginButton: StyleProp<ViewStyle>
-		backToLoginButtonText: StyleProp<TextStyle>
-	}
 	handlePress: () => void
 	purpose: AuthStackParamList['EmailVerification']['purpose']
 }
 
 const BackToLoginButton: React.FC<BackToLoginButtonProps> = ({
-	emailVerificationStyles,
 	purpose,
 	handlePress,
 }) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const emailVerificationStyles = createEmailVerificationStyles(colors, responsive)
 
-
-  
 	return (
 		<TouchableOpacity
 			style={emailVerificationStyles.backToLoginButton}

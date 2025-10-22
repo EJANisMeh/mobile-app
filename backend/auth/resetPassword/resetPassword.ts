@@ -109,14 +109,14 @@ export const resetPassword = async (
 			})
 		}
 
-		res.json({
+		return res.json({
 			success: true,
 			message:
 				'Password reset successful. You can now login with your new password.',
 		})
 	} catch (error) {
 		console.error('Reset password error:', error)
-		res.status(500).json({
+		return res.status(500).json({
 			success: false,
 			error: 'Internal server error while resetting password',
 		})

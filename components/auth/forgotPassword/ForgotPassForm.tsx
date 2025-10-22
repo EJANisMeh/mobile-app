@@ -4,11 +4,13 @@ import ForgotPassEmailInput from './ForgotPassEmailInput'
 import RequestPassResetButton from './RequestPassResetButton'
 import BackToLoginButton from './BackToLoginButton'
 import { UseAlertModalType } from '../../../hooks/useModals/useAlertModal'
+import { createForgotPasswordStyles } from '../../../styles/auth'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
 
 interface ForgotPasswordFormProps {
 	email: string
 	setEmail: (email: string) => void
-	forgotPasswordStyles: Record<string, StyleProp<any>>
 	showAlert: UseAlertModalType['showAlert']
 	hideAlert: UseAlertModalType['hideAlert']
 }
@@ -16,26 +18,27 @@ interface ForgotPasswordFormProps {
 const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
 	email,
 	setEmail,
-	forgotPasswordStyles,
 	showAlert,
 	hideAlert,
 }) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const forgotPasswordStyles = createForgotPasswordStyles(colors, responsive)
+
 	return (
 		<View style={forgotPasswordStyles.form}>
 			<ForgotPassEmailInput
 				email={email}
 				setEmail={setEmail}
-				forgotPasswordStyles={forgotPasswordStyles}
 			/>
 
 			<RequestPassResetButton
 				email={email}
-				forgotPasswordStyles={forgotPasswordStyles}
 				showAlert={showAlert}
 				hideAlert={hideAlert}
 			/>
 
-			<BackToLoginButton forgotPasswordStyles={forgotPasswordStyles} />
+			<BackToLoginButton />
 		</View>
 	)
 }

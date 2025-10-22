@@ -6,18 +6,15 @@ import {
 	ViewStyle,
 	TextStyle,
 } from 'react-native'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
+import { createEmailVerificationStyles } from '../../../styles/auth'
 
 interface CodeInputProps {
   code: string[]
   setCode: React.Dispatch<React.SetStateAction<string[]>>
 	isVerifying: boolean
 	inputRefs: React.RefObject<(TextInput | null)[]>
-	emailVerificationStyles: {
-		codeInputContainer: StyleProp<ViewStyle>
-		codeInput: StyleProp<TextStyle>
-		codeInputFilled: StyleProp<TextStyle>
-		codeInputEmpty: StyleProp<TextStyle>
-	}
 }
 
 const CodeInput: React.FC<CodeInputProps> = ({
@@ -25,8 +22,12 @@ const CodeInput: React.FC<CodeInputProps> = ({
   setCode,
 	isVerifying,
 	inputRefs,
-	emailVerificationStyles,
-}) => {
+}) =>
+{
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const emailVerificationStyles = createEmailVerificationStyles(colors, responsive)
+
 	const handleCodeChange = (text: string, index: number) => {
 		// Only allow numbers
 		if (text && !/^\d$/.test(text)) return

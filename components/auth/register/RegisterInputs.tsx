@@ -1,26 +1,30 @@
 import React from 'react'
-import { TextInput, StyleProp, TextStyle } from 'react-native'
+import { TextInput } from 'react-native'
 import type { RegisterData } from '../../../types'
 import { useAuthContext } from '../../../context'
+import { createRegisterStyles } from '../../../styles/auth'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
 
 interface RegisterInputsProps {
 	formData: RegisterData
-	inputStyle: StyleProp<TextStyle>
 	updateField: (field: keyof RegisterData, value: string) => void
 }
 
 const RegisterInputs: React.FC<RegisterInputsProps> = ({
 	formData,
-	inputStyle,
 	updateField,
 }) =>
 {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const registerStyles = createRegisterStyles(colors, responsive)
   const { isLoading } = useAuthContext()
 
 	return (
 		<>
 			<TextInput
-				style={inputStyle}
+				style={registerStyles.input}
 				placeholder="Email (yourEmail@example.com)"
 				value={formData.email}
 				onChangeText={(value) => updateField('email', value)}
@@ -31,7 +35,7 @@ const RegisterInputs: React.FC<RegisterInputsProps> = ({
 			/>
 
 			<TextInput
-				style={inputStyle}
+				style={registerStyles.input}
 				placeholder="Password"
 				value={formData.password}
 				onChangeText={(value) => updateField('password', value)}
@@ -41,7 +45,7 @@ const RegisterInputs: React.FC<RegisterInputsProps> = ({
 			/>
 
 			<TextInput
-				style={inputStyle}
+				style={registerStyles.input}
 				placeholder="Confirm Password"
 				value={formData.confirmPassword}
 				onChangeText={(value) => updateField('confirmPassword', value)}

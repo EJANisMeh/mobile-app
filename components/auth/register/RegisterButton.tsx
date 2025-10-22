@@ -4,27 +4,28 @@ import {
 	Text,
 	TouchableOpacity,
 	ActivityIndicator,
-	StyleProp,
 } from 'react-native'
 import type { RegisterData } from '../../../types'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
 import { useAuthContext } from '../../../context'
 import { UseAlertModalType } from '../../../hooks/useModals/types'
+import { createRegisterStyles } from '../../../styles/auth'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
   
 interface RegisterButtonProps {
 	formData: RegisterData
-	colors: { textOnPrimary: string }
-	buttonStyles: Record<string, StyleProp<any>>
 	showAlert: UseAlertModalType['showAlert']
 	hideAlert?: UseAlertModalType['hideAlert']
 }
 
 const RegisterButton: React.FC<RegisterButtonProps> = ({
 	formData,
-	colors,
-	buttonStyles,
 	showAlert,
 }) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const registerStyles = createRegisterStyles(colors, responsive)
 	const { isLoading, error, register } = useAuthContext()
   const navigation = useAuthNavigation()
   
@@ -113,8 +114,8 @@ const RegisterButton: React.FC<RegisterButtonProps> = ({
 	return (
 		<TouchableOpacity
 			style={[
-				buttonStyles.registerButton,
-				isLoading && buttonStyles.disabledButton,
+				registerStyles.registerButton,
+				isLoading && registerStyles.disabledButton,
 			]}
 			onPress={handleRegister}
 			disabled={isLoading}
@@ -126,12 +127,12 @@ const RegisterButton: React.FC<RegisterButtonProps> = ({
 						color={colors.textOnPrimary}
 						style={{ marginRight: 8 }}
 					/>
-					<Text style={buttonStyles.registerButtonText}>
+					<Text style={registerStyles.registerButtonText}>
 						Creating Account...
 					</Text>
 				</View>
 			) : (
-				<Text style={buttonStyles.registerButtonText}>Create Account</Text>
+				<Text style={registerStyles.registerButtonText}>Create Account</Text>
 			)}
 		</TouchableOpacity>
 	)

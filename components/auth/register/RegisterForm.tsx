@@ -1,16 +1,17 @@
 import React from 'react'
-import { View, StyleProp } from 'react-native'
+import { View } from 'react-native'
 
 import { RegisterData } from '../../../types'
 import { UseAlertModalProps } from '../../../hooks/useModals/types'
 import RegisterInputs from './RegisterInputs'
 import RegisterButton from './RegisterButton'
+import { createRegisterStyles } from '../../../styles/auth'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
 
 interface RegisterFormProps {
 	formData: RegisterData
 	setFormData: React.Dispatch<React.SetStateAction<RegisterData>>
-	colors: { textOnPrimary: string }
-	registerStyles: Record<string, StyleProp<any>>
 	showAlert: (opts: UseAlertModalProps) => void
 	setEdited: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -18,11 +19,14 @@ interface RegisterFormProps {
 const RegisterForm: React.FC<RegisterFormProps> = ({
 	formData,
 	setFormData,
-	colors,
-	registerStyles,
 	showAlert,
 	setEdited,
-}) => {
+}) =>
+{
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const registerStyles = createRegisterStyles(colors, responsive)
+
 	const updateField = (field: keyof RegisterData, value: string) => {
 		setFormData((prev: RegisterData) => {
 			// Create the updated form data
@@ -44,14 +48,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 		<View style={registerStyles.form}>
 			<RegisterInputs
 				formData={formData}
-				inputStyle={registerStyles.input}
 				updateField={updateField}
 			/>
 
 			<RegisterButton
 				formData={formData}
-				colors={colors}
-				buttonStyles={registerStyles}
 				showAlert={showAlert}
 			/>
 		</View>
