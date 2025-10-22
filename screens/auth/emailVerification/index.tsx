@@ -13,7 +13,7 @@ import { createEmailVerificationStyles } from '../../../styles/themedStyles'
 import { EmailVerificationScreenProps } from '../../../types/authTypes'
 import DynamicScrollView from '../../../components/DynamicScrollView'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { CodeInput } from '../../../components/auth/emailVerification'
+import { CodeInput, ResendCodeButton } from '../../../components/auth/emailVerification'
 import { VerifyCodeButton } from '../../../components/auth/emailVerification'
 
 const VERIFICATION_CODE = '123456'
@@ -34,12 +34,9 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	const [isResending, setIsResending] = useState(false)
 	const [canResend, setCanResend] = useState(false)
 	const [countdown, setCountdown] = useState(30)
+	const inputRefs = useRef<(TextInput | null)[]>([])
 	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
-	const { verifyEmail } = useAuthContext()
-
-	// Refs for input fields
-	const inputRefs = useRef<(TextInput | null)[]>([])
 
 	useEffect(() => {
 		const timer = setInterval(() => {
@@ -55,39 +52,6 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 
 		return () => clearInterval(timer)
 	}, [])
-
-	const handleResendCode = async () => {
-		if (!canResend) return
-
-		setIsResending(true)
-		try {
-			// TODO: Implement actual code resend when backend is ready
-			// await resendVerificationCode(email)
-
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1500))
-
-			showAlert({
-				title: 'Success',
-				message: 'A new verification code has been sent to your email.',
-			})
-
-			// Reset countdown
-			setCanResend(false)
-			setCountdown(30)
-
-			// Clear code inputs
-			setCode(['', '', '', '', '', ''])
-			inputRefs.current[0]?.focus()
-		} catch (error) {
-			showAlert({
-				title: 'Error',
-				message: 'Failed to resend verification code. Please try again.',
-			})
-		} finally {
-			setIsResending(false)
-		}
-	}
 
 	const handleBackToLogin = async () => {
 		if (purpose === 'password-reset') {
@@ -159,25 +123,18 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 							hideAlert={hideAlert}
 						/>
 
-						<TouchableOpacity
-							style={[
-								emailVerificationStyles.secondaryButton,
-								(!canResend || isResending) &&
-									emailVerificationStyles.disabledButton,
-							]}
-							onPress={handleResendCode}
-							disabled={!canResend || isResending}>
-							{isResending ? (
-								<ActivityIndicator
-									color="#007bff"
-									size="small"
-								/>
-							) : (
-								<Text style={emailVerificationStyles.secondaryButtonText}>
-									{canResend ? 'Resend Code' : `Resend in ${countdown}s`}
-								</Text>
-							)}
-						</TouchableOpacity>
+						<ResendCodeButton
+							emailVerificationStyles={emailVerificationStyles}
+							inputRefs={inputRefs}
+							setCode={setCode}
+							canResend={canResend}
+							setCanResend={setCanResend}
+							isResending={isResending}
+							setIsResending={setIsResending}
+							countdown={countdown}
+							setCountdown={setCountdown}
+							showAlert={showAlert}
+						/>
 
 						<TouchableOpacity
 							style={emailVerificationStyles.backToLoginButton}
