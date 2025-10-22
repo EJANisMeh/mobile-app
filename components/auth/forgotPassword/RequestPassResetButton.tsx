@@ -42,26 +42,33 @@ const RequestPassResetButton: React.FC<RequestPassResetButtonProps> = ({
 
 		try {
 			// Call backend to check if email exists and send reset email
-			const success = await requestPasswordReset(email)
+			const result = await requestPasswordReset(email)
 			const resetTitle = 'Password Reset'
-			const resetMsg = 'Password reset request sent to the email'
 
-			if (!success) {
+			if (!result.success) {
 				showAlert({
 					title: resetTitle,
-					message: resetMsg,
+					message: result.message || 'Failed to send reset email',
+				})
+				return
+			}
+
+			if (!result.userId) {
+				showAlert({
+					title: 'Error',
+					message: 'User ID not found for the provided email.',
 				})
 				return
 			}
 
 			showAlert({
 				title: resetTitle,
-				message: resetMsg,
+				message: result.message,
 				onClose: () => {
 					hideAlert()
 					// Navigate to EmailVerification with password-reset purpose
 					navigation.navigate('EmailVerification', {
-						email,
+						userId: result.userId,
 						purpose: 'password-reset',
 					})
 				},

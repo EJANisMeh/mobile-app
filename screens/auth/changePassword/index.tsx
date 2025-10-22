@@ -31,7 +31,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 	navigation,
 	route,
 }) => {
-	const { email, userId } = route.params
+	const { userId } = route.params
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const changePasswordStyles = createChangePasswordStyles(colors, responsive)
@@ -100,7 +100,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 		setLocalIsLoading(true)
 		try {
 			// Call resetPassword with email or userId and new password
-			const identifier = email ?? userId
+			const identifier = userId
 			const success = await resetPassword(
 				identifier as string | number,
 				formData.newPassword

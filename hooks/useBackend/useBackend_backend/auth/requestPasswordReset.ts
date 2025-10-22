@@ -22,10 +22,7 @@ export const requestPasswordReset = (
 				}
 			}
 
-			return {
-				success: response.success,
-				message: response.message,
-			}
+			return response
 		} catch (error) {
 			const errorMsg =
 				error instanceof Error ? error.message : 'Password reset request failed'
