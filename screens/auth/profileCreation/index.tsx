@@ -5,16 +5,22 @@ import {
 	TextInput,
 	TouchableOpacity,
 	ActivityIndicator,
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
 } from 'react-native'
 import { useAuthContext, useThemeContext } from '../../../context'
 import { AlertModal } from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
-import { createProfileCreationStyles } from '../../../styles/themedStyles'
-import { ProfileCreationScreenProps, ProfileCreationData } from '../../../types'
+import { createProfileCreationStyles } from '../../../styles/auth'
+import { ProfileCreationData } from '../../../types'
 import DynamicScrollView from '../../../components/DynamicScrollView'
+import { NameInputs } from '../../../components/auth/profileCreation'
+
+interface ProfileCreationScreenProps {
+	route: {
+		params: {
+			userId: number
+		}
+	}
+}
 
 const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 	route,
@@ -116,54 +122,7 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 					</Text>
 
 					<View style={profileCreationStyles.form}>
-						<TextInput
-							style={[
-								profileCreationStyles.input,
-								isLoading && { opacity: 0.6 },
-							]}
-							placeholder="First Name *"
-							value={formData.fname}
-							onChangeText={(text) => updateField('fname', text)}
-							editable={!isLoading}
-							autoCapitalize="words"
-						/>
-
-						<TextInput
-							style={[
-								profileCreationStyles.input,
-								isLoading && { opacity: 0.6 },
-							]}
-							placeholder="Last Name *"
-							value={formData.lname}
-							onChangeText={(text) => updateField('lname', text)}
-							editable={!isLoading}
-							autoCapitalize="words"
-						/>
-
-						<TouchableOpacity
-							style={[
-								profileCreationStyles.imagePickerButton,
-								isLoading && { opacity: 0.6 },
-							]}
-							disabled={isLoading}
-							onPress={() => {
-								// TODO: Implement image picker
-								showAlert({
-									title: 'Coming Soon',
-									message: 'Image upload feature will be available soon.',
-								})
-							}}>
-							<Text style={profileCreationStyles.imagePickerText}>
-								{formData.image_url
-									? '✓ Profile Picture Selected'
-									: '📷 Add Profile Picture (Optional)'}
-							</Text>
-							{formData.image_url && (
-								<Text style={profileCreationStyles.selectedImageText}>
-									Tap to change
-								</Text>
-							)}
-						</TouchableOpacity>
+						<NameInputs formData={formData} updateField={updateField} />
 
 						<View style={profileCreationStyles.contactDetailsContainer}>
 							<Text style={profileCreationStyles.contactDetailsLabel}>
