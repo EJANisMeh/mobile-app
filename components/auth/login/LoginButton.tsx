@@ -62,8 +62,10 @@ const LoginButton: React.FC<LoginButtonProps> = ({
 				},
 			})
 		}
+		
 		// Check if user needs to complete profile
-		if (result.needsProfileCreation && result.userId && result.token) {
+		if (result.needsProfileCreation && result.userId && result.token)
+		{
 			showAlert({
 				title: 'Welcome!',
 				message: 'Please complete your profile to continue.',

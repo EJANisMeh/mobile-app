@@ -34,7 +34,7 @@ export const login = (
 			// Check if user needs to complete profile
 			// If so, don't store auth data yet - just return the info
 
-			if (response.needsEmailVerification || response.needsProfileCreation) {
+			if (response.needsEmailVerification) {
 				return {
 					success: true,
 					userId: response.user.id,
@@ -49,6 +49,16 @@ export const login = (
 				return {
 					success: false,
 					error: 'No token received',
+				}
+			}
+
+			if (response.needsProfileCreation) {
+				return {
+					success: true,
+					userId: response.user.id,
+					needsProfileCreation: response.needsProfileCreation,
+					token: response.token,
+					message: response.message,
 				}
 			}
 

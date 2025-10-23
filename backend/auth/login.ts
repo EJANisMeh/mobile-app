@@ -112,7 +112,7 @@ export const login = async (req: express.Request, res: express.Response) => {
 			{ expiresIn: JWT_EXPIRES_IN }
 		)
 
-		res.json({
+		return res.json({
 			success: true,
 			user: userResponse,
 			token,
@@ -120,7 +120,7 @@ export const login = async (req: express.Request, res: express.Response) => {
 		})
 	} catch (error) {
 		console.error('Login error:', error)
-		res.status(500).json({
+		return res.status(500).json({
 			success: false,
 			error: 'Internal server error during login',
 		})
