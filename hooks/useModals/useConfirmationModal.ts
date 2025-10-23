@@ -1,13 +1,32 @@
 import { useState, useCallback } from 'react'
-import { UseConfirmationModalProps } from '../../types/hookTypes/useModals'
 
-export const useConfirmationModal = () =>
+export interface UseConfirmationModalProps {
+	title: string
+	message: string
+	confirmText: string
+	cancelText: string
+	confirmStyle?: 'default' | 'destructive'
+	onConfirm: () => void
+	onCancel?: () => void
+}
+
+export interface UseConfirmationModalType
+{
+  visible: boolean
+  props: UseConfirmationModalProps
+  showConfirmation: (confirmProps: UseConfirmationModalProps) => void
+  hideConfirmation: () => void
+}
+
+export const useConfirmationModal = (): UseConfirmationModalType =>
 {
   const [visible, setVisible] = useState(false)
   const [props, setProps] = useState<UseConfirmationModalProps>({
     title: '',
     message: '',
-    onConfirm: () => {},
+    confirmText: '',
+    cancelText: '',
+    onConfirm: () => { },
   })
 
   const showConfirmation = useCallback(
@@ -24,6 +43,8 @@ export const useConfirmationModal = () =>
       setProps({
         title: '',
         message: '',
+        confirmText: '',
+        cancelText: '',
         onConfirm: () => {},
       })
     }, 300)
