@@ -1,18 +1,22 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { View, Text, BackHandler, TouchableOpacity } from 'react-native'
+import { useThemeContext } from '../../../context'
+import { AlertModal, ConfirmationModal } from '../../../components'
 import {
-	View,
-	Text,
-	TextInput,
-	TouchableOpacity,
-	ActivityIndicator,
-} from 'react-native'
-import { useAuthContext, useThemeContext } from '../../../context'
-import { AlertModal } from '../../../components'
-import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
+	useAlertModal,
+	useConfirmationModal,
+	useResponsiveDimensions,
+	useAuthNavigation,
+} from '../../../hooks'
 import { createProfileCreationStyles } from '../../../styles/auth'
 import { ProfileCreationData } from '../../../types'
 import DynamicScrollView from '../../../components/DynamicScrollView'
-import { NameInputs, ContactDetails } from '../../../components/auth/profileCreation'
+import {
+	NameInputs,
+	ContactDetails,
+	SubmitButton,
+	ImagePicker,
+} from '../../../components/auth/profileCreation'
 
 interface ProfileCreationScreenProps {
 	route: {
@@ -30,8 +34,14 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 	const responsive = useResponsiveDimensions()
 	const profileCreationStyles = createProfileCreationStyles(colors, responsive)
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
-	const { completeProfile } = useAuthContext()
-	const [isLoading, setIsLoading] = useState(false)
+	const {
+		visible: confirmVisible,
+		props: confirmProps,
+		showConfirmation,
+		hideConfirmation,
+	} = useConfirmationModal()
+	const navigation = useAuthNavigation()
+
 	const [formData, setFormData] = useState<ProfileCreationData>({
 		fname: '',
 		lname: '',
@@ -39,54 +49,12 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 		contact_details: [],
 	})
 
-	const handleSubmit = async () => {
-		// Validate required fields
-		if (!formData.fname.trim() || !formData.lname.trim()) {
-			showAlert({
-				title: 'Missing Information',
-				message: 'Please enter your first name and last name.',
-			})
-			return
-		}
-
-		setIsLoading(true)
-		try {
-			const success = await completeProfile({
-				userId,
-				fname: formData.fname,
-				lname: formData.lname,
-				image_url: formData.image_url,
-				contact_details: formData.contact_details,
-			})
-
-			if (success) {
-				showAlert({
-					title: 'Success',
-					message:
-						'Profile created successfully! You can now access your account.',
-					onConfirm: () => {
-						hideAlert()
-						// RootNavigator will automatically handle navigation based on auth state
-					},
-				})
-			} else {
-				showAlert({
-					title: 'Error',
-					message: 'Failed to create profile. Please try again.',
-				})
-			}
-		} catch (error) {
-			showAlert({
-				title: 'Error',
-				message: 'An unexpected error occurred. Please try again.',
-			})
-		} finally {
-			setIsLoading(false)
-		}
-	}
-
 	const updateField = (field: keyof ProfileCreationData, value: string) => {
 		setFormData((prev) => ({ ...prev, [field]: value }))
+	}
+
+	const updateImageUrl = (url: string | undefined) => {
+		setFormData((prev) => ({ ...prev, image_url: url }))
 	}
 
 	const addContactDetail = () => {
@@ -109,6 +77,40 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 		setFormData((prev) => ({ ...prev, contact_details: newContacts }))
 	}
 
+	const handleCancel = () => {
+		showConfirmation({
+			title: 'Cancel Profile Creation?',
+			message:
+				'Are you sure you want to cancel profile creation? Your current input will not be saved.',
+			confirmText: 'Yes',
+			cancelText: 'No',
+			onConfirm: () =>
+			{
+				updateField('fname', '')
+				updateField('lname', '')
+				updateImageUrl(undefined)
+				setFormData((prev) => ({ ...prev, contact_details: [] }))
+				// Handle cancellation logic
+				navigation.reset({
+					index: 0,
+					routes: [{ name: 'Login' }],
+				})
+			},
+		})
+	}
+
+	useEffect(() => {
+		const backHandler = BackHandler.addEventListener(
+			'hardwareBackPress',
+			() => {
+				handleCancel()
+				return true // Prevent default back behavior
+			}
+		)
+
+		return () => backHandler.remove() // Remove backhandler function after unmounting
+	}, [])
+
 	return (
 		<>
 			<DynamicScrollView
@@ -121,8 +123,16 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 						Enter your details to get started
 					</Text>
 
+					<ImagePicker
+						formData={formData}
+						showAlert={showAlert}
+					/>
+
 					<View style={profileCreationStyles.form}>
-						<NameInputs formData={formData} updateField={updateField} />
+						<NameInputs
+							formData={formData}
+							updateField={updateField}
+						/>
 
 						<ContactDetails
 							formData={formData}
@@ -131,8 +141,18 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 							addContactDetail={addContactDetail}
 						/>
 
-						{/* Submit Button */}
-						
+						<SubmitButton
+							userId={userId}
+							formData={formData}
+							showAlert={showAlert}
+							showConfirmation={showConfirmation}
+						/>
+
+						<TouchableOpacity
+							style={profileCreationStyles.cancelButton}
+							onPress={handleCancel}>
+							<Text style={profileCreationStyles.cancelButtonText}>Cancel</Text>
+						</TouchableOpacity>
 					</View>
 				</View>
 			</DynamicScrollView>
@@ -142,6 +162,18 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 				onClose={hideAlert}
 				title={title}
 				message={message}
+			/>
+
+			<ConfirmationModal
+				visible={confirmVisible}
+				onClose={hideConfirmation}
+				title={confirmProps.title}
+				message={confirmProps.message}
+				confirmText={confirmProps.confirmText}
+				cancelText={confirmProps.cancelText}
+				confirmStyle={confirmProps.confirmStyle}
+				onConfirm={confirmProps.onConfirm}
+				onCancel={confirmProps.onCancel}
 			/>
 		</>
 	)
