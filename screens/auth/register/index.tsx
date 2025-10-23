@@ -31,14 +31,14 @@ const RegisterScreen: React.FC = () => {
 	const registerStyles = createRegisterStyles(colors, responsive)
 	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
-	const navigation = useAuthNavigation()
-
 	const {
 		visible: confirmVisible,
 		props: confirmProps,
 		showConfirmation,
 		hideConfirmation,
 	} = useConfirmationModal()
+	
+	const navigation = useAuthNavigation()
 
 	const handleBackToLogin = () => {
 		Keyboard.dismiss()
