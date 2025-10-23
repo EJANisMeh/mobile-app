@@ -116,7 +116,6 @@ export const createChangePasswordStyles = (
 		fontWeight: 'bold' as const,
 	},
 	submitButton: {
-		flex: 1,
 		backgroundColor: colors.primary,
 		borderRadius: 8,
 		paddingVertical: 14,
@@ -128,7 +127,6 @@ export const createChangePasswordStyles = (
 		fontWeight: 'bold' as const,
 	},
 	cancelButton: {
-		flex: 1,
 		borderWidth: 2,
 		borderColor: colors.border,
 		borderRadius: 8,
