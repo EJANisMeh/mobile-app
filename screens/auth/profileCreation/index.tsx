@@ -12,7 +12,7 @@ import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import { createProfileCreationStyles } from '../../../styles/auth'
 import { ProfileCreationData } from '../../../types'
 import DynamicScrollView from '../../../components/DynamicScrollView'
-import { NameInputs } from '../../../components/auth/profileCreation'
+import { NameInputs, ContactDetails } from '../../../components/auth/profileCreation'
 
 interface ProfileCreationScreenProps {
 	route: {
@@ -124,65 +124,15 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 					<View style={profileCreationStyles.form}>
 						<NameInputs formData={formData} updateField={updateField} />
 
-						<View style={profileCreationStyles.contactDetailsContainer}>
-							<Text style={profileCreationStyles.contactDetailsLabel}>
-								Contact Details (Optional)
-							</Text>
-							<Text style={profileCreationStyles.contactDetailsHint}>
-								Add phone numbers, social media, etc.
-							</Text>
+						<ContactDetails
+							formData={formData}
+							updateContactDetail={updateContactDetail}
+							removeContactDetail={removeContactDetail}
+							addContactDetail={addContactDetail}
+						/>
 
-							{(formData.contact_details || []).map((contact, index) => (
-								<View
-									key={index}
-									style={profileCreationStyles.contactItem}>
-									<TextInput
-										style={profileCreationStyles.contactInput}
-										placeholder="e.g., +639123456789 or @username"
-										value={contact}
-										onChangeText={(text) => updateContactDetail(index, text)}
-										editable={!isLoading}
-									/>
-									<TouchableOpacity
-										style={profileCreationStyles.removeContactButton}
-										onPress={() => removeContactDetail(index)}
-										disabled={isLoading}>
-										<Text style={profileCreationStyles.removeContactText}>
-											×
-										</Text>
-									</TouchableOpacity>
-								</View>
-							))}
-
-							<TouchableOpacity
-								style={profileCreationStyles.addContactButton}
-								onPress={addContactDetail}
-								disabled={isLoading}>
-								<Text style={profileCreationStyles.addContactButtonText}>
-									+ Add Contact Detail
-								</Text>
-							</TouchableOpacity>
-						</View>
-
-						<TouchableOpacity
-							style={[
-								profileCreationStyles.submitButton,
-								isLoading && profileCreationStyles.disabledButton,
-							]}
-							onPress={handleSubmit}
-							disabled={isLoading}
-							activeOpacity={isLoading ? 1 : 0.7}>
-							{isLoading ? (
-								<ActivityIndicator
-									size="small"
-									color={colors.textOnPrimary}
-								/>
-							) : (
-								<Text style={profileCreationStyles.submitButtonText}>
-									Complete Profile
-								</Text>
-							)}
-						</TouchableOpacity>
+						{/* Submit Button */}
+						
 					</View>
 				</View>
 			</DynamicScrollView>
