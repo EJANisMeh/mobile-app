@@ -25,6 +25,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
 			title: 'Confirm Logout',
 			message: 'Are you sure you want to logout?',
 			confirmText: 'Logout',
+			cancelText: 'Cancel',
 			confirmStyle: 'destructive',
 			onConfirm: async () => {
 				try {
