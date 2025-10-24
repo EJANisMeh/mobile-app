@@ -20,7 +20,7 @@ import {
 } from '../../../hooks'
 import { createConcessionStyles } from '../../../styles/concessionaire'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
-import { NoConcession } from '../../../components/concessionaire/concession/main'
+import { LoadingConcession, NoConcession, ConcessionHeader } from '../../../components/concessionaire/concession/main'
 
 const ConcessionScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -112,57 +112,25 @@ const ConcessionScreen: React.FC = () => {
 	// Loading state
 	if (loading && !concession) {
 		return (
-			<NoConcession />
+			<LoadingConcession />
 		)
 	}
 
 	// No concession assigned
 	if (!concession && !loading) {
 		return (
-			<View style={concessionStyles.loadingContainer}>
-				<MaterialCommunityIcons
-					name="store-off"
-					size={64}
-					color={colors.placeholder}
-				/>
-				<Text style={concessionStyles.loadingText}>
-					No concession assigned to your account
-				</Text>
-			</View>
+			<NoConcession />
 		)
 	}
 
+	// concession and !loading
 	return (
 		<View style={concessionStyles.container}>
 			<ScrollView
 				contentContainerStyle={concessionStyles.scrollContent}
 				showsVerticalScrollIndicator={false}>
 				{/* Header Section */}
-				<View style={concessionStyles.headerSection}>
-					<Text style={concessionStyles.concessionName}>
-						{concession?.name}
-					</Text>
-					{concession?.description ? (
-						<>
-							<Text
-								style={concessionStyles.concessionDescription}
-								numberOfLines={descExpanded ? undefined : 4}>
-								{concession.description}
-							</Text>
-							{concession.description.length > DESC_COLLAPSE_LENGTH && (
-								<TouchableOpacity onPress={() => setDescExpanded((s) => !s)}>
-									<Text style={concessionStyles.showMoreText}>
-										{descExpanded ? 'Show less' : 'Show more'}
-									</Text>
-								</TouchableOpacity>
-							)}
-						</>
-					) : (
-						<Text style={concessionStyles.noDescription}>
-							No description available
-						</Text>
-					)}
-				</View>
+				<ConcessionHeader />
 
 				{/* Status Section */}
 				<View style={concessionStyles.statusSection}>

@@ -1,28 +1,23 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, ActivityIndicator } from 'react-native'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createConcessionStyles } from '../../../../styles/concessionaire'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
 
-const NoConcession: React.FC = () =>
-{
+const LoadingConcession: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const concessionStyles = createConcessionStyles(colors, responsive)
 
 	return (
 		<View style={concessionStyles.loadingContainer}>
-			<MaterialCommunityIcons
-				name="store-off"
-				size={64}
-				color={colors.placeholder}
+			<ActivityIndicator
+				size="large"
+				color={colors.primary}
 			/>
-			<Text style={concessionStyles.loadingText}>
-				No concession assigned to your account
-			</Text>
+			<Text style={concessionStyles.loadingText}>Loading concession...</Text>
 		</View>
 	)
 }
 
-export default NoConcession
+export default LoadingConcession
