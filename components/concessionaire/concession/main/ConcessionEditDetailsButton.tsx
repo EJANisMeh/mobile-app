@@ -4,13 +4,13 @@ import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createConcessionStyles } from '../../../../styles/concessionaire'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { useConcessionNavigation } from '../../../../hooks/useNavigation'
+import { useConcessionaireNavigation } from '../../../../hooks/useNavigation'
 
 const ConcessionEditDetailsButton: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const concessionStyles = createConcessionStyles(colors, responsive)
-	const navigation = useConcessionNavigation()
+	const navigation = useConcessionaireNavigation()
 
 	const handleEditDetails = () => {
 		navigation.navigate('EditConcessionDetails' as never)
