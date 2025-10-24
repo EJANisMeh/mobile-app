@@ -20,6 +20,7 @@ import {
 	ConcessionHeader,
 	ConcessionStatusButton,
 	ConcessionEditDetailsButton,
+	PaymentMethodsList,
 } from '../../../components/concessionaire/concession/main'
 
 const ConcessionScreen: React.FC = () => {
@@ -27,7 +28,6 @@ const ConcessionScreen: React.FC = () => {
 	const responsive = useResponsiveDimensions()
 	const { user } = useAuthContext()
 	const { concession, loading, getConcession } = useConcessionContext()
-	const navigation = useNavigation()
 	const concessionStyles = createConcessionStyles(colors, responsive)
 
 	const { visible, title, message, showAlert, hideAlert, handleClose } =
@@ -47,9 +47,6 @@ const ConcessionScreen: React.FC = () => {
 		}
 	}, [user?.concession_id])
 
-	const handleManagePaymentMethods = () => {
-		navigation.navigate('ManagePaymentMethods' as never)
-	}
 
 	// Loading state
 	if (loading && !concession) {
@@ -86,61 +83,8 @@ const ConcessionScreen: React.FC = () => {
 				{/* Payment Methods Section */}
 				<View style={concessionStyles.paymentMethodsSection}>
 					<Text style={concessionStyles.sectionTitle}>Payment Methods</Text>
-					<View style={concessionStyles.paymentMethodsList}>
-						{concession?.payment_methods?.map(
-							(method: string, index: number) => (
-								<View
-									key={index}
-									style={[
-										concessionStyles.paymentMethodItem,
-										method === 'cash' && concessionStyles.paymentMethodDefault,
-									]}>
-									<View style={concessionStyles.paymentMethodContent}>
-										<MaterialCommunityIcons
-											name={
-												method === 'cash'
-													? 'cash'
-													: method === 'gcash'
-													? 'cellphone'
-													: 'credit-card'
-											}
-											size={22}
-											color={method === 'cash' ? colors.primary : colors.text}
-											style={concessionStyles.paymentMethodIcon}
-										/>
-										<Text
-											style={[
-												concessionStyles.paymentMethodText,
-												method === 'cash' &&
-													concessionStyles.paymentMethodDefaultText,
-											]}>
-											{method}
-										</Text>
-									</View>
-									{method === 'cash' && (
-										<View style={concessionStyles.defaultBadge}>
-											<Text style={concessionStyles.defaultBadgeText}>
-												DEFAULT
-											</Text>
-										</View>
-									)}
-								</View>
-							)
-						)}
-
-						<TouchableOpacity
-							style={concessionStyles.addPaymentButton}
-							onPress={handleManagePaymentMethods}>
-							<MaterialCommunityIcons
-								name="plus-circle"
-								size={20}
-								color={colors.primary}
-							/>
-							<Text style={concessionStyles.addPaymentButtonText}>
-								Manage Payment Methods
-							</Text>
-						</TouchableOpacity>
-					</View>
+					
+					<PaymentMethodsList />
 				</View>
 			</ScrollView>
 
