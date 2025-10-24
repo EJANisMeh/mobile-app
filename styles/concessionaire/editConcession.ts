@@ -1,25 +1,29 @@
 import { StyleSheet } from 'react-native'
 import { ThemeColors } from '../../types/theme'
+import type { ResponsiveDimensionsReturn } from '../../types/hookTypes/useResponsiveDimensions'
 
-export const createEditConcessionStyles = (colors: ThemeColors) =>
+export const createEditConcessionStyles = (
+	colors: ThemeColors,
+	responsive: ResponsiveDimensionsReturn
+) =>
 	StyleSheet.create({
 		container: {
 			flex: 1,
 			backgroundColor: colors.background,
 		},
 		scrollContent: {
-			padding: 20,
+			padding: responsive.getResponsivePadding().horizontal,
 			paddingBottom: 100, // Space for action buttons
 		},
 		loadingContainer: {
 			flex: 1,
-			justifyContent: 'center',
-			alignItems: 'center',
+			justifyContent: 'center' as const,
+			alignItems: 'center' as const,
 			backgroundColor: colors.background,
 		},
 		loadingText: {
-			marginTop: 10,
-			fontSize: 16,
+			marginTop: responsive.getResponsiveMargin().small,
+			fontSize: responsive.getResponsiveFontSize(16),
 			color: colors.text,
 		},
 		// Image Preview Section
@@ -27,16 +31,16 @@ export const createEditConcessionStyles = (colors: ThemeColors) =>
 			width: '100%',
 			height: 200,
 			borderRadius: 12,
-			overflow: 'hidden',
-			marginBottom: 24,
-			position: 'relative',
+			overflow: 'hidden' as const,
+			marginBottom: responsive.getResponsiveMargin().large,
+			position: 'relative' as const,
 		},
 		imagePreview: {
 			width: '100%',
 			height: '100%',
 		},
 		removeImageButton: {
-			position: 'absolute',
+			position: 'absolute' as const,
 			top: 12,
 			right: 12,
 			backgroundColor: 'rgba(0,0,0,0.6)',
@@ -50,28 +54,28 @@ export const createEditConcessionStyles = (colors: ThemeColors) =>
 			backgroundColor: colors.card,
 			borderWidth: 2,
 			borderColor: colors.border,
-			borderStyle: 'dashed',
-			justifyContent: 'center',
-			alignItems: 'center',
-			marginBottom: 24,
+			borderStyle: 'dashed' as const,
+			justifyContent: 'center' as const,
+			alignItems: 'center' as const,
+			marginBottom: responsive.getResponsiveMargin().large,
 		},
 		imagePlaceholderText: {
-			marginTop: 8,
-			fontSize: 14,
+			marginTop: responsive.getResponsiveMargin().small,
+			fontSize: responsive.getResponsiveFontSize(14),
 			color: colors.placeholder,
 		},
 		// Form Section
 		formSection: {
-			marginBottom: 20,
+			marginBottom: responsive.getResponsivePadding().vertical,
 		},
 		inputGroup: {
-			marginBottom: 20,
+			marginBottom: responsive.getResponsivePadding().vertical,
 		},
 		label: {
-			fontSize: 16,
-			fontWeight: '600',
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
 			color: colors.text,
-			marginBottom: 8,
+			marginBottom: responsive.getResponsiveMargin().small,
 		},
 		required: {
 			color: '#f44336',
@@ -82,7 +86,7 @@ export const createEditConcessionStyles = (colors: ThemeColors) =>
 			borderColor: colors.border,
 			borderRadius: 10,
 			padding: 14,
-			fontSize: 16,
+			fontSize: responsive.getResponsiveFontSize(16),
 			color: colors.text,
 		},
 		textArea: {
@@ -98,51 +102,51 @@ export const createEditConcessionStyles = (colors: ThemeColors) =>
 			paddingTop: 14,
 		},
 		showMoreButton: {
-			marginTop: 8,
+			marginTop: responsive.getResponsiveMargin().small,
 		},
 		showMoreText: {
 			color: colors.primary,
-			fontWeight: '600',
-			textAlign: 'right',
+			fontWeight: '600' as const,
+			textAlign: 'right' as const,
 		},
 		hint: {
-			fontSize: 13,
+			fontSize: responsive.getResponsiveFontSize(13),
 			color: colors.placeholder,
 			marginTop: 6,
-			fontStyle: 'italic',
+			fontStyle: 'italic' as const,
 		},
 		charCount: {
-			fontSize: 12,
+			fontSize: responsive.getResponsiveFontSize(12),
 			color: colors.placeholder,
 			marginTop: 4,
-			textAlign: 'right',
+			textAlign: 'right' as const,
 		},
 		// Schedule Button
 		scheduleButton: {
-			flexDirection: 'row',
-			alignItems: 'center',
-			padding: 16,
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			padding: responsive.getResponsiveSpacing().md,
 			backgroundColor: colors.card,
 			borderRadius: 10,
 			borderWidth: 1,
 			borderColor: colors.border,
 		},
 		scheduleIcon: {
-			marginRight: 12,
+			marginRight: responsive.getResponsiveMargin().medium,
 		},
 		scheduleButtonText: {
 			flex: 1,
-			fontSize: 16,
+			fontSize: responsive.getResponsiveFontSize(16),
 			color: colors.text,
 		},
 		// Action Buttons
 		actionButtonsContainer: {
-			position: 'absolute',
+			position: 'absolute' as const,
 			bottom: 0,
 			left: 0,
 			right: 0,
-			flexDirection: 'row',
-			padding: 16,
+			flexDirection: 'row' as const,
+			padding: responsive.getResponsiveSpacing().md,
 			backgroundColor: colors.background,
 			borderTopWidth: 1,
 			borderTopColor: colors.border,
@@ -150,36 +154,36 @@ export const createEditConcessionStyles = (colors: ThemeColors) =>
 		},
 		cancelButton: {
 			flex: 1,
-			padding: 16,
+			padding: responsive.getResponsiveSpacing().md,
 			borderRadius: 10,
 			borderWidth: 1,
 			borderColor: colors.border,
-			alignItems: 'center',
-			justifyContent: 'center',
+			alignItems: 'center' as const,
+			justifyContent: 'center' as const,
 		},
 		cancelButtonText: {
-			fontSize: 16,
-			fontWeight: '600',
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
 			color: colors.text,
 		},
 		saveButton: {
 			flex: 1,
-			flexDirection: 'row',
-			padding: 16,
+			flexDirection: 'row' as const,
+			padding: responsive.getResponsiveSpacing().md,
 			borderRadius: 10,
 			backgroundColor: colors.primary,
-			alignItems: 'center',
-			justifyContent: 'center',
+			alignItems: 'center' as const,
+			justifyContent: 'center' as const,
 		},
 		saveButtonDisabled: {
 			opacity: 0.6,
 		},
 		saveButtonIcon: {
-			marginRight: 8,
+			marginRight: responsive.getResponsiveMargin().small,
 		},
 		saveButtonText: {
-			fontSize: 16,
-			fontWeight: '600',
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
 			color: '#fff',
 		},
 	})

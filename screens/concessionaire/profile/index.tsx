@@ -1,11 +1,18 @@
 import React from 'react'
 import { View, Text, ScrollView } from 'react-native'
 import { LogoutButton } from '../../../components'
-import { useAuthContext } from '../../../context'
-import { concessionaireProfileStyles } from '../../../styles/concessionaire'
+import { useAuthContext, useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
+import { createConcessionaireProfileStyles } from '../../../styles/concessionaire'
 
 const ProfileScreen: React.FC = () => {
 	const { user, isLoading, error, logout } = useAuthContext()
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const concessionaireProfileStyles = createConcessionaireProfileStyles(
+		colors,
+		responsive
+	)
 
 	return (
 		<ScrollView style={concessionaireProfileStyles.profileContainer}>

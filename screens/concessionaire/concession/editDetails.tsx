@@ -17,17 +17,18 @@ import {
 	useConcessionContext,
 	useAuthContext,
 } from '../../../context'
-import { useAlertModal } from '../../../hooks'
-import { createEditConcessionStyles } from '../../../styles/themedStyles'
+import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
+import { createEditConcessionStyles } from '../../../styles/concessionaire'
 import { AlertModal } from '../../../components/modals'
 import { UpdateConcessionData } from '../../../types'
 
 const EditConcessionDetailsScreen: React.FC = () => {
 	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
 	const { user } = useAuthContext()
 	const { concession, loading, updateConcession } = useConcessionContext()
 	const navigation = useNavigation()
-	const styles = createEditConcessionStyles(colors)
+	const styles = createEditConcessionStyles(colors, responsive)
 
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
 	const [isSaving, setIsSaving] = useState(false)

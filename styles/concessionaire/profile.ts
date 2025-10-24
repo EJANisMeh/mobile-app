@@ -1,44 +1,50 @@
 import { StyleSheet } from 'react-native'
+import { ThemeColors } from '../../types/theme'
+import type { ResponsiveDimensionsReturn } from '../../types/hookTypes/useResponsiveDimensions'
 
-export const concessionaireProfileStyles = StyleSheet.create({
-	profileContainer: {
-		flex: 1,
-		backgroundColor: '#f8f9fa',
-	},
-	profileContent: {
-		padding: 20,
-	},
-	profileTitle: {
-		fontSize: 28,
-		fontWeight: 'bold',
-		color: '#333',
-		marginBottom: 30,
-		textAlign: 'center',
-	},
-	userInfo: {
-		backgroundColor: 'white',
-		padding: 20,
-		borderRadius: 12,
-		marginBottom: 20,
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
+export const createConcessionaireProfileStyles = (
+	colors: ThemeColors,
+	responsive: ResponsiveDimensionsReturn
+) =>
+	StyleSheet.create({
+		profileContainer: {
+			flex: 1,
+			backgroundColor: colors.background,
 		},
-		shadowOpacity: 0.1,
-		shadowRadius: 3.84,
-		elevation: 5,
-	},
-	infoLabel: {
-		fontSize: 16,
-		fontWeight: 'bold',
-		color: '#555',
-		marginTop: 12,
-		marginBottom: 4,
-	},
-	infoValue: {
-		fontSize: 16,
-		color: '#333',
-		marginBottom: 8,
-	},
-})
+		profileContent: {
+			padding: responsive.getResponsivePadding().horizontal,
+		},
+		profileTitle: {
+			fontSize: responsive.getResponsiveFontSize(28),
+			fontWeight: 'bold' as const,
+			color: colors.text,
+			marginBottom: responsive.getResponsiveMargin().large,
+			textAlign: 'center' as const,
+		},
+		userInfo: {
+			backgroundColor: colors.card,
+			padding: responsive.getResponsivePadding().horizontal,
+			borderRadius: 12,
+			marginBottom: responsive.getResponsivePadding().vertical,
+			shadowColor: '#000',
+			shadowOffset: {
+				width: 0,
+				height: 2,
+			},
+			shadowOpacity: 0.1,
+			shadowRadius: 3.84,
+			elevation: 5,
+		},
+		infoLabel: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: 'bold' as const,
+			color: colors.text,
+			marginTop: responsive.getResponsiveMargin().medium,
+			marginBottom: 4,
+		},
+		infoValue: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			color: colors.text,
+			marginBottom: responsive.getResponsiveMargin().small,
+		},
+	})

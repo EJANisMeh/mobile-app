@@ -14,8 +14,12 @@ import {
 	useConcessionContext,
 	useAuthContext,
 } from '../../../context'
-import { useAlertModal, useConfirmationModal } from '../../../hooks'
-import { createPaymentMethodsStyles } from '../../../styles/themedStyles'
+import {
+	useAlertModal,
+	useConfirmationModal,
+	useResponsiveDimensions,
+} from '../../../hooks'
+import { createPaymentMethodsStyles } from '../../../styles/concessionaire'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
 
 interface PaymentMethod {
@@ -46,9 +50,10 @@ const PAYMENT_METHOD_INFO: Record<
 
 const ManagePaymentMethodsScreen: React.FC = () => {
 	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
 	const { concession, loading, updateConcession } = useConcessionContext()
 	const navigation = useNavigation()
-	const styles = createPaymentMethodsStyles(colors)
+	const styles = createPaymentMethodsStyles(colors, responsive)
 
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
 	const {
@@ -118,7 +123,9 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 			title: 'Remove Payment Method',
 			message: `Are you sure you want to remove ${
 				PAYMENT_METHOD_INFO[method.type].label
-			}?`,
+				}?`,
+			confirmText: 'Yes',
+			cancelText: 'No',
 			onConfirm: () => {
 				setPaymentMethods(paymentMethods.filter((_, i) => i !== index))
 			},
