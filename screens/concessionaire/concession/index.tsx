@@ -1,10 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import {
-	View,
-	Text,
-	ScrollView,
-	TouchableOpacity,
-} from 'react-native'
+import React, { useEffect } from 'react'
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import {
@@ -19,14 +14,19 @@ import {
 } from '../../../hooks'
 import { createConcessionStyles } from '../../../styles/concessionaire'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
-import { LoadingConcession, NoConcession, ConcessionHeader, ConcessionStatusButton } from '../../../components/concessionaire/concession/main'
+import {
+	LoadingConcession,
+	NoConcession,
+	ConcessionHeader,
+	ConcessionStatusButton,
+	ConcessionEditDetailsButton,
+} from '../../../components/concessionaire/concession/main'
 
 const ConcessionScreen: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const { user } = useAuthContext()
-	const { concession, loading, getConcession } =
-		useConcessionContext()
+	const { concession, loading, getConcession } = useConcessionContext()
 	const navigation = useNavigation()
 	const concessionStyles = createConcessionStyles(colors, responsive)
 
@@ -47,26 +47,18 @@ const ConcessionScreen: React.FC = () => {
 		}
 	}, [user?.concession_id])
 
-	const handleEditDetails = () => {
-		navigation.navigate('EditConcessionDetails' as never)
-	}
-
 	const handleManagePaymentMethods = () => {
 		navigation.navigate('ManagePaymentMethods' as never)
 	}
 
 	// Loading state
 	if (loading && !concession) {
-		return (
-			<LoadingConcession />
-		)
+		return <LoadingConcession />
 	}
 
 	// No concession assigned
 	if (!concession && !loading) {
-		return (
-			<NoConcession />
-		)
+		return <NoConcession />
 	}
 
 	// concession and !loading
@@ -88,23 +80,7 @@ const ConcessionScreen: React.FC = () => {
 				<View style={concessionStyles.actionsSection}>
 					<Text style={concessionStyles.sectionTitle}>Manage</Text>
 
-					<TouchableOpacity
-						style={concessionStyles.actionButton}
-						onPress={handleEditDetails}>
-						<MaterialCommunityIcons
-							name="store-edit"
-							size={24}
-							color={colors.primary}
-							style={concessionStyles.actionIcon}
-						/>
-						<Text style={concessionStyles.actionText}>Edit Details</Text>
-						<MaterialCommunityIcons
-							name="chevron-right"
-							size={24}
-							color={colors.placeholder}
-							style={concessionStyles.actionArrow}
-						/>
-					</TouchableOpacity>
+					<ConcessionEditDetailsButton />
 				</View>
 
 				{/* Payment Methods Section */}
