@@ -13,17 +13,23 @@ import {
 	useConcessionContext,
 	useAuthContext,
 } from '../../../context'
-import { useAlertModal, useConfirmationModal } from '../../../hooks'
-import { createConcessionStyles } from '../../../styles/themedStyles'
+import {
+	useAlertModal,
+	useConfirmationModal,
+	useResponsiveDimensions,
+} from '../../../hooks'
+import { createConcessionStyles } from '../../../styles/concessionaire'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
+import { NoConcession } from '../../../components/concessionaire/concession/main'
 
 const ConcessionScreen: React.FC = () => {
 	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
 	const { user } = useAuthContext()
 	const { concession, loading, error, getConcession, toggleConcessionStatus } =
 		useConcessionContext()
 	const navigation = useNavigation()
-	const styles = createConcessionStyles(colors)
+	const concessionStyles = createConcessionStyles(colors, responsive)
 
 	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
@@ -89,6 +95,8 @@ const ConcessionScreen: React.FC = () => {
 			message: `Are you sure you want to ${
 				concession.is_open ? 'close' : 'open'
 			} the concession?`,
+			confirmText: 'Yes',
+			cancelText: 'No',
 			onConfirm: action,
 		})
 	}
@@ -104,26 +112,20 @@ const ConcessionScreen: React.FC = () => {
 	// Loading state
 	if (loading && !concession) {
 		return (
-			<View style={styles.loadingContainer}>
-				<ActivityIndicator
-					size="large"
-					color={colors.primary}
-				/>
-				<Text style={styles.loadingText}>Loading concession...</Text>
-			</View>
+			<NoConcession />
 		)
 	}
 
 	// No concession assigned
 	if (!concession && !loading) {
 		return (
-			<View style={styles.loadingContainer}>
+			<View style={concessionStyles.loadingContainer}>
 				<MaterialCommunityIcons
 					name="store-off"
 					size={64}
 					color={colors.placeholder}
 				/>
-				<Text style={styles.loadingText}>
+				<Text style={concessionStyles.loadingText}>
 					No concession assigned to your account
 				</Text>
 			</View>
@@ -131,102 +133,106 @@ const ConcessionScreen: React.FC = () => {
 	}
 
 	return (
-		<View style={styles.container}>
+		<View style={concessionStyles.container}>
 			<ScrollView
-				contentContainerStyle={styles.scrollContent}
+				contentContainerStyle={concessionStyles.scrollContent}
 				showsVerticalScrollIndicator={false}>
 				{/* Header Section */}
-				<View style={styles.headerSection}>
-					<Text style={styles.concessionName}>{concession?.name}</Text>
+				<View style={concessionStyles.headerSection}>
+					<Text style={concessionStyles.concessionName}>
+						{concession?.name}
+					</Text>
 					{concession?.description ? (
 						<>
 							<Text
-								style={styles.concessionDescription}
+								style={concessionStyles.concessionDescription}
 								numberOfLines={descExpanded ? undefined : 4}>
 								{concession.description}
 							</Text>
 							{concession.description.length > DESC_COLLAPSE_LENGTH && (
 								<TouchableOpacity onPress={() => setDescExpanded((s) => !s)}>
-									<Text style={styles.showMoreText}>
+									<Text style={concessionStyles.showMoreText}>
 										{descExpanded ? 'Show less' : 'Show more'}
 									</Text>
 								</TouchableOpacity>
 							)}
 						</>
 					) : (
-						<Text style={styles.noDescription}>No description available</Text>
+						<Text style={concessionStyles.noDescription}>
+							No description available
+						</Text>
 					)}
 				</View>
 
 				{/* Status Section */}
-				<View style={styles.statusSection}>
-					<Text style={styles.sectionTitle}>Status</Text>
+				<View style={concessionStyles.statusSection}>
+					<Text style={concessionStyles.sectionTitle}>Status</Text>
 					<TouchableOpacity
 						style={[
-							styles.statusButton,
+							concessionStyles.statusButton,
 							concession?.is_open
-								? styles.statusButtonOpen
-								: styles.statusButtonClosed,
+								? concessionStyles.statusButtonOpen
+								: concessionStyles.statusButtonClosed,
 						]}
 						onPress={handleStatusToggle}
 						disabled={isTogglingStatus}>
-						<View style={styles.statusButtonContent}>
+						<View style={concessionStyles.statusButtonContent}>
 							<MaterialCommunityIcons
 								name={concession?.is_open ? 'store-check' : 'store-off'}
 								size={28}
 								color={concession?.is_open ? '#2e7d32' : '#c62828'}
-								style={styles.statusIcon}
+								style={concessionStyles.statusIcon}
 							/>
 							<Text
 								style={[
-									styles.statusText,
+									concessionStyles.statusText,
 									concession?.is_open
-										? styles.statusTextOpen
-										: styles.statusTextClosed,
+										? concessionStyles.statusTextOpen
+										: concessionStyles.statusTextClosed,
 								]}>
 								{concession?.is_open ? 'Open' : 'Closed'}
 							</Text>
 						</View>
-						<Text style={styles.statusToggleText}>Tap to toggle</Text>
+						<Text style={concessionStyles.statusToggleText}>Tap to toggle</Text>
 					</TouchableOpacity>
 				</View>
 
 				{/* Actions Section */}
-				<View style={styles.actionsSection}>
-					<Text style={styles.sectionTitle}>Manage</Text>
+				<View style={concessionStyles.actionsSection}>
+					<Text style={concessionStyles.sectionTitle}>Manage</Text>
 
 					<TouchableOpacity
-						style={styles.actionButton}
+						style={concessionStyles.actionButton}
 						onPress={handleEditDetails}>
 						<MaterialCommunityIcons
 							name="store-edit"
 							size={24}
 							color={colors.primary}
-							style={styles.actionIcon}
+							style={concessionStyles.actionIcon}
 						/>
-						<Text style={styles.actionText}>Edit Details</Text>
+						<Text style={concessionStyles.actionText}>Edit Details</Text>
 						<MaterialCommunityIcons
 							name="chevron-right"
 							size={24}
 							color={colors.placeholder}
-							style={styles.actionArrow}
+							style={concessionStyles.actionArrow}
 						/>
 					</TouchableOpacity>
 				</View>
 
 				{/* Payment Methods Section */}
-				<View style={styles.paymentMethodsSection}>
-					<Text style={styles.sectionTitle}>Payment Methods</Text>
-					<View style={styles.paymentMethodsList}>
+				<View style={concessionStyles.paymentMethodsSection}>
+					<Text style={concessionStyles.sectionTitle}>Payment Methods</Text>
+					<View style={concessionStyles.paymentMethodsList}>
 						{concession?.payment_methods?.map(
 							(method: string, index: number) => (
 								<View
 									key={index}
 									style={[
-										styles.paymentMethodItem,
-										method === 'cash' && styles.paymentMethodDefault,
+										concessionStyles.paymentMethodItem,
+										method === 'cash' && concessionStyles.paymentMethodDefault,
 									]}>
-									<View style={styles.paymentMethodContent}>
+									<View style={concessionStyles.paymentMethodContent}>
 										<MaterialCommunityIcons
 											name={
 												method === 'cash'
@@ -237,19 +243,22 @@ const ConcessionScreen: React.FC = () => {
 											}
 											size={22}
 											color={method === 'cash' ? colors.primary : colors.text}
-											style={styles.paymentMethodIcon}
+											style={concessionStyles.paymentMethodIcon}
 										/>
 										<Text
 											style={[
-												styles.paymentMethodText,
-												method === 'cash' && styles.paymentMethodDefaultText,
+												concessionStyles.paymentMethodText,
+												method === 'cash' &&
+													concessionStyles.paymentMethodDefaultText,
 											]}>
 											{method}
 										</Text>
 									</View>
 									{method === 'cash' && (
-										<View style={styles.defaultBadge}>
-											<Text style={styles.defaultBadgeText}>DEFAULT</Text>
+										<View style={concessionStyles.defaultBadge}>
+											<Text style={concessionStyles.defaultBadgeText}>
+												DEFAULT
+											</Text>
 										</View>
 									)}
 								</View>
@@ -257,14 +266,14 @@ const ConcessionScreen: React.FC = () => {
 						)}
 
 						<TouchableOpacity
-							style={styles.addPaymentButton}
+							style={concessionStyles.addPaymentButton}
 							onPress={handleManagePaymentMethods}>
 							<MaterialCommunityIcons
 								name="plus-circle"
 								size={20}
 								color={colors.primary}
 							/>
-							<Text style={styles.addPaymentButtonText}>
+							<Text style={concessionStyles.addPaymentButtonText}>
 								Manage Payment Methods
 							</Text>
 						</TouchableOpacity>
