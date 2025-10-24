@@ -63,17 +63,17 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 		})
 	}
 
-		useEffect(() => {
-			const backHandler = BackHandler.addEventListener(
-				'hardwareBackPress',
-				() => {
-					handleCancel()
-					return true // Prevent default back behavior
-				}
-			)
-	
-			return () => backHandler.remove() // Remove backhandler function after unmounting
-		}, [])
+	useEffect(() => {
+		const backHandler = BackHandler.addEventListener(
+			'hardwareBackPress',
+			() => {
+				handleCancel()
+				return true // Prevent default back behavior
+			}
+		)
+
+		return () => backHandler.remove() // Remove backhandler function after unmounting
+	}, [])
 
 	return (
 		<>
@@ -97,6 +97,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 						formData={formData}
 						updateField={updateField}
 						showAlert={showAlert}
+						showConfirmation={showConfirmation}
 					/>
 
 					<TouchableOpacity

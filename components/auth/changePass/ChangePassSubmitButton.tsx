@@ -4,7 +4,10 @@ import { createChangePasswordStyles } from '../../../styles/auth'
 import { useThemeContext, useAuthContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
-import { UseAlertModalType } from '../../../hooks/useModals/types'
+import {
+	UseAlertModalType,
+	UseConfirmationModalType,
+} from '../../../hooks/useModals/types'
 
 interface ChangePassSubmitButtonProps {
 	userId: number
@@ -14,14 +17,16 @@ interface ChangePassSubmitButtonProps {
 		confirmPassword: string
 	}
 	updateField: (field: string, value: string) => void
-  showAlert: UseAlertModalType['showAlert']
+	showAlert: UseAlertModalType['showAlert']
+	showConfirmation: UseConfirmationModalType['showConfirmation']
 }
 
 const ChangePassInputs: React.FC<ChangePassSubmitButtonProps> = ({
 	userId,
 	formData,
 	updateField,
-	showAlert
+	showAlert,
+	showConfirmation,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
@@ -66,8 +71,6 @@ const ChangePassInputs: React.FC<ChangePassSubmitButtonProps> = ({
 	}
 
 	const handleResetPassword = async () => {
-		if (!validateForm()) return
-
 		try {
 			// Call resetPassword with email or userId and new password
 			const identifier = userId
@@ -79,7 +82,8 @@ const ChangePassInputs: React.FC<ChangePassSubmitButtonProps> = ({
 			if (!result.success) {
 				showAlert({
 					title: 'Error',
-					message: result.error || 'Failed to reset password. Please try again.',
+					message:
+						result.error || 'Failed to reset password. Please try again.',
 				})
 				return
 			}
@@ -87,12 +91,11 @@ const ChangePassInputs: React.FC<ChangePassSubmitButtonProps> = ({
 			showAlert({
 				title: 'Success',
 				message: result.message || 'Password changed successfully.',
-        onClose: () =>
-        {
+				onClose: () => {
 					// reset to empty fields
 					updateField('newPassword', '')
-          updateField('confirmPassword', '')
-          
+					updateField('confirmPassword', '')
+
 					navigation.reset({
 						index: 0,
 						routes: [{ name: 'Login' }],
@@ -107,13 +110,25 @@ const ChangePassInputs: React.FC<ChangePassSubmitButtonProps> = ({
 		}
 	}
 
+	const onPress = () =>
+	{
+		if (!validateForm()) return
+		showConfirmation({
+			title: 'Change Password?',
+			message: 'Confirm the password change?',
+			confirmText: 'Yes',
+			cancelText: 'No',
+			onConfirm: handleResetPassword,
+		})
+	}
+
 	return (
 		<TouchableOpacity
 			style={[
 				changePasswordStyles.submitButton,
 				isLoading && changePasswordStyles.disabledButton,
 			]}
-			onPress={handleResetPassword}
+			onPress={onPress}
 			disabled={isLoading}>
 			<Text style={changePasswordStyles.submitButtonText}>
 				{isLoading ? 'Changing Password...' : 'Change Password'}
