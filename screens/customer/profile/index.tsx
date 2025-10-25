@@ -1,9 +1,10 @@
 import React from 'react'
-import { View, Text, ScrollView } from 'react-native'
+import { View, Text } from 'react-native'
 import { LogoutButton } from '../../../components'
 import { useAuthContext, useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createCustomerProfileStyles } from '../../../styles/customer'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 
 const ProfileScreen: React.FC = () => {
 	const { user, isLoading, error } = useAuthContext()
@@ -12,7 +13,10 @@ const ProfileScreen: React.FC = () => {
 	const customerProfileStyles = createCustomerProfileStyles(colors, responsive)
 
 	return (
-		<ScrollView style={customerProfileStyles.profileContainer}>
+		<DynamicScrollView
+			styles={customerProfileStyles.profileContainer}
+			autoCenter={false}
+			showsVerticalScrollIndicator={false}>
 			<View style={customerProfileStyles.profileContent}>
 				<Text style={customerProfileStyles.profileTitle}>Customer Profile</Text>
 
@@ -40,7 +44,7 @@ const ProfileScreen: React.FC = () => {
 				{/* Logout Button */}
 				<LogoutButton />
 			</View>
-		</ScrollView>
+		</DynamicScrollView>
 	)
 }
 

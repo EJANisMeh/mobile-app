@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import {
 	View,
 	Text,
-	ScrollView,
 	TextInput,
 	TouchableOpacity,
 	ActivityIndicator,
@@ -20,6 +19,7 @@ import {
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import { createEditConcessionStyles } from '../../../styles/concessionaire'
 import { AlertModal } from '../../../components/modals'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 import { UpdateConcessionData } from '../../../types'
 
 const EditConcessionDetailsScreen: React.FC = () => {
@@ -154,139 +154,142 @@ const EditConcessionDetailsScreen: React.FC = () => {
 	}
 
 	return (
-		<View style={styles.container}>
-			<ScrollView
-				contentContainerStyle={styles.scrollContent}
+		<>
+			<DynamicScrollView
+				styles={styles.container}
+				autoCenter={false}
 				showsVerticalScrollIndicator={false}>
-				{/* Image Preview Section */}
-				{imageUrl ? (
-					<View style={styles.imagePreviewContainer}>
-						<Image
-							source={{ uri: imageUrl }}
-							style={styles.imagePreview}
-							resizeMode="cover"
-						/>
-						<TouchableOpacity
-							style={styles.removeImageButton}
-							onPress={() => setImageUrl('')}>
-							<MaterialCommunityIcons
-								name="close-circle"
-								size={24}
-								color="#fff"
+				<View style={styles.scrollContent}>
+					{/* Image Preview Section */}
+					{imageUrl ? (
+						<View style={styles.imagePreviewContainer}>
+							<Image
+								source={{ uri: imageUrl }}
+								style={styles.imagePreview}
+								resizeMode="cover"
 							/>
-						</TouchableOpacity>
-					</View>
-				) : (
-					<View style={styles.imagePlaceholder}>
-						<MaterialCommunityIcons
-							name="image-plus"
-							size={48}
-							color={colors.placeholder}
-						/>
-						<Text style={styles.imagePlaceholderText}>No image selected</Text>
-					</View>
-				)}
-
-				{/* Form Fields */}
-				<View style={styles.formSection}>
-					{/* Name Field */}
-					<View style={styles.inputGroup}>
-						<Text style={styles.label}>
-							Concession Name <Text style={styles.required}>*</Text>
-						</Text>
-						<TextInput
-							style={styles.input}
-							placeholder="Enter concession name"
-							placeholderTextColor={colors.placeholder}
-							value={name}
-							onChangeText={setName}
-							maxLength={100}
-						/>
-					</View>
-
-					{/* Description Field */}
-					<View style={styles.inputGroup}>
-						<Text style={styles.label}>Description</Text>
-						<TextInput
-							style={[styles.input, styles.textArea]}
-							placeholder="Describe your concession..."
-							placeholderTextColor={colors.placeholder}
-							value={description}
-							onChangeText={setDescription}
-							multiline
-							numberOfLines={7}
-							textAlignVertical="top"
-							maxLength={1500}
-						/>
-						<Text style={styles.charCount}>
-							{description.length}/1500 characters
-						</Text>
-					</View>
-
-					{/* Schedule Section - Placeholder */}
-					<View style={styles.inputGroup}>
-						<Text style={styles.label}>Operating Schedule</Text>
-						<TouchableOpacity
-							style={styles.scheduleButton}
-							onPress={() =>
-								showAlert({
-									title: 'Coming Soon',
-									message: 'Schedule management feature is under development',
-								})
-							}>
+							<TouchableOpacity
+								style={styles.removeImageButton}
+								onPress={() => setImageUrl('')}>
+								<MaterialCommunityIcons
+									name="close-circle"
+									size={24}
+									color="#fff"
+								/>
+							</TouchableOpacity>
+						</View>
+					) : (
+						<View style={styles.imagePlaceholder}>
 							<MaterialCommunityIcons
-								name="calendar-clock"
-								size={24}
-								color={colors.primary}
-								style={styles.scheduleIcon}
-							/>
-							<Text style={styles.scheduleButtonText}>
-								Configure Operating Hours
-							</Text>
-							<MaterialCommunityIcons
-								name="chevron-right"
-								size={24}
+								name="image-plus"
+								size={48}
 								color={colors.placeholder}
 							/>
+							<Text style={styles.imagePlaceholderText}>No image selected</Text>
+						</View>
+					)}
+
+					{/* Form Fields */}
+					<View style={styles.formSection}>
+						{/* Name Field */}
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>
+								Concession Name <Text style={styles.required}>*</Text>
+							</Text>
+							<TextInput
+								style={styles.input}
+								placeholder="Enter concession name"
+								placeholderTextColor={colors.placeholder}
+								value={name}
+								onChangeText={setName}
+								maxLength={100}
+							/>
+						</View>
+
+						{/* Description Field */}
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Description</Text>
+							<TextInput
+								style={[styles.input, styles.textArea]}
+								placeholder="Describe your concession..."
+								placeholderTextColor={colors.placeholder}
+								value={description}
+								onChangeText={setDescription}
+								multiline
+								numberOfLines={7}
+								textAlignVertical="top"
+								maxLength={1500}
+							/>
+							<Text style={styles.charCount}>
+								{description.length}/1500 characters
+							</Text>
+						</View>
+
+						{/* Schedule Section - Placeholder */}
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Operating Schedule</Text>
+							<TouchableOpacity
+								style={styles.scheduleButton}
+								onPress={() =>
+									showAlert({
+										title: 'Coming Soon',
+										message: 'Schedule management feature is under development',
+									})
+								}>
+								<MaterialCommunityIcons
+									name="calendar-clock"
+									size={24}
+									color={colors.primary}
+									style={styles.scheduleIcon}
+								/>
+								<Text style={styles.scheduleButtonText}>
+									Configure Operating Hours
+								</Text>
+								<MaterialCommunityIcons
+									name="chevron-right"
+									size={24}
+									color={colors.placeholder}
+								/>
+							</TouchableOpacity>
+							<Text style={styles.hint}>
+								Set your daily operating hours and breaks
+							</Text>
+						</View>
+					</View>
+
+					{/* Action Buttons */}
+					<View style={styles.actionButtonsContainer}>
+						<TouchableOpacity
+							style={styles.cancelButton}
+							onPress={handleCancel}
+							disabled={isSaving}>
+							<Text style={styles.cancelButtonText}>Cancel</Text>
 						</TouchableOpacity>
-						<Text style={styles.hint}>
-							Set your daily operating hours and breaks
-						</Text>
+
+						<TouchableOpacity
+							style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+							onPress={handleSave}
+							disabled={isSaving}>
+							{isSaving ? (
+								<ActivityIndicator
+									size="small"
+									color="#fff"
+								/>
+							) : (
+								<>
+									<MaterialCommunityIcons
+										name="content-save"
+										size={20}
+										color="#fff"
+										style={styles.saveButtonIcon}
+									/>
+									<Text style={styles.saveButtonText}>Save Changes</Text>
+								</>
+							)}
+						</TouchableOpacity>
 					</View>
 				</View>
-			</ScrollView>
-
-			{/* Action Buttons */}
-			<View style={styles.actionButtonsContainer}>
-				<TouchableOpacity
-					style={styles.cancelButton}
-					onPress={handleCancel}
-					disabled={isSaving}>
-					<Text style={styles.cancelButtonText}>Cancel</Text>
-				</TouchableOpacity>
-
-				<TouchableOpacity
-					style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
-					onPress={handleSave}
-					disabled={isSaving}>
-					{isSaving ? (
-						<ActivityIndicator
-							size="small"
-							color="#fff"
-						/>
-					) : (
-						<>
-							<MaterialCommunityIcons
-								name="content-save"
-								size={20}
-								color="#fff"
-								style={styles.saveButtonIcon}
-							/>
-							<Text style={styles.saveButtonText}>Save Changes</Text>
-						</>
-					)}
-				</TouchableOpacity>
-			</View>
+			</DynamicScrollView>
 
 			<AlertModal
 				visible={visible}
@@ -294,7 +297,7 @@ const EditConcessionDetailsScreen: React.FC = () => {
 				title={title}
 				message={message}
 			/>
-		</View>
+		</>
 	)
 }
 

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import {
 	View,
 	Text,
-	ScrollView,
 	TextInput,
 	TouchableOpacity,
 	ActivityIndicator,
@@ -21,6 +20,7 @@ import {
 } from '../../../hooks'
 import { createPaymentMethodsStyles } from '../../../styles/concessionaire'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 
 interface PaymentMethod {
 	type: string // 'cash', 'gcash', 'paymaya'
@@ -123,7 +123,7 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 			title: 'Remove Payment Method',
 			message: `Are you sure you want to remove ${
 				PAYMENT_METHOD_INFO[method.type].label
-				}?`,
+			}?`,
 			confirmText: 'Yes',
 			cancelText: 'No',
 			onConfirm: () => {
@@ -222,163 +222,166 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 	}
 
 	return (
-		<View style={styles.container}>
-			<ScrollView
-				contentContainerStyle={styles.scrollContent}
+		<>
+			<DynamicScrollView
+				styles={styles.container}
+				autoCenter={false}
 				showsVerticalScrollIndicator={false}>
-				{/* Info Section */}
-				<View style={styles.infoSection}>
-					<MaterialCommunityIcons
-						name="information"
-						size={20}
-						color={colors.primary}
-					/>
-					<Text style={styles.infoText}>
-						Manage your concession's accepted payment methods. Cash is always
-						required as the default method.
-					</Text>
-				</View>
+				<View style={styles.scrollContent}>
+					{/* Info Section */}
+					<View style={styles.infoSection}>
+						<MaterialCommunityIcons
+							name="information"
+							size={20}
+							color={colors.primary}
+						/>
+						<Text style={styles.infoText}>
+							Manage your concession's accepted payment methods. Cash is always
+							required as the default method.
+						</Text>
+					</View>
 
-				{/* Payment Methods List */}
-				<View style={styles.methodsSection}>
-					<Text style={styles.sectionTitle}>Active Payment Methods</Text>
+					{/* Payment Methods List */}
+					<View style={styles.methodsSection}>
+						<Text style={styles.sectionTitle}>Active Payment Methods</Text>
 
-					{paymentMethods.map((method, index) => (
-						<View
-							key={index}
-							style={styles.methodCard}>
-							<View style={styles.methodHeader}>
-								<View style={styles.methodTitleRow}>
-									<MaterialCommunityIcons
-										name={PAYMENT_METHOD_INFO[method.type].icon as any}
-										size={24}
-										color={colors.primary}
-										style={styles.methodIcon}
-									/>
-									<Text style={styles.methodTitle}>
-										{PAYMENT_METHOD_INFO[method.type].label}
-									</Text>
-									{method.type === 'cash' && (
-										<View style={styles.defaultBadge}>
-											<Text style={styles.defaultBadgeText}>DEFAULT</Text>
-										</View>
+						{paymentMethods.map((method, index) => (
+							<View
+								key={index}
+								style={styles.methodCard}>
+								<View style={styles.methodHeader}>
+									<View style={styles.methodTitleRow}>
+										<MaterialCommunityIcons
+											name={PAYMENT_METHOD_INFO[method.type].icon as any}
+											size={24}
+											color={colors.primary}
+											style={styles.methodIcon}
+										/>
+										<Text style={styles.methodTitle}>
+											{PAYMENT_METHOD_INFO[method.type].label}
+										</Text>
+										{method.type === 'cash' && (
+											<View style={styles.defaultBadge}>
+												<Text style={styles.defaultBadgeText}>DEFAULT</Text>
+											</View>
+										)}
+									</View>
+
+									{method.type !== 'cash' && (
+										<TouchableOpacity
+											style={styles.removeButton}
+											onPress={() => handleRemoveMethod(index)}>
+											<MaterialCommunityIcons
+												name="close-circle"
+												size={24}
+												color="#dc3545"
+											/>
+										</TouchableOpacity>
 									)}
 								</View>
 
-								{method.type !== 'cash' && (
-									<TouchableOpacity
-										style={styles.removeButton}
-										onPress={() => handleRemoveMethod(index)}>
-										<MaterialCommunityIcons
-											name="close-circle"
-											size={24}
-											color="#dc3545"
-										/>
-									</TouchableOpacity>
-								)}
-							</View>
-
-							<TextInput
-								style={[
-									styles.detailsInput,
-									method.type === 'cash' && styles.detailsInputReadonly,
-								]}
-								placeholder={PAYMENT_METHOD_INFO[method.type].placeholder}
-								placeholderTextColor={colors.placeholder}
-								value={method.details}
-								onChangeText={(text) => handleUpdateDetails(index, text)}
-								editable={method.type !== 'cash'}
-								multiline={method.type === 'cash'}
-							/>
-						</View>
-					))}
-
-					{/* Add Method Button */}
-					<TouchableOpacity
-						style={styles.addButton}
-						onPress={() => setShowAddOptions(!showAddOptions)}>
-						<MaterialCommunityIcons
-							name={showAddOptions ? 'minus-circle' : 'plus-circle'}
-							size={24}
-							color={colors.primary}
-						/>
-						<Text style={styles.addButtonText}>
-							{showAddOptions ? 'Hide Options' : 'Add Payment Method'}
-						</Text>
-					</TouchableOpacity>
-
-					{/* Add Options */}
-					{showAddOptions && (
-						<View style={styles.addOptionsContainer}>
-							{Object.entries(PAYMENT_METHOD_INFO).map(([type, info]) => (
-								<TouchableOpacity
-									key={type}
+								<TextInput
 									style={[
-										styles.addOptionButton,
-										paymentMethods.some((m) => m.type === type) &&
-											styles.addOptionButtonDisabled,
+										styles.detailsInput,
+										method.type === 'cash' && styles.detailsInputReadonly,
 									]}
-									onPress={() => handleAddMethod(type)}
-									disabled={paymentMethods.some((m) => m.type === type)}>
-									<MaterialCommunityIcons
-										name={info.icon as any}
-										size={20}
-										color={
-											paymentMethods.some((m) => m.type === type)
-												? colors.placeholder
-												: colors.primary
-										}
-										style={styles.optionIcon}
-									/>
-									<Text
-										style={[
-											styles.addOptionText,
-											paymentMethods.some((m) => m.type === type) &&
-												styles.addOptionTextDisabled,
-										]}>
-										{info.label}
-									</Text>
-									{paymentMethods.some((m) => m.type === type) && (
-										<Text style={styles.addedLabel}>Added</Text>
-									)}
-								</TouchableOpacity>
-							))}
-						</View>
-					)}
-				</View>
-			</ScrollView>
+									placeholder={PAYMENT_METHOD_INFO[method.type].placeholder}
+									placeholderTextColor={colors.placeholder}
+									value={method.details}
+									onChangeText={(text) => handleUpdateDetails(index, text)}
+									editable={method.type !== 'cash'}
+									multiline={method.type === 'cash'}
+								/>
+							</View>
+						))}
 
-			{/* Action Buttons */}
-			<View style={styles.actionButtonsContainer}>
-				<TouchableOpacity
-					style={styles.cancelButton}
-					onPress={handleCancel}
-					disabled={isSaving}>
-					<Text style={styles.cancelButtonText}>Cancel</Text>
-				</TouchableOpacity>
-
-				<TouchableOpacity
-					style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
-					onPress={handleSave}
-					disabled={isSaving}>
-					{isSaving ? (
-						<ActivityIndicator
-							size="small"
-							color="#fff"
-						/>
-					) : (
-						<>
+						{/* Add Method Button */}
+						<TouchableOpacity
+							style={styles.addButton}
+							onPress={() => setShowAddOptions(!showAddOptions)}>
 							<MaterialCommunityIcons
-								name="content-save"
-								size={20}
-								color="#fff"
-								style={styles.saveButtonIcon}
+								name={showAddOptions ? 'minus-circle' : 'plus-circle'}
+								size={24}
+								color={colors.primary}
 							/>
-							<Text style={styles.saveButtonText}>Save Changes</Text>
-						</>
-					)}
-				</TouchableOpacity>
-			</View>
+							<Text style={styles.addButtonText}>
+								{showAddOptions ? 'Hide Options' : 'Add Payment Method'}
+							</Text>
+						</TouchableOpacity>
+
+						{/* Add Options */}
+						{showAddOptions && (
+							<View style={styles.addOptionsContainer}>
+								{Object.entries(PAYMENT_METHOD_INFO).map(([type, info]) => (
+									<TouchableOpacity
+										key={type}
+										style={[
+											styles.addOptionButton,
+											paymentMethods.some((m) => m.type === type) &&
+												styles.addOptionButtonDisabled,
+										]}
+										onPress={() => handleAddMethod(type)}
+										disabled={paymentMethods.some((m) => m.type === type)}>
+										<MaterialCommunityIcons
+											name={info.icon as any}
+											size={20}
+											color={
+												paymentMethods.some((m) => m.type === type)
+													? colors.placeholder
+													: colors.primary
+											}
+											style={styles.optionIcon}
+										/>
+										<Text
+											style={[
+												styles.addOptionText,
+												paymentMethods.some((m) => m.type === type) &&
+													styles.addOptionTextDisabled,
+											]}>
+											{info.label}
+										</Text>
+										{paymentMethods.some((m) => m.type === type) && (
+											<Text style={styles.addedLabel}>Added</Text>
+										)}
+									</TouchableOpacity>
+								))}
+							</View>
+						)}
+					</View>
+
+					{/* Action Buttons */}
+					<View style={styles.actionButtonsContainer}>
+						<TouchableOpacity
+							style={styles.cancelButton}
+							onPress={handleCancel}
+							disabled={isSaving}>
+							<Text style={styles.cancelButtonText}>Cancel</Text>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+							onPress={handleSave}
+							disabled={isSaving}>
+							{isSaving ? (
+								<ActivityIndicator
+									size="small"
+									color="#fff"
+								/>
+							) : (
+								<>
+									<MaterialCommunityIcons
+										name="content-save"
+										size={20}
+										color="#fff"
+										style={styles.saveButtonIcon}
+									/>
+									<Text style={styles.saveButtonText}>Save Changes</Text>
+								</>
+							)}
+						</TouchableOpacity>
+					</View>
+				</View>
+			</DynamicScrollView>
 
 			<AlertModal
 				visible={visible}
@@ -398,7 +401,7 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 				}}
 				onCancel={() => hideConfirmation()}
 			/>
-		</View>
+		</>
 	)
 }
 

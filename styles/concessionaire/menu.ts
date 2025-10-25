@@ -7,19 +7,16 @@ export const createConcessionaireMenuStyles = (
 	responsive: ResponsiveDimensionsReturn
 ) =>
 	StyleSheet.create({
-		placeholder: {
-			flex: 1,
-			justifyContent: 'center' as const,
-			alignItems: 'center' as const,
+		container: {
 			backgroundColor: colors.background,
 		},
-		placeholderText: {
+		containerText: {
 			fontSize: responsive.getResponsiveFontSize(24),
 			fontWeight: 'bold' as const,
 			color: colors.text,
 			marginBottom: responsive.getResponsiveMargin().small,
 		},
-		placeholderSubtext: {
+		containerSubtext: {
 			fontSize: responsive.getResponsiveFontSize(16),
 			color: colors.textSecondary,
 		},

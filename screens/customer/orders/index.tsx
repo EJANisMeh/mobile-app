@@ -3,6 +3,7 @@ import { View, Text } from 'react-native'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createCustomerOrdersStyles } from '../../../styles/customer'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 
 const OrdersScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -10,10 +11,15 @@ const OrdersScreen: React.FC = () => {
 	const customerOrdersStyles = createCustomerOrdersStyles(colors, responsive)
 
 	return (
-		<View style={customerOrdersStyles.placeholder}>
-			<Text style={customerOrdersStyles.placeholderText}>Orders Screen</Text>
-			<Text style={customerOrdersStyles.placeholderSubtext}>Coming Soon</Text>
-		</View>
+		<DynamicScrollView
+			styles={customerOrdersStyles.container}
+			autoCenter="center"
+			fallbackAlign="center">
+			<View>
+				<Text style={customerOrdersStyles.containerText}>Orders Screen</Text>
+				<Text style={customerOrdersStyles.containerSubtext}>Coming Soon</Text>
+			</View>
+		</DynamicScrollView>
 	)
 }
 

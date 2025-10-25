@@ -3,6 +3,7 @@ import { View, Text } from 'react-native'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createCustomerMenuStyles } from '../../../styles/customer'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 
 const MenuScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -10,10 +11,15 @@ const MenuScreen: React.FC = () => {
 	const customerMenuStyles = createCustomerMenuStyles(colors, responsive)
 
 	return (
-		<View style={customerMenuStyles.placeholder}>
-			<Text style={customerMenuStyles.placeholderText}>Menu Screen</Text>
-			<Text style={customerMenuStyles.placeholderSubtext}>Coming Soon</Text>
-		</View>
+		<DynamicScrollView
+			styles={customerMenuStyles.container}
+			autoCenter="center"
+			fallbackAlign="center">
+			<View>
+				<Text style={customerMenuStyles.containerText}>Menu Screen</Text>
+				<Text style={customerMenuStyles.containerSubtext}>Coming Soon</Text>
+			</View>
+		</DynamicScrollView>
 	)
 }
 

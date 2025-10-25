@@ -8,7 +8,6 @@ export const createConcessionaireProfileStyles = (
 ) =>
 	StyleSheet.create({
 		profileContainer: {
-			flex: 1,
 			backgroundColor: colors.background,
 		},
 		profileContent: {

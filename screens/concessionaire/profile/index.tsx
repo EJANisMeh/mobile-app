@@ -1,9 +1,10 @@
 import React from 'react'
-import { View, Text, ScrollView } from 'react-native'
+import { View, Text } from 'react-native'
 import { LogoutButton } from '../../../components'
 import { useAuthContext, useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createConcessionaireProfileStyles } from '../../../styles/concessionaire'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 
 const ProfileScreen: React.FC = () => {
 	const { user, isLoading, error, logout } = useAuthContext()
@@ -15,7 +16,10 @@ const ProfileScreen: React.FC = () => {
 	)
 
 	return (
-		<ScrollView style={concessionaireProfileStyles.profileContainer}>
+		<DynamicScrollView
+			styles={concessionaireProfileStyles.profileContainer}
+			autoCenter={false}
+			showsVerticalScrollIndicator={false}>
 			<View style={concessionaireProfileStyles.profileContent}>
 				<Text style={concessionaireProfileStyles.profileTitle}>
 					Concessionaire Profile
@@ -56,7 +60,7 @@ const ProfileScreen: React.FC = () => {
 				{/* Logout Button */}
 				<LogoutButton />
 			</View>
-		</ScrollView>
+		</DynamicScrollView>
 	)
 }
 

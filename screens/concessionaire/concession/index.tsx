@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import {
@@ -13,6 +13,7 @@ import {
 	useResponsiveDimensions,
 } from '../../../hooks'
 import { createConcessionStyles } from '../../../styles/concessionaire'
+import DynamicScrollView from '../../../components/DynamicScrollView'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
 import {
 	LoadingConcession,
@@ -47,7 +48,6 @@ const ConcessionScreen: React.FC = () => {
 		}
 	}, [user?.concession_id])
 
-
 	// Loading state
 	if (loading && !concession) {
 		return <LoadingConcession />
@@ -60,33 +60,36 @@ const ConcessionScreen: React.FC = () => {
 
 	// concession and !loading
 	return (
-		<View style={concessionStyles.container}>
-			<ScrollView
-				contentContainerStyle={concessionStyles.scrollContent}
+		<>
+			<DynamicScrollView
+				styles={concessionStyles.container}
+				autoCenter={false}
 				showsVerticalScrollIndicator={false}>
-				{/* Header Section */}
-				<ConcessionHeader />
+				<View style={concessionStyles.scrollContent}>
+					{/* Header Section */}
+					<ConcessionHeader />
 
-				{/* Status Section */}
-				<ConcessionStatusButton
-					showAlert={showAlert}
-					showConfirmation={showConfirmation}
-				/>
+					{/* Status Section */}
+					<ConcessionStatusButton
+						showAlert={showAlert}
+						showConfirmation={showConfirmation}
+					/>
 
-				{/* Actions Section */}
-				<View style={concessionStyles.actionsSection}>
-					<Text style={concessionStyles.sectionTitle}>Manage</Text>
+					{/* Actions Section */}
+					<View style={concessionStyles.actionsSection}>
+						<Text style={concessionStyles.sectionTitle}>Manage</Text>
 
-					<ConcessionEditDetailsButton />
+						<ConcessionEditDetailsButton />
+					</View>
+
+					{/* Payment Methods Section */}
+					<View style={concessionStyles.paymentMethodsSection}>
+						<Text style={concessionStyles.sectionTitle}>Payment Methods</Text>
+
+						<PaymentMethodsList />
+					</View>
 				</View>
-
-				{/* Payment Methods Section */}
-				<View style={concessionStyles.paymentMethodsSection}>
-					<Text style={concessionStyles.sectionTitle}>Payment Methods</Text>
-					
-					<PaymentMethodsList />
-				</View>
-			</ScrollView>
+			</DynamicScrollView>
 
 			<AlertModal
 				visible={visible}
@@ -107,7 +110,7 @@ const ConcessionScreen: React.FC = () => {
 				}}
 				onCancel={() => hideConfirmation()}
 			/>
-		</View>
+		</>
 	)
 }
 
