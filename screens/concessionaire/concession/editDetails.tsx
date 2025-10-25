@@ -21,6 +21,7 @@ import { createEditConcessionStyles } from '../../../styles/concessionaire'
 import { AlertModal } from '../../../components/modals'
 import DynamicScrollView from '../../../components/DynamicScrollView'
 import { UpdateConcessionData } from '../../../types'
+import { LoadingEditConcession } from '../../../components/concessionaire/concession/editDetails'
 
 const EditConcessionDetailsScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -143,13 +144,7 @@ const EditConcessionDetailsScreen: React.FC = () => {
 	// Loading state
 	if (loading && !concession) {
 		return (
-			<View style={styles.loadingContainer}>
-				<ActivityIndicator
-					size="large"
-					color={colors.primary}
-				/>
-				<Text style={styles.loadingText}>Loading concession...</Text>
-			</View>
+			<LoadingEditConcession />
 		)
 	}
 
