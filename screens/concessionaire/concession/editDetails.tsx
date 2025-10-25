@@ -5,7 +5,6 @@ import {
 	TextInput,
 	TouchableOpacity,
 	ActivityIndicator,
-	Image,
 	Platform,
 } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -21,7 +20,10 @@ import { createEditConcessionStyles } from '../../../styles/concessionaire'
 import { AlertModal } from '../../../components/modals'
 import DynamicScrollView from '../../../components/DynamicScrollView'
 import { UpdateConcessionData } from '../../../types'
-import { LoadingEditConcession } from '../../../components/concessionaire/concession/editDetails'
+import {
+	LoadingEditConcession,
+	ConcessionImage,
+} from '../../../components/concessionaire/concession/editDetails'
 
 const EditConcessionDetailsScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -156,33 +158,10 @@ const EditConcessionDetailsScreen: React.FC = () => {
 				showsVerticalScrollIndicator={true}>
 				<View style={styles.scrollContent}>
 					{/* Image Preview Section */}
-					{imageUrl ? (
-						<View style={styles.imagePreviewContainer}>
-							<Image
-								source={{ uri: imageUrl }}
-								style={styles.imagePreview}
-								resizeMode="cover"
-							/>
-							<TouchableOpacity
-								style={styles.removeImageButton}
-								onPress={() => setImageUrl('')}>
-								<MaterialCommunityIcons
-									name="close-circle"
-									size={24}
-									color="#fff"
-								/>
-							</TouchableOpacity>
-						</View>
-					) : (
-						<View style={styles.imagePlaceholder}>
-							<MaterialCommunityIcons
-								name="image-plus"
-								size={48}
-								color={colors.placeholder}
-							/>
-							<Text style={styles.imagePlaceholderText}>No image selected</Text>
-						</View>
-					)}
+					<ConcessionImage
+						imageUrl={imageUrl}
+						setImageUrl={setImageUrl}
+					/>
 
 					{/* Form Fields */}
 					<View style={styles.formSection}>
