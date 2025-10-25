@@ -130,8 +130,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 		<>
 			<DynamicScrollView
 				styles={emailVerificationStyles.container}
-				autoCenter="center"
-				fallbackAlign="flex-start">
+				autoCenter="center">
 				<View style={emailVerificationStyles.content}>
 					<View style={emailVerificationStyles.iconContainer}>
 						<Text style={emailVerificationStyles.icon}>

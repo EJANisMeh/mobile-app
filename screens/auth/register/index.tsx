@@ -78,8 +78,7 @@ const RegisterScreen: React.FC = () => {
 		<>
 			<DynamicScrollView
 				styles={registerStyles.container}
-				autoCenter="center"
-				fallbackAlign="flex-start">
+				autoCenter="center">
 				<View style={registerStyles.content}>
 					<Text style={registerStyles.title}>Create Account</Text>
 					<Text style={registerStyles.subtitle}>Sign up to get started</Text>

@@ -64,7 +64,7 @@ const ConcessionScreen: React.FC = () => {
 			<DynamicScrollView
 				styles={concessionStyles.container}
 				autoCenter={false}
-				showsVerticalScrollIndicator={false}>
+				showsVerticalScrollIndicator={true}>
 				<View style={concessionStyles.scrollContent}>
 					{/* Header Section */}
 					<ConcessionHeader />

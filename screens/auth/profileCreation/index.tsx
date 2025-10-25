@@ -115,8 +115,7 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 		<>
 			<DynamicScrollView
 				styles={profileCreationStyles.container}
-				autoCenter="center"
-				fallbackAlign="flex-start">
+				autoCenter="center">
 				<View style={profileCreationStyles.content}>
 					<Text style={profileCreationStyles.title}>Complete Your Profile</Text>
 					<Text style={profileCreationStyles.subtitle}>

@@ -20,8 +20,7 @@ const ForgotPasswordScreen: React.FC = () => {
 		<>
 			<DynamicScrollView
 				styles={forgotPasswordStyles.container}
-				autoCenter="center"
-				fallbackAlign="flex-start">
+				autoCenter="center">
 				<View style={forgotPasswordStyles.content}>
 					<Text style={forgotPasswordStyles.title}>Reset Password</Text>
 					<Text style={forgotPasswordStyles.subtitle}>

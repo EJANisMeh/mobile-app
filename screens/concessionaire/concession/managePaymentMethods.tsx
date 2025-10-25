@@ -226,7 +226,7 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 			<DynamicScrollView
 				styles={styles.container}
 				autoCenter={false}
-				showsVerticalScrollIndicator={false}>
+				showsVerticalScrollIndicator={true}>
 				<View style={styles.scrollContent}>
 					{/* Info Section */}
 					<View style={styles.infoSection}>

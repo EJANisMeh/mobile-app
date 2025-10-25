@@ -79,8 +79,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 		<>
 			<DynamicScrollView
 				styles={changePasswordStyles.container}
-				autoCenter="center"
-				fallbackAlign="flex-start">
+				autoCenter="center">
 				<View style={changePasswordStyles.content}>
 					<Text style={changePasswordStyles.title}>Change Password</Text>
 					<Text style={changePasswordStyles.subtitle}>

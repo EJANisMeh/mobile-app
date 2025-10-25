@@ -158,7 +158,7 @@ const EditConcessionDetailsScreen: React.FC = () => {
 			<DynamicScrollView
 				styles={styles.container}
 				autoCenter={false}
-				showsVerticalScrollIndicator={false}>
+				showsVerticalScrollIndicator={true}>
 				<View style={styles.scrollContent}>
 					{/* Image Preview Section */}
 					{imageUrl ? (

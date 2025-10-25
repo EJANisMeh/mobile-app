@@ -18,8 +18,7 @@ const ProfileScreen: React.FC = () => {
 	return (
 		<DynamicScrollView
 			styles={concessionaireProfileStyles.profileContainer}
-			autoCenter={false}
-			showsVerticalScrollIndicator={false}>
+			autoCenter={false}>
 			<View style={concessionaireProfileStyles.profileContent}>
 				<Text style={concessionaireProfileStyles.profileTitle}>
 					Concessionaire Profile

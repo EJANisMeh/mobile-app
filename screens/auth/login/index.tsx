@@ -23,8 +23,7 @@ const LoginScreen: React.FC = () => {
 		<>
 			<DynamicScrollView
 				styles={loginStyles.container}
-				autoCenter="center"
-				fallbackAlign="flex-start">
+				autoCenter="center">
 				<View style={loginStyles.content}>
 					<Text style={loginStyles.title}>Hello User</Text>
 					<Text style={loginStyles.subtitle}>Sign in to your account</Text>
