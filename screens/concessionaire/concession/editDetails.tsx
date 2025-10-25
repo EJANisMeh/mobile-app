@@ -2,34 +2,29 @@ import React, { useState, useEffect } from 'react'
 import {
 	View,
 	Text,
-	TextInput,
 	TouchableOpacity,
-	ActivityIndicator,
 	Platform,
 } from 'react-native'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import * as NavigationBar from 'expo-navigation-bar'
 import {
 	useThemeContext,
 	useConcessionContext,
-	useAuthContext,
 } from '../../../context'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import { createEditConcessionStyles } from '../../../styles/concessionaire'
 import { AlertModal } from '../../../components/modals'
 import DynamicScrollView from '../../../components/DynamicScrollView'
-import { UpdateConcessionData } from '../../../types'
 import {
 	LoadingEditConcession,
 	EditConcessionImage,
-	EditConcessionForm
+	EditConcessionForm,
+	EditConcessionSaveButton,
 } from '../../../components/concessionaire/concession/editDetails'
 
 const EditConcessionDetailsScreen: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
-	const { user } = useAuthContext()
 	const { concession, loading, updateConcession } = useConcessionContext()
 	const navigation = useNavigation()
 	const styles = createEditConcessionStyles(colors, responsive)
@@ -85,60 +80,7 @@ const EditConcessionDetailsScreen: React.FC = () => {
 		}
 	}, [])
 
-	const handleSave = async () => {
-		// Validation
-		if (!name.trim()) {
-			showAlert({
-				title: 'Validation Error',
-				message: 'Concession name is required',
-			})
-			return
-		}
 
-		if (!concession?.id) {
-			showAlert({
-				title: 'Error',
-				message: 'No concession found to update',
-			})
-			return
-		}
-
-		setIsSaving(true)
-
-		try {
-			const updateData: UpdateConcessionData = {
-				name: name.trim(),
-				description: description.trim() || null,
-				image_url: imageUrl.trim() || null,
-			}
-
-			const result = await updateConcession(concession.id, updateData)
-
-			if (result.success) {
-				showAlert({
-					title: 'Success',
-					message: 'Concession details updated successfully',
-				})
-				// Navigate back after a short delay
-				setTimeout(() => {
-					navigation.goBack()
-				}, 1500)
-			} else {
-				showAlert({
-					title: 'Error',
-					message: result.error || 'Failed to update concession details',
-				})
-			}
-		} catch (err) {
-			showAlert({
-				title: 'Error',
-				message:
-					err instanceof Error ? err.message : 'An unexpected error occurred',
-			})
-		} finally {
-			setIsSaving(false)
-		}
-	}
 
 	const handleCancel = () => {
 		navigation.goBack()
@@ -175,6 +117,7 @@ const EditConcessionDetailsScreen: React.FC = () => {
 
 					{/* Action Buttons */}
 					<View style={styles.actionButtonsContainer}>
+						{/* Cancel Button */}
 						<TouchableOpacity
 							style={styles.cancelButton}
 							onPress={handleCancel}
@@ -182,27 +125,15 @@ const EditConcessionDetailsScreen: React.FC = () => {
 							<Text style={styles.cancelButtonText}>Cancel</Text>
 						</TouchableOpacity>
 
-						<TouchableOpacity
-							style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
-							onPress={handleSave}
-							disabled={isSaving}>
-							{isSaving ? (
-								<ActivityIndicator
-									size="small"
-									color="#fff"
-								/>
-							) : (
-								<>
-									<MaterialCommunityIcons
-										name="content-save"
-										size={20}
-										color="#fff"
-										style={styles.saveButtonIcon}
-									/>
-									<Text style={styles.saveButtonText}>Save Changes</Text>
-								</>
-							)}
-						</TouchableOpacity>
+						{/* Save Button */}
+						<EditConcessionSaveButton
+							name={name}
+							description={description}
+							imageUrl={imageUrl}
+							isSaving={isSaving}
+							setIsSaving={setIsSaving}
+							showAlert={showAlert}
+						/>
 					</View>
 				</View>
 			</DynamicScrollView>
