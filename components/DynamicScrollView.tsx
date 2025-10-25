@@ -33,7 +33,8 @@ import { useResponsiveDimensions } from '../hooks'
 
 interface DynamicScrollViewProps extends ScrollViewProps {
 	children: React.ReactNode
-	styles?: StyleProp<ViewStyle>
+	styles: StyleProp<ViewStyle>
+	/** Enables or disables the KeyboardAvoidingView. */
 	enableKeyboardAvoiding?: boolean
 	behavior?: 'height' | 'position' | 'padding' | undefined
 	keyboardVerticalOffset?: number
@@ -55,6 +56,11 @@ interface DynamicScrollViewProps extends ScrollViewProps {
 	 * Default: 'flex-start' (start from top)
 	 */
 	fallbackAlign?: 'flex-start' | 'flex-end' | 'center'
+
+	// ScrollView Props
+	keyboardShouldPersistTaps?: 'handled' | 'always' | 'never'
+	bounces?: boolean
+	showsVerticalScrollIndicator?: boolean
 }
 
 const DynamicScrollView = ({
@@ -65,7 +71,13 @@ const DynamicScrollView = ({
 	keyboardVerticalOffset,
 	autoCenter = false,
 	fallbackAlign = 'flex-start',
-	...scrollProps
+
+	// Scroll View Props
+	keyboardShouldPersistTaps = 'handled',
+	bounces = false,
+	showsVerticalScrollIndicator = false,
+
+	...additionalScrollProps
 }: DynamicScrollViewProps) => {
 	const responsive = useResponsiveDimensions()
 
@@ -114,10 +126,10 @@ const DynamicScrollView = ({
 			<ScrollView
 				style={scrollViewStyle}
 				contentContainerStyle={contentContainerStyle}
-				keyboardShouldPersistTaps="handled"
-				bounces={false}
-				showsVerticalScrollIndicator={false}
-				{...scrollProps}>
+				keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+				bounces={bounces}
+				showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+				{...additionalScrollProps}>
 				{children}
 			</ScrollView>
 		</KeyboardAvoidingView>
