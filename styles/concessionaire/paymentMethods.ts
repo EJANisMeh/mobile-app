@@ -11,13 +11,14 @@ export const createPaymentMethodsStyles = (
 			backgroundColor: colors.background,
 		},
 		scrollContent: {
-			padding: responsive.getResponsivePadding().horizontal,
+			paddingHorizontal: responsive.getResponsiveSpacing().xl,
+			paddingVertical: responsive.getResponsiveSpacing().md,
 			paddingBottom: 100, // Space for action buttons
 		},
 		loadingContainer: {
 			flex: 1,
-			justifyContent: 'center' as const,
-			alignItems: 'center' as const,
+			justifyContent: 'center',
+			alignItems: 'center',
 			backgroundColor: colors.background,
 		},
 		loadingText: {
@@ -27,16 +28,12 @@ export const createPaymentMethodsStyles = (
 		},
 		// Info Section
 		infoSection: {
-			flexDirection: 'row' as const,
-			padding: responsive.getResponsiveMargin().medium,
-			backgroundColor: colors.primary + '15',
-			borderRadius: 10,
+			flexDirection: 'row',
 			marginBottom: responsive.getResponsiveMargin().large,
-			alignItems: 'flex-start' as const,
+			alignItems: 'flex-start',
 		},
 		infoText: {
 			flex: 1,
-			marginLeft: responsive.getResponsiveMargin().small,
 			fontSize: responsive.getResponsiveFontSize(14),
 			color: colors.text,
 			lineHeight: 20,
@@ -47,7 +44,7 @@ export const createPaymentMethodsStyles = (
 		},
 		sectionTitle: {
 			fontSize: responsive.getResponsiveFontSize(18),
-			fontWeight: '600' as const,
+			fontWeight: '600',
 			color: colors.text,
 			marginBottom: responsive.getResponsiveSpacing().md,
 		},
@@ -60,14 +57,14 @@ export const createPaymentMethodsStyles = (
 			marginBottom: responsive.getResponsiveMargin().medium,
 		},
 		methodHeader: {
-			flexDirection: 'row' as const,
-			justifyContent: 'space-between' as const,
-			alignItems: 'center' as const,
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
 			marginBottom: responsive.getResponsiveMargin().medium,
 		},
 		methodTitleRow: {
-			flexDirection: 'row' as const,
-			alignItems: 'center' as const,
+			flexDirection: 'row',
+			alignItems: 'center',
 			flex: 1,
 		},
 		methodIcon: {
@@ -75,7 +72,7 @@ export const createPaymentMethodsStyles = (
 		},
 		methodTitle: {
 			fontSize: responsive.getResponsiveFontSize(18),
-			fontWeight: '600' as const,
+			fontWeight: '600',
 			color: colors.text,
 		},
 		defaultBadge: {
@@ -88,7 +85,7 @@ export const createPaymentMethodsStyles = (
 		defaultBadgeText: {
 			color: '#fff',
 			fontSize: responsive.getResponsiveFontSize(11),
-			fontWeight: 'bold' as const,
+			fontWeight: 'bold',
 		},
 		removeButton: {
 			padding: 4,
@@ -109,20 +106,21 @@ export const createPaymentMethodsStyles = (
 		},
 		// Add Button
 		addButton: {
-			flexDirection: 'row' as const,
-			alignItems: 'center' as const,
-			justifyContent: 'center' as const,
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'center',
 			padding: responsive.getResponsiveSpacing().md,
 			borderRadius: 10,
 			borderWidth: 2,
 			borderColor: colors.primary,
-			borderStyle: 'dashed' as const,
+			borderStyle: 'dashed',
 			marginTop: responsive.getResponsiveMargin().small,
+			marginBottom: responsive.getResponsiveMargin().large,
 		},
 		addButtonText: {
 			fontSize: responsive.getResponsiveFontSize(16),
 			color: colors.primary,
-			fontWeight: '600' as const,
+			fontWeight: '600',
 			marginLeft: responsive.getResponsiveMargin().small,
 		},
 		// Add Options
@@ -131,8 +129,8 @@ export const createPaymentMethodsStyles = (
 			gap: responsive.getResponsiveMargin().small,
 		},
 		addOptionButton: {
-			flexDirection: 'row' as const,
-			alignItems: 'center' as const,
+			flexDirection: 'row',
+			alignItems: 'center',
 			padding: 14,
 			backgroundColor: colors.card,
 			borderRadius: 10,
@@ -149,7 +147,7 @@ export const createPaymentMethodsStyles = (
 			flex: 1,
 			fontSize: responsive.getResponsiveFontSize(16),
 			color: colors.text,
-			fontWeight: '500' as const,
+			fontWeight: '500',
 		},
 		addOptionTextDisabled: {
 			color: colors.placeholder,
@@ -157,15 +155,15 @@ export const createPaymentMethodsStyles = (
 		addedLabel: {
 			fontSize: responsive.getResponsiveFontSize(12),
 			color: colors.placeholder,
-			fontStyle: 'italic' as const,
+			fontStyle: 'italic',
 		},
 		// Action Buttons
 		actionButtonsContainer: {
-			position: 'absolute' as const,
+			position: 'absolute',
 			bottom: 0,
 			left: 0,
 			right: 0,
-			flexDirection: 'row' as const,
+			flexDirection: 'row',
 			padding: responsive.getResponsiveSpacing().md,
 			backgroundColor: colors.background,
 			borderTopWidth: 1,
@@ -178,22 +176,22 @@ export const createPaymentMethodsStyles = (
 			borderRadius: 10,
 			borderWidth: 1,
 			borderColor: colors.border,
-			alignItems: 'center' as const,
-			justifyContent: 'center' as const,
+			alignItems: 'center',
+			justifyContent: 'center',
 		},
 		cancelButtonText: {
 			fontSize: responsive.getResponsiveFontSize(16),
-			fontWeight: '600' as const,
+			fontWeight: '600',
 			color: colors.text,
 		},
 		saveButton: {
 			flex: 1,
-			flexDirection: 'row' as const,
-			padding: responsive.getResponsiveSpacing().md,
+			flexDirection: 'row',
+			paddingHorizontal: responsive.getResponsiveSpacing().md,
 			borderRadius: 10,
 			backgroundColor: colors.primary,
-			alignItems: 'center' as const,
-			justifyContent: 'center' as const,
+			alignItems: 'center',
+			justifyContent: 'center',
 		},
 		saveButtonDisabled: {
 			opacity: 0.6,
@@ -203,7 +201,7 @@ export const createPaymentMethodsStyles = (
 		},
 		saveButtonText: {
 			fontSize: responsive.getResponsiveFontSize(16),
-			fontWeight: '600' as const,
+			fontWeight: '600',
 			color: '#fff',
 		},
 	})
