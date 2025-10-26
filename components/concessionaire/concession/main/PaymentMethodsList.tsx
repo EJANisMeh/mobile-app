@@ -1,61 +1,58 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { useThemeContext, useConcessionContext } from '../../../../context';
-import { useResponsiveDimensions } from '../../../../hooks';
-import { createConcessionStyles } from '../../../../styles/concessionaire';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useConcessionaireNavigation } from '../../../../hooks/useNavigation';
+import React from 'react'
+import { View, Text, TouchableOpacity } from 'react-native'
+import { useThemeContext, useConcessionContext } from '../../../../context'
+import { useResponsiveDimensions } from '../../../../hooks'
+import { createConcessionStyles } from '../../../../styles/concessionaire'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { useConcessionaireNavigation } from '../../../../hooks/useNavigation'
+import { PaymentMethodTuple } from '../../../../types'
 
-const PaymentMethodsList: React.FC = () =>
-{
-  const { colors } = useThemeContext();
-  const responsive = useResponsiveDimensions();
-  const concessionStyles = createConcessionStyles(colors, responsive);
-  const { concession } = useConcessionContext();
-  const navigation = useConcessionaireNavigation();
+const PaymentMethodsList: React.FC = () => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const concessionStyles = createConcessionStyles(colors, responsive)
+	const { concession } = useConcessionContext()
+	const navigation = useConcessionaireNavigation()
 
-  
 	const handleManagePaymentMethodsNav = () => {
 		navigation.navigate('ManagePaymentMethods' as never)
 	}
 
-  return (
+	// Parse payment methods from tuple format [["type", "details"], ...]
+	const paymentMethods =
+		(concession?.payment_methods as PaymentMethodTuple[]) || []
+
+	return (
 		<View style={concessionStyles.paymentMethodsList}>
-			{concession?.payment_methods?.map((method: string, index: number) => (
-				<View
-					key={index}
-					style={[
-						concessionStyles.paymentMethodItem,
-						method === 'cash' && concessionStyles.paymentMethodDefault,
-					]}>
-					<View style={concessionStyles.paymentMethodContent}>
-						<MaterialCommunityIcons
-							name={
-								method === 'cash'
-									? 'cash'
-									: method === 'gcash'
-									? 'cellphone'
-									: 'credit-card'
-							}
-							size={22}
-							color={method === 'cash' ? colors.primary : colors.text}
-							style={concessionStyles.paymentMethodIcon}
-						/>
-						<Text
-							style={[
-								concessionStyles.paymentMethodText,
-								method === 'cash' && concessionStyles.paymentMethodDefaultText,
-							]}>
-							{method}
-						</Text>
-					</View>
-					{method === 'cash' && (
-						<View style={concessionStyles.defaultBadge}>
-							<Text style={concessionStyles.defaultBadgeText}>DEFAULT</Text>
+			{paymentMethods.map(([type, details], index: number) => {
+				const isCash = type.toLowerCase() === 'cash'
+
+				return (
+					<View
+						key={index}
+						style={[
+							concessionStyles.paymentMethodItem,
+						]}>
+						<View style={concessionStyles.paymentMethodContent}>
+							<Text
+								style={[
+									concessionStyles.paymentMethodText,
+								]}>
+								{type}
+							</Text>
+							{details && (
+								<Text
+									style={[
+										concessionStyles.paymentMethodDetails,
+									]}>
+									{' '}
+									• {details}
+								</Text>
+							)}
 						</View>
-					)}
-				</View>
-			))}
+					</View>
+				)
+			})}
 
 			<TouchableOpacity
 				style={concessionStyles.addPaymentButton}
@@ -72,5 +69,5 @@ const PaymentMethodsList: React.FC = () =>
 		</View>
 	)
 }
- 
-export default PaymentMethodsList;
+
+export default PaymentMethodsList

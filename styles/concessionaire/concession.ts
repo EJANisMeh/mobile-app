@@ -161,6 +161,11 @@ export const createConcessionStyles = (
 			fontSize: responsive.getResponsiveFontSize(11),
 			fontWeight: 'bold' as const,
 		},
+		paymentMethodDetails: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.textSecondary,
+			fontWeight: '400' as const,
+		},
 		addPaymentButton: {
 			flexDirection: 'row' as const,
 			alignItems: 'center' as const,

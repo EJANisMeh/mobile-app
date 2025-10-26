@@ -33,12 +33,34 @@ export const updateConcession = async (
 		if (image_url !== undefined) updateData.image_url = image_url
 		if (is_open !== undefined) updateData.is_open = is_open
 		if (payment_methods !== undefined) {
-			// Ensure payment_methods is an array and always includes "cash"
+			// Ensure payment_methods is an array of [type, details] tuples
+			// Format: [["cash", "Pay cash on counter"], ["gcash", "09171234567"], ...]
 			const methods = Array.isArray(payment_methods) ? payment_methods : []
-			if (!methods.includes('cash')) {
-				methods.unshift('cash') // Add cash as first payment method
+
+			// Validate that each method is a tuple [type, details]
+			const validMethods = methods.filter(
+				(m) =>
+					Array.isArray(m) &&
+					m.length === 2 &&
+					typeof m[0] === 'string' &&
+					typeof m[1] === 'string'
+			)
+
+			// Ensure cash is always present at index 0
+			const cashIndex = validMethods.findIndex(
+				([type]) => type.toLowerCase() === 'cash'
+			)
+
+			if (cashIndex > 0) {
+				// Move cash to first position
+				const cash = validMethods.splice(cashIndex, 1)[0]
+				validMethods.unshift(cash)
+			} else if (cashIndex === -1) {
+				// Add cash if not present
+				validMethods.unshift(['cash', 'Pay cash on counter'])
 			}
-			updateData.payment_methods = methods
+
+			updateData.payment_methods = validMethods
 		}
 		if (schedule !== undefined) updateData.schedule = schedule
 
