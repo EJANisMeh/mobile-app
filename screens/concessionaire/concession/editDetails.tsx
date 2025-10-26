@@ -27,7 +27,7 @@ import {
 const EditConcessionDetailsScreen: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
-	const { concession, loading, updateConcession } = useConcessionContext()
+	const { concession, loading } = useConcessionContext()
 	const navigation = useNavigation()
 	const styles = createEditConcessionStyles(colors, responsive)
 
