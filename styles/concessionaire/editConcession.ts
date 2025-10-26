@@ -145,7 +145,7 @@ export const createEditConcessionStyles = (
 			left: 0,
 			right: 0,
 			flexDirection: 'row',
-			padding: responsive.getResponsiveSpacing().md,
+			padding: responsive.getResponsiveSpacing().xs,
 			backgroundColor: colors.background,
 			borderTopWidth: 1,
 			borderTopColor: colors.border,
