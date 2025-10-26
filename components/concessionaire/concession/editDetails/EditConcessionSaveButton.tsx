@@ -1,103 +1,106 @@
-import React from 'react';
-import
-  {
-    TouchableOpacity,
-    Text,
-    ActivityIndicator
-} from 'react-native';
-import { useThemeContext, useConcessionContext } from '../../../../context';
-import { useResponsiveDimensions } from '../../../../hooks';
-import { createEditConcessionStyles } from '../../../../styles/concessionaire';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React from 'react'
+import { TouchableOpacity, Text, ActivityIndicator } from 'react-native'
+import { useThemeContext, useConcessionContext } from '../../../../context'
+import { useResponsiveDimensions } from '../../../../hooks'
+import { createEditConcessionStyles } from '../../../../styles/concessionaire'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { UpdateConcessionData } from '../../../../types/concessionTypes'
 import { UseAlertModalType } from '../../../../hooks/useModals/types'
 import { useConcessionaireNavigation } from '../../../../hooks/useNavigation'
 
-interface EditConcessionSaveButtonProps
-{
-  name: string;
-  description: string;
-  imageUrl: string;
-  isSaving: boolean;
-  setIsSaving: React.Dispatch<React.SetStateAction<boolean>>;
-  showAlert: UseAlertModalType['showAlert'];
+interface EditConcessionSaveButtonProps {
+	name: string
+	description: string
+	imageUrl: string
+	isSaving: boolean
+	setIsSaving: React.Dispatch<React.SetStateAction<boolean>>
+	showAlert: UseAlertModalType['showAlert']
+	edited: boolean
 }
 
 const EditConcessionSaveButton: React.FC<EditConcessionSaveButtonProps> = ({
-  name,
-  description,
-  imageUrl,
-  isSaving,
-  setIsSaving,
-  showAlert
-}) =>
-{
-  const { colors } = useThemeContext();
-  const responsive = useResponsiveDimensions();
-  const styles = createEditConcessionStyles(colors, responsive);
-  const { concession, updateConcession } = useConcessionContext();
-  const navigation = useConcessionaireNavigation();
+	name,
+	description,
+	imageUrl,
+	isSaving,
+	setIsSaving,
+	showAlert,
+	edited,
+}) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const styles = createEditConcessionStyles(colors, responsive)
+	const { concession, updateConcession } = useConcessionContext()
+	const navigation = useConcessionaireNavigation()
 
-  const handleSave = async () => {
-    // Validation
-    if (!name.trim()) {
-      showAlert({
-        title: 'Validation Error',
-        message: 'Concession name is required',
-      })
-      return
-    }
+	const handleSave = async () => {
+		// Early return if no changes or already saving
+		if (!edited || isSaving) {
+			return
+		}
 
-    if (!concession?.id) {
-      showAlert({
-        title: 'Error',
-        message: 'No concession found to update',
-      })
-      return
-    }
+		// Validation
+		if (!name.trim()) {
+			showAlert({
+				title: 'Validation Error',
+				message: 'Concession name is required',
+			})
+			return
+		}
 
-    setIsSaving(true)
+		if (!concession?.id) {
+			showAlert({
+				title: 'Error',
+				message: 'No concession found to update',
+			})
+			return
+		}
 
-    try {
-      const updateData: UpdateConcessionData = {
-        name: name.trim(),
-        description: description.trim() || null,
-        image_url: imageUrl.trim() || null,
-      }
+		setIsSaving(true)
 
-      const result = await updateConcession(concession.id, updateData)
+		try {
+			const updateData: UpdateConcessionData = {
+				name: name.trim(),
+				description: description.trim() || null,
+				image_url: imageUrl.trim() || null,
+			}
 
-      if (result.success) {
-        showAlert({
-          title: 'Success',
-          message: 'Concession details updated successfully',
-        })
-        // Navigate back after a short delay
-        setTimeout(() => {
-          navigation.goBack()
-        }, 1500)
-      } else {
-        showAlert({
-          title: 'Error',
-          message: result.error || 'Failed to update concession details',
-        })
-      }
-    } catch (err) {
-      showAlert({
-        title: 'Error',
-        message:
-          err instanceof Error ? err.message : 'An unexpected error occurred',
-      })
-    } finally {
-      setIsSaving(false)
-    }
-  }
+			const result = await updateConcession(concession.id, updateData)
 
-  return (
+			if (result.success) {
+				showAlert({
+					title: 'Success',
+					message: 'Concession details updated successfully',
+				})
+				// Navigate back after a short delay
+				setTimeout(() => {
+					navigation.goBack()
+				}, 1500)
+			} else {
+				showAlert({
+					title: 'Error',
+					message: result.error || 'Failed to update concession details',
+				})
+			}
+		} catch (err) {
+			showAlert({
+				title: 'Error',
+				message:
+					err instanceof Error ? err.message : 'An unexpected error occurred',
+			})
+		} finally {
+			setIsSaving(false)
+		}
+	}
+
+	return (
 		<TouchableOpacity
-			style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+			style={[
+				styles.saveButton,
+				(!edited || isSaving) && styles.saveButtonDisabled,
+			]}
 			onPress={handleSave}
-			disabled={isSaving}>
+			disabled={!edited || isSaving}>
 			{isSaving ? (
 				<ActivityIndicator
 					size="small"
@@ -117,5 +120,5 @@ const EditConcessionSaveButton: React.FC<EditConcessionSaveButtonProps> = ({
 		</TouchableOpacity>
 	)
 }
- 
-export default EditConcessionSaveButton;
+
+export default EditConcessionSaveButton

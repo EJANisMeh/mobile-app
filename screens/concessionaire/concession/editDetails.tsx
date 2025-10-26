@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, TouchableOpacity, Platform, BackHandler } from 'react-native'
+import {
+	View,
+	Text,
+	TouchableOpacity,
+	Platform,
+	BackHandler,
+} from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useThemeContext, useConcessionContext } from '../../../context'
@@ -130,18 +136,18 @@ const EditConcessionDetailsScreen: React.FC = () => {
 		navigation.goBack()
 	}
 
-		// Handle Android hardware back button
-		useEffect(() => {
-			const backHandler = BackHandler.addEventListener(
-				'hardwareBackPress',
-				() => {
-					handleCancel()
-					return true // Prevent default back behavior
-				}
-			)
-	
-			return () => backHandler.remove() // Remove backhandler function after unmounting
-		}, [edited])
+	// Handle Android hardware back button
+	useEffect(() => {
+		const backHandler = BackHandler.addEventListener(
+			'hardwareBackPress',
+			() => {
+				handleCancel()
+				return true // Prevent default back behavior
+			}
+		)
+
+		return () => backHandler.remove() // Remove backhandler function after unmounting
+	}, [edited])
 
 	// Loading state
 	if (loading && !concession) {
@@ -188,6 +194,7 @@ const EditConcessionDetailsScreen: React.FC = () => {
 							isSaving={isSaving}
 							setIsSaving={setIsSaving}
 							showAlert={showAlert}
+							edited={edited}
 						/>
 					</View>
 				</View>
