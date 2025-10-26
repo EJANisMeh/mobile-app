@@ -16,6 +16,7 @@ import {
 import {
 	useAlertModal,
 	useConfirmationModal,
+	useHideNavBar,
 	useResponsiveDimensions,
 } from '../../../hooks'
 import { createPaymentMethodsStyles } from '../../../styles/concessionaire'
@@ -87,6 +88,8 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 
 		setPaymentMethods(existing)
 	}, [concession])
+
+	useHideNavBar()
 
 	const handleAddMethod = (type: string) => {
 		// Check if method already exists
@@ -230,14 +233,8 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 				<View style={styles.scrollContent}>
 					{/* Info Section */}
 					<View style={styles.infoSection}>
-						<MaterialCommunityIcons
-							name="information"
-							size={20}
-							color={colors.primary}
-						/>
 						<Text style={styles.infoText}>
-							Manage your concession's accepted payment methods. Cash is always
-							required as the default method.
+							Manage your concession's accepted payment methods.
 						</Text>
 					</View>
 

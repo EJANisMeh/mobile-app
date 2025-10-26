@@ -1,18 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import {
-	View,
-	Text,
-	TouchableOpacity,
-	Platform,
-	BackHandler,
-} from 'react-native'
+import { View, Text, TouchableOpacity, BackHandler } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
-import * as NavigationBar from 'expo-navigation-bar'
 import { useThemeContext, useConcessionContext } from '../../../context'
 import {
 	useAlertModal,
 	useResponsiveDimensions,
 	useConfirmationModal,
+	useHideNavBar,
 } from '../../../hooks'
 import { createEditConcessionStyles } from '../../../styles/concessionaire'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
@@ -84,38 +78,7 @@ const EditConcessionDetailsScreen: React.FC = () => {
 	}, [name, description, imageUrl, initialValues])
 
 	// Hide system navigation buttons on Android when screen mounts
-	useEffect(() => {
-		const hideNavigationBar = async () => {
-			if (Platform.OS === 'android') {
-				try {
-					// Hide the navigation bar (system buttons)
-					await NavigationBar.setVisibilityAsync('hidden')
-					// Note: setBehaviorAsync is not needed with edge-to-edge mode
-					// The system automatically handles swipe-to-show behavior
-				} catch (error) {
-					console.log('Error hiding navigation bar:', error)
-				}
-			}
-		}
-
-		const showNavigationBar = async () => {
-			if (Platform.OS === 'android') {
-				try {
-					// Show the navigation bar when leaving the screen
-					await NavigationBar.setVisibilityAsync('visible')
-				} catch (error) {
-					console.log('Error showing navigation bar:', error)
-				}
-			}
-		}
-
-		hideNavigationBar()
-
-		// Cleanup: show navigation bar when component unmounts
-		return () => {
-			showNavigationBar()
-		}
-	}, [])
+	useHideNavBar()
 
 	const handleCancel = () => {
 		if (edited) {
