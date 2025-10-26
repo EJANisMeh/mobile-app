@@ -25,6 +25,7 @@ const MainTabs: React.FC = () => {
 				tabBarActiveTintColor: '#28a745',
 				tabBarInactiveTintColor: '#6c757d',
 				headerShown: true,
+				headerLeft: () => null,
 			}}>
 			<Tab.Screen
 				name="Orders"
@@ -121,6 +122,7 @@ const ConcessionaireStack: React.FC = () => {
 					headerShown: true,
 					title: 'Edit Concession Details',
 					presentation: 'modal',
+					headerLeft: () => null,
 				}}
 			/>
 			<Stack.Screen
@@ -130,6 +132,7 @@ const ConcessionaireStack: React.FC = () => {
 					headerShown: true,
 					title: 'Manage Payment Methods',
 					presentation: 'modal',
+					headerLeft: () => null,
 				}}
 			/>
 		</Stack.Navigator>
