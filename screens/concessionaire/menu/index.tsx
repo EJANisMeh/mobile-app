@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, ActivityIndicator } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { useThemeContext } from '../../../context'
+import { useThemeContext, useConcessionContext } from '../../../context'
 import {
 	useResponsiveDimensions,
 	useAlertModal,
 	useConfirmationModal,
+	useMenuBackend,
 } from '../../../hooks'
 import { createConcessionaireMenuStyles } from '../../../styles/concessionaire'
 import DynamicScrollView from '../../../components/DynamicScrollView'
@@ -20,6 +21,7 @@ const MenuScreen: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createConcessionaireMenuStyles(colors, responsive)
+	const { concession } = useConcessionContext()
 
 	const { visible, title, message, showAlert, hideAlert } = useAlertModal()
 	const {
@@ -29,12 +31,31 @@ const MenuScreen: React.FC = () => {
 		hideConfirmation,
 	} = useConfirmationModal()
 
-	const [loading, setLoading] = useState(false)
-	const [menuItems, setMenuItems] = useState<any[]>([]) // TODO: Replace with proper type
+	const {
+		loading,
+		error,
+		menuItems,
+		getMenuItems,
+		toggleAvailability,
+		deleteMenuItem,
+	} = useMenuBackend()
 
+	// Fetch menu items on mount
+	useEffect(() => {
+		if (concession?.id) {
+			getMenuItems(concession.id)
+		}
+	}, [concession?.id])
 
-
-
+	// Show error if any
+	useEffect(() => {
+		if (error) {
+			showAlert({
+				title: 'Error',
+				message: error,
+			})
+		}
+	}, [error])
 
 	if (loading) {
 		return (
@@ -57,9 +78,9 @@ const MenuScreen: React.FC = () => {
 				<View style={styles.scrollContent}>
 					{/* Header Actions */}
 					<View style={styles.headerActions}>
-						<AddMenuItemButton showAlert={showAlert} />
+						<AddMenuItemButton />
 
-						<ManageCategoriesButton showAlert={showAlert} />
+						<ManageCategoriesButton />
 					</View>
 
 					{/* Menu Items List */}
@@ -82,9 +103,34 @@ const MenuScreen: React.FC = () => {
 									key={item.id}
 									id={item.id}
 									name={item.name}
-									basePrice={item.basePrice}
-									imageUrl={item.imageUrl}
-									availability={item.availability}
+									basePrice={item.price}
+									imageUrl={item.image_url}
+									availability={item.available}
+									showAlert={showAlert}
+									showConfirmation={showConfirmation}
+									onToggleAvailability={async (itemId, currentAvailability) => {
+										const result = await toggleAvailability(
+											itemId,
+											currentAvailability
+										)
+										if (result.success) {
+											showAlert({
+												title: 'Success',
+												message: `Item marked as ${
+													currentAvailability ? 'unavailable' : 'available'
+												}`,
+											})
+										}
+									}}
+									onDelete={async (itemId) => {
+										const result = await deleteMenuItem(itemId)
+										if (result.success) {
+											showAlert({
+												title: 'Deleted',
+												message: 'Menu item has been deleted successfully',
+											})
+										}
+									}}
 								/>
 							))}
 						</View>

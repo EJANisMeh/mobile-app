@@ -1,4 +1,5 @@
 export { authApi } from './authApi'
 export { concessionApi } from './concessionApi'
+export { menuApi } from './menuApi'
 export { userApi } from './userApi'
 export { debugApi } from './debugApi'

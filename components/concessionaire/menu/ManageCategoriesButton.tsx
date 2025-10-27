@@ -4,25 +4,16 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createConcessionaireMenuStyles } from '../../../styles/concessionaire/menu'
-import { UseAlertModalType } from '../../../hooks/useModals/types'
+import { useConcessionaireNavigation } from '../../../hooks/useNavigation'
 
-interface ManageCategoriesButtonProps {
-	showAlert: UseAlertModalType['showAlert']
-}
-
-const ManageCategoriesButton: React.FC<ManageCategoriesButtonProps> = ({
-	showAlert,
-}) => {
+const ManageCategoriesButton: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createConcessionaireMenuStyles(colors, responsive)
+	const navigation = useConcessionaireNavigation()
 
 	const handleManageCategoriesNav = () => {
-		// TODO: Navigate to manage categories screen
-		showAlert({
-			title: 'Coming Soon',
-			message: 'Category management will be implemented',
-		})
+		navigation.navigate('CategoryManagement')
 	}
 
 	return (

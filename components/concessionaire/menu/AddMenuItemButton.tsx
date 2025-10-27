@@ -4,27 +4,16 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createConcessionaireMenuStyles } from '../../../styles/concessionaire/menu'
-import { UseAlertModalType } from '../../../hooks/useModals/types'
+import { useConcessionaireNavigation } from '../../../hooks/useNavigation'
 
-interface AddMenuItemButtonProps
-{
-  showAlert: UseAlertModalType['showAlert']
-}
-
-const AddMenuItemButton: React.FC<AddMenuItemButtonProps> = ({ 
-  showAlert
-}) => {
+const AddMenuItemButton: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
-  const styles = createConcessionaireMenuStyles(colors, responsive)
-  
+	const styles = createConcessionaireMenuStyles(colors, responsive)
+	const navigation = useConcessionaireNavigation()
+
 	const handleAddItemNav = () => {
-		// TODO: Navigate to add item screen
-		showAlert({
-			title: 'Coming Soon',
-			message: 'Add item functionality will be implemented',
-    })
-    
+		navigation.navigate('AddMenuItem')
 	}
 	return (
 		<TouchableOpacity
