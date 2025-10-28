@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, BackHandler, TouchableOpacity } from 'react-native'
 import { useThemeContext } from '../../../context'
-import { AlertModal, ConfirmationModal } from '../../../components'
+import {
+	AlertModal,
+	ConfirmationModal,
+	DynamicKeyboardView,
+	DynamicScrollView,
+} from '../../../components'
 import {
 	useAlertModal,
 	useConfirmationModal,
@@ -10,7 +15,6 @@ import {
 } from '../../../hooks'
 import { createProfileCreationStyles } from '../../../styles/auth'
 import { ProfileCreationData } from '../../../types'
-import DynamicScrollView from '../../../components/DynamicScrollView'
 import {
 	NameInputs,
 	ContactDetails,
@@ -84,8 +88,7 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 				'Are you sure you want to cancel profile creation? Your current input will not be saved.',
 			confirmText: 'Yes',
 			cancelText: 'No',
-			onConfirm: () =>
-			{
+			onConfirm: () => {
 				updateField('fname', '')
 				updateField('lname', '')
 				updateImageUrl(undefined)
@@ -112,7 +115,7 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 	}, [])
 
 	return (
-		<>
+		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={profileCreationStyles.container}
 				autoCenter="center">
@@ -174,7 +177,7 @@ const ProfileCreationScreen: React.FC<ProfileCreationScreenProps> = ({
 				onConfirm={confirmProps.onConfirm}
 				onCancel={confirmProps.onCancel}
 			/>
-		</>
+		</DynamicKeyboardView>
 	)
 }
 

@@ -3,7 +3,7 @@ import { View, Text } from 'react-native'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createCustomerCartStyles } from '../../../styles/customer'
-import DynamicScrollView from '../../../components/DynamicScrollView'
+import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 
 const CartScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -11,6 +11,7 @@ const CartScreen: React.FC = () => {
 	const customerCartStyles = createCustomerCartStyles(colors, responsive)
 
 	return (
+		<DynamicKeyboardView>
 		<DynamicScrollView
 			styles={customerCartStyles.container}
 			autoCenter="center"
@@ -19,7 +20,7 @@ const CartScreen: React.FC = () => {
 				<Text style={customerCartStyles.containerText}>Cart Screen</Text>
 				<Text style={customerCartStyles.containerSubtext}>Coming Soon</Text>
 			</View>
-		</DynamicScrollView>
+		</DynamicScrollView></DynamicKeyboardView>
 	)
 }
 

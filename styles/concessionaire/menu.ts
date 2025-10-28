@@ -234,11 +234,7 @@ export const createConcessionaireMenuStyles = (
 
 		// Category Management Styles
 		categoryManagementContainer: {
-			flex: 1,
 			backgroundColor: colors.background,
-			paddingHorizontal: padding.horizontal,
-			paddingTop: spacing.md,
-			paddingBottom: spacing.lg,
 		},
 		categoryInputContainer: {
 			flexDirection: 'row' as const,

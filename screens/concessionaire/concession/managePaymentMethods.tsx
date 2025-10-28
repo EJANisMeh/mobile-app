@@ -10,12 +10,12 @@ import {
 } from '../../../hooks'
 import { createPaymentMethodsStyles } from '../../../styles/concessionaire'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
-import DynamicScrollView from '../../../components/DynamicScrollView'
 import {
 	PaymentMethodsList,
 	AddPaymentMethodInput,
 } from '../../../components/concessionaire/concession/paymentmethods'
 import { PaymentMethod, PaymentMethodTuple } from '../../../types'
+import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 
 const ManagePaymentMethodsScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -198,7 +198,7 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 	}
 
 	return (
-		<>
+		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={styles.container}
 				autoCenter={false}
@@ -272,7 +272,7 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 				confirmStyle={confirmProps.confirmStyle}
 				onConfirm={confirmProps.onConfirm}
 			/>
-		</>
+		</DynamicKeyboardView>
 	)
 }
 

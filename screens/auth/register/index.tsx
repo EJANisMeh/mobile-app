@@ -13,8 +13,12 @@ import { RegisterData } from '../../../types'
 //styles
 import { createRegisterStyles } from '../../../styles/auth'
 // components
-import { AlertModal, ConfirmationModal } from '../../../components'
-import DynamicScrollView from '../../../components/DynamicScrollView'
+import {
+	AlertModal,
+	ConfirmationModal,
+	DynamicKeyboardView,
+	DynamicScrollView,
+} from '../../../components'
 import RegisterForm from '../../../components/auth/register'
 import BackToLoginButton from '../../../components/auth/register/BackToLoginButton'
 
@@ -37,7 +41,7 @@ const RegisterScreen: React.FC = () => {
 		showConfirmation,
 		hideConfirmation,
 	} = useConfirmationModal()
-	
+
 	const navigation = useAuthNavigation()
 
 	const handleBackToLogin = () => {
@@ -75,7 +79,7 @@ const RegisterScreen: React.FC = () => {
 	}, [edited])
 
 	return (
-		<>
+		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={registerStyles.container}
 				autoCenter="center">
@@ -94,9 +98,7 @@ const RegisterScreen: React.FC = () => {
 						<Text style={registerStyles.footerText}>
 							Already have an account?{' '}
 						</Text>
-						<BackToLoginButton
-							handlePress={handleBackToLogin}
-						/>
+						<BackToLoginButton handlePress={handleBackToLogin} />
 					</View>
 				</View>
 			</DynamicScrollView>
@@ -119,7 +121,7 @@ const RegisterScreen: React.FC = () => {
 				confirmStyle={confirmProps.confirmStyle}
 				onConfirm={confirmProps.onConfirm}
 			/>
-		</>
+		</DynamicKeyboardView>
 	)
 }
 

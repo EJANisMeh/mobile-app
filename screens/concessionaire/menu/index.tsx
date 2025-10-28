@@ -9,13 +9,13 @@ import {
 	useMenuBackend,
 } from '../../../hooks'
 import { createConcessionaireMenuStyles } from '../../../styles/concessionaire'
-import DynamicScrollView from '../../../components/DynamicScrollView'
 import {
 	MenuItemCard,
 	AddMenuItemButton,
 	ManageCategoriesButton,
 } from '../../../components/concessionaire/menu'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
+import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 
 const MenuScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -77,7 +77,7 @@ const MenuScreen: React.FC = () => {
 	}
 
 	return (
-		<>
+		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={styles.container}
 				autoCenter={false}
@@ -159,7 +159,7 @@ const MenuScreen: React.FC = () => {
 				confirmStyle={confirmProps.confirmStyle}
 				onConfirm={confirmProps.onConfirm}
 			/>
-		</>
+		</DynamicKeyboardView>
 	)
 }
 

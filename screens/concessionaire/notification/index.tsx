@@ -3,7 +3,7 @@ import { View, Text } from 'react-native'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createConcessionaireNotificationsStyles } from '../../../styles/concessionaire'
-import DynamicScrollView from '../../../components/DynamicScrollView'
+import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 
 const NotificationsScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -12,19 +12,21 @@ const NotificationsScreen: React.FC = () => {
 		createConcessionaireNotificationsStyles(colors, responsive)
 
 	return (
-		<DynamicScrollView
-			styles={concessionaireNotificationsStyles.container}
-			autoCenter="center"
-			fallbackAlign="center">
-			<View>
-				<Text style={concessionaireNotificationsStyles.containerText}>
-					Notifications
-				</Text>
-				<Text style={concessionaireNotificationsStyles.containerSubtext}>
-					Coming Soon
-				</Text>
-			</View>
-		</DynamicScrollView>
+		<DynamicKeyboardView>
+			<DynamicScrollView
+				styles={concessionaireNotificationsStyles.container}
+				autoCenter="center"
+				fallbackAlign="center">
+				<View>
+					<Text style={concessionaireNotificationsStyles.containerText}>
+						Notifications
+					</Text>
+					<Text style={concessionaireNotificationsStyles.containerSubtext}>
+						Coming Soon
+					</Text>
+				</View>
+			</DynamicScrollView>
+		</DynamicKeyboardView>
 	)
 }
 

@@ -13,7 +13,6 @@ import {
 	useResponsiveDimensions,
 } from '../../../hooks'
 import { createConcessionStyles } from '../../../styles/concessionaire'
-import DynamicScrollView from '../../../components/DynamicScrollView'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
 import {
 	LoadingConcession,
@@ -23,6 +22,7 @@ import {
 	ConcessionEditDetailsButton,
 	PaymentMethodsList,
 } from '../../../components/concessionaire/concession/main'
+import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 
 const ConcessionScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -60,7 +60,7 @@ const ConcessionScreen: React.FC = () => {
 
 	// concession and !loading
 	return (
-		<>
+		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={concessionStyles.container}
 				autoCenter={false}
@@ -110,7 +110,7 @@ const ConcessionScreen: React.FC = () => {
 				}}
 				onCancel={() => hideConfirmation()}
 			/>
-		</>
+		</DynamicKeyboardView>
 	)
 }
 

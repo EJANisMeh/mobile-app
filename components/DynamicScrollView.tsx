@@ -1,12 +1,5 @@
 import React from 'react'
-import {
-	KeyboardAvoidingView,
-	Platform,
-	ScrollView,
-	ScrollViewProps,
-	StyleProp,
-	ViewStyle,
-} from 'react-native'
+import { ScrollView, ScrollViewProps, StyleProp, ViewStyle } from 'react-native'
 import { useResponsiveDimensions } from '../hooks'
 
 /**
@@ -16,8 +9,9 @@ import { useResponsiveDimensions } from '../hooks'
  * - Adapts padding and styles based on device orientation
  * - Auto-centers content when it fits on screen (portrait mode with height > 600)
  * - Falls back to top alignment when content overflows or in landscape
- * - Keyboard avoiding behavior built-in
  * - Strongly typed with generic styles support
+ *
+ * NOTE: Use inside DynamicKeyboardView for keyboard avoidance and safe area support
  *
  * Usage examples:
  *
@@ -28,16 +22,15 @@ import { useResponsiveDimensions } from '../hooks'
  *    <DynamicScrollView autoCenter={false}>
  *
  * 3. With custom styles:
- *    <DynamicScrollView styles={myStyles.container}>
+ *    <DynamicScrollView style={myStyles.container}>
  */
 
 interface DynamicScrollViewProps extends ScrollViewProps {
 	children: React.ReactNode
-	styles: StyleProp<ViewStyle>
-	/** Enables or disables the KeyboardAvoidingView. */
-	enableKeyboardAvoiding?: boolean
-	behavior?: 'height' | 'position' | 'padding' | undefined
-	keyboardVerticalOffset?: number
+	/** Style prop (recommended) */
+	style?: StyleProp<ViewStyle>
+	/** Legacy styles prop for backward compatibility */
+	styles?: StyleProp<ViewStyle>
 	/**
 	 * Auto-center content vertically when all content fits on screen.
 	 * When content overflows, it starts from top (or specified fallbackAlign).
@@ -65,10 +58,8 @@ interface DynamicScrollViewProps extends ScrollViewProps {
 
 const DynamicScrollView = ({
 	children,
-	styles,
-	enableKeyboardAvoiding = true,
-	behavior = 'padding',
-	keyboardVerticalOffset,
+	style,
+	styles, // Legacy support
 	autoCenter = false,
 	fallbackAlign = 'flex-start',
 
@@ -81,9 +72,6 @@ const DynamicScrollView = ({
 }: DynamicScrollViewProps) => {
 	const responsive = useResponsiveDimensions()
 
-	const offset =
-		keyboardVerticalOffset ?? (Platform.OS === 'android' ? -100 : 0)
-
 	// Calculate justifyContent based on autoCenter and screen size
 	const getJustifyContent = ():
 		| 'center'
@@ -92,7 +80,6 @@ const DynamicScrollView = ({
 		| 'space-between'
 		| 'space-around' => {
 		if (!autoCenter) {
-			// If autoCenter is disabled, use fallbackAlign or extract from contentContainerStyle
 			return fallbackAlign as 'flex-start' | 'flex-end' | 'center'
 		}
 
@@ -105,34 +92,26 @@ const DynamicScrollView = ({
 	}
 
 	// Separate visual styles (for ScrollView style prop)
-	const scrollViewStyle: StyleProp<ViewStyle> = [{ flex: 1 }, styles]
+	// Support both 'style' and 'styles' for backward compatibility
+	const scrollViewStyle: StyleProp<ViewStyle> = [{ flex: 1 }, styles || style]
 
 	// Layout styles (for ScrollView contentContainerStyle prop)
 	const contentContainerStyle: StyleProp<ViewStyle> = [
 		autoCenter ? { justifyContent: getJustifyContent() } : undefined,
-		{ paddingHorizontal: responsive.getResponsivePadding().horizontal },
 		{ paddingVertical: responsive.getResponsivePadding().vertical },
 		{ flexGrow: 1 },
-		{ alignItems: 'center' as const },
 	]
 
 	return (
-		<KeyboardAvoidingView
-			key={responsive.isLandscape ? 'landscape' : 'portrait'}
-			style={{ flex: 1 }}
-			behavior={behavior}
-			enabled={enableKeyboardAvoiding}
-			keyboardVerticalOffset={offset}>
-			<ScrollView
-				style={scrollViewStyle}
-				contentContainerStyle={contentContainerStyle}
-				keyboardShouldPersistTaps={keyboardShouldPersistTaps}
-				bounces={bounces}
-				showsVerticalScrollIndicator={showsVerticalScrollIndicator}
-				{...additionalScrollProps}>
-				{children}
-			</ScrollView>
-		</KeyboardAvoidingView>
+		<ScrollView
+			style={scrollViewStyle}
+			contentContainerStyle={contentContainerStyle}
+			keyboardShouldPersistTaps={keyboardShouldPersistTaps}
+			bounces={bounces}
+			showsVerticalScrollIndicator={showsVerticalScrollIndicator}
+			{...additionalScrollProps}>
+			{children}
+		</ScrollView>
 	)
 }
 

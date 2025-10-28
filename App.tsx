@@ -3,15 +3,18 @@ import { NavigationContainer } from '@react-navigation/native'
 import { StatusBar } from 'expo-status-bar'
 import { AppProvider, useThemeContext } from './context'
 import { RootNavigator } from './navigation'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 const AppContent: React.FC = () => {
 	const { mode } = useThemeContext()
 
 	return (
-		<NavigationContainer>
-			<RootNavigator />
-			<StatusBar style={mode === 'light' ? 'dark' : 'light'} />
-		</NavigationContainer>
+		<SafeAreaProvider>
+			<NavigationContainer>
+				<RootNavigator />
+				<StatusBar style={mode === 'light' ? 'dark' : 'light'} />
+			</NavigationContainer>
+		</SafeAreaProvider>
 	)
 }
 

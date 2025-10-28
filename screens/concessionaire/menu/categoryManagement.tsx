@@ -4,17 +4,21 @@ import {
 	Text,
 	TextInput,
 	TouchableOpacity,
-	ScrollView,
 	ActivityIndicator,
 	BackHandler,
 } from 'react-native'
 import { useThemeContext, useConcessionContext } from '../../../context'
-import { useResponsiveDimensions } from '../../../hooks'
+import { useHideNavBar, useResponsiveDimensions } from '../../../hooks'
 import { useCategoryBackend } from '../../../hooks/useBackend/useCategoryBackend'
 import { useAlertModal } from '../../../hooks/useModals/useAlertModal'
 import { useConfirmationModal } from '../../../hooks/useModals/useConfirmationModal'
 import { createConcessionaireMenuStyles } from '../../../styles/concessionaire'
-import { AlertModal, ConfirmationModal } from '../../../components/modals'
+import {
+	AlertModal,
+	ConfirmationModal,
+	DynamicKeyboardView,
+	DynamicScrollView,
+} from '../../../components'
 import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 
@@ -41,6 +45,8 @@ const CategoryManagementScreen: React.FC = () => {
 	const [editedCategories, setEditedCategories] = useState<CategoryItem[]>([])
 	const [hasChanges, setHasChanges] = useState(false)
 
+	useHideNavBar()
+
 	// Load categories on mount
 	useEffect(() => {
 		let isMounted = true
@@ -66,13 +72,6 @@ const CategoryManagementScreen: React.FC = () => {
 			isMounted = false
 		}
 	}, [concession?.id])
-
-	// Remove header
-	useEffect(() => {
-		navigation.setOptions({
-			headerShown: false,
-		})
-	}, [navigation])
 
 	// Check if there are changes
 	useEffect(() => {
@@ -225,10 +224,8 @@ const CategoryManagementScreen: React.FC = () => {
 	}
 
 	return (
-		<View style={styles.categoryManagementContainer}>
-			<ScrollView
-				style={{ flex: 1 }}
-				showsVerticalScrollIndicator={false}>
+		<DynamicKeyboardView style={styles.categoryManagementContainer}>
+			<DynamicScrollView showsVerticalScrollIndicator={false}>
 				{editedCategories.map((category, index) => (
 					<View
 						key={index}
@@ -272,7 +269,7 @@ const CategoryManagementScreen: React.FC = () => {
 						Add Category
 					</Text>
 				</TouchableOpacity>
-			</ScrollView>
+			</DynamicScrollView>
 
 			<View style={styles.bottomActions}>
 				<TouchableOpacity
@@ -302,7 +299,7 @@ const CategoryManagementScreen: React.FC = () => {
 				message={confirmationModal.props.message}
 				onConfirm={confirmationModal.props.onConfirm}
 			/>
-		</View>
+		</DynamicKeyboardView>
 	)
 }
 

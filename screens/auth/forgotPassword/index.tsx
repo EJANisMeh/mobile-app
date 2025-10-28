@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
 import { View, Text } from 'react-native'
 import { useThemeContext } from '../../../context'
-import { AlertModal } from '../../../components'
+import {
+	AlertModal,
+	DynamicKeyboardView,
+	DynamicScrollView,
+} from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import { createForgotPasswordStyles } from '../../../styles/auth'
-import DynamicScrollView from '../../../components/DynamicScrollView'
 import { ForgotPassForm } from '../../../components/auth/forgotPassword'
 
 
@@ -17,7 +20,7 @@ const ForgotPasswordScreen: React.FC = () => {
 		useAlertModal()
 
 	return (
-		<>
+		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={forgotPasswordStyles.container}
 				autoCenter="center">
@@ -44,7 +47,7 @@ const ForgotPasswordScreen: React.FC = () => {
 				message={message}
 				buttons={[{ text: 'Confirm', onPress: handleClose }]}
 			/>
-		</>
+		</DynamicKeyboardView>
 	)
 }
 

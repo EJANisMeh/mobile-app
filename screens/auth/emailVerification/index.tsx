@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { View, Text, TextInput, BackHandler } from 'react-native'
 import { useThemeContext } from '../../../context'
-import { AlertModal, ConfirmationModal } from '../../../components'
+import {
+	AlertModal,
+	ConfirmationModal,
+	DynamicKeyboardView,
+	DynamicScrollView,
+} from '../../../components'
 import {
 	useAlertModal,
 	useResponsiveDimensions,
@@ -9,7 +14,6 @@ import {
 } from '../../../hooks'
 import type { AuthStackParamList } from '../../../types/navigation'
 import { createEmailVerificationStyles } from '../../../styles/auth'
-import DynamicScrollView from '../../../components/DynamicScrollView'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import {
 	CodeInput,
@@ -19,11 +23,10 @@ import { VerifyCodeButton } from '../../../components/auth/emailVerification'
 import BackToLoginButton from '../../../components/auth/emailVerification/BackToLoginButton'
 import { useAuthNavigation } from '../../../hooks/useNavigation'
 
-interface EmailVerificationScreenProps
-{
+interface EmailVerificationScreenProps {
 	route: {
 		params: {
-			purpose: AuthStackParamList['EmailVerification']['purpose'];
+			purpose: AuthStackParamList['EmailVerification']['purpose']
 			userId: number
 		}
 	}
@@ -127,7 +130,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 	}
 
 	return (
-		<>
+		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={emailVerificationStyles.container}
 				autoCenter="center">
@@ -204,7 +207,7 @@ const EmailVerificationScreen: React.FC<EmailVerificationScreenProps> = ({
 				confirmStyle={confirmProps.confirmStyle}
 				onConfirm={confirmProps.onConfirm}
 			/>
-		</>
+		</DynamicKeyboardView>
 	)
 }
 

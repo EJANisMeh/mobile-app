@@ -2,10 +2,13 @@ import React, { useState } from 'react'
 import { View, Text } from 'react-native'
 import { useThemeContext } from '../../../context'
 import { LoginCredentials } from '../../../types'
-import { AlertModal } from '../../../components'
+import {
+	AlertModal,
+	DynamicKeyboardView,
+	DynamicScrollView,
+} from '../../../components'
 import { useAlertModal, useResponsiveDimensions } from '../../../hooks'
 import { createLoginStyles } from '../../../styles/auth'
-import DynamicScrollView from '../../../components/DynamicScrollView'
 import LoginForm from '../../../components/auth/login/LoginForm'
 
 const LoginScreen: React.FC = () => {
@@ -20,7 +23,7 @@ const LoginScreen: React.FC = () => {
 	})
 
 	return (
-		<>
+		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={loginStyles.container}
 				autoCenter="center">
@@ -43,7 +46,7 @@ const LoginScreen: React.FC = () => {
 				message={message}
 				buttons={[{ text: 'OK', onPress: handleClose }]}
 			/>
-		</>
+		</DynamicKeyboardView>
 	)
 }
 

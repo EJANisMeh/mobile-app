@@ -10,13 +10,13 @@ import {
 } from '../../../hooks'
 import { createEditConcessionStyles } from '../../../styles/concessionaire'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
-import DynamicScrollView from '../../../components/DynamicScrollView'
 import {
 	LoadingEditConcession,
 	EditConcessionImage,
 	EditConcessionForm,
 	EditConcessionSaveButton,
 } from '../../../components/concessionaire/concession/editDetails'
+import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 
 const EditConcessionDetailsScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -118,7 +118,7 @@ const EditConcessionDetailsScreen: React.FC = () => {
 	}
 
 	return (
-		<>
+		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={styles.container}
 				autoCenter={false}
@@ -180,7 +180,7 @@ const EditConcessionDetailsScreen: React.FC = () => {
 				confirmStyle={confirmProps.confirmStyle}
 				onConfirm={confirmProps.onConfirm}
 			/>
-		</>
+		</DynamicKeyboardView>
 	)
 }
 

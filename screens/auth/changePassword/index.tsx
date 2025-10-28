@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, TouchableOpacity, BackHandler } from 'react-native'
 import { useThemeContext } from '../../../context'
-import { AlertModal, ConfirmationModal } from '../../../components'
+import {
+	AlertModal,
+	ConfirmationModal,
+	DynamicKeyboardView,
+	DynamicScrollView,
+} from '../../../components'
 import {
 	useAlertModal,
 	useConfirmationModal,
 	useResponsiveDimensions,
 } from '../../../hooks'
 import { createChangePasswordStyles } from '../../../styles/auth'
-import DynamicScrollView from '../../../components/DynamicScrollView'
 import {
 	ChangePassInputs,
 	ChangePassSubmitButton,
@@ -76,7 +80,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 	}, [])
 
 	return (
-		<>
+		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={changePasswordStyles.container}
 				autoCenter="center">
@@ -125,7 +129,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 				confirmStyle={confirmProps.confirmStyle}
 				onConfirm={confirmProps.onConfirm}
 			/>
-		</>
+		</DynamicKeyboardView>
 	)
 }
 
