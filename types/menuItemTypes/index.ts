@@ -22,6 +22,7 @@ export interface VariationGroupInput {
 	mode: 'custom' | 'category' | 'existing' // Mode selection
 	categoryFilterId: number | null // For category mode
 	options: VariationOptionInput[] // For custom mode
+	existingMenuItemIds?: number[] // For existing-items mode: selected menu item ids
 	position: number
 }
 
@@ -29,6 +30,7 @@ export interface VariationOptionInput {
 	id?: number // For editing existing
 	name: string
 	priceAdjustment: string
+	availability?: boolean
 	isDefault: boolean
 	position: number
 }

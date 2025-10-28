@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, ActivityIndicator } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useThemeContext, useConcessionContext } from '../../../context'
 import {
@@ -40,29 +41,31 @@ const MenuScreen: React.FC = () => {
 		deleteMenuItem,
 	} = useMenuBackend()
 
-	// Fetch menu items on mount
-	useEffect(() => {
-		let isMounted = true
+	// Fetch menu items on mount and when screen comes into focus
+	useFocusEffect(
+		React.useCallback(() => {
+			let isMounted = true
 
-		const fetchItems = async () => {
-			if (concession?.id) {
-				const result = await getMenuItems(concession.id)
-				// Show error only if component is still mounted
-				if (isMounted && !result.success && result.error) {
-					showAlert({
-						title: 'Error',
-						message: result.error,
-					})
+			const fetchItems = async () => {
+				if (concession?.id) {
+					const result = await getMenuItems(concession.id)
+					// Show error only if component is still mounted
+					if (isMounted && !result.success && result.error) {
+						showAlert({
+							title: 'Error',
+							message: result.error,
+						})
+					}
 				}
 			}
-		}
 
-		fetchItems()
+			fetchItems()
 
-		return () => {
-			isMounted = false
-		}
-	}, [concession?.id])
+			return () => {
+				isMounted = false
+			}
+		}, [concession?.id])
+	)
 
 	if (loading) {
 		return (
@@ -109,7 +112,9 @@ const MenuScreen: React.FC = () => {
 									name={item.name}
 									basePrice={item.basePrice}
 									images={item.images}
-									displayImageIndex={item.displayImageIndex || 0}
+									displayImageIndex={
+										item.display_image_index ?? item.displayImageIndex ?? 0
+									}
 									availability={item.availability}
 									showAlert={showAlert}
 									showConfirmation={showConfirmation}

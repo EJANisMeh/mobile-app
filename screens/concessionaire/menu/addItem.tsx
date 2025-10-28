@@ -34,6 +34,7 @@ import {
 	ConfirmationModal,
 	MenuModal,
 } from '../../../components/modals'
+import { apiCall } from '../../../services/api/api'
 import {
 	AddMenuItemFormData,
 	ConcessionaireStackParamList,
@@ -90,6 +91,7 @@ const AddMenuItemScreen: React.FC = () => {
 	})
 
 	const [hasChanges, setHasChanges] = useState(false)
+	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [selectionTypes, setSelectionTypes] = useState<SelectionType[]>([])
 	const [loadingSelectionTypes, setLoadingSelectionTypes] = useState(false)
 
@@ -108,10 +110,11 @@ const AddMenuItemScreen: React.FC = () => {
 	const loadSelectionTypes = async () => {
 		setLoadingSelectionTypes(true)
 		try {
-			const response = await fetch('/api/menu/selection-types')
-			if (response.ok) {
-				const data = await response.json()
-				setSelectionTypes(data.selectionTypes || [])
+			const data = await apiCall('/menu/selection-types')
+			if (data.success && data.selectionTypes) {
+				setSelectionTypes(data.selectionTypes)
+			} else {
+				console.error('Failed to load selection types:', data.error)
 			}
 		} catch (error) {
 			console.error('Failed to load selection types:', error)
@@ -160,54 +163,150 @@ const AddMenuItemScreen: React.FC = () => {
 		}
 	}
 
-	const handleSave = () => {
-		// Validation
+	// Compute quick validity (no side-effects) will be computed after validateForm is declared
+
+	const validateForm = (setErrorMsgs = true) => {
+		const newErrors: Record<string, string> = {}
+		// name
 		if (!formData.name.trim()) {
-			alertModal.showAlert({
-				title: 'Validation Error',
-				message: 'Please enter item name',
-			})
-			return
+			newErrors['name'] = 'Item name is required'
 		}
-
+		// category
 		if (!formData.categoryId) {
+			newErrors['category'] = 'Category is required'
+		}
+		// basePrice if provided must be a valid number >= 0
+		if (formData.basePrice.trim()) {
+			const p = parseFloat(formData.basePrice)
+			if (isNaN(p) || p < 0) {
+				newErrors['basePrice'] = 'Enter a valid price or leave empty'
+			}
+		}
+
+		// Variation groups validations
+		formData.variationGroups.forEach((group, i) => {
+			const prefix = `variation-${i}`
+			if (!group.name.trim()) {
+				newErrors[`${prefix}-name`] = 'Group name is required'
+			}
+			const selType = selectionTypes.find((t) => t.id === group.selectionTypeId)
+			const isMulti = selType?.code?.startsWith('multi')
+			if (isMulti) {
+				if (!group.multiLimit && group.multiLimit !== 0) {
+					newErrors[`${prefix}-multiLimit`] =
+						'Limit is required for multi selection types'
+				}
+			}
+			if (group.mode === 'custom') {
+				if (!group.options || group.options.length < 2) {
+					newErrors[`${prefix}-options`] =
+						'Add at least 2 options for custom mode'
+				}
+				// check each option name
+				group.options.forEach((opt, j) => {
+					if (!opt.name.trim()) {
+						newErrors[`${prefix}-option-${j}`] = 'Option name required'
+					}
+				})
+			} else if (group.mode === 'category') {
+				if (!group.categoryFilterId) {
+					newErrors[`${prefix}-categoryFilterId`] =
+						'Select a category for this mode'
+				}
+			} else if (group.mode === 'existing') {
+				const ids = (group as any).existingMenuItemIds || []
+				if (!ids || ids.length < 2) {
+					newErrors[`${prefix}-existing`] = 'Select at least 2 existing items'
+				}
+			}
+		})
+
+		if (setErrorMsgs) setErrors(newErrors)
+		return Object.keys(newErrors).length === 0
+	}
+
+	// Live validation on form data changes
+	useEffect(() => {
+		validateForm(true)
+	}, [formData, selectionTypes])
+
+	// compute validity (no side-effects)
+	const isFormValid = validateForm(false)
+
+	const handleSave = () => {
+		const valid = validateForm(true)
+		if (!valid) {
+			// focus/notify by modal briefly
 			alertModal.showAlert({
 				title: 'Validation Error',
-				message: 'Please select a category',
+				message: 'Please fix the highlighted fields before saving',
 			})
 			return
 		}
 
-		if (!formData.basePrice.trim()) {
-			alertModal.showAlert({
-				title: 'Validation Error',
-				message: 'Please enter base price',
-			})
-			return
-		}
-
-		const price = parseFloat(formData.basePrice)
-		if (isNaN(price) || price <= 0) {
-			alertModal.showAlert({
-				title: 'Validation Error',
-				message: 'Please enter valid price',
-			})
-			return
-		}
-
-		// TODO: Save to backend
 		confirmationModal.showConfirmation({
 			title: 'Add Item',
 			message: 'Add this item to your menu?',
 			confirmText: 'Add',
 			cancelText: 'Cancel',
 			onConfirm: async () => {
-				// TODO: Call backend API
-				alertModal.showAlert({
-					title: 'Success',
-					message: 'Item added successfully!',
-				})
-				navigation.goBack()
+				try {
+					const response = await apiCall('/menu/add', {
+						method: 'POST',
+						body: JSON.stringify({
+							concessionId: concession?.id,
+							name: formData.name.trim(),
+							description: formData.description.trim() || null,
+							basePrice: formData.basePrice || '0',
+							images: formData.images,
+							displayImageIndex: formData.displayImageIndex,
+							categoryId: formData.categoryId,
+							availability: formData.availability,
+							variationGroups: formData.variationGroups.map((group) => ({
+								name: group.name.trim(),
+								selectionTypeId: group.selectionTypeId,
+								multiLimit: group.multiLimit,
+								mode: group.mode,
+								categoryFilterId: group.categoryFilterId,
+								options: group.options.map((opt) => ({
+									name: opt.name.trim(),
+									priceAdjustment: opt.priceAdjustment,
+									isDefault: opt.isDefault,
+									availability: opt.availability,
+									position: opt.position,
+								})),
+								existingMenuItemIds: (group as any).existingMenuItemIds || [],
+								position: group.position,
+							})),
+							addons: formData.addons.map((addon) => ({
+								menuItemId: addon.menuItemId,
+								label: addon.label?.trim() || null,
+								priceOverride: addon.priceOverride,
+								required: addon.required,
+								position: addon.position,
+							})),
+						}),
+					})
+
+					if (response.success) {
+						alertModal.showAlert({
+							title: 'Success',
+							message: 'Item added successfully!',
+						})
+						navigation.goBack()
+					} else {
+						alertModal.showAlert({
+							title: 'Error',
+							message: response.error || 'Failed to add item',
+						})
+					}
+				} catch (error) {
+					console.error('Error adding item:', error)
+					alertModal.showAlert({
+						title: 'Error',
+						message: 'Failed to add item. Please try again.',
+					})
+				}
 			},
 		})
 	}
@@ -321,6 +420,7 @@ const AddMenuItemScreen: React.FC = () => {
 			mode: 'custom',
 			categoryFilterId: null,
 			options: [],
+			existingMenuItemIds: [],
 			position: formData.variationGroups.length,
 		}
 		setFormData((prev) => ({
@@ -362,6 +462,7 @@ const AddMenuItemScreen: React.FC = () => {
 		const newOption: VariationOptionInput = {
 			name: '',
 			priceAdjustment: '0',
+			availability: true,
 			isDefault: false,
 			position: formData.variationGroups[groupIndex].options.length,
 		}
@@ -500,6 +601,11 @@ const AddMenuItemScreen: React.FC = () => {
 						placeholderTextColor={colors.textSecondary}
 					/>
 				</View>
+				{errors['name'] && (
+					<Text style={{ color: '#ef4444', marginTop: 4 }}>
+						{errors['name']}
+					</Text>
+				)}
 
 				{/* Description */}
 				<Text style={styles.sectionTitle}>Description</Text>
@@ -518,7 +624,7 @@ const AddMenuItemScreen: React.FC = () => {
 				</View>
 
 				{/* Base Price */}
-				<Text style={styles.sectionTitle}>Base Price *</Text>
+				<Text style={styles.sectionTitle}>Base Price</Text>
 				<View style={styles.categoryInputContainer}>
 					<Text style={styles.currencySymbol}>₱</Text>
 					<TextInput
@@ -532,6 +638,11 @@ const AddMenuItemScreen: React.FC = () => {
 						keyboardType="decimal-pad"
 					/>
 				</View>
+				{errors['basePrice'] && (
+					<Text style={{ color: '#ef4444', marginTop: 4 }}>
+						{errors['basePrice']}
+					</Text>
+				)}
 
 				{/* Category */}
 				<Text style={styles.sectionTitle}>Category *</Text>
@@ -553,6 +664,11 @@ const AddMenuItemScreen: React.FC = () => {
 						color={colors.textSecondary}
 					/>
 				</TouchableOpacity>
+				{errors['category'] && (
+					<Text style={{ color: '#ef4444', marginTop: 4 }}>
+						{errors['category']}
+					</Text>
+				)}
 
 				{/* Images Section */}
 				<Text style={styles.sectionTitle}>Images (Max 3)</Text>
@@ -667,7 +783,27 @@ const AddMenuItemScreen: React.FC = () => {
 				</ScrollView>
 
 				{/* Variations Section */}
-				<Text style={styles.sectionTitle}>Variations (Optional)</Text>
+				<View
+					style={{
+						flexDirection: 'row',
+						alignItems: 'center',
+						marginBottom: 8,
+					}}>
+					<Text style={[styles.sectionTitle, { marginBottom: 0, flex: 1 }]}>
+						Variations (Optional)
+					</Text>
+					<TouchableOpacity
+						style={{ padding: 6 }}
+						onPress={() =>
+							alertModal.showAlert({
+								title: 'Variations Help',
+								message:
+									'Variations: group of choices for your menu item (e.g., sizes, toppings, rice type, etc.)',
+							})
+						}>
+						<Text style={{ color: colors.primary, fontWeight: '600' }}>?</Text>
+					</TouchableOpacity>
+				</View>
 				{formData.variationGroups.map((group, groupIndex) => (
 					<View
 						key={groupIndex}
@@ -705,22 +841,51 @@ const AddMenuItemScreen: React.FC = () => {
 								/>
 							</TouchableOpacity>
 						</View>
-
 						{/* Group Name */}
-						<TextInput
-							style={[styles.categoryInput, { marginBottom: 8 }]}
-							value={group.name}
-							onChangeText={(text) =>
-								handleUpdateVariationGroup(groupIndex, 'name', text)
-							}
-							placeholder="Group name (e.g., Size, Toppings)"
-							placeholderTextColor={colors.textSecondary}
-						/>
-
+						<View
+							style={[
+								styles.categoryInputContainer,
+								{ marginBottom: 8, borderWidth: 1, borderColor: colors.border },
+							]}>
+							<TextInput
+								style={styles.categoryInput}
+								value={group.name}
+								onChangeText={(text) =>
+									handleUpdateVariationGroup(groupIndex, 'name', text)
+								}
+								placeholder="Group name (e.g., Size, Toppings)"
+								placeholderTextColor={colors.textSecondary}
+							/>
+						</View>
+						{errors[`variation-${groupIndex}-name`] && (
+							<Text style={{ color: '#ef4444', marginBottom: 8 }}>
+								{errors[`variation-${groupIndex}-name`]}
+							</Text>
+						)}
 						{/* Mode Selection */}
-						<Text style={{ fontSize: 12, color: colors.text, marginBottom: 4 }}>
-							Mode:
-						</Text>
+						<View
+							style={{
+								flexDirection: 'row',
+								alignItems: 'center',
+								marginBottom: 4,
+							}}>
+							<Text style={{ fontSize: 12, color: colors.text, flex: 1 }}>
+								Mode:
+							</Text>
+							<TouchableOpacity
+								style={{ padding: 6 }}
+								onPress={() =>
+									alertModal.showAlert({
+										title: 'Mode Help',
+										message:
+											'Custom: options specific to this menu item.\n\nCategory: include all menu items in a specified category.\n\nExisting Items: include individual existing items as options.',
+									})
+								}>
+								<Text style={{ color: colors.primary, fontWeight: '600' }}>
+									?
+								</Text>
+							</TouchableOpacity>
+						</View>
 						<View
 							style={{
 								flexDirection: 'row',
@@ -758,7 +923,6 @@ const AddMenuItemScreen: React.FC = () => {
 								</TouchableOpacity>
 							))}
 						</View>
-
 						{/* Category Filter (for category mode) */}
 						{group.mode === 'category' && (
 							<TouchableOpacity
@@ -799,16 +963,40 @@ const AddMenuItemScreen: React.FC = () => {
 								/>
 							</TouchableOpacity>
 						)}
-
+						{errors[`variation-${groupIndex}-categoryFilterId`] && (
+							<Text style={{ color: '#ef4444', marginTop: 4, marginBottom: 8 }}>
+								{errors[`variation-${groupIndex}-categoryFilterId`]}
+							</Text>
+						)}
 						{/* Selection Type */}
-						<Text style={{ fontSize: 12, color: colors.text, marginBottom: 4 }}>
-							Selection Type:
-						</Text>
+						<View
+							style={{
+								flexDirection: 'row',
+								alignItems: 'center',
+								marginBottom: 4,
+							}}>
+							<Text style={{ fontSize: 12, color: colors.text, flex: 1 }}>
+								Selection Type:
+							</Text>
+							<TouchableOpacity
+								style={{ padding: 6 }}
+								onPress={() =>
+									alertModal.showAlert({
+										title: 'Selection Type Help',
+										message:
+											'Single - Required: user must pick exactly one option.\n\nSingle - Optional: user can pick zero or one.\n\nMulti - Required: user must pick at least one up to the limit.\n\nMulti - Optional: user can pick zero or more up to the limit.',
+									})
+								}>
+								<Text style={{ color: colors.primary, fontWeight: '600' }}>
+									?
+								</Text>
+							</TouchableOpacity>
+						</View>
 						<TouchableOpacity
 							style={[styles.categoryInputContainer, { marginBottom: 8 }]}
 							onPress={() => {
 								const typeOptions = selectionTypes.map((type) => ({
-									label: type.description || type.code,
+									label: type.code,
 									value: type.id,
 								}))
 								menuModal.showMenu({
@@ -825,7 +1013,7 @@ const AddMenuItemScreen: React.FC = () => {
 							}}>
 							<Text style={styles.categoryInput}>
 								{selectionTypes.find((t) => t.id === group.selectionTypeId)
-									?.description || 'Select type'}
+									?.code || 'Select type'}
 							</Text>
 							<Ionicons
 								name="chevron-down"
@@ -833,78 +1021,161 @@ const AddMenuItemScreen: React.FC = () => {
 								color={colors.textSecondary}
 							/>
 						</TouchableOpacity>
-
+						{/* Multi limit input for multi selection types */}
+						{(
+							selectionTypes.find((t) => t.id === group.selectionTypeId)
+								?.code || ''
+						).startsWith('multi') && (
+							<View style={{ marginBottom: 8 }}>
+								<View
+									style={{
+										flexDirection: 'row',
+										alignItems: 'center',
+										marginBottom: 4,
+									}}>
+									<Text style={{ fontSize: 12, color: colors.text, flex: 1 }}>
+										Limit
+									</Text>
+									<TouchableOpacity
+										style={{ padding: 6 }}
+										onPress={() =>
+											alertModal.showAlert({
+												title: 'Limit Help',
+												message:
+													'Limit: refers to up to how many choices user is required to enter.',
+											})
+										}>
+										<Text style={{ color: colors.primary, fontWeight: '600' }}>
+											?
+										</Text>
+									</TouchableOpacity>
+								</View>
+								<TextInput
+									style={styles.categoryInput}
+									value={group.multiLimit?.toString() || ''}
+									onChangeText={(text) => {
+										const num = text.trim() === '' ? null : parseInt(text, 10)
+										handleUpdateVariationGroup(groupIndex, 'multiLimit', num)
+										// clear error if any
+										setErrors((prev) => ({
+											...prev,
+											[`variation-${groupIndex}-multiLimit`]: '',
+										}))
+									}}
+									placeholder="Max choices"
+									keyboardType="number-pad"
+									placeholderTextColor={colors.textSecondary}
+								/>
+								{errors[`variation-${groupIndex}-multiLimit`] && (
+									<Text style={{ color: '#ef4444', marginTop: 4 }}>
+										{errors[`variation-${groupIndex}-multiLimit`]}
+									</Text>
+								)}
+							</View>
+						)}
 						{/* Custom Options (for custom mode only) */}
 						{group.mode === 'custom' && (
 							<>
-								<Text
+								<View
 									style={{
-										fontSize: 12,
-										color: colors.text,
+										flexDirection: 'row',
+										alignItems: 'center',
 										marginBottom: 4,
 									}}>
-									Options:
-								</Text>
+									<Text style={{ fontSize: 12, color: colors.text, flex: 1 }}>
+										Options:
+									</Text>
+									<TouchableOpacity
+										style={{ padding: 6 }}
+										onPress={() =>
+											alertModal.showAlert({
+												title: 'Options Help',
+												message:
+													'Options: name of option and additional price of the option',
+											})
+										}>
+										<Text style={{ color: colors.primary, fontWeight: '600' }}>
+											?
+										</Text>
+									</TouchableOpacity>
+								</View>
 								{group.options.map((option, optionIndex) => (
-									<View
-										key={optionIndex}
-										style={{
-											flexDirection: 'row',
-											gap: 8,
-											marginBottom: 8,
-											alignItems: 'center',
-										}}>
-										<TextInput
-											style={[styles.categoryInput, { flex: 2 }]}
-											value={option.name}
-											onChangeText={(text) =>
-												handleUpdateVariationOption(
-													groupIndex,
-													optionIndex,
-													'name',
-													text
-												)
-											}
-											placeholder="Option name"
-											placeholderTextColor={colors.textSecondary}
-										/>
-										<View style={{ flexDirection: 'row', flex: 1, gap: 4 }}>
-											<Text
-												style={{
-													fontSize: 14,
-													color: colors.text,
-													alignSelf: 'center',
-												}}>
-												₱
-											</Text>
+									<React.Fragment key={optionIndex}>
+										<View
+											style={{
+												flexDirection: 'row',
+												gap: 8,
+												marginBottom: 8,
+												alignItems: 'center',
+											}}>
 											<TextInput
-												style={[styles.categoryInput, { flex: 1 }]}
-												value={option.priceAdjustment}
+												style={[styles.categoryInput, { flex: 2 }]}
+												value={option.name}
 												onChangeText={(text) =>
 													handleUpdateVariationOption(
 														groupIndex,
 														optionIndex,
-														'priceAdjustment',
+														'name',
 														text
 													)
 												}
-												placeholder="0.00"
+												placeholder="Option name"
 												placeholderTextColor={colors.textSecondary}
-												keyboardType="decimal-pad"
 											/>
+											<View style={{ flexDirection: 'row', flex: 1, gap: 4 }}>
+												<Text
+													style={{
+														fontSize: 14,
+														color: colors.text,
+														alignSelf: 'center',
+													}}>
+													₱
+												</Text>
+												<TextInput
+													style={[styles.categoryInput, { flex: 1 }]}
+													value={option.priceAdjustment}
+													onChangeText={(text) =>
+														handleUpdateVariationOption(
+															groupIndex,
+															optionIndex,
+															'priceAdjustment',
+															text
+														)
+													}
+													placeholder="0.00"
+													placeholderTextColor={colors.textSecondary}
+													keyboardType="decimal-pad"
+												/>
+											</View>
+											<TouchableOpacity
+												onPress={() =>
+													handleRemoveVariationOption(groupIndex, optionIndex)
+												}>
+												<Ionicons
+													name="close-circle"
+													size={20}
+													color="#ef4444"
+												/>
+											</TouchableOpacity>
 										</View>
-										<TouchableOpacity
-											onPress={() =>
-												handleRemoveVariationOption(groupIndex, optionIndex)
-											}>
-											<Ionicons
-												name="close-circle"
-												size={20}
-												color="#ef4444"
-											/>
-										</TouchableOpacity>
-									</View>
+										{errors[
+											`variation-${groupIndex}-option-${optionIndex}`
+										] && (
+											<Text style={{ color: '#ef4444', marginBottom: 8 }}>
+												{
+													errors[
+														`variation-${groupIndex}-option-${optionIndex}`
+													]
+												}
+											</Text>
+										)}
+									</React.Fragment>
 								))}
+								{errors[`variation-${groupIndex}-options`] && (
+									<Text style={{ color: '#ef4444', marginBottom: 8 }}>
+										{errors[`variation-${groupIndex}-options`]}
+									</Text>
+								)}
 								<TouchableOpacity
 									style={[
 										styles.addCategoryButton,
@@ -918,6 +1189,113 @@ const AddMenuItemScreen: React.FC = () => {
 									/>
 									<Text style={styles.addCategoryButtonText}>Add Option</Text>
 								</TouchableOpacity>
+							</>
+						)}
+						{/* Existing Items mode: allow selecting menu items as options */}
+						{group.mode === 'existing' && (
+							<>
+								<Text
+									style={{ fontSize: 12, color: colors.text, marginBottom: 4 }}>
+									Options (Existing Items):
+								</Text>
+								{(group as any).existingMenuItemIds?.map(
+									(itemId: number, idx: number) => {
+										const mi = menuItems.find((m) => m.id === itemId)
+										return (
+											<View
+												key={idx}
+												style={{
+													flexDirection: 'row',
+													alignItems: 'center',
+													justifyContent: 'space-between',
+													marginBottom: 8,
+													gap: 8,
+												}}>
+												<Text style={{ color: colors.text }}>
+													{mi?.name || 'Unknown'}
+												</Text>
+												<TouchableOpacity
+													onPress={() => {
+														setFormData((prev) => ({
+															...prev,
+															variationGroups: prev.variationGroups.map(
+																(g, gi) =>
+																	gi === groupIndex
+																		? {
+																				...g,
+																				existingMenuItemIds: (
+																					g as any
+																				).existingMenuItemIds?.filter(
+																					(id: number) => id !== itemId
+																				),
+																		  }
+																		: g
+															),
+														}))
+													}}>
+													<Ionicons
+														name="close-circle"
+														size={20}
+														color="#ef4444"
+													/>
+												</TouchableOpacity>
+											</View>
+										)
+									}
+								)}
+
+								<TouchableOpacity
+									style={[
+										styles.addCategoryButton,
+										{ marginTop: 4, marginBottom: 0 },
+									]}
+									onPress={() => {
+										if (menuItems.length === 0) {
+											alertModal.showAlert({
+												title: 'No Menu Items',
+												message: 'Create some menu items first',
+											})
+											return
+										}
+										const menuItemOptions = menuItems.map((item) => ({
+											label: `${item.name} - ₱${item.basePrice}`,
+											value: item.id,
+										}))
+										menuModal.showMenu({
+											title: 'Select Menu Item',
+											options: menuItemOptions,
+											onSelect: (menuItemId) => {
+												setFormData((prev) => ({
+													...prev,
+													variationGroups: prev.variationGroups.map((g, gi) =>
+														gi === groupIndex
+															? {
+																	...g,
+																	existingMenuItemIds: [
+																		...((g as any).existingMenuItemIds || []),
+																		menuItemId as number,
+																	],
+															  }
+															: g
+													),
+												}))
+											},
+										})
+									}}>
+									<Ionicons
+										name="add-circle-outline"
+										size={16}
+										color={colors.primary}
+									/>
+									<Text style={styles.addCategoryButtonText}>
+										Add Option (Existing Item)
+									</Text>
+								</TouchableOpacity>
+								{errors[`variation-${groupIndex}-existing`] && (
+									<Text style={{ color: '#ef4444', marginTop: 4 }}>
+										{errors[`variation-${groupIndex}-existing`]}
+									</Text>
+								)}
 							</>
 						)}
 					</View>
@@ -1072,9 +1450,9 @@ const AddMenuItemScreen: React.FC = () => {
 					<Text style={styles.cancelButtonText}>Cancel</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
-					style={[styles.saveButton, !hasChanges && styles.saveButtonDisabled]}
+					style={[styles.saveButton, !isFormValid && styles.saveButtonDisabled]}
 					onPress={handleSave}
-					disabled={!hasChanges}>
+					disabled={!isFormValid}>
 					<Text style={styles.saveButtonText}>Add Item</Text>
 				</TouchableOpacity>
 			</View>

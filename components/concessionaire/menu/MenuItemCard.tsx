@@ -13,7 +13,7 @@ import { useConcessionaireNavigation } from '../../../hooks/useNavigation'
 interface MenuItemCardProps {
 	id: number
 	name: string
-	basePrice: number
+	basePrice: number | null
 	images: string[]
 	displayImageIndex: number
 	availability: boolean
@@ -103,7 +103,14 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 					numberOfLines={1}>
 					{name}
 				</Text>
-				<Text style={styles.menuItemPrice}>₱{basePrice.toFixed(2)}</Text>
+				<Text style={styles.menuItemPrice}>
+					₱
+					{basePrice != null
+						? typeof basePrice === 'number'
+							? basePrice.toFixed(2)
+							: Number(basePrice).toFixed(2)
+						: '0.00'}
+				</Text>
 				<View style={styles.menuItemStatus}>
 					<View
 						style={[
