@@ -11,6 +11,7 @@ import ConcessionScreen from '../screens/concessionaire/concession'
 import EditConcessionDetailsScreen from '../screens/concessionaire/concession/editDetails'
 import ManagePaymentMethodsScreen from '../screens/concessionaire/concession/managePaymentMethods'
 import CategoryManagementScreen from '../screens/concessionaire/menu/categoryManagement'
+import AddMenuItemScreen from '../screens/concessionaire/menu/addItem'
 import NotificationsScreen from '../screens/concessionaire/notification'
 import ProfileScreen from '../screens/concessionaire/profile'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -163,9 +164,9 @@ const ConcessionaireStack: React.FC = () => {
 			/>
 			<Stack.Screen
 				name="AddMenuItem"
-				component={MenuScreen}
+				component={AddMenuItemScreen}
 				options={{
-					headerShown: true,
+					headerShown: false,
 					title: 'Add Menu Item',
 					presentation: 'modal',
 					headerLeft: () => null,

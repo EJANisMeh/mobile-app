@@ -46,7 +46,7 @@ export const getOrdersByCustomer = async (
 							select: {
 								name: true,
 								description: true,
-								imageUrl: true,
+								images: true,
 							},
 						},
 					},

@@ -108,7 +108,8 @@ const MenuScreen: React.FC = () => {
 									id={item.id}
 									name={item.name}
 									basePrice={item.basePrice}
-									imageUrl={item.imageUrl}
+									images={item.images}
+									displayImageIndex={item.displayImageIndex || 0}
 									availability={item.availability}
 									showAlert={showAlert}
 									showConfirmation={showConfirmation}

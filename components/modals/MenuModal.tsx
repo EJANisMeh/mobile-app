@@ -8,9 +8,11 @@ import {
 } from 'react-native'
 import BaseModal from './BaseModal'
 
-interface MenuOption {
-	text: string
-	onPress: () => void
+export interface MenuOption {
+	text?: string
+	label?: string
+	value?: any
+	onPress?: () => void
 	style?: 'default' | 'destructive'
 	icon?: string
 }
@@ -21,6 +23,8 @@ interface MenuModalProps {
 	title: string
 	message?: string
 	options: MenuOption[]
+	onSelect?: (value: any) => void
+	footer?: React.ReactNode
 }
 
 const MenuModal: React.FC<MenuModalProps> = ({
@@ -29,7 +33,18 @@ const MenuModal: React.FC<MenuModalProps> = ({
 	title,
 	message,
 	options,
+	onSelect,
+	footer,
 }) => {
+	const handleOptionPress = (option: MenuOption) => {
+		if (option.onPress) {
+			option.onPress()
+		} else if (onSelect && option.value !== undefined) {
+			onSelect(option.value)
+		}
+		onClose()
+	}
+
 	return (
 		<BaseModal
 			visible={visible}
@@ -45,20 +60,19 @@ const MenuModal: React.FC<MenuModalProps> = ({
 							styles.option,
 							option.style === 'destructive' && styles.destructiveOption,
 						]}
-						onPress={() => {
-							option.onPress()
-							onClose()
-						}}>
+						onPress={() => handleOptionPress(option)}>
 						<Text
 							style={[
 								styles.optionText,
 								option.style === 'destructive' && styles.destructiveOptionText,
 							]}>
-							{option.text}
+							{option.text || option.label}
 						</Text>
 					</TouchableOpacity>
 				))}
 			</ScrollView>
+
+			{footer && <View style={styles.footerContainer}>{footer}</View>}
 
 			<TouchableOpacity
 				style={styles.cancelButton}
@@ -99,6 +113,9 @@ const styles = StyleSheet.create({
 	},
 	destructiveOptionText: {
 		color: '#721c24',
+	},
+	footerContainer: {
+		marginBottom: 15,
 	},
 	cancelButton: {
 		paddingVertical: 12,

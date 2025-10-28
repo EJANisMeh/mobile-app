@@ -3,11 +3,15 @@ import { addItem } from './addItem'
 import { editItem } from './editItem'
 import { deleteItem } from './deleteItem'
 import { getItem } from './getItem'
+import { getSelectionTypes } from './getSelectionTypes'
 
 const router = express.Router()
 
 // Get menu items
 router.get('/get', getItem)
+
+// Get selection types
+router.get('/selection-types', getSelectionTypes)
 
 // Add menu item
 router.post('/add', addItem)

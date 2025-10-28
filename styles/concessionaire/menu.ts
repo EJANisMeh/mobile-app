@@ -237,6 +237,19 @@ export const createConcessionaireMenuStyles = (
 		categoryManagementContainer: {
 			backgroundColor: colors.background,
 		},
+		sectionTitle: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
+			color: colors.text,
+			marginBottom: spacing.xs,
+			marginTop: spacing.md,
+		},
+		currencySymbol: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
+			color: colors.text,
+			marginRight: spacing.xs,
+		},
 		categoryInputContainer: {
 			flexDirection: 'row' as const,
 			alignItems: 'center' as const,

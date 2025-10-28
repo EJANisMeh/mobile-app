@@ -14,7 +14,8 @@ interface MenuItemCardProps {
 	id: number
 	name: string
 	basePrice: number
-	imageUrl: string | null
+	images: string[]
+	displayImageIndex: number
 	availability: boolean
 	showAlert: UseAlertModalType['showAlert']
 	showConfirmation: UseConfirmationModalType['showConfirmation']
@@ -26,7 +27,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 	id,
 	name,
 	basePrice,
-	imageUrl,
+	images,
+	displayImageIndex,
 	availability,
 	showAlert,
 	showConfirmation,
@@ -77,9 +79,9 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 		<View style={styles.menuItemCard}>
 			{/* Image */}
 			<View style={styles.menuItemImageContainer}>
-				{imageUrl ? (
+				{images && images.length > 0 ? (
 					<Image
-						source={{ uri: imageUrl }}
+						source={{ uri: images[displayImageIndex] || images[0] }}
 						style={styles.menuItemImage}
 						resizeMode="cover"
 					/>
