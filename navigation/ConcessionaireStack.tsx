@@ -140,7 +140,7 @@ const ConcessionaireStack: React.FC = () => {
 				name="CategoryManagement"
 				component={CategoryManagementScreen}
 				options={{
-					headerShown: true,
+					headerShown: false,
 					title: 'Category Management',
 					presentation: 'modal',
 					headerLeft: () => null,
