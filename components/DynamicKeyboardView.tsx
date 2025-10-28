@@ -6,7 +6,7 @@ import {
 	ViewStyle,
 	View,
 } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView, Edge } from 'react-native-safe-area-context'
 import { useResponsiveDimensions } from '../hooks'
 
 /**
@@ -32,8 +32,16 @@ interface DynamicKeyboardViewProps {
 	enableKeyboardAvoiding?: boolean
 	behavior?: 'height' | 'position' | 'padding' | undefined
 	keyboardVerticalOffset?: number
-	/** Enables safe area insets */
-	useSafeArea?: boolean
+	/**
+	 * Enables safe area insets.
+	 * - true: all edges (top, bottom, left, right)
+	 * - false: no safe area
+	 * - array: specific edges only
+	 *
+	 * For screens WITH headers: use ['left', 'right', 'bottom'] (no top)
+	 * For screens WITHOUT headers: use true or ['top', 'left', 'right', 'bottom']
+	 */
+	useSafeArea?: boolean | Edge[]
 }
 
 const DynamicKeyboardView = ({
@@ -42,20 +50,22 @@ const DynamicKeyboardView = ({
 	enableKeyboardAvoiding = true,
 	behavior = 'padding',
 	keyboardVerticalOffset,
-	useSafeArea = true,
+	useSafeArea = ['left', 'right', 'bottom'], // Default: safe area on sides and bottom, but not top (for screens with headers)
 }: DynamicKeyboardViewProps) => {
 	const responsive = useResponsiveDimensions()
 
 	const offset =
 		keyboardVerticalOffset ?? (Platform.OS === 'android' ? -100 : 0)
 
-	const containerStyle: StyleProp<ViewStyle> = [
-		{ flex: 1 },
-		{
-			paddingHorizontal: responsive.getResponsivePadding().horizontal,
-		},
-		style,
-	]
+	const containerStyle: StyleProp<ViewStyle> = [{ flex: 1 }, style]
+
+	// Determine which edges to use for safe area
+	const safeAreaEdges: Edge[] | undefined =
+		useSafeArea === false
+			? undefined
+			: useSafeArea === true
+			? ['top', 'bottom', 'left', 'right']
+			: useSafeArea
 
 	const content = (
 		<KeyboardAvoidingView
@@ -68,8 +78,16 @@ const DynamicKeyboardView = ({
 		</KeyboardAvoidingView>
 	)
 
-	if (useSafeArea) {
-		return <SafeAreaView style={{ flex: 1 }}>{content}</SafeAreaView>
+	if (safeAreaEdges) {
+		// Use the containerStyle for SafeAreaView so the safe area background
+		// matches the screen's background (prevents gray area showing through)
+		return (
+			<SafeAreaView
+				style={containerStyle as any}
+				edges={safeAreaEdges}>
+				{content}
+			</SafeAreaView>
+		)
 	}
 
 	return content

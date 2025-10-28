@@ -54,6 +54,7 @@ const CategoryManagementScreen: React.FC = () => {
 		const fetchCategories = async () => {
 			if (concession?.id) {
 				const result = await getCategories(concession.id)
+
 				if (isMounted && result.success && result.categories) {
 					setEditedCategories(
 						result.categories.map((cat) => ({
@@ -224,7 +225,9 @@ const CategoryManagementScreen: React.FC = () => {
 	}
 
 	return (
-		<DynamicKeyboardView style={styles.categoryManagementContainer}>
+		<DynamicKeyboardView
+			style={styles.categoryManagementContainer}
+			useSafeArea={true}>
 			<DynamicScrollView showsVerticalScrollIndicator={false}>
 				{editedCategories.map((category, index) => (
 					<View

@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
 import { ConcessionaireStackParamList } from '../types/navigation'
+import { useAuthContext, useConcessionContext } from '../context'
 
 // Import screen components
 import MenuScreen from '../screens/concessionaire/menu'
@@ -109,6 +110,20 @@ const MainTabs: React.FC = () => {
 
 // Root stack navigator with tabs and modal screens
 const ConcessionaireStack: React.FC = () => {
+	const { user } = useAuthContext()
+	const { getConcession, concession } = useConcessionContext()
+
+	// Load concession data globally when concessionaire stack mounts
+	useEffect(() => {
+		if (user?.concession_id && !concession) {
+			console.log(
+				'[ConcessionaireStack] Loading concession:',
+				user.concession_id
+			)
+			getConcession(user.concession_id)
+		}
+	}, [user?.concession_id])
+
 	return (
 		<Stack.Navigator screenOptions={{ headerShown: false }}>
 			<Stack.Screen
@@ -141,7 +156,7 @@ const ConcessionaireStack: React.FC = () => {
 				component={CategoryManagementScreen}
 				options={{
 					headerShown: false,
-					title: 'Category Management',
+					title: 'Categories',
 					presentation: 'modal',
 					headerLeft: () => null,
 				}}
