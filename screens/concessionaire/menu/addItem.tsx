@@ -9,7 +9,12 @@ import {
 	Image,
 	ScrollView,
 } from 'react-native'
-import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native'
+import {
+	useNavigation,
+	useRoute,
+	RouteProp,
+	useFocusEffect,
+} from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import * as ImagePicker from 'expo-image-picker'
 import { Ionicons } from '@expo/vector-icons'
@@ -17,17 +22,25 @@ import { useThemeContext, useConcessionContext } from '../../../context'
 import { useResponsiveDimensions, useHideNavBar } from '../../../hooks'
 import { useCategoryBackend } from '../../../hooks/useBackend/useCategoryBackend'
 import { useMenuBackend } from '../../../hooks/useBackend/useMenuBackend'
-import { useAlertModal, useConfirmationModal, useMenuModal } from '../../../hooks/useModals'
+import {
+	useAlertModal,
+	useConfirmationModal,
+	useMenuModal,
+} from '../../../hooks/useModals'
 import { createConcessionaireMenuStyles } from '../../../styles/concessionaire'
 import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
-import { AlertModal, ConfirmationModal, MenuModal } from '../../../components/modals'
-import { 
-	AddMenuItemFormData, 
-	ConcessionaireStackParamList, 
+import {
+	AlertModal,
+	ConfirmationModal,
+	MenuModal,
+} from '../../../components/modals'
+import {
+	AddMenuItemFormData,
+	ConcessionaireStackParamList,
 	VariationGroupInput,
 	VariationOptionInput,
 	AddonInput,
-	SelectionType 
+	SelectionType,
 } from '../../../types'
 
 type AddMenuItemScreenNavigationProp = StackNavigationProp<
@@ -749,10 +762,7 @@ const AddMenuItemScreen: React.FC = () => {
 						{/* Category Filter (for category mode) */}
 						{group.mode === 'category' && (
 							<TouchableOpacity
-								style={[
-									styles.categoryInputContainer,
-									{ marginBottom: 8 },
-								]}
+								style={[styles.categoryInputContainer, { marginBottom: 8 }]}
 								onPress={() => {
 									const categoryOptions = categories.map((cat) => ({
 										label: cat.name,
@@ -929,7 +939,9 @@ const AddMenuItemScreen: React.FC = () => {
 					Add-ons (Optional)
 				</Text>
 				{formData.addons.map((addon, index) => {
-					const menuItem = menuItems.find((item) => item.id === addon.menuItemId)
+					const menuItem = menuItems.find(
+						(item) => item.id === addon.menuItemId
+					)
 					return (
 						<View
 							key={index}
