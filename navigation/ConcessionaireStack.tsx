@@ -117,10 +117,6 @@ const ConcessionaireStack: React.FC = () => {
 	// Load concession data globally when concessionaire stack mounts
 	useEffect(() => {
 		if (user?.concession_id && !concession) {
-			console.log(
-				'[ConcessionaireStack] Loading concession:',
-				user.concession_id
-			)
 			getConcession(user.concession_id)
 		}
 	}, [user?.concession_id])
