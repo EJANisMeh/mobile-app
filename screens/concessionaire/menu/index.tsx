@@ -42,20 +42,27 @@ const MenuScreen: React.FC = () => {
 
 	// Fetch menu items on mount
 	useEffect(() => {
-		if (concession?.id) {
-			getMenuItems(concession.id)
+		let isMounted = true
+
+		const fetchItems = async () => {
+			if (concession?.id) {
+				const result = await getMenuItems(concession.id)
+				// Show error only if component is still mounted
+				if (isMounted && !result.success && result.error) {
+					showAlert({
+						title: 'Error',
+						message: result.error,
+					})
+				}
+			}
+		}
+
+		fetchItems()
+
+		return () => {
+			isMounted = false
 		}
 	}, [concession?.id])
-
-	// Show error if any
-	useEffect(() => {
-		if (error) {
-			showAlert({
-				title: 'Error',
-				message: error,
-			})
-		}
-	}, [error])
 
 	if (loading) {
 		return (
@@ -92,9 +99,6 @@ const MenuScreen: React.FC = () => {
 								color={colors.placeholder}
 							/>
 							<Text style={styles.emptyStateText}>No menu items yet</Text>
-							<Text style={styles.emptyStateSubtext}>
-								Add your first item to get started
-							</Text>
 						</View>
 					) : (
 						<View style={styles.menuItemsList}>
@@ -103,9 +107,9 @@ const MenuScreen: React.FC = () => {
 									key={item.id}
 									id={item.id}
 									name={item.name}
-									basePrice={item.price}
-									imageUrl={item.image_url}
-									availability={item.available}
+									basePrice={item.basePrice}
+									imageUrl={item.imageUrl}
+									availability={item.availability}
 									showAlert={showAlert}
 									showConfirmation={showConfirmation}
 									onToggleAvailability={async (itemId, currentAvailability) => {

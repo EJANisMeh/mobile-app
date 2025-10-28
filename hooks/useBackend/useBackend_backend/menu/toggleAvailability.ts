@@ -22,7 +22,7 @@ export const toggleAvailability =
 				setMenuItems((prevItems: any[]) =>
 					prevItems.map((item: any) =>
 						item.id === itemId
-							? { ...item, available: !currentAvailability }
+							? { ...item, availability: !currentAvailability }
 							: item
 					)
 				)

@@ -8,20 +8,22 @@ export const getMenuItems =
 		setMenuItems: Dispatch<SetStateAction<any[]>>
 	) =>
 	async (concessionId: number) => {
-		try {
-			setLoading(true)
-			setError(null)
+		setLoading(true)
+		setError(null)
 
+		try {
 			const response = await menuApi.getMenuItems(concessionId)
 
 			if (response.success) {
 				setMenuItems(response.menuItems || [])
+				setLoading(false)
 				return {
 					success: true,
 					menuItems: response.menuItems || [],
 				}
 			} else {
 				setError(response.error || 'Failed to fetch menu items')
+				setLoading(false)
 				return {
 					success: false,
 					error: response.error || 'Failed to fetch menu items',
@@ -30,11 +32,10 @@ export const getMenuItems =
 		} catch (error: any) {
 			const errorMessage = error.message || 'Failed to fetch menu items'
 			setError(errorMessage)
+			setLoading(false)
 			return {
 				success: false,
 				error: errorMessage,
 			}
-		} finally {
-			setLoading(false)
 		}
 	}

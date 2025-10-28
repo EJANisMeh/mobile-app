@@ -13,13 +13,10 @@ export const menuApi = {
 	getMenuItems: async (concessionId: number): Promise<any> => {
 		const token = await AsyncStorage.getItem('authToken')
 
-		return await apiCall(
-			`/menu/search?concession_id=${concessionId}&limit=100`,
-			{
-				method: 'GET',
-				headers: token ? { Authorization: `Bearer ${token}` } : {},
-			}
-		)
+		return await apiCall(`/menu/get?concessionId=${concessionId}&limit=100`, {
+			method: 'GET',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+		})
 	},
 
 	/**
@@ -28,14 +25,14 @@ export const menuApi = {
 	 */
 	toggleAvailability: async (
 		itemId: number,
-		available: boolean
+		availability: boolean
 	): Promise<any> => {
 		const token = await AsyncStorage.getItem('authToken')
 
 		return await apiCall(`/menu/edit/${itemId}`, {
 			method: 'PUT',
 			headers: token ? { Authorization: `Bearer ${token}` } : {},
-			body: JSON.stringify({ available }),
+			body: JSON.stringify({ availability }),
 		})
 	},
 

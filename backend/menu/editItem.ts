@@ -5,7 +5,7 @@ import { prisma, updateQuery, selectOne } from '../db'
 export const editItem = async (req: express.Request, res: express.Response) => {
 	try {
 		const { id } = req.params
-		const { name, description, price, category, available } = req.body
+		const { name, description, basePrice, categoryId, availability } = req.body
 
 		// Validate menu item exists
 		const existingItemResult = await selectOne(prisma, {
@@ -24,9 +24,9 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 		const updateData: any = {}
 		if (name !== undefined) updateData.name = name.trim()
 		if (description !== undefined) updateData.description = description.trim()
-		if (price !== undefined) updateData.price = parseFloat(price)
-		if (category !== undefined) updateData.category = category.trim()
-		if (available !== undefined) updateData.available = available
+		if (basePrice !== undefined) updateData.basePrice = parseFloat(basePrice)
+		if (categoryId !== undefined) updateData.categoryId = categoryId
+		if (availability !== undefined) updateData.availability = availability
 
 		// Update menu item using simplified query
 		const menuItemResult = await updateQuery(prisma, {

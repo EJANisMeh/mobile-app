@@ -72,7 +72,7 @@ export const createConcessionaireMenuStyles = (
 			gap: margin.small,
 		},
 		categoryButtonText: {
-			fontSize: responsive.getResponsiveFontSize(16),
+			fontSize: responsive.getResponsiveFontSize(15),
 			fontWeight: '600' as const,
 			color: colors.primary,
 		},

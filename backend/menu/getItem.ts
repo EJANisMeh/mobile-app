@@ -2,10 +2,7 @@ import express from 'express'
 import { prisma, selectQuery } from '../db'
 
 // Search menu items endpoint
-export const searchItem = async (
-	req: express.Request,
-	res: express.Response
-) => {
+export const getItem = async (req: express.Request, res: express.Response) => {
 	try {
 		const {
 			concession_id,
@@ -50,13 +47,15 @@ export const searchItem = async (
 		}
 
 		if (available !== undefined) {
-			whereConditions.available = available === 'true'
+			whereConditions.availability = available === 'true'
 		}
 
 		if (min_price || max_price) {
-			whereConditions.price = {}
-			if (min_price) whereConditions.price.gte = parseFloat(min_price as string)
-			if (max_price) whereConditions.price.lte = parseFloat(max_price as string)
+			whereConditions.basePrice = {}
+			if (min_price)
+				whereConditions.basePrice.gte = parseFloat(min_price as string)
+			if (max_price)
+				whereConditions.basePrice.lte = parseFloat(max_price as string)
 		}
 
 		// Search menu items using simplified query
@@ -68,7 +67,7 @@ export const searchItem = async (
 					select: {
 						id: true,
 						name: true,
-						cafeteria_id: true,
+						cafeteriaId: true,
 					},
 				},
 			},
