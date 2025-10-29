@@ -4,6 +4,7 @@ import { editItem } from './editItem'
 import { deleteItem } from './deleteItem'
 import { getItem } from './getItem'
 import { getSelectionTypes } from './getSelectionTypes'
+import { toggleVariationOptionAvailability } from './toggleVariationOptionAvailability'
 
 const router = express.Router()
 
@@ -21,5 +22,11 @@ router.put('/edit/:id', editItem)
 
 // Delete menu item
 router.delete('/delete/:id', deleteItem)
+
+// Toggle variation option availability
+router.put(
+	'/variation-option/:optionId/availability',
+	toggleVariationOptionAvailability
+)
 
 export default router

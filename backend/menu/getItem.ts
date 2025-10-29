@@ -19,7 +19,7 @@ export const getItem = async (req: express.Request, res: express.Response) => {
 		const whereConditions: any = {}
 
 		if (concession_id) {
-			whereConditions.concession_id = parseInt(concession_id as string)
+			whereConditions.concessionId = parseInt(concession_id as string)
 		}
 
 		if (category) {
@@ -70,6 +70,22 @@ export const getItem = async (req: express.Request, res: express.Response) => {
 						cafeteriaId: true,
 					},
 				},
+				menu_item_variation_groups: {
+					where: {
+						kind: 'group',
+					},
+					include: {
+						menu_item_variation_option_choices: {
+							orderBy: {
+								position: 'asc',
+							},
+						},
+						selection_types: true,
+					},
+					orderBy: {
+						position: 'asc',
+					},
+				},
 			},
 			orderBy: {
 				name: 'asc',
@@ -100,3 +116,4 @@ export const getItem = async (req: express.Request, res: express.Response) => {
 		})
 	}
 }
+

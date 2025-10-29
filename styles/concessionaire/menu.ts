@@ -106,11 +106,11 @@ export const createConcessionaireMenuStyles = (
 
 		// Menu Item Card Styles
 		menuItemCard: {
-			flexDirection: 'row' as const,
+			flexDirection: 'column' as const,
 			backgroundColor: colors.surface,
 			borderRadius: 12,
 			padding: spacing.md,
-			gap: margin.medium,
+			gap: margin.small,
 			shadowColor: '#000',
 			shadowOffset: { width: 0, height: 2 },
 			shadowOpacity: 0.1,
@@ -200,6 +200,7 @@ export const createConcessionaireMenuStyles = (
 			elevation: 8,
 			borderWidth: 1,
 			borderColor: colors.border,
+			zIndex: 9999,
 		},
 		dropdownItem: {
 			flexDirection: 'row' as const,
@@ -219,6 +220,80 @@ export const createConcessionaireMenuStyles = (
 			height: 1,
 			backgroundColor: colors.border,
 			marginVertical: spacing.xs / 2,
+		},
+
+		// Variations Section
+		variationsContainer: {
+			marginTop: spacing.sm,
+			paddingTop: spacing.sm,
+			borderTopWidth: 1,
+			borderTopColor: colors.border,
+			gap: spacing.md,
+		},
+		variationGroup: {
+			gap: spacing.xs,
+		},
+		variationGroupName: {
+			fontSize: responsive.getResponsiveFontSize(15),
+			fontWeight: '600' as const,
+			color: colors.text,
+			marginBottom: spacing.xs / 2,
+		},
+		variationOption: {
+			flexDirection: 'row' as const,
+			justifyContent: 'space-between' as const,
+			alignItems: 'center' as const,
+			paddingVertical: spacing.xs,
+			gap: spacing.sm,
+		},
+		variationOptionInfo: {
+			flex: 1,
+			flexDirection: 'row' as const,
+			justifyContent: 'space-between' as const,
+			alignItems: 'center' as const,
+		},
+		variationOptionName: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.text,
+		},
+		variationOptionPrice: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			fontWeight: '500' as const,
+			color: colors.textSecondary,
+			marginLeft: spacing.xs,
+		},
+		availabilityToggle: {
+			paddingHorizontal: spacing.sm,
+			paddingVertical: spacing.xs / 2,
+			borderRadius: 6,
+			backgroundColor: colors.border,
+			borderWidth: 1,
+			borderColor: colors.border,
+		},
+		availabilityToggleActive: {
+			backgroundColor: '#10b981',
+			borderColor: '#10b981',
+		},
+		availabilityToggleText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			fontWeight: '600' as const,
+			color: colors.textSecondary,
+		},
+		availabilityToggleTextActive: {
+			color: '#fff',
+		},
+		toggleVariationsButton: {
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			justifyContent: 'center' as const,
+			paddingVertical: spacing.xs,
+			marginTop: spacing.xs,
+			gap: spacing.xs / 2,
+		},
+		toggleVariationsText: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			fontWeight: '600' as const,
+			color: colors.primary,
 		},
 
 		// Legacy styles (for backward compatibility)

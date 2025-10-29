@@ -39,6 +39,7 @@ const MenuScreen: React.FC = () => {
 		getMenuItems,
 		toggleAvailability,
 		deleteMenuItem,
+		toggleVariationOptionAvailability,
 	} = useMenuBackend()
 
 	// Fetch menu items on mount and when screen comes into focus
@@ -116,6 +117,7 @@ const MenuScreen: React.FC = () => {
 										item.display_image_index ?? item.displayImageIndex ?? 0
 									}
 									availability={item.availability}
+									customVariations={item.menu_item_variation_groups}
 									showAlert={showAlert}
 									showConfirmation={showConfirmation}
 									onToggleAvailability={async (itemId, currentAvailability) => {
@@ -129,6 +131,28 @@ const MenuScreen: React.FC = () => {
 												message: `Item marked as ${
 													currentAvailability ? 'unavailable' : 'available'
 												}`,
+											})
+										}
+									}}
+									onToggleVariationOptionAvailability={async (
+										optionId,
+										currentAvailability
+									) => {
+										const result = await toggleVariationOptionAvailability(
+											optionId,
+											currentAvailability
+										)
+										if (result.success) {
+											showAlert({
+												title: 'Success',
+												message: `Option marked as ${
+													!currentAvailability ? 'available' : 'unavailable'
+												}`,
+											})
+										} else {
+											showAlert({
+												title: 'Error',
+												message: result.error || 'Failed to update option',
 											})
 										}
 									}}

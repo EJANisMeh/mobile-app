@@ -13,7 +13,7 @@ export const menuApi = {
 	getMenuItems: async (concessionId: number): Promise<any> => {
 		const token = await AsyncStorage.getItem('authToken')
 
-		return await apiCall(`/menu/get?concessionId=${concessionId}&limit=100`, {
+		return await apiCall(`/menu/get?concession_id=${concessionId}&limit=100`, {
 			method: 'GET',
 			headers: token ? { Authorization: `Bearer ${token}` } : {},
 		})
@@ -46,6 +46,23 @@ export const menuApi = {
 		return await apiCall(`/menu/delete/${itemId}`, {
 			method: 'DELETE',
 			headers: token ? { Authorization: `Bearer ${token}` } : {},
+		})
+	},
+
+	/**
+	 * Toggle variation option availability
+	 * Backend handles: validation, updating option availability status
+	 */
+	toggleVariationOptionAvailability: async (
+		optionId: number,
+		availability: boolean
+	): Promise<any> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall(`/menu/variation-option/${optionId}/availability`, {
+			method: 'PUT',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+			body: JSON.stringify({ availability }),
 		})
 	},
 }
