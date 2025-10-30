@@ -139,8 +139,11 @@ const EditMenuItemScreen: React.FC = () => {
 							name: group.name || '',
 							selectionTypeId: group.selection_type_id ?? 1,
 							multiLimit: group.multi_limit ?? null,
-							mode: 'custom' as const,
-							categoryFilterId: null,
+							mode: (group.code || 'custom') as
+								| 'custom'
+								| 'category'
+								| 'existing',
+							categoryFilterId: group.category_filter_id ?? null,
 							options:
 								group.menu_item_variation_option_choices?.map(
 									(option: any) => ({

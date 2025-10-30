@@ -120,7 +120,9 @@ const MenuScreen: React.FC = () => {
 										item.display_image_index ?? item.displayImageIndex ?? 0
 									}
 									availability={item.availability}
-									customVariations={item.menu_item_variation_groups}
+									customVariations={item.menu_item_variation_groups?.filter(
+										(group: any) => group.code === 'custom'
+									)}
 									isExpanded={expandedItems.has(item.id)}
 									onToggleExpand={() => {
 										setExpandedItems((prev) => {
