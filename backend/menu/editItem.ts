@@ -23,12 +23,11 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 		// Prepare update data
 		const updateData: any = {}
 		if (name !== undefined) updateData.name = name.trim()
-		if (description !== undefined) updateData.description = description.trim()
+		if (description !== undefined)
+			updateData.description = description ? description.trim() : null
 		if (basePrice !== undefined) updateData.basePrice = parseFloat(basePrice)
 		if (categoryId !== undefined) updateData.categoryId = categoryId
-		if (availability !== undefined) updateData.availability = availability
-
-		// Update menu item using simplified query
+		if (availability !== undefined) updateData.availability = availability // Update menu item using simplified query
 		const menuItemResult = await updateQuery(prisma, {
 			table: 'menuItem',
 			where: { id: parseInt(id) },

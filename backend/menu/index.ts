@@ -3,6 +3,7 @@ import { addItem } from './addItem'
 import { editItem } from './editItem'
 import { deleteItem } from './deleteItem'
 import { getItem } from './getItem'
+import { getItemById } from './getItemById'
 import { getSelectionTypes } from './getSelectionTypes'
 import { toggleVariationOptionAvailability } from './toggleVariationOptionAvailability'
 
@@ -10,6 +11,9 @@ const router = express.Router()
 
 // Get menu items
 router.get('/get', getItem)
+
+// Get single menu item by ID
+router.get('/get/:itemId', getItemById)
 
 // Get selection types
 router.get('/selection-types', getSelectionTypes)

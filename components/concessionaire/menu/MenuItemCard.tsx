@@ -18,6 +18,8 @@ interface MenuItemCardProps {
 	displayImageIndex: number
 	availability: boolean
 	customVariations?: any[] // Custom variation groups
+	isExpanded?: boolean
+	onToggleExpand?: () => void
 	showAlert: UseAlertModalType['showAlert']
 	showConfirmation: UseConfirmationModalType['showConfirmation']
 	onToggleAvailability: (itemId: number, currentAvailability: boolean) => void
@@ -36,6 +38,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 	displayImageIndex,
 	availability,
 	customVariations = [],
+	isExpanded = false,
+	onToggleExpand,
 	showAlert,
 	showConfirmation,
 	onToggleAvailability,
@@ -47,7 +51,6 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 	const styles = createConcessionaireMenuStyles(colors, responsive)
 	const navigation = useConcessionaireNavigation()
 	const [showMenu, setShowMenu] = useState(false)
-	const [showVariations, setShowVariations] = useState(false)
 
 	const handleEditItemNav = () => {
 		setShowMenu(false)
@@ -206,7 +209,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 			{/* Custom Variations Section */}
 			{customVariations && customVariations.length > 0 && (
 				<>
-					{showVariations && (
+					{isExpanded && (
 						<View style={styles.variationsContainer}>
 							{customVariations.map((group, groupIndex) => (
 								<View
@@ -277,14 +280,14 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 					{/* Toggle Variations Button */}
 					<TouchableOpacity
 						style={styles.toggleVariationsButton}
-						onPress={() => setShowVariations(!showVariations)}>
+						onPress={onToggleExpand}>
 						<MaterialCommunityIcons
-							name={showVariations ? 'chevron-up' : 'chevron-down'}
+							name={isExpanded ? 'chevron-up' : 'chevron-down'}
 							size={20}
 							color={colors.primary}
 						/>
 						<Text style={styles.toggleVariationsText}>
-							{showVariations ? 'Hide Variations' : 'Custom Variations'}
+							{isExpanded ? 'Hide Variations' : 'Custom Variations'}
 						</Text>
 					</TouchableOpacity>
 				</>

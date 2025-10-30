@@ -20,6 +20,19 @@ export const menuApi = {
 	},
 
 	/**
+	 * Get single menu item by ID with all details
+	 * Backend handles: fetching full item data including variations and addons
+	 */
+	getMenuItemById: async (itemId: number): Promise<any> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall(`/menu/get/${itemId}`, {
+			method: 'GET',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+		})
+	},
+
+	/**
 	 * Toggle menu item availability
 	 * Backend handles: validation, updating availability status
 	 */

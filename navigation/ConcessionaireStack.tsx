@@ -12,6 +12,7 @@ import EditConcessionDetailsScreen from '../screens/concessionaire/concession/ed
 import ManagePaymentMethodsScreen from '../screens/concessionaire/concession/managePaymentMethods'
 import CategoryManagementScreen from '../screens/concessionaire/menu/categoryManagement'
 import AddMenuItemScreen from '../screens/concessionaire/menu/addItem'
+import EditMenuItemScreen from '../screens/concessionaire/menu/editItem'
 import NotificationsScreen from '../screens/concessionaire/notification'
 import ProfileScreen from '../screens/concessionaire/profile'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -149,10 +150,10 @@ const ConcessionaireStack: React.FC = () => {
 				}}
 			/>
 			<Stack.Screen
-				name="CategoryManagement"
+				name="CategoryManagement" 
 				component={CategoryManagementScreen}
 				options={{
-					headerShown: false,
+					headerShown: true,
 					title: 'Categories',
 					presentation: 'modal',
 					headerLeft: () => null,
@@ -162,7 +163,7 @@ const ConcessionaireStack: React.FC = () => {
 				name="AddMenuItem"
 				component={AddMenuItemScreen}
 				options={{
-					headerShown: false,
+					headerShown: true,
 					title: 'Add Menu Item',
 					presentation: 'modal',
 					headerLeft: () => null,
@@ -170,7 +171,7 @@ const ConcessionaireStack: React.FC = () => {
 			/>
 			<Stack.Screen
 				name="EditMenuItem"
-				component={MenuScreen}
+				component={EditMenuItemScreen}
 				options={{
 					headerShown: true,
 					title: 'Edit Menu Item',

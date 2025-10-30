@@ -42,6 +42,9 @@ const MenuScreen: React.FC = () => {
 		toggleVariationOptionAvailability,
 	} = useMenuBackend()
 
+	// Track which menu items have their variations expanded
+	const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set())
+
 	// Fetch menu items on mount and when screen comes into focus
 	useFocusEffect(
 		React.useCallback(() => {
@@ -118,6 +121,18 @@ const MenuScreen: React.FC = () => {
 									}
 									availability={item.availability}
 									customVariations={item.menu_item_variation_groups}
+									isExpanded={expandedItems.has(item.id)}
+									onToggleExpand={() => {
+										setExpandedItems((prev) => {
+											const newSet = new Set(prev)
+											if (newSet.has(item.id)) {
+												newSet.delete(item.id)
+											} else {
+												newSet.add(item.id)
+											}
+											return newSet
+										})
+									}}
 									showAlert={showAlert}
 									showConfirmation={showConfirmation}
 									onToggleAvailability={async (itemId, currentAvailability) => {
