@@ -1,5 +1,6 @@
 import express from 'express'
 import { PrismaClient } from '@prisma/client'
+import { VariationGroupMode, getKindFromMode } from '../../types'
 
 const prisma = new PrismaClient()
 
@@ -90,15 +91,9 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 						continue // Skip invalid groups
 					}
 
-					// Determine kind based on mode
-					let kind = 'group'
-					if (group.mode === 'custom') {
-						kind = 'group'
-					} else if (group.mode === 'category') {
-						kind = 'category_filter'
-					} else if (group.mode === 'existing') {
-						kind = 'existing_items'
-					}
+					// Determine kind based on mode using typed helper
+					const mode = group.mode as VariationGroupMode
+					const kind = getKindFromMode(mode || 'custom')
 
 					// Create variation group
 					const createdGroup = await tx.menu_item_variation_groups.create({

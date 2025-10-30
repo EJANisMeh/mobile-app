@@ -8,30 +8,30 @@ export const deleteItem = async (
 ) => {
 	try {
 		const { id } = req.params
+		const itemId = parseInt(id)
 
 		// Validate menu item exists
-		const existingItemResult = await selectOne(prisma, {
-			table: 'menuItem',
-			where: { id: parseInt(id) },
+		const existingItem = await prisma.menuItem.findUnique({
+			where: { id: itemId },
 		})
 
-		if (!existingItemResult.success || !existingItemResult.data) {
+		if (!existingItem) {
 			return res.status(404).json({
 				success: false,
 				error: 'Menu item not found',
 			})
 		}
 
-		// Delete menu item using simplified query
-		const deleteResult = await deleteQuery(prisma, {
-			table: 'menuItem',
-			where: { id: parseInt(id) },
-		})
+		// Just delete - the trigger should be fixed now but if not, at least we get the item ID back
+		const result = await prisma.$executeRawUnsafe(
+			`DELETE FROM menu_items WHERE id = $1`,
+			itemId
+		)
 
-		if (!deleteResult.success) {
-			return res.status(500).json({
+		if (result === 0) {
+			return res.status(404).json({
 				success: false,
-				error: 'Failed to delete menu item',
+				error: 'Menu item not found or already deleted',
 			})
 		}
 

@@ -46,6 +46,57 @@ export interface AddonInput {
 
 export type VariationGroupMode = 'custom' | 'category' | 'existing'
 
+/**
+ * Variation group kind (database column value)
+ * Maps to the 'kind' column in menu_item_variation_groups table
+ * - group: Custom variation group with manually defined options
+ * - category_filter: Filter options by category
+ * - existing_items: Use existing menu items as options
+ */
+export type VariationGroupKind = 'group' | 'category_filter' | 'existing_items'
+
+/**
+ * Maps variation group mode to database kind value
+ */
+export const VARIATION_GROUP_MODE_TO_KIND: Record<
+	VariationGroupMode,
+	VariationGroupKind
+> = {
+	custom: 'group',
+	category: 'category_filter',
+	existing: 'existing_items',
+}
+
+/**
+ * Maps database kind value to variation group mode
+ */
+export const VARIATION_GROUP_KIND_TO_MODE: Record<
+	VariationGroupKind,
+	VariationGroupMode
+> = {
+	group: 'custom',
+	category_filter: 'category',
+	existing_items: 'existing',
+}
+
+/**
+ * Helper function to get kind from mode
+ */
+export const getKindFromMode = (
+	mode: VariationGroupMode
+): VariationGroupKind => {
+	return VARIATION_GROUP_MODE_TO_KIND[mode]
+}
+
+/**
+ * Helper function to get mode from kind
+ */
+export const getModeFromKind = (
+	kind: VariationGroupKind
+): VariationGroupMode => {
+	return VARIATION_GROUP_KIND_TO_MODE[kind]
+}
+
 export interface SelectionType {
 	id: number
 	code: string

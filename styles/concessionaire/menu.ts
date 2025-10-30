@@ -102,6 +102,7 @@ export const createConcessionaireMenuStyles = (
 		// Menu Items List
 		menuItemsList: {
 			gap: margin.small,
+			overflow: 'visible' as const,
 		},
 
 		// Menu Item Card Styles
@@ -116,6 +117,7 @@ export const createConcessionaireMenuStyles = (
 			shadowOpacity: 0.1,
 			shadowRadius: 4,
 			elevation: 2,
+			overflow: 'visible' as const,
 		},
 		menuItemImageContainer: {
 			width: 80,
@@ -220,6 +222,41 @@ export const createConcessionaireMenuStyles = (
 			height: 1,
 			backgroundColor: colors.border,
 			marginVertical: spacing.xs / 2,
+		},
+
+		// Dropdown Modal Styles
+		dropdownModalOverlay: {
+			flex: 1,
+			backgroundColor: 'rgba(0, 0, 0, 0.5)',
+			justifyContent: 'center' as const,
+			alignItems: 'center' as const,
+		},
+		dropdownModalMenu: {
+			backgroundColor: colors.surface,
+			borderRadius: 12,
+			minWidth: 200,
+			shadowColor: '#000',
+			shadowOffset: { width: 0, height: 4 },
+			shadowOpacity: 0.3,
+			shadowRadius: 12,
+			elevation: 10,
+			borderWidth: 1,
+			borderColor: colors.border,
+		},
+		dropdownMenuHeader: {
+			paddingVertical: spacing.md,
+			paddingHorizontal: spacing.md,
+			borderBottomWidth: 1,
+			borderBottomColor: colors.border,
+			backgroundColor: colors.background,
+			borderTopLeftRadius: 12,
+			borderTopRightRadius: 12,
+		},
+		dropdownMenuTitle: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
+			color: colors.text,
+			textAlign: 'center' as const,
 		},
 
 		// Variations Section

@@ -44,6 +44,8 @@ const MenuScreen: React.FC = () => {
 
 	// Track which menu items have their variations expanded
 	const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set())
+	// Track which menu item has its dropdown menu open
+	const [openMenuItemId, setOpenMenuItemId] = useState<number | null>(null)
 
 	// Fetch menu items on mount and when screen comes into focus
 	useFocusEffect(
@@ -121,7 +123,7 @@ const MenuScreen: React.FC = () => {
 									}
 									availability={item.availability}
 									customVariations={item.menu_item_variation_groups?.filter(
-										(group: any) => group.code === 'custom'
+										(group: any) => group.kind === 'group'
 									)}
 									isExpanded={expandedItems.has(item.id)}
 									onToggleExpand={() => {
@@ -134,6 +136,10 @@ const MenuScreen: React.FC = () => {
 											}
 											return newSet
 										})
+									}}
+									isMenuOpen={openMenuItemId === item.id}
+									onMenuToggle={(itemId, isOpen) => {
+										setOpenMenuItemId(isOpen ? itemId : null)
 									}}
 									showAlert={showAlert}
 									showConfirmation={showConfirmation}
@@ -179,6 +185,11 @@ const MenuScreen: React.FC = () => {
 											showAlert({
 												title: 'Deleted',
 												message: 'Menu item has been deleted successfully',
+											})
+										} else {
+											showAlert({
+												title: 'Error',
+												message: result.error || 'Failed to delete menu item',
 											})
 										}
 									}}

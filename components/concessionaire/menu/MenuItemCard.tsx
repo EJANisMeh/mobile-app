@@ -1,5 +1,13 @@
-import React, { useState } from 'react'
-import { View, Text, Image, TouchableOpacity } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import {
+	View,
+	Text,
+	Image,
+	TouchableOpacity,
+	Modal,
+	TouchableWithoutFeedback,
+	BackHandler,
+} from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
@@ -28,6 +36,8 @@ interface MenuItemCardProps {
 		currentAvailability: boolean
 	) => void
 	onDelete: (itemId: number) => void
+	isMenuOpen?: boolean
+	onMenuToggle?: (itemId: number, isOpen: boolean) => void
 }
 
 const MenuItemCard: React.FC<MenuItemCardProps> = ({
@@ -45,20 +55,39 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 	onToggleAvailability,
 	onToggleVariationOptionAvailability,
 	onDelete,
+	isMenuOpen = false,
+	onMenuToggle,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createConcessionaireMenuStyles(colors, responsive)
 	const navigation = useConcessionaireNavigation()
-	const [showMenu, setShowMenu] = useState(false)
+
+	// Handle back button press to close menu
+	useEffect(() => {
+		if (!isMenuOpen) return
+
+		const backHandler = BackHandler.addEventListener(
+			'hardwareBackPress',
+			() => {
+				if (isMenuOpen && onMenuToggle) {
+					onMenuToggle(id, false)
+					return true
+				}
+				return false
+			}
+		)
+
+		return () => backHandler.remove()
+	}, [isMenuOpen, id, onMenuToggle])
 
 	const handleEditItemNav = () => {
-		setShowMenu(false)
+		onMenuToggle?.(id, false)
 		navigation.navigate('EditMenuItem', { itemId: id.toString() })
 	}
 
 	const handleToggleAvailability = () => {
-		setShowMenu(false)
+		onMenuToggle?.(id, false)
 		showConfirmation({
 			title: availability ? 'Mark as Unavailable' : 'Mark as Available',
 			message: `Are you sure you want to mark "${name}" as ${
@@ -73,7 +102,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 	}
 
 	const handleDeleteItem = () => {
-		setShowMenu(false)
+		onMenuToggle?.(id, false)
 		showConfirmation({
 			title: 'Delete Item',
 			message: `Are you sure you want to delete "${name}"? This action cannot be undone.`,
@@ -152,7 +181,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 				{/* Actions Menu */}
 				<View style={styles.menuItemActions}>
 					<TouchableOpacity
-						onPress={() => setShowMenu(!showMenu)}
+						onPress={() => onMenuToggle?.(id, !isMenuOpen)}
 						style={styles.menuButton}>
 						<MaterialCommunityIcons
 							name="dots-vertical"
@@ -160,51 +189,72 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 							color={colors.text}
 						/>
 					</TouchableOpacity>
-
-					{showMenu && (
-						<View style={styles.dropdownMenu}>
-							<TouchableOpacity
-								style={styles.dropdownItem}
-								onPress={handleEditItemNav}>
-								<MaterialCommunityIcons
-									name="pencil"
-									size={18}
-									color={colors.text}
-								/>
-								<Text style={styles.dropdownText}>Edit Item</Text>
-							</TouchableOpacity>
-
-							<TouchableOpacity
-								style={styles.dropdownItem}
-								onPress={handleToggleAvailability}>
-								<MaterialCommunityIcons
-									name={availability ? 'eye-off' : 'eye'}
-									size={18}
-									color={colors.text}
-								/>
-								<Text style={styles.dropdownText}>
-									{availability ? 'Mark Unavailable' : 'Mark Available'}
-								</Text>
-							</TouchableOpacity>
-
-							<View style={styles.dropdownDivider} />
-
-							<TouchableOpacity
-								style={styles.dropdownItem}
-								onPress={handleDeleteItem}>
-								<MaterialCommunityIcons
-									name="delete"
-									size={18}
-									color="#dc3545"
-								/>
-								<Text style={[styles.dropdownText, styles.dropdownTextDanger]}>
-									Delete Item
-								</Text>
-							</TouchableOpacity>
-						</View>
-					)}
 				</View>
 			</View>
+
+			{/* Dropdown Menu Modal */}
+			<Modal
+				visible={isMenuOpen}
+				transparent={true}
+				animationType="fade"
+				onRequestClose={() => onMenuToggle?.(id, false)}>
+				<TouchableWithoutFeedback onPress={() => onMenuToggle?.(id, false)}>
+					<View style={styles.dropdownModalOverlay}>
+						<TouchableWithoutFeedback>
+							<View style={styles.dropdownModalMenu}>
+								{/* Menu Item Name Header */}
+								<View style={styles.dropdownMenuHeader}>
+									<Text
+										style={styles.dropdownMenuTitle}
+										numberOfLines={1}>
+										{name}
+									</Text>
+								</View>
+
+								<TouchableOpacity
+									style={styles.dropdownItem}
+									onPress={handleEditItemNav}>
+									<MaterialCommunityIcons
+										name="pencil"
+										size={18}
+										color={colors.text}
+									/>
+									<Text style={styles.dropdownText}>Edit Item</Text>
+								</TouchableOpacity>
+
+								<TouchableOpacity
+									style={styles.dropdownItem}
+									onPress={handleToggleAvailability}>
+									<MaterialCommunityIcons
+										name={availability ? 'eye-off' : 'eye'}
+										size={18}
+										color={colors.text}
+									/>
+									<Text style={styles.dropdownText}>
+										{availability ? 'Mark Unavailable' : 'Mark Available'}
+									</Text>
+								</TouchableOpacity>
+
+								<View style={styles.dropdownDivider} />
+
+								<TouchableOpacity
+									style={styles.dropdownItem}
+									onPress={handleDeleteItem}>
+									<MaterialCommunityIcons
+										name="delete"
+										size={18}
+										color="#dc3545"
+									/>
+									<Text
+										style={[styles.dropdownText, styles.dropdownTextDanger]}>
+										Delete Item
+									</Text>
+								</TouchableOpacity>
+							</View>
+						</TouchableWithoutFeedback>
+					</View>
+				</TouchableWithoutFeedback>
+			</Modal>
 
 			{/* Custom Variations Section */}
 			{customVariations && customVariations.length > 0 && (
