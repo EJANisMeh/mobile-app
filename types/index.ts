@@ -1,6 +1,7 @@
 // Main types index file
 export * from './apiTypes'
 export * from './authTypes'
+export * from './cafeteriaTypes'
 export * from './componentTypes'
 export * from './concessionTypes'
 export * from './hookTypes'

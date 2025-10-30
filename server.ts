@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import { connectDatabase, disconnectDatabase } from './backend/db/index'
 import authRoutes from './routes/authRouter'
 import concessionRoutes from './routes/concessionRouter'
+import customerRoutes from './routes/customerRouter'
 import categoryRoutes from './routes/categoryRouter'
 import menuRoutes from './backend/menu/index'
 import orderRoutes from './backend/order/index'
@@ -24,6 +25,7 @@ app.use(express.urlencoded({ extended: true }))
 // Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/concession', concessionRoutes)
+app.use('/api/customer', customerRoutes)
 app.use('/api/category', categoryRoutes)
 app.use('/api/menu', menuRoutes)
 app.use('/api/orders', orderRoutes)

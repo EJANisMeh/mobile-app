@@ -1,5 +1,6 @@
 import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { CustomerStackParamList } from '../types/navigation'
 
 // Import screen components
@@ -26,6 +27,13 @@ const CustomerStack: React.FC = () => {
 				options={{
 					title: 'Menu',
 					tabBarLabel: 'Menu',
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							name="bulletin-board"
+							color={color}
+							size={size}
+						/>
+					),
 				}}
 			/>
 			<Tab.Screen
@@ -34,6 +42,13 @@ const CustomerStack: React.FC = () => {
 				options={{
 					title: 'Cart',
 					tabBarLabel: 'Cart',
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							name="cart"
+							color={color}
+							size={size}
+						/>
+					),
 				}}
 			/>
 			<Tab.Screen
@@ -42,6 +57,13 @@ const CustomerStack: React.FC = () => {
 				options={{
 					title: 'My Orders',
 					tabBarLabel: 'Orders',
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							name="food"
+							color={color}
+							size={size}
+						/>
+					),
 				}}
 			/>
 			<Tab.Screen
@@ -50,6 +72,13 @@ const CustomerStack: React.FC = () => {
 				options={{
 					title: 'Notifications',
 					tabBarLabel: 'Alerts',
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							name="bell"
+							color={color}
+							size={size}
+						/>
+					),
 				}}
 			/>
 			<Tab.Screen
@@ -58,6 +87,13 @@ const CustomerStack: React.FC = () => {
 				options={{
 					title: 'Profile',
 					tabBarLabel: 'Profile',
+					tabBarIcon: ({ color, size }) => (
+						<MaterialCommunityIcons
+							name="account"
+							color={color}
+							size={size}
+						/>
+					),
 				}}
 			/>
 		</Tab.Navigator>

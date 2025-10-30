@@ -45,15 +45,15 @@ model Cafeteria {
 model Concession {
   id                   Int                    @id @default(autoincrement())
   name                 String
-  description          String?
   image_url            String?
-  cafeteriaId          Int?                   @map("cafeteria_id")
+  cafeteriaId          Int                    @map("cafeteria_id")
   is_open              Boolean                @default(false)
   payment_methods      Json                   @default("[]")
-  schedule             Json?                  @default("{}")
   createdAt            DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  cafeteria            Cafeteria?             @relation(fields: [cafeteriaId], references: [id], onUpdate: NoAction)
+  description          String?
+  schedule             Json?                  @default("{}")
+  cafeteria            Cafeteria              @relation(fields: [cafeteriaId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   menu_item_categories menu_item_categories[]
   menuItems            MenuItem[]
   orders               Order[]
@@ -68,14 +68,14 @@ model MenuItem {
   name                                                              String
   description                                                       String?
   basePrice                                                         Decimal                      @map("base_price") @db.Decimal(10, 2)
-  images                                                            String[]                     @default([])
-  display_image_index                                               Int                          @default(0)
   availability                                                      Boolean                      @default(false)
   concessionId                                                      Int                          @map("concession_id")
   categoryId                                                        Int?                         @map("category_id")
   position                                                          Int?                         @default(0)
   createdAt                                                         DateTime                     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt                                                         DateTime                     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  images                                                            String[]                     @default([])
+  display_image_index                                               Int                          @default(0)
   feedback                                                          Feedback[]
   menu_item_addons_menu_item_addons_menu_item_idTomenu_items        menu_item_addons[]           @relation("menu_item_addons_menu_item_idTomenu_items")
   menu_item_addons_menu_item_addons_target_menu_item_idTomenu_items menu_item_addons[]           @relation("menu_item_addons_target_menu_item_idTomenu_items")
@@ -164,15 +164,15 @@ model menu_item_addons {
 }
 
 model menu_item_categories {
-  id                                Int                          @id @default(autoincrement())
-  concession_id                     Int
-  name                              String
-  position                          Int?                         @default(0)
-  created_at                        DateTime                     @default(now()) @db.Timestamptz(6)
-  updated_at                        DateTime                     @default(now()) @db.Timestamptz(6)
-  concessions                       Concession                   @relation(fields: [concession_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  menuItems                         MenuItem[]
-  variation_groups_with_filter      menu_item_variation_groups[]
+  id                           Int                          @id @default(autoincrement())
+  concession_id                Int
+  name                         String
+  position                     Int?                         @default(0)
+  created_at                   DateTime                     @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime                     @default(now()) @db.Timestamptz(6)
+  concessions                  Concession                   @relation(fields: [concession_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  variation_groups_with_filter menu_item_variation_groups[]
+  menuItems                    MenuItem[]
 
   @@index([concession_id])
 }
@@ -189,14 +189,18 @@ model menu_item_variation_groups {
   is_default                         Boolean                              @default(false)
   selection_type_id                  Int?
   multi_limit                        Int?
-  category_filter_id                 Int?
   position                           Int?                                 @default(0)
+  category_filter_id                 Int?
+  created_at                         DateTime                             @default(now()) @db.Timestamptz(6)
+  updated_at                         DateTime                             @default(now()) @updatedAt @db.Timestamptz(6)
   menu_item_addons                   menu_item_addons[]
+  category_filter                    menu_item_categories?                @relation(fields: [category_filter_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   menu_items                         MenuItem                             @relation(fields: [menu_item_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   selection_types                    selection_types?                     @relation(fields: [selection_type_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  category_filter                    menu_item_categories?                @relation(fields: [category_filter_id], references: [id], onUpdate: NoAction)
   menu_item_variation_option_choices menu_item_variation_option_choices[]
   orderItems                         OrderItem[]
+
+  @@index([category_filter_id])
 }
 
 model menu_item_variation_option_choices {
@@ -205,11 +209,11 @@ model menu_item_variation_option_choices {
   code                       String?
   name                       String
   price_adjustment           Decimal                    @default(0.00) @db.Decimal(10, 2)
-  availability               Boolean                    @default(true)
   is_default                 Boolean                    @default(false)
   position                   Int?                       @default(0)
-  created_at                 DateTime                   @default(now()) @db.Timestamptz(6)
-  updated_at                 DateTime                   @default(now()) @updatedAt @db.Timestamptz(6)
+  availability               Boolean                    @default(true)
+  created_at                 DateTime?                  @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime?                  @default(now()) @updatedAt @db.Timestamptz(6)
   menu_item_variation_groups menu_item_variation_groups @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 

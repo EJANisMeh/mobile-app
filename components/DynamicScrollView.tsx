@@ -100,7 +100,6 @@ const DynamicScrollView = ({
 		autoCenter ? { justifyContent: getJustifyContent() } : undefined,
 		{
 			paddingHorizontal: responsive.getResponsivePadding().horizontal,
-			paddingBottom: responsive.getResponsivePadding().vertical,
 		},
 		{ flexGrow: 1 },
 		{ width: '100%' },
