@@ -50,7 +50,10 @@ const ConcessionCard: React.FC<ConcessionCardProps> = ({ concession }) => {
 						showsHorizontalScrollIndicator={true}
 						contentContainerStyle={styles.menuItemsContainer}>
 						{concession.menuItems.map((item) => (
-							<MenuItemCard key={item.id} item={item} />
+							<MenuItemCard
+								key={item.id}
+								item={item}
+							/>
 						))}
 
 						<TouchableOpacity

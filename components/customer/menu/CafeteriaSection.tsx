@@ -50,7 +50,10 @@ const CafeteriaSection: React.FC<CafeteriaSectionProps> = ({ cafeteria }) => {
 
 			{/* Open Concessions */}
 			{openConcessions.map((concession) => (
-				<ConcessionCard key={concession.id} concession={concession} />
+				<ConcessionCard
+					key={concession.id}
+					concession={concession}
+				/>
 			))}
 
 			{/* Closed Concessions Section */}
@@ -71,7 +74,10 @@ const CafeteriaSection: React.FC<CafeteriaSectionProps> = ({ cafeteria }) => {
 
 					{showClosedConcessions &&
 						closedConcessions.map((concession) => (
-							<ConcessionCard key={concession.id} concession={concession} />
+							<ConcessionCard
+								key={concession.id}
+								concession={concession}
+							/>
 						))}
 				</View>
 			)}

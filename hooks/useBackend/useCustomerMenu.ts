@@ -16,7 +16,7 @@ export const useCustomerMenu = () => {
 			setLoading(true)
 			setError(null)
 			const response = await customerApi.getCafeteriasWithMenu()
-			
+
 			if (!response.success) {
 				setError((response as any).error || 'Failed to load menu')
 				setData(null)
