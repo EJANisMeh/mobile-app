@@ -1,10 +1,15 @@
 import React from 'react'
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createCustomerMenuStyles } from '../../../styles/customer'
+import { CustomerStackParamList } from '../../../types/navigation'
 import MenuItemCard from './MenuItemCard'
 import type { ConcessionWithMenuItems } from '../../../types'
+
+type NavigationProp = StackNavigationProp<CustomerStackParamList>
 
 interface ConcessionCardProps {
 	concession: ConcessionWithMenuItems
@@ -14,10 +19,13 @@ const ConcessionCard: React.FC<ConcessionCardProps> = ({ concession }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createCustomerMenuStyles(colors, responsive)
+	const navigation = useNavigation<NavigationProp>()
 
 	const handleViewAll = () => {
-		// TODO: Navigate to full menu list for this concession
-		console.log('View all items for concession:', concession.id)
+		navigation.navigate('FullMenuList', {
+			concessionId: concession.id,
+			concessionName: concession.name,
+		})
 	}
 
 	return (

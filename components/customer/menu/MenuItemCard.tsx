@@ -1,9 +1,14 @@
 import React from 'react'
 import { View, Text, Image, TouchableOpacity } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createCustomerMenuStyles } from '../../../styles/customer'
+import { CustomerStackParamList } from '../../../types/navigation'
 import type { MenuItemForCustomer } from '../../../types'
+
+type NavigationProp = StackNavigationProp<CustomerStackParamList>
 
 interface MenuItemCardProps {
 	item: MenuItemForCustomer
@@ -13,10 +18,10 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createCustomerMenuStyles(colors, responsive)
+	const navigation = useNavigation<NavigationProp>()
 
 	const handlePress = () => {
-		// TODO: Navigate to item details or add to cart
-		console.log('Pressed item:', item.id)
+		navigation.navigate('MenuItemView', { menuItemId: item.id })
 	}
 
 	// Get the display image (use displayImageIndex or first image)
