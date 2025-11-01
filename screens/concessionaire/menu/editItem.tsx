@@ -27,7 +27,7 @@ import {
 	useConfirmationModal,
 	useMenuModal,
 } from '../../../hooks/useModals'
-import { createConcessionaireMenuStyles } from '../../../styles/concessionaire'
+import { createConcessionaireEditMenuItemStyles } from '../../../styles/concessionaire'
 import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 import { menuApi } from '../../../services/api'
 import {
@@ -57,7 +57,7 @@ type EditMenuItemScreenRouteProp = RouteProp<
 const EditMenuItemScreen: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
-	const styles = createConcessionaireMenuStyles(colors, responsive)
+	const styles = createConcessionaireEditMenuItemStyles(colors, responsive)
 	const navigation = useNavigation<EditMenuItemScreenNavigationProp>()
 	const route = useRoute<EditMenuItemScreenRouteProp>()
 	const { concession } = useConcessionContext()
@@ -686,7 +686,7 @@ const EditMenuItemScreen: React.FC = () => {
 		return (
 			<View
 				style={[
-					styles.categoryManagementContainer,
+					styles.editItemContainer,
 					{ justifyContent: 'center', alignItems: 'center' },
 				]}>
 				<ActivityIndicator
@@ -700,7 +700,7 @@ const EditMenuItemScreen: React.FC = () => {
 
 	return (
 		<DynamicKeyboardView
-			style={styles.categoryManagementContainer}
+			style={styles.editItemContainer}
 			useSafeArea={true}>
 			<DynamicScrollView showsVerticalScrollIndicator={false}>
 				{/* Item Name */}

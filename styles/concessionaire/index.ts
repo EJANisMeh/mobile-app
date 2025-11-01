@@ -1,4 +1,7 @@
 export { createConcessionaireMenuStyles } from './menu'
+export { createConcessionaireAddMenuItemStyles } from './addMenuItem'
+export { createConcessionaireCategoryManagementStyles } from './categoryManagement'
+export { createConcessionaireEditMenuItemStyles } from './editMenuItem'
 export { createConcessionaireOrdersStyles } from './orders'
 export { createConcessionStyles } from './concession'
 export { createConcessionaireNotificationsStyles } from './notifications'

@@ -12,7 +12,7 @@ import { useHideNavBar, useResponsiveDimensions } from '../../../hooks'
 import { useCategoryBackend } from '../../../hooks/useBackend/useCategoryBackend'
 import { useAlertModal } from '../../../hooks/useModals/useAlertModal'
 import { useConfirmationModal } from '../../../hooks/useModals/useConfirmationModal'
-import { createConcessionaireMenuStyles } from '../../../styles/concessionaire'
+import { createConcessionaireCategoryManagementStyles } from '../../../styles/concessionaire'
 import {
 	AlertModal,
 	ConfirmationModal,
@@ -32,7 +32,10 @@ interface CategoryItem {
 const CategoryManagementScreen: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
-	const styles = createConcessionaireMenuStyles(colors, responsive)
+	const styles = createConcessionaireCategoryManagementStyles(
+		colors,
+		responsive
+	)
 	const navigation = useNavigation()
 
 	const { concession } = useConcessionContext()
@@ -225,8 +228,7 @@ const CategoryManagementScreen: React.FC = () => {
 	}
 
 	return (
-		<DynamicKeyboardView
-			style={styles.categoryManagementContainer}>
+		<DynamicKeyboardView style={styles.categoryManagementContainer}>
 			<DynamicScrollView showsVerticalScrollIndicator={false}>
 				{editedCategories.map((category, index) => (
 					<View
