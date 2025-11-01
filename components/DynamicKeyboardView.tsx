@@ -50,12 +50,18 @@ const DynamicKeyboardView = ({
 	enableKeyboardAvoiding = true,
 	behavior = 'padding',
 	keyboardVerticalOffset,
-	useSafeArea = ['left', 'right', 'bottom'], // Default: safe area on sides and bottom, but not top (for screens with headers)
+	useSafeArea = false,
 }: DynamicKeyboardViewProps) => {
 	const responsive = useResponsiveDimensions()
 
-	const offset =
-		keyboardVerticalOffset ?? (Platform.OS === 'android' ? -100 : 0)
+	// When using softwareKeyboardLayoutMode: "resize", we should disable KeyboardAvoidingView
+	// because Android already handles the layout. Using both causes conflicts.
+	// Only use KeyboardAvoidingView when explicitly needed with custom offset
+	const shouldUseKeyboardAvoiding =
+		Platform.OS === 'ios' || keyboardVerticalOffset !== undefined
+
+	// Default offset for custom cases
+	const offset = keyboardVerticalOffset ?? 0
 
 	const containerStyle: StyleProp<ViewStyle> = [{ flex: 1 }, style]
 
@@ -67,30 +73,22 @@ const DynamicKeyboardView = ({
 			? ['top', 'bottom', 'left', 'right']
 			: useSafeArea
 
-	const content = (
-		<KeyboardAvoidingView
-			key={responsive.isLandscape ? 'landscape' : 'portrait'}
-			style={{ flex: 1 }}
-			behavior={behavior}
-			enabled={enableKeyboardAvoiding}
-			keyboardVerticalOffset={offset}>
-			<View style={containerStyle}>{children}</View>
-		</KeyboardAvoidingView>
+	// SafeAreaView should be the outermost container
+	const SafeContainer = safeAreaEdges ? SafeAreaView : View
+
+	return (
+		<SafeContainer
+			style={containerStyle}
+			{...(safeAreaEdges ? { edges: safeAreaEdges } : {})}>
+			<KeyboardAvoidingView
+				style={{ flex: 1 }}
+				behavior={behavior}
+				enabled={shouldUseKeyboardAvoiding && enableKeyboardAvoiding}
+				keyboardVerticalOffset={offset}>
+				{children}
+			</KeyboardAvoidingView>
+		</SafeContainer>
 	)
-
-	if (safeAreaEdges) {
-		// Use the containerStyle for SafeAreaView so the safe area background
-		// matches the screen's background (prevents gray area showing through)
-		return (
-			<SafeAreaView
-				style={containerStyle as any}
-				edges={safeAreaEdges}>
-				{content}
-			</SafeAreaView>
-		)
-	}
-
-	return content
 }
 
 export default DynamicKeyboardView
