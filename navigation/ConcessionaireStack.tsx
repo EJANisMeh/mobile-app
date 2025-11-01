@@ -150,7 +150,7 @@ const ConcessionaireStack: React.FC = () => {
 				}}
 			/>
 			<Stack.Screen
-				name="CategoryManagement" 
+				name="CategoryManagement"
 				component={CategoryManagementScreen}
 				options={{
 					headerShown: true,

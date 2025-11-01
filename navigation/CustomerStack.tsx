@@ -1,5 +1,6 @@
 import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { createStackNavigator } from '@react-navigation/stack'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { CustomerStackParamList } from '../types/navigation'
 
@@ -9,20 +10,23 @@ import CartScreen from '../screens/customer/cart'
 import OrdersScreen from '../screens/customer/orders'
 import NotificationsScreen from '../screens/customer/notification'
 import ProfileScreen from '../screens/customer/profile'
+import MenuItemViewScreen from '../screens/customer/menu/menuItemView'
+import FullMenuListScreen from '../screens/customer/menu/fullMenuList'
 
-const Tab = createBottomTabNavigator<CustomerStackParamList>()
+const Tab = createBottomTabNavigator()
+const Stack = createStackNavigator<CustomerStackParamList>()
 
-const CustomerStack: React.FC = () => {
+const TabNavigator: React.FC = () => {
 	return (
 		<Tab.Navigator
-			initialRouteName="Menu"
+			initialRouteName="MenuTab"
 			screenOptions={{
 				tabBarActiveTintColor: '#007bff',
 				tabBarInactiveTintColor: '#6c757d',
-				headerShown: true,
+				headerShown: false,
 			}}>
 			<Tab.Screen
-				name="Menu"
+				name="MenuTab"
 				component={MenuScreen}
 				options={{
 					title: 'Menu',
@@ -37,7 +41,7 @@ const CustomerStack: React.FC = () => {
 				}}
 			/>
 			<Tab.Screen
-				name="Cart"
+				name="CartTab"
 				component={CartScreen}
 				options={{
 					title: 'Cart',
@@ -52,7 +56,7 @@ const CustomerStack: React.FC = () => {
 				}}
 			/>
 			<Tab.Screen
-				name="Orders"
+				name="OrdersTab"
 				component={OrdersScreen}
 				options={{
 					title: 'My Orders',
@@ -67,7 +71,7 @@ const CustomerStack: React.FC = () => {
 				}}
 			/>
 			<Tab.Screen
-				name="Notifications"
+				name="NotificationsTab"
 				component={NotificationsScreen}
 				options={{
 					title: 'Notifications',
@@ -82,7 +86,7 @@ const CustomerStack: React.FC = () => {
 				}}
 			/>
 			<Tab.Screen
-				name="Profile"
+				name="ProfileTab"
 				component={ProfileScreen}
 				options={{
 					title: 'Profile',
@@ -97,6 +101,33 @@ const CustomerStack: React.FC = () => {
 				}}
 			/>
 		</Tab.Navigator>
+	)
+}
+
+const CustomerStack: React.FC = () => {
+	return (
+		<Stack.Navigator
+			screenOptions={{
+				headerShown: true,
+			}}>
+			<Stack.Screen
+				name="Menu"
+				component={TabNavigator}
+				options={{ headerShown: true }}
+			/>
+			<Stack.Screen
+				name="MenuItemView"
+				component={MenuItemViewScreen}
+				options={{ title: 'Menu Item' }}
+			/>
+			<Stack.Screen
+				name="FullMenuList"
+				component={FullMenuListScreen}
+				options={({ route }) => ({
+					title: route.params?.concessionName || 'Menu Items',
+				})}
+			/>
+		</Stack.Navigator>
 	)
 }
 
