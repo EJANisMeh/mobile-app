@@ -1,3 +1,3 @@
 export { UseAlertModalProps, UseAlertModalType } from '../useAlertModal'
-export { UseConfirmationModalProps } from '../useConfirmationModal'
-export { UseConfirmationModalType } from '../useConfirmationModal'
+export { UseConfirmationModalProps, UseConfirmationModalType } from '../useConfirmationModal'
+export { UseMenuModalProps, UseMenuModalType } from '../useMenuModal'

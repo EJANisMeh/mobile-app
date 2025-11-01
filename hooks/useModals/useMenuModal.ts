@@ -1,7 +1,30 @@
 import { useState, useCallback } from 'react'
-import { UseMenuModalProps } from '../../types/hookTypes/useModals'
 
-export const useMenuModal = () =>
+interface MenuOption {
+	text?: string
+	label?: string
+	value?: any
+	onPress?: () => void
+	style?: 'default' | 'destructive'
+}
+
+export interface UseMenuModalProps {
+	title: string
+	message?: string
+	options: MenuOption[]
+	onSelect?: (value: any) => void
+	footer?: React.ReactNode
+}
+
+export interface UseMenuModalType
+{
+	visible: boolean
+	props: UseMenuModalProps
+	showMenu: (menuProps: UseMenuModalProps) => void
+	hideMenu: () => void
+}
+
+export const useMenuModal = (): UseMenuModalType =>
 {
 	const [visible, setVisible] = useState(false)
 	const [props, setProps] = useState<UseMenuModalProps>({
