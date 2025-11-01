@@ -34,6 +34,10 @@ import {
 	ConfirmationModal,
 	MenuModal,
 } from '../../../components/modals'
+import {
+	NameInput,
+	DescriptionInput,
+} from '../../../components/concessionaire/menu/addItem'
 import { apiCall } from '../../../services/api/api'
 import {
 	AddMenuItemFormData,
@@ -584,44 +588,20 @@ const AddMenuItemScreen: React.FC = () => {
 	}
 
 	return (
-		<DynamicKeyboardView
-			style={styles.categoryManagementContainer}
-			useSafeArea={true}>
+		<DynamicKeyboardView style={styles.categoryManagementContainer}>
 			<DynamicScrollView showsVerticalScrollIndicator={false}>
 				{/* Item Name */}
-				<Text style={styles.sectionTitle}>Item Name *</Text>
-				<View style={styles.categoryInputContainer}>
-					<TextInput
-						style={styles.categoryInput}
-						value={formData.name}
-						onChangeText={(text) =>
-							setFormData((prev) => ({ ...prev, name: text }))
-						}
-						placeholder="e.g., Burger, Pizza, Coffee"
-						placeholderTextColor={colors.textSecondary}
-					/>
-				</View>
-				{errors['name'] && (
-					<Text style={{ color: '#ef4444', marginTop: 4 }}>
-						{errors['name']}
-					</Text>
-				)}
+				<NameInput
+					formData={formData}
+					setFormData={setFormData}
+					errors={errors}
+				/>
 
 				{/* Description */}
-				<Text style={styles.sectionTitle}>Description</Text>
-				<View style={[styles.categoryInputContainer, { minHeight: 80 }]}>
-					<TextInput
-						style={[styles.categoryInput, { textAlignVertical: 'top' }]}
-						value={formData.description}
-						onChangeText={(text) =>
-							setFormData((prev) => ({ ...prev, description: text }))
-						}
-						placeholder="Describe your item..."
-						placeholderTextColor={colors.textSecondary}
-						multiline
-						numberOfLines={3}
-					/>
-				</View>
+				<DescriptionInput
+					formData={formData}
+					setFormData={setFormData}
+				/>
 
 				{/* Base Price */}
 				<Text style={styles.sectionTitle}>Base Price</Text>
