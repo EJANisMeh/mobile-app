@@ -226,8 +226,7 @@ const CategoryManagementScreen: React.FC = () => {
 
 	return (
 		<DynamicKeyboardView
-			style={styles.categoryManagementContainer}
-			useSafeArea={true}>
+			style={styles.categoryManagementContainer}>
 			<DynamicScrollView showsVerticalScrollIndicator={false}>
 				{editedCategories.map((category, index) => (
 					<View
