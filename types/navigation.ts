@@ -25,6 +25,8 @@ export type CustomerStackParamList = {
 	Orders: undefined
 	Notifications: undefined
 	Profile: undefined
+	MenuItemView: { menuItemId: number }
+	FullMenuList: { concessionId: number; concessionName: string }
 }
 
 export type ConcessionaireStackParamList = {
