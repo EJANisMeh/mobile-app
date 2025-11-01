@@ -43,27 +43,18 @@ import {
 import { apiCall } from '../../../services/api/api'
 import {
 	AddMenuItemFormData,
-	ConcessionaireStackParamList,
 	VariationGroupInput,
 	VariationOptionInput,
 	AddonInput,
 	SelectionType,
 } from '../../../types'
-
-type AddMenuItemScreenNavigationProp = StackNavigationProp<
-	ConcessionaireStackParamList,
-	'AddMenuItem'
->
-type AddMenuItemScreenRouteProp = RouteProp<
-	ConcessionaireStackParamList,
-	'AddMenuItem'
->
+import { useConcessionaireNavigation } from '../../../hooks/useNavigation'
 
 const AddMenuItemScreen: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createConcessionaireMenuStyles(colors, responsive)
-	const navigation = useNavigation<AddMenuItemScreenNavigationProp>()
+	const navigation = useConcessionaireNavigation()
 	const { concession } = useConcessionContext()
 
 	const {
@@ -74,7 +65,12 @@ const AddMenuItemScreen: React.FC = () => {
 		hideAlert,
 		handleClose: handleCloseAlertModal,
 	} = useAlertModal()
-	const confirmationModal = useConfirmationModal()
+	const {
+		visible: confirmationModalVisible,
+		props: confirmationModalProps,
+		showConfirmation,
+		hideConfirmation,
+	} = useConfirmationModal()
 	const {
 		visible: menuModalVisible,
 		props: menuModalProps,
@@ -167,7 +163,7 @@ const AddMenuItemScreen: React.FC = () => {
 
 	const handleCancel = () => {
 		if (hasChanges) {
-			confirmationModal.showConfirmation({
+			showConfirmation({
 				title: 'Discard Changes',
 				message: 'You have unsaved changes. Discard them?',
 				confirmText: 'Discard',
@@ -261,7 +257,7 @@ const AddMenuItemScreen: React.FC = () => {
 			return
 		}
 
-		confirmationModal.showConfirmation({
+		showConfirmation({
 			title: 'Add Item',
 			message: 'Add this item to your menu?',
 			confirmText: 'Add',
@@ -347,7 +343,7 @@ const AddMenuItemScreen: React.FC = () => {
 	}
 
 	const handleRemoveVariationGroup = (index: number) => {
-		confirmationModal.showConfirmation({
+		showConfirmation({
 			title: 'Remove Variation Group',
 			message: 'Remove this variation group?',
 			confirmText: 'Remove',
@@ -1222,11 +1218,11 @@ const AddMenuItemScreen: React.FC = () => {
 			/>
 
 			<ConfirmationModal
-				visible={confirmationModal.visible}
-				onClose={confirmationModal.hideConfirmation}
-				title={confirmationModal.props.title}
-				message={confirmationModal.props.message}
-				onConfirm={confirmationModal.props.onConfirm}
+				visible={confirmationModalVisible}
+				onClose={hideConfirmation}
+				title={confirmationModalProps.title}
+				message={confirmationModalProps.message}
+				onConfirm={confirmationModalProps.onConfirm}
 			/>
 
 			<MenuModal
