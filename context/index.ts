@@ -1,9 +1,8 @@
 // Context providers index
-export
-{
-  AppProvider,
-  useAuthContext,
-  useConcessionContext,
-  useThemeContext,
-  useMenuContext
+export {
+	AppProvider,
+	useAuthContext,
+	useConcessionContext,
+	useThemeContext,
+	useMenuContext,
 } from './AppProvider'

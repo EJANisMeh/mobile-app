@@ -8,8 +8,7 @@ import {
 	UseAlertModalType,
 	UseConfirmationModalType,
 } from '../../../../hooks/useModals/types'
-import
-	{
+import {
 	AddMenuItemFormData,
 	VariationGroupInput,
 	SelectionType,
@@ -72,8 +71,6 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 			variationGroups: [...prev.variationGroups, newGroup],
 		}))
 	}
-
-	
 
 	const handleUpdateVariationGroup = (
 		index: number,

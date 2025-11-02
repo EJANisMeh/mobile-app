@@ -4,8 +4,7 @@ import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createConcessionaireAddMenuItemStyles } from '../../../../styles/concessionaire/addMenuItem'
 
-interface FormActionsProps
-{
+interface FormActionsProps {
 	hasErrors: boolean
 	handleSave: () => void
 	handleCancel: () => void

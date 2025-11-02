@@ -4,32 +4,36 @@ import { Ionicons } from '@expo/vector-icons'
 import { useThemeContext, useMenuContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
 import { createConcessionaireAddMenuItemStyles } from '../../../../../styles/concessionaire/addMenuItem'
-import { AddMenuItemFormData, VariationGroupInput } from '../../../../../types/menuItemTypes'
-import { UseAlertModalType, UseMenuModalType } from '../../../../../hooks/useModals/types'
+import {
+	AddMenuItemFormData,
+	VariationGroupInput,
+} from '../../../../../types/menuItemTypes'
+import {
+	UseAlertModalType,
+	UseMenuModalType,
+} from '../../../../../hooks/useModals/types'
 
-interface VariationExistingItemsProps
-{
-  setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
-  groupIndex: number
-  group: VariationGroupInput
-  errors: Record<string, string>
-  showAlert: UseAlertModalType['showAlert']
-  showMenuModal: UseMenuModalType['showMenu']
+interface VariationExistingItemsProps {
+	setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
+	groupIndex: number
+	group: VariationGroupInput
+	errors: Record<string, string>
+	showAlert: UseAlertModalType['showAlert']
+	showMenuModal: UseMenuModalType['showMenu']
 }
 
 const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
-  setFormData,
-  groupIndex,
-  group,
-  errors,
-  showAlert,
-  showMenuModal,
-}) =>
-{
-  const { colors } = useThemeContext()
-  const responsive = useResponsiveDimensions()
-  const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
-  const { menuItems } = useMenuContext()
+	setFormData,
+	groupIndex,
+	group,
+	errors,
+	showAlert,
+	showMenuModal,
+}) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
+	const { menuItems } = useMenuContext()
 
 	return (
 		<>

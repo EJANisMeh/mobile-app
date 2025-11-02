@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import { View, Text, ActivityIndicator, BackHandler } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native'
 import {
-	View,
-	Text,
-	ActivityIndicator,
-	BackHandler,
-} from 'react-native'
-import {
-	useFocusEffect,
-} from '@react-navigation/native'
-import { useThemeContext, useConcessionContext, useMenuContext } from '../../../context'
+	useThemeContext,
+	useConcessionContext,
+	useMenuContext,
+} from '../../../context'
 import { useResponsiveDimensions, useHideNavBar } from '../../../hooks'
 import { useCategoryBackend } from '../../../hooks/useBackend/useCategoryBackend'
 import {
@@ -335,13 +332,10 @@ const AddMenuItemScreen: React.FC = () => {
 					showAlert={showAlert}
 					showMenuModal={showMenuModal}
 				/>
-
 			</DynamicScrollView>
 
 			{/* Bottom Actions */}
-			<View style={styles.bottomActions}>
-				
-			</View>
+			<View style={styles.bottomActions}></View>
 
 			<AlertModal
 				visible={alertModalVisible}
