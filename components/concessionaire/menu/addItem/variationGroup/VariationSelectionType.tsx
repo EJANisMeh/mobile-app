@@ -51,7 +51,7 @@ const VariationSelectionType: React.FC<VariationSelectionTypeProps> = ({
 				</TouchableOpacity>
 			</View>
 			<TouchableOpacity
-				style={[styles.categoryInputContainer, { marginBottom: 8 }]}
+				style={[styles.categoryInputContainer, styles.selectionTypeContainer]}
 				onPress={() => {
 					const typeOptions = selectionTypes.map((type) => ({
 						label: type.code,

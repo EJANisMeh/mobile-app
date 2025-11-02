@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react'
-import { apiCall } from '../../../../services/api/api'
+import { menuApi } from '../../../../services/api'
 import { AddMenuItemFormData } from '../../../../types'
 
 export const addMenuItem =
@@ -13,42 +13,8 @@ export const addMenuItem =
 		setError(null)
 
 		try {
-			const response = await apiCall('/menu/add', {
-				method: 'POST',
-				body: JSON.stringify({
-					concessionId,
-					name: formData.name.trim(),
-					description: formData.description.trim() || null,
-					basePrice: formData.basePrice || '0',
-					images: formData.images,
-					displayImageIndex: formData.displayImageIndex,
-					categoryId: formData.categoryId,
-					availability: formData.availability,
-					variationGroups: formData.variationGroups.map((group) => ({
-						name: group.name.trim(),
-						selectionTypeId: group.selectionTypeId,
-						multiLimit: group.multiLimit,
-						mode: group.mode,
-						categoryFilterId: group.categoryFilterId,
-						options: group.options.map((opt) => ({
-							name: opt.name.trim(),
-							priceAdjustment: opt.priceAdjustment,
-							isDefault: opt.isDefault,
-							availability: opt.availability,
-							position: opt.position,
-						})),
-						existingMenuItemIds: (group as any).existingMenuItemIds || [],
-						position: group.position,
-					})),
-					addons: formData.addons.map((addon) => ({
-						menuItemId: addon.menuItemId,
-						label: addon.label?.trim() || null,
-						priceOverride: addon.priceOverride,
-						required: addon.required,
-						position: addon.position,
-					})),
-				}),
-			})
+			// Call menuApi.addMenuItem instead of direct apiCall
+			const response = await menuApi.addMenuItem(concessionId, formData)
 
 			if (response.success && response.menuItem) {
 				// Add the new item to the menu items list

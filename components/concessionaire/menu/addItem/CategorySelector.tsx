@@ -45,15 +45,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 			},
 			footer: (
 				<TouchableOpacity
-					style={{
-						flexDirection: 'row',
-						alignItems: 'center',
-						justifyContent: 'center',
-						paddingVertical: 12,
-						borderTopWidth: 1,
-						borderTopColor: colors.border,
-						gap: 8,
-					}}
+					style={styles.categoryFooter}
 					onPress={() => {
 						hideMenu()
 						navigation.navigate('CategoryManagement')
@@ -63,12 +55,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 						size={20}
 						color={colors.primary}
 					/>
-					<Text
-						style={{
-							fontSize: 16,
-							fontWeight: '600',
-							color: colors.primary,
-						}}>
+					<Text style={styles.categoryFooterText}>
 						Add New Category
 					</Text>
 				</TouchableOpacity>
@@ -85,7 +72,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 				<Text
 					style={[
 						styles.categoryInput,
-						!formData.categoryId && { color: colors.textSecondary },
+						!formData.categoryId && styles.categoryPlaceholder,
 					]}>
 					{formData.categoryId
 						? categories.find((c) => c.id === formData.categoryId)?.name
@@ -98,7 +85,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 				/>
 			</TouchableOpacity>
 			{errors['category'] && (
-				<Text style={{ color: '#ef4444', marginTop: 4 }}>
+				<Text style={styles.nameInputError}>
 					{errors['category']}
 				</Text>
 			)}

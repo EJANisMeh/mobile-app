@@ -6,7 +6,7 @@ import authRoutes from './routes/authRouter'
 import concessionRoutes from './routes/concessionRouter'
 import customerRoutes from './routes/customerRouter'
 import categoryRoutes from './routes/categoryRouter'
-import menuRoutes from './backend/menu/index'
+import menuRoutes from './routes/menuRouter'
 import orderRoutes from './backend/order/index'
 import profileRoutes from './backend/profile/index'
 

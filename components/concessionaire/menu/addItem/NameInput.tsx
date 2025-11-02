@@ -35,7 +35,7 @@ const NameInput: React.FC<NameInputProps> = ({
 				/>
 			</View>
 			{errors['name'] && (
-				<Text style={{ color: '#ef4444', marginTop: 4 }}>{errors['name']}</Text>
+				<Text style={styles.nameInputError}>{errors['name']}</Text>
 			)}
 		</>
 	)

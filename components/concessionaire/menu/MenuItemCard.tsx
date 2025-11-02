@@ -11,7 +11,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
-import { createConcessionaireMenuStyles } from '../../../styles/concessionaire'
+import { createConcessionaireAddMenuItemStyles } from '../../../styles/concessionaire/addMenuItem'
 import {
 	UseAlertModalType,
 	UseConfirmationModalType,
@@ -60,7 +60,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
-	const styles = createConcessionaireMenuStyles(colors, responsive)
+	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
 	const navigation = useConcessionaireNavigation()
 
 	// Handle back button press to close menu
@@ -118,11 +118,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 	return (
 		<View style={styles.menuItemCard}>
 			{/* Main Row: Image, Info, Actions */}
-			<View
-				style={{
-					flexDirection: 'row',
-					gap: responsive.getResponsiveMargin().medium,
-				}}>
+			<View style={styles.menuItemRow}>
 				{/* Image */}
 				<View style={styles.menuItemImageContainer}>
 					{images && images.length > 0 ? (

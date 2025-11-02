@@ -82,74 +82,41 @@ const ImagePickerSection: React.FC<ImagePickerSectionProps> = ({
 		<>
 			<Text style={styles.sectionTitle}>Images (Max 3)</Text>
 			{formData.images.length > 0 && (
-				<Text
-					style={{
-						fontSize: 12,
-						color: colors.textSecondary,
-						marginBottom: 8,
-					}}>
+				<Text style={styles.imagePickerHint}>
 					Tap an image to set as display image
 				</Text>
 			)}
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={true}
-				style={{ marginBottom: 16 }}>
-				<View style={{ flexDirection: 'row', gap: 12 }}>
+				style={styles.imageScrollView}>
+				<View style={styles.imageContainer}>
 					{formData.images.map((uri, index) => (
 						<TouchableOpacity
 							key={index}
 							onPress={() =>
 								setFormData((prev) => ({ ...prev, displayImageIndex: index }))
 							}
-							style={{
-								width: 100,
-								height: 100,
-								borderRadius: 8,
-								overflow: 'hidden',
-								position: 'relative',
-								borderWidth: formData.displayImageIndex === index ? 3 : 0,
-								borderColor: colors.primary,
-							}}>
+							style={[
+								styles.imageWrapper,
+								formData.displayImageIndex === index && {
+									borderWidth: 3,
+									borderColor: colors.primary,
+								},
+							]}>
 							<Image
 								source={{ uri }}
-								style={{ width: '100%', height: '100%' }}
+								style={styles.image}
 							/>
 							{formData.displayImageIndex === index && (
-								<View
-									style={{
-										position: 'absolute',
-										bottom: 4,
-										left: 4,
-										right: 4,
-										backgroundColor: colors.primary,
-										borderRadius: 4,
-										paddingVertical: 2,
-										paddingHorizontal: 4,
-										alignItems: 'center',
-									}}>
-									<Text
-										style={{
-											fontSize: 10,
-											fontWeight: '600',
-											color: '#fff',
-										}}>
+								<View style={styles.displayImageBadge}>
+									<Text style={styles.displayImageBadgeText}>
 										DISPLAY
 									</Text>
 								</View>
 							)}
 							<TouchableOpacity
-								style={{
-									position: 'absolute',
-									top: 4,
-									right: 4,
-									backgroundColor: 'rgba(0,0,0,0.6)',
-									borderRadius: 12,
-									width: 24,
-									height: 24,
-									justifyContent: 'center',
-									alignItems: 'center',
-								}}
+								style={styles.imageRemoveButton}
 								onPress={() => handleRemoveImage(index)}>
 								<Ionicons
 									name="close"
@@ -161,29 +128,14 @@ const ImagePickerSection: React.FC<ImagePickerSectionProps> = ({
 					))}
 					{formData.images.length < 3 && (
 						<TouchableOpacity
-							style={{
-								width: 100,
-								height: 100,
-								borderRadius: 8,
-								borderWidth: 2,
-								borderStyle: 'dashed',
-								borderColor: colors.border,
-								backgroundColor: colors.surface,
-								justifyContent: 'center',
-								alignItems: 'center',
-							}}
+							style={styles.addImageButton}
 							onPress={handlePickImage}>
 							<Ionicons
 								name="add"
 								size={32}
 								color={colors.textSecondary}
 							/>
-							<Text
-								style={{
-									fontSize: 12,
-									color: colors.textSecondary,
-									marginTop: 4,
-								}}>
+							<Text style={styles.addImageButtonText}>
 								Add Image
 							</Text>
 						</TouchableOpacity>

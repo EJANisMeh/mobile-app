@@ -46,7 +46,7 @@ const VariationGroupName: React.FC<VariationGroupNameProps> = ({
 				/>
 			</View>
 			{errors[`variation-${groupIndex}-name`] && (
-				<Text style={{ color: '#ef4444', marginBottom: 8 }}>
+				<Text style={styles.errorText}>
 					{errors[`variation-${groupIndex}-name`]}
 				</Text>
 			)}

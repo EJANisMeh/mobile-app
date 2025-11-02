@@ -4,8 +4,58 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { apiCall } from './api'
+import { AddMenuItemFormData } from '../../types'
 
 export const menuApi = {
+	/**
+	 * Add new menu item
+	 * Backend handles: validation, creating menu item with variations and addons
+	 */
+	addMenuItem: async (
+		concessionId: number,
+		formData: AddMenuItemFormData
+	): Promise<any> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall('/menu/add', {
+			method: 'POST',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+			body: JSON.stringify({
+				concessionId,
+				name: formData.name.trim(),
+				description: formData.description.trim() || null,
+				basePrice: formData.basePrice || '0',
+				images: formData.images,
+				displayImageIndex: formData.displayImageIndex,
+				categoryId: formData.categoryId,
+				availability: formData.availability,
+				variationGroups: formData.variationGroups.map((group) => ({
+					name: group.name.trim(),
+					selectionTypeId: group.selectionTypeId,
+					multiLimit: group.multiLimit,
+					mode: group.mode,
+					categoryFilterId: group.categoryFilterId,
+					options: group.options.map((opt) => ({
+						name: opt.name.trim(),
+						priceAdjustment: opt.priceAdjustment,
+						isDefault: opt.isDefault,
+						availability: opt.availability,
+						position: opt.position,
+					})),
+					existingMenuItemIds: (group as any).existingMenuItemIds || [],
+					position: group.position,
+				})),
+				addons: formData.addons.map((addon) => ({
+					menuItemId: addon.menuItemId,
+					label: addon.label?.trim() || null,
+					priceOverride: addon.priceOverride,
+					required: addon.required,
+					position: addon.position,
+				})),
+			}),
+		})
+	},
+
 	/**
 	 * Get menu items for a concession
 	 * Backend handles: menu item lookup, filtering, pagination

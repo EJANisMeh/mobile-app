@@ -37,7 +37,7 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 
 	return (
 		<>
-			<Text style={{ fontSize: 12, color: colors.text, marginBottom: 4 }}>
+			<Text style={styles.existingItemsLabel}>
 				Options (Existing Items):
 			</Text>
 			{(group as any).existingMenuItemIds?.map(
@@ -46,14 +46,8 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 					return (
 						<View
 							key={idx}
-							style={{
-								flexDirection: 'row',
-								alignItems: 'center',
-								justifyContent: 'space-between',
-								marginBottom: 8,
-								gap: 8,
-							}}>
-							<Text style={{ color: colors.text }}>
+							style={styles.existingItemRow}>
+							<Text style={styles.existingItemText}>
 								{mi?.name || 'Unknown'}
 							</Text>
 							<TouchableOpacity
@@ -130,7 +124,7 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 				</Text>
 			</TouchableOpacity>
 			{errors[`variation-${groupIndex}-existing`] && (
-				<Text style={{ color: '#ef4444', marginTop: 4 }}>
+				<Text style={styles.errorText}>
 					{errors[`variation-${groupIndex}-existing`]}
 				</Text>
 			)}

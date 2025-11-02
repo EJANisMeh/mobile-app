@@ -92,7 +92,7 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 
 	return (
 		<>
-			<Text style={[styles.sectionTitle, { marginTop: 16 }]}>
+			<Text style={[styles.sectionTitle, styles.addonSectionTitle]}>
 				Add-ons (Optional)
 			</Text>
 			{formData.addons.map((addon, index) => {
@@ -118,7 +118,7 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 
 						{/* Custom Label */}
 						<TextInput
-							style={[styles.categoryInput, { marginBottom: 8 }]}
+							style={[styles.categoryInput, styles.addonLabelInput]}
 							value={addon.label || ''}
 							onChangeText={(text) =>
 								handleUpdateAddon(index, 'label', text || null)
@@ -131,7 +131,7 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 						<View style={styles.addonPriceRow}>
 							<Text style={styles.addonPriceLabel}>Price Override: ₱</Text>
 							<TextInput
-								style={[styles.categoryInput, { flex: 1 }]}
+								style={[styles.categoryInput, styles.addonPriceInput]}
 								value={addon.priceOverride || ''}
 								onChangeText={(text) =>
 									handleUpdateAddon(index, 'priceOverride', text || null)

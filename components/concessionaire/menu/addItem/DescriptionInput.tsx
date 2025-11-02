@@ -21,9 +21,9 @@ const DescriptionInput: React.FC<DescriptionInputProps> = ({
 	return (
 		<>
 			<Text style={styles.sectionTitle}>Description</Text>
-			<View style={[styles.categoryInputContainer, { minHeight: 80 }]}>
+			<View style={[styles.categoryInputContainer, styles.descriptionInputContainer]}>
 				<TextInput
-					style={[styles.categoryInput, { textAlignVertical: 'top' }]}
+					style={[styles.categoryInput, styles.descriptionInput]}
 					value={formData.description}
 					onChangeText={(text) =>
 						setFormData((prev) => ({ ...prev, description: text }))
