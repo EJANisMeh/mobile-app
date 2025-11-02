@@ -1,19 +1,19 @@
 import React from 'react'
-import { Text, TouchableOpacity } from 'react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createConcessionaireEditMenuItemStyles } from '../../../../styles/concessionaire/editMenuItem'
 import { AddMenuItemFormData, Category } from '../../../../types'
-import { UseMenuModalType } from '../../../../hooks/useModals/useMenuModal'
+import { UseCheckboxMenuModalType } from '../../../../hooks/useModals/useCheckboxMenuModal'
 
 interface CategorySelectorProps {
 	formData: AddMenuItemFormData
 	setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
 	categories: Category[]
 	errors: Record<string, string>
-	showMenu: UseMenuModalType['showMenu']
-	hideMenu: UseMenuModalType['hideMenu']
+	showCheckboxMenu: UseCheckboxMenuModalType['showMenu']
+	hideCheckboxMenu: UseCheckboxMenuModalType['hideMenu']
 	onNavigateToCategoryManagement: () => void
 }
 
@@ -22,8 +22,8 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 	setFormData,
 	categories,
 	errors,
-	showMenu,
-	hideMenu,
+	showCheckboxMenu,
+	hideCheckboxMenu,
 	onNavigateToCategoryManagement,
 }) => {
 	const { colors } = useThemeContext()
@@ -36,11 +36,12 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 			value: cat.id,
 		}))
 
-		showMenu({
-			title: 'Select Category',
+		showCheckboxMenu({
+			title: 'Select Categories',
 			options: categoryOptions,
-			onSelect: (value: number) => {
-				setFormData((prev) => ({ ...prev, categoryId: value }))
+			selectedValues: formData.categoryIds,
+			onSave: (selectedCategoryIds: number[]) => {
+				setFormData((prev) => ({ ...prev, categoryIds: selectedCategoryIds }))
 			},
 			footer: (
 				<TouchableOpacity
@@ -54,7 +55,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 						gap: 8,
 					}}
 					onPress={() => {
-						hideMenu()
+						hideCheckboxMenu()
 						onNavigateToCategoryManagement()
 					}}>
 					<Ionicons
@@ -75,20 +76,30 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 		})
 	}
 
+	const getSelectedCategoriesText = () => {
+		if (formData.categoryIds.length === 0) {
+			return 'Select categories'
+		}
+		const selectedNames = formData.categoryIds
+			.map((id) => categories.find((c) => c.id === id)?.name)
+			.filter(Boolean)
+		return selectedNames.join(', ')
+	}
+
 	return (
 		<>
-			<Text style={styles.sectionTitle}>Category *</Text>
+			<Text style={styles.sectionTitle}>Categories *</Text>
 			<TouchableOpacity
 				style={styles.categoryInputContainer}
 				onPress={handleCategorySelect}>
 				<Text
 					style={[
 						styles.categoryInput,
-						!formData.categoryId && { color: colors.textSecondary },
+						formData.categoryIds.length === 0 && {
+							color: colors.textSecondary,
+						},
 					]}>
-					{formData.categoryId
-						? categories.find((c) => c.id === formData.categoryId)?.name
-						: 'Select category'}
+					{getSelectedCategoriesText()}
 				</Text>
 				<Ionicons
 					name="chevron-down"

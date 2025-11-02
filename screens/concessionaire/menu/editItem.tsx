@@ -7,13 +7,18 @@ import {
 	useFocusEffect,
 } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { useThemeContext, useConcessionContext, useMenuContext } from '../../../context'
+import {
+	useThemeContext,
+	useConcessionContext,
+	useMenuContext,
+} from '../../../context'
 import { useResponsiveDimensions, useHideNavBar } from '../../../hooks'
 import { useCategoryBackend } from '../../../hooks/useBackend/useCategoryBackend'
 import {
 	useAlertModal,
 	useConfirmationModal,
 	useMenuModal,
+	useCheckboxMenuModal,
 } from '../../../hooks/useModals'
 import { createConcessionaireEditMenuItemStyles } from '../../../styles/concessionaire'
 import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
@@ -22,6 +27,7 @@ import {
 	AlertModal,
 	ConfirmationModal,
 	MenuModal,
+	CheckboxMenuModal,
 } from '../../../components/modals'
 import { apiCall } from '../../../services/api/api'
 import {
@@ -60,6 +66,7 @@ const EditMenuItemScreen: React.FC = () => {
 	const alertModal = useAlertModal()
 	const confirmationModal = useConfirmationModal()
 	const menuModal = useMenuModal()
+	const checkboxMenuModal = useCheckboxMenuModal()
 	const {
 		categories,
 		loading: categoriesLoading,
@@ -78,7 +85,7 @@ const EditMenuItemScreen: React.FC = () => {
 		basePrice: '',
 		images: [],
 		displayImageIndex: 0,
-		categoryId: null,
+		categoryIds: [],
 		availability: true,
 		variationGroups: [],
 		addons: [],
@@ -123,7 +130,7 @@ const EditMenuItemScreen: React.FC = () => {
 					basePrice: item.basePrice ? item.basePrice.toString() : '',
 					images: item.images || [],
 					displayImageIndex: item.display_image_index ?? 0,
-					categoryId: item.categoryId ?? null,
+					categoryIds: item.categoryId ? [item.categoryId] : [],
 					availability: item.availability ?? true,
 					variationGroups:
 						item.menu_item_variation_groups?.map((group: any) => ({
@@ -249,8 +256,8 @@ const EditMenuItemScreen: React.FC = () => {
 			newErrors['name'] = 'Item name is required'
 		}
 		// category
-		if (!formData.categoryId) {
-			newErrors['category'] = 'Category is required'
+		if (formData.categoryIds.length === 0) {
+			newErrors['category'] = 'At least one category is required'
 		}
 		// basePrice if provided must be a valid number >= 0
 		if (formData.basePrice.trim()) {
@@ -345,7 +352,7 @@ const EditMenuItemScreen: React.FC = () => {
 							basePrice: formData.basePrice || '0',
 							images: formData.images,
 							displayImageIndex: formData.displayImageIndex,
-							categoryId: formData.categoryId,
+							categoryIds: formData.categoryIds,
 							availability: formData.availability,
 							variationGroups: formData.variationGroups.map((group) => ({
 								name: group.name.trim(),
@@ -451,8 +458,8 @@ const EditMenuItemScreen: React.FC = () => {
 					setFormData={setFormData}
 					categories={categories}
 					errors={errors}
-					showMenu={menuModal.showMenu}
-					hideMenu={menuModal.hideMenu}
+					showCheckboxMenu={checkboxMenuModal.showMenu}
+					hideCheckboxMenu={checkboxMenuModal.hideMenu}
 					onNavigateToCategoryManagement={() =>
 						navigation.navigate('CategoryManagement')
 					}
@@ -513,6 +520,16 @@ const EditMenuItemScreen: React.FC = () => {
 				options={menuModal.props.options}
 				onSelect={menuModal.props.onSelect}
 				footer={menuModal.props.footer}
+			/>
+			<CheckboxMenuModal
+				visible={checkboxMenuModal.visible}
+				onClose={checkboxMenuModal.hideMenu}
+				title={checkboxMenuModal.props.title}
+				message={checkboxMenuModal.props.message}
+				options={checkboxMenuModal.props.options}
+				selectedValues={checkboxMenuModal.props.selectedValues}
+				onSave={checkboxMenuModal.props.onSave}
+				footer={checkboxMenuModal.props.footer}
 			/>
 		</DynamicKeyboardView>
 	)

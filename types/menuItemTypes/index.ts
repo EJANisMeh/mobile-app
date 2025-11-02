@@ -8,7 +8,7 @@ export interface AddMenuItemFormData {
 	basePrice: string
 	images: string[] // Max 3 images
 	displayImageIndex: number // Index of image to display in menu list (0-2)
-	categoryId: number | null
+	categoryIds: number[] // Multiple categories support
 	availability: boolean
 	variationGroups: VariationGroupInput[]
 	addons: AddonInput[]

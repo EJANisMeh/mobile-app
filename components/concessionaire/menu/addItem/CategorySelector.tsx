@@ -6,7 +6,7 @@ import { useResponsiveDimensions } from '../../../../hooks'
 import { createConcessionaireAddMenuItemStyles } from '../../../../styles/concessionaire/addMenuItem'
 import { AddMenuItemFormData } from '../../../../types'
 import { useConcessionaireNavigation } from '../../../../hooks/useNavigation'
-import { UseMenuModalType } from '../../../../hooks/useModals/useMenuModal'
+import { UseCheckboxMenuModalType } from '../../../../hooks/useModals/useCheckboxMenuModal'
 import { Category } from '../../../../types/categoryTypes'
 
 interface CategorySelectorProps {
@@ -14,8 +14,8 @@ interface CategorySelectorProps {
 	setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
 	categories: Category[]
 	errors: Record<string, string>
-	showMenu: UseMenuModalType['showMenu']
-	hideMenu: UseMenuModalType['hideMenu']
+	showCheckboxMenu: UseCheckboxMenuModalType['showMenu']
+	hideCheckboxMenu: UseCheckboxMenuModalType['hideMenu']
 }
 
 const CategorySelector: React.FC<CategorySelectorProps> = ({
@@ -23,8 +23,8 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 	setFormData,
 	categories,
 	errors,
-	showMenu,
-	hideMenu,
+	showCheckboxMenu,
+	hideCheckboxMenu,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
@@ -37,17 +37,18 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 			value: cat.id,
 		}))
 
-		showMenu({
-			title: 'Select Category',
+		showCheckboxMenu({
+			title: 'Select Categories',
 			options: categoryOptions,
-			onSelect: (value: number) => {
-				setFormData((prev) => ({ ...prev, categoryId: value }))
+			selectedValues: formData.categoryIds,
+			onSave: (selectedCategoryIds: number[]) => {
+				setFormData((prev) => ({ ...prev, categoryIds: selectedCategoryIds }))
 			},
 			footer: (
 				<TouchableOpacity
 					style={styles.categoryFooter}
 					onPress={() => {
-						hideMenu()
+						hideCheckboxMenu()
 						navigation.navigate('CategoryManagement')
 					}}>
 					<Ionicons
@@ -61,20 +62,28 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 		})
 	}
 
+	const getSelectedCategoriesText = () => {
+		if (formData.categoryIds.length === 0) {
+			return 'Select categories'
+		}
+		const selectedNames = formData.categoryIds
+			.map((id) => categories.find((c) => c.id === id)?.name)
+			.filter(Boolean)
+		return selectedNames.join(', ')
+	}
+
 	return (
 		<>
-			<Text style={styles.sectionTitle}>Category *</Text>
+			<Text style={styles.sectionTitle}>Categories *</Text>
 			<TouchableOpacity
 				style={styles.categoryInputContainer}
 				onPress={handleCategorySelect}>
 				<Text
 					style={[
 						styles.categoryInput,
-						!formData.categoryId && styles.categoryPlaceholder,
+						formData.categoryIds.length === 0 && styles.categoryPlaceholder,
 					]}>
-					{formData.categoryId
-						? categories.find((c) => c.id === formData.categoryId)?.name
-						: 'Select category'}
+					{getSelectedCategoriesText()}
 				</Text>
 				<Ionicons
 					name="chevron-down"

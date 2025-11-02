@@ -27,7 +27,7 @@ export const menuApi = {
 				basePrice: formData.basePrice || '0',
 				images: formData.images,
 				displayImageIndex: formData.displayImageIndex,
-				categoryId: formData.categoryId,
+				categoryIds: formData.categoryIds,
 				availability: formData.availability,
 				variationGroups: formData.variationGroups.map((group) => ({
 					name: group.name.trim(),

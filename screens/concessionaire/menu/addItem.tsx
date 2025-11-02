@@ -12,6 +12,7 @@ import {
 	useAlertModal,
 	useConfirmationModal,
 	useMenuModal,
+	useCheckboxMenuModal,
 } from '../../../hooks/useModals'
 import { createConcessionaireAddMenuItemStyles } from '../../../styles/concessionaire'
 import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
@@ -19,6 +20,7 @@ import {
 	AlertModal,
 	ConfirmationModal,
 	MenuModal,
+	CheckboxMenuModal,
 } from '../../../components/modals'
 import {
 	NameInput,
@@ -61,6 +63,12 @@ const AddMenuItemScreen: React.FC = () => {
 		showMenu: showMenuModal,
 	} = useMenuModal()
 	const {
+		visible: checkboxMenuModalVisible,
+		props: checkboxMenuModalProps,
+		hideMenu: hideCheckboxMenuModal,
+		showMenu: showCheckboxMenuModal,
+	} = useCheckboxMenuModal()
+	const {
 		categories,
 		loading: categoriesLoading,
 		getCategories,
@@ -75,7 +83,7 @@ const AddMenuItemScreen: React.FC = () => {
 		basePrice: '',
 		images: [],
 		displayImageIndex: 0,
-		categoryId: null,
+		categoryIds: [],
 		availability: true,
 		variationGroups: [],
 		addons: [],
@@ -117,7 +125,7 @@ const AddMenuItemScreen: React.FC = () => {
 			formData.description.trim() !== '' ||
 			formData.basePrice.trim() !== '' ||
 			formData.images.length > 0 ||
-			formData.categoryId !== null
+			formData.categoryIds.length > 0
 
 		setHasChanges(changed)
 	}, [formData])
@@ -159,8 +167,8 @@ const AddMenuItemScreen: React.FC = () => {
 			newErrors['name'] = 'Item name is required'
 		}
 		// category
-		if (!formData.categoryId) {
-			newErrors['category'] = 'Category is required'
+		if (formData.categoryIds.length === 0) {
+			newErrors['category'] = 'At least one category is required'
 		}
 		// basePrice if provided must be a valid number >= 0
 		if (formData.basePrice.trim()) {
@@ -301,8 +309,8 @@ const AddMenuItemScreen: React.FC = () => {
 					setFormData={setFormData}
 					categories={categories}
 					errors={errors}
-					showMenu={showMenuModal}
-					hideMenu={hideMenuModal}
+					showCheckboxMenu={showCheckboxMenuModal}
+					hideCheckboxMenu={hideCheckboxMenuModal}
 				/>
 
 				{/* Images Section */}
@@ -359,6 +367,17 @@ const AddMenuItemScreen: React.FC = () => {
 				options={menuModalProps.options}
 				onSelect={menuModalProps.onSelect}
 				footer={menuModalProps.footer}
+			/>
+
+			<CheckboxMenuModal
+				visible={checkboxMenuModalVisible}
+				onClose={hideCheckboxMenuModal}
+				title={checkboxMenuModalProps.title}
+				message={checkboxMenuModalProps.message}
+				options={checkboxMenuModalProps.options}
+				selectedValues={checkboxMenuModalProps.selectedValues}
+				onSave={checkboxMenuModalProps.onSave}
+				footer={checkboxMenuModalProps.footer}
 			/>
 		</DynamicKeyboardView>
 	)
