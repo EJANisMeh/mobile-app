@@ -21,7 +21,13 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 		} = req.body
 
 		// Validate required fields: concessionId, name, categoryIds
-		if (!concessionId || !name || !categoryIds || !Array.isArray(categoryIds) || categoryIds.length === 0) {
+		if (
+			!concessionId ||
+			!name ||
+			!categoryIds ||
+			!Array.isArray(categoryIds) ||
+			categoryIds.length === 0
+		) {
 			return res.status(400).json({
 				success: false,
 				error: 'Concession ID, name, and at least one category are required',

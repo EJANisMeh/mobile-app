@@ -66,8 +66,13 @@ const EditMenuItemScreen: React.FC = () => {
 	const confirmationModal = useConfirmationModal()
 	const menuModal = useMenuModal()
 	const checkboxMenuModal = useCheckboxMenuModal()
-	const { categories, getMenuItems, getCategories, editMenuItem, getMenuItemById } =
-		useMenuContext()
+	const {
+		categories,
+		getMenuItems,
+		getCategories,
+		editMenuItem,
+		getMenuItemById,
+	} = useMenuContext()
 
 	useHideNavBar()
 

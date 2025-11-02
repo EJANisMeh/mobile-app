@@ -13,7 +13,10 @@ import {
 	editMenuItem,
 	getMenuItemById,
 } from './useBackend_backend/menu'
-import { useGetCategories, useUpdateCategories } from './useBackend_backend/category'
+import {
+	useGetCategories,
+	useUpdateCategories,
+} from './useBackend_backend/category'
 import { Category } from '../../types/categoryTypes'
 
 export const useMenuBackend = () => {
