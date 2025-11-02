@@ -2,25 +2,24 @@ import React from 'react'
 import { Text, View, TextInput } from 'react-native'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
-import { createConcessionaireMenuStyles } from '../../../../styles/concessionaire/menu'
+import { createConcessionaireAddMenuItemStyles } from '../../../../styles/concessionaire/addMenuItem'
 import { AddMenuItemFormData } from '../../../../types'
 
-interface BasePriceInputProps
-{ 
-  formData: AddMenuItemFormData
-  setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
-  errors: Record<string, string>
+interface BasePriceInputProps {
+	formData: AddMenuItemFormData
+	setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
+	errors: Record<string, string>
 }
 
 const BasePriceInput: React.FC<BasePriceInputProps> = ({
-  formData,
-  setFormData,
-  errors,
+	formData,
+	setFormData,
+	errors,
 }) => {
-  const { colors } = useThemeContext()
-  const responsive = useResponsiveDimensions()
-  const styles = createConcessionaireMenuStyles(colors, responsive)
-  
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
+
 	return (
 		<>
 			<Text style={styles.sectionTitle}>Base Price</Text>

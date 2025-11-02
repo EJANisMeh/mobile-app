@@ -186,6 +186,23 @@ export const createConcessionaireAddMenuItemStyles = (
 			borderWidth: 1,
 			borderColor: colors.border,
 		},
+		variationCategoryInputContainer: {
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			backgroundColor: colors.surface,
+			borderRadius: 8,
+			paddingHorizontal: spacing.md,
+			paddingVertical: spacing.xs,
+			marginBottom: spacing.xs,
+			gap: spacing.sm,
+			borderWidth: 1,
+			borderColor: colors.border,
+		},
+		variationCategoryText: {
+			flex: 1,
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.text,
+		},
 		modeSelectionHeader: {
 			flexDirection: 'row' as const,
 			alignItems: 'center' as const,
@@ -231,6 +248,21 @@ export const createConcessionaireAddMenuItemStyles = (
 			fontSize: responsive.getResponsiveFontSize(13),
 			marginTop: spacing.xs / 2,
 			marginBottom: spacing.xs,
+		},
+
+		// Variation multi-limit styles
+		multiLimitOuter: {
+			marginBottom: spacing.xs,
+		},
+		multiLimitRow: {
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			marginBottom: spacing.xs / 2,
+		},
+		multiLimitLabel: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.text,
+			flex: 1,
 		},
 
 		// Add-ons Section Styles

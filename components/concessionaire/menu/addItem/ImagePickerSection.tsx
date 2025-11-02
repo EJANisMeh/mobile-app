@@ -3,25 +3,25 @@ import { Text, ScrollView, Image, TouchableOpacity, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
-import { createConcessionaireMenuStyles } from '../../../../styles/concessionaire/menu'
+import { createConcessionaireAddMenuItemStyles } from '../../../../styles/concessionaire/addMenuItem'
 import { AddMenuItemFormData } from '../../../../types'
 import { UseAlertModalType } from '../../../../hooks/useModals/types'
 import * as ImagePicker from 'expo-image-picker'
 
 interface ImagePickerSectionProps {
 	formData: AddMenuItemFormData
-  setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
-  showAlert: UseAlertModalType['showAlert']
+	setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
+	showAlert: UseAlertModalType['showAlert']
 }
 
 const ImagePickerSection: React.FC<ImagePickerSectionProps> = ({
 	formData,
-  setFormData,
-  showAlert,
+	setFormData,
+	showAlert,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
-	const styles = createConcessionaireMenuStyles(colors, responsive)
+	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
 
 	const handleRemoveImage = (index: number) => {
 		setFormData((prev) => {

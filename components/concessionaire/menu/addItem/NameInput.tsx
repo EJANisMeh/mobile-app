@@ -2,13 +2,13 @@ import React from 'react'
 import { View, Text, TextInput } from 'react-native'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
-import { createConcessionaireMenuStyles } from '../../../../styles/concessionaire/menu'
+import { createConcessionaireAddMenuItemStyles } from '../../../../styles/concessionaire/addMenuItem'
 import { AddMenuItemFormData } from '../../../../types'
 
 interface NameInputProps {
-  formData: AddMenuItemFormData
-  setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
-  errors: Record<string, string>
+	formData: AddMenuItemFormData
+	setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
+	errors: Record<string, string>
 }
 
 const NameInput: React.FC<NameInputProps> = ({
@@ -18,7 +18,7 @@ const NameInput: React.FC<NameInputProps> = ({
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
-	const styles = createConcessionaireMenuStyles(colors, responsive)
+	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
 
 	return (
 		<>

@@ -3,15 +3,16 @@ import { Text, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
-import { createConcessionaireMenuStyles } from '../../../../styles/concessionaire/menu'
+import { createConcessionaireAddMenuItemStyles } from '../../../../styles/concessionaire/addMenuItem'
 import { AddMenuItemFormData } from '../../../../types'
-import { useCategoryBackend } from '../../../../hooks/useBackend/useCategoryBackend'
 import { useConcessionaireNavigation } from '../../../../hooks/useNavigation'
 import { UseMenuModalType } from '../../../../hooks/useModals/useMenuModal'
+import { Category } from '../../../../types/categoryTypes'
 
 interface CategorySelectorProps {
 	formData: AddMenuItemFormData
 	setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
+	categories: Category[]
 	errors: Record<string, string>
 	showMenu: UseMenuModalType['showMenu']
 	hideMenu: UseMenuModalType['hideMenu']
@@ -20,14 +21,14 @@ interface CategorySelectorProps {
 const CategorySelector: React.FC<CategorySelectorProps> = ({
 	formData,
 	setFormData,
+	categories,
 	errors,
 	showMenu,
 	hideMenu,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
-	const styles = createConcessionaireMenuStyles(colors, responsive)
-	const { categories } = useCategoryBackend()
+	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
 	const navigation = useConcessionaireNavigation()
 
 	const handleCategorySelect = () => {

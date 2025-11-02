@@ -2,7 +2,7 @@ import React from 'react'
 import { View, Text, TextInput } from 'react-native'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
-import { createConcessionaireMenuStyles } from '../../../../styles/concessionaire/menu'
+import { createConcessionaireAddMenuItemStyles } from '../../../../styles/concessionaire/addMenuItem'
 import { AddMenuItemFormData } from '../../../../types'
 
 interface DescriptionInputProps {
@@ -16,7 +16,7 @@ const DescriptionInput: React.FC<DescriptionInputProps> = ({
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
-	const styles = createConcessionaireMenuStyles(colors, responsive)
+	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
 
 	return (
 		<>

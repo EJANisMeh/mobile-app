@@ -39,6 +39,7 @@ import {
 	BasePriceInput,
 	CategorySelector,
 	ImagePickerSection,
+	VariationGroupsSection,
 } from '../../../components/concessionaire/menu/addItem'
 import { apiCall } from '../../../services/api/api'
 import { AddMenuItemFormData, AddonInput, SelectionType } from '../../../types'
@@ -414,6 +415,7 @@ const AddMenuItemScreen: React.FC = () => {
 				<CategorySelector
 					formData={formData}
 					setFormData={setFormData}
+					categories={categories}
 					errors={errors}
 					showMenu={showMenuModal}
 					hideMenu={hideMenuModal}
@@ -427,6 +429,18 @@ const AddMenuItemScreen: React.FC = () => {
 				/>
 
 				{/* Variations Section */}
+				<VariationGroupsSection
+					formData={formData}
+					setFormData={setFormData}
+					categories={categories}
+					selectionTypes={selectionTypes}
+					menuItems={menuItems}
+					errors={errors}
+					setErrors={setErrors}
+					showMenuModal={showMenuModal}
+					showAlert={showAlert}
+					showConfirmation={showConfirmation}
+				/>
 
 				{/* Add-ons Section */}
 				<Text style={[styles.sectionTitle, { marginTop: 16 }]}>
