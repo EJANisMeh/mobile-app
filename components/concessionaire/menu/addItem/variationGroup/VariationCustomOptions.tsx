@@ -3,7 +3,11 @@ import { View, Text, TextInput, TouchableOpacity } from 'react-native'
 import { useThemeContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
 import { createConcessionaireAddMenuItemStyles } from '../../../../../styles/concessionaire/addMenuItem'
-import { VariationGroupInput, VariationOptionInput, AddMenuItemFormData } from '../../../../../types/menuItemTypes'
+import {
+	VariationGroupInput,
+	VariationOptionInput,
+	AddMenuItemFormData,
+} from '../../../../../types/menuItemTypes'
 import { UseAlertModalType } from '../../../../../hooks/useModals/types'
 import { Ionicons } from '@expo/vector-icons'
 
@@ -87,9 +91,7 @@ const VariationCustomOptions: React.FC<VariationCustomOptionsProps> = ({
 	return (
 		<>
 			<View style={styles.variationOptionsHeader}>
-				<Text style={styles.variationOptionsLabel}>
-					Options:
-				</Text>
+				<Text style={styles.variationOptionsLabel}>Options:</Text>
 				<TouchableOpacity
 					style={styles.variationOptionsHelpButton}
 					onPress={() =>
@@ -120,9 +122,7 @@ const VariationCustomOptions: React.FC<VariationCustomOptionsProps> = ({
 							placeholderTextColor={colors.textSecondary}
 						/>
 						<View style={styles.variationOptionPriceContainer}>
-							<Text style={styles.variationOptionPriceSymbol}>
-								₱
-							</Text>
+							<Text style={styles.variationOptionPriceSymbol}>₱</Text>
 							<TextInput
 								style={styles.variationOptionPriceInput}
 								value={option.priceAdjustment}
@@ -175,5 +175,5 @@ const VariationCustomOptions: React.FC<VariationCustomOptionsProps> = ({
 		</>
 	)
 }
- 
-export default VariationCustomOptions;
+
+export default VariationCustomOptions

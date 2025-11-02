@@ -37,9 +37,7 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 
 	return (
 		<>
-			<Text style={styles.existingItemsLabel}>
-				Options (Existing Items):
-			</Text>
+			<Text style={styles.existingItemsLabel}>Options (Existing Items):</Text>
 			{(group as any).existingMenuItemIds?.map(
 				(itemId: number, idx: number) => {
 					const mi = menuItems.find((m: any) => m.id === itemId)

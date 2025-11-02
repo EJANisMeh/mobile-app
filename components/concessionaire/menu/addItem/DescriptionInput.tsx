@@ -21,7 +21,11 @@ const DescriptionInput: React.FC<DescriptionInputProps> = ({
 	return (
 		<>
 			<Text style={styles.sectionTitle}>Description</Text>
-			<View style={[styles.categoryInputContainer, styles.descriptionInputContainer]}>
+			<View
+				style={[
+					styles.categoryInputContainer,
+					styles.descriptionInputContainer,
+				]}>
 				<TextInput
 					style={[styles.categoryInput, styles.descriptionInput]}
 					value={formData.description}

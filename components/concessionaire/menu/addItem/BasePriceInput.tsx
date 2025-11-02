@@ -37,9 +37,7 @@ const BasePriceInput: React.FC<BasePriceInputProps> = ({
 				/>
 			</View>
 			{errors['basePrice'] && (
-				<Text style={styles.nameInputError}>
-					{errors['basePrice']}
-				</Text>
+				<Text style={styles.nameInputError}>{errors['basePrice']}</Text>
 			)}
 		</>
 	)

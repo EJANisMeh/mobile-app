@@ -110,9 +110,7 @@ const ImagePickerSection: React.FC<ImagePickerSectionProps> = ({
 							/>
 							{formData.displayImageIndex === index && (
 								<View style={styles.displayImageBadge}>
-									<Text style={styles.displayImageBadgeText}>
-										DISPLAY
-									</Text>
+									<Text style={styles.displayImageBadgeText}>DISPLAY</Text>
 								</View>
 							)}
 							<TouchableOpacity
@@ -135,9 +133,7 @@ const ImagePickerSection: React.FC<ImagePickerSectionProps> = ({
 								size={32}
 								color={colors.textSecondary}
 							/>
-							<Text style={styles.addImageButtonText}>
-								Add Image
-							</Text>
+							<Text style={styles.addImageButtonText}>Add Image</Text>
 						</TouchableOpacity>
 					)}
 				</View>

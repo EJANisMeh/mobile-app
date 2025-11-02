@@ -4,35 +4,39 @@ import { Ionicons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
 import { createConcessionaireAddMenuItemStyles } from '../../../../../styles/concessionaire/addMenuItem'
-import { VariationGroupInput, SelectionType } from '../../../../../types/menuItemTypes'
-import { UseMenuModalType, UseAlertModalType } from '../../../../../hooks/useModals/types'
+import {
+	VariationGroupInput,
+	SelectionType,
+} from '../../../../../types/menuItemTypes'
+import {
+	UseMenuModalType,
+	UseAlertModalType,
+} from '../../../../../hooks/useModals/types'
 
-interface VariationSelectionTypeProps
-{
-  groupIndex: number
-  group: VariationGroupInput
-  selectionTypes: SelectionType[]
-  showAlert: UseAlertModalType['showAlert']
-  showMenuModal: UseMenuModalType['showMenu']
-  handleUpdateVariationGroup: (
-    index: number,
-    field: keyof VariationGroupInput,
-    value: any
-  ) => void
+interface VariationSelectionTypeProps {
+	groupIndex: number
+	group: VariationGroupInput
+	selectionTypes: SelectionType[]
+	showAlert: UseAlertModalType['showAlert']
+	showMenuModal: UseMenuModalType['showMenu']
+	handleUpdateVariationGroup: (
+		index: number,
+		field: keyof VariationGroupInput,
+		value: any
+	) => void
 }
 
 const VariationSelectionType: React.FC<VariationSelectionTypeProps> = ({
-  groupIndex,
-  group,
-  selectionTypes,
-  showAlert,
-  showMenuModal,
-  handleUpdateVariationGroup
-}) =>
-{
-  const { colors } = useThemeContext()
-  const responsive = useResponsiveDimensions()
-  const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
+	groupIndex,
+	group,
+	selectionTypes,
+	showAlert,
+	showMenuModal,
+	handleUpdateVariationGroup,
+}) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
 
 	return (
 		<>

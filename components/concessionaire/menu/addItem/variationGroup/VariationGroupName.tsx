@@ -3,9 +3,7 @@ import { View, TextInput, Text } from 'react-native'
 import { useThemeContext } from '../../../../../context'
 import { createConcessionaireAddMenuItemStyles } from '../../../../../styles/concessionaire/addMenuItem'
 import { useResponsiveDimensions } from '../../../../../hooks'
-import {
-  VariationGroupInput,
-} from '../../../../../types/menuItemTypes'
+import { VariationGroupInput } from '../../../../../types/menuItemTypes'
 
 interface VariationGroupNameProps {
 	group: VariationGroupInput
@@ -19,14 +17,14 @@ interface VariationGroupNameProps {
 }
 
 const VariationGroupName: React.FC<VariationGroupNameProps> = ({
-  group,
-  groupIndex,
-  errors,
-  handleUpdateVariationGroup,
+	group,
+	groupIndex,
+	errors,
+	handleUpdateVariationGroup,
 }) => {
-  const { colors } = useThemeContext()
-  const responsive = useResponsiveDimensions()
-  const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
 
 	return (
 		<>

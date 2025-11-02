@@ -55,9 +55,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 						size={20}
 						color={colors.primary}
 					/>
-					<Text style={styles.categoryFooterText}>
-						Add New Category
-					</Text>
+					<Text style={styles.categoryFooterText}>Add New Category</Text>
 				</TouchableOpacity>
 			),
 		})
@@ -85,9 +83,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 				/>
 			</TouchableOpacity>
 			{errors['category'] && (
-				<Text style={styles.nameInputError}>
-					{errors['category']}
-				</Text>
+				<Text style={styles.nameInputError}>{errors['category']}</Text>
 			)}
 		</>
 	)
