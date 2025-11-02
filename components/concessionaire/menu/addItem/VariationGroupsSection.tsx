@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useThemeContext } from '../../../../context'
+import { useThemeContext, useMenuContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createConcessionaireAddMenuItemStyles } from '../../../../styles/concessionaire/addMenuItem'
 import {
@@ -32,7 +32,6 @@ interface VariationGroupsSectionProps {
 	setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
 	categories: Category[]
 	selectionTypes: SelectionType[]
-	menuItems: any[]
 	errors: Record<string, string>
 	setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>
 	showMenuModal: UseMenuModalType['showMenu']
@@ -45,7 +44,6 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 	setFormData,
 	categories,
 	selectionTypes,
-	menuItems,
 	errors,
 	setErrors,
 	showMenuModal,
@@ -55,6 +53,7 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
+	const { menuItems } = useMenuContext()
 
 	// Variation Group Handlers
 	const handleAddVariationGroup = () => {
@@ -194,7 +193,6 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 							errors={errors}
 							showAlert={showAlert}
 							showMenuModal={showMenuModal}
-							menuItems={menuItems}
 						/>
 					)}
 				</View>

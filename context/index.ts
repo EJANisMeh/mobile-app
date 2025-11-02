@@ -4,5 +4,6 @@ export
   AppProvider,
   useAuthContext,
   useConcessionContext,
-  useThemeContext
+  useThemeContext,
+  useMenuContext
 } from './AppProvider'

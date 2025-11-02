@@ -1,30 +1,35 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, TextInput } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useThemeContext } from '../../../../context'
+import { useThemeContext, useMenuContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createConcessionaireAddMenuItemStyles } from '../../../../styles/concessionaire/addMenuItem'
-import { AddMenuItemFormData, AddonInput } from '../../../../types/menuItemTypes'
-import { UseAlertModalType, UseMenuModalType } from '../../../../hooks/useModals/types'
+import {
+	AddMenuItemFormData,
+	AddonInput,
+} from '../../../../types/menuItemTypes'
+import {
+	UseAlertModalType,
+	UseMenuModalType,
+} from '../../../../hooks/useModals/types'
 
 interface AddonSectionProps {
 	formData: AddMenuItemFormData
 	setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
-  menuItems: any[]
-  showAlert: UseAlertModalType['showAlert']
-  showMenuModal: UseMenuModalType['showMenu']
+	showAlert: UseAlertModalType['showAlert']
+	showMenuModal: UseMenuModalType['showMenu']
 }
 
 const AddonSection: React.FC<AddonSectionProps> = ({
 	formData,
 	setFormData,
-  menuItems,
-  showAlert,
-  showMenuModal,
+	showAlert,
+	showMenuModal,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
+	const { menuItems } = useMenuContext()
 
 	// Add-on Handlers
 	const handleAddAddon = () => {
@@ -36,7 +41,7 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 			return
 		}
 
-		const menuItemOptions = menuItems.map((item) => ({
+		const menuItemOptions = menuItems.map((item: any) => ({
 			label: `${item.name} - ₱${item.basePrice}`,
 			value: item.id,
 		}))
@@ -45,7 +50,9 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 			title: 'Select Menu Item',
 			options: menuItemOptions,
 			onSelect: (menuItemId: number) => {
-				const selectedItem = menuItems.find((item) => item.id === menuItemId)
+				const selectedItem = menuItems.find(
+					(item: any) => item.id === menuItemId
+				)
 				if (selectedItem) {
 					const newAddon: AddonInput = {
 						menuItemId: menuItemId,
@@ -89,7 +96,9 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 				Add-ons (Optional)
 			</Text>
 			{formData.addons.map((addon, index) => {
-				const menuItem = menuItems.find((item) => item.id === addon.menuItemId)
+				const menuItem = menuItems.find(
+					(item: any) => item.id === addon.menuItemId
+				)
 				return (
 					<View
 						key={index}

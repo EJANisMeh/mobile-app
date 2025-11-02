@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useThemeContext } from '../../../../../context'
+import { useThemeContext, useMenuContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
 import { createConcessionaireAddMenuItemStyles } from '../../../../../styles/concessionaire/addMenuItem'
 import { AddMenuItemFormData, VariationGroupInput } from '../../../../../types/menuItemTypes'
@@ -15,7 +15,6 @@ interface VariationExistingItemsProps
   errors: Record<string, string>
   showAlert: UseAlertModalType['showAlert']
   showMenuModal: UseMenuModalType['showMenu']
-  menuItems: any[]
 }
 
 const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
@@ -25,12 +24,12 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
   errors,
   showAlert,
   showMenuModal,
-  menuItems,
 }) =>
 {
   const { colors } = useThemeContext()
   const responsive = useResponsiveDimensions()
   const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
+  const { menuItems } = useMenuContext()
 
 	return (
 		<>
@@ -39,7 +38,7 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 			</Text>
 			{(group as any).existingMenuItemIds?.map(
 				(itemId: number, idx: number) => {
-					const mi = menuItems.find((m) => m.id === itemId)
+					const mi = menuItems.find((m: any) => m.id === itemId)
 					return (
 						<View
 							key={idx}
@@ -92,7 +91,7 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 						})
 						return
 					}
-					const menuItemOptions = menuItems.map((item) => ({
+					const menuItemOptions = menuItems.map((item: any) => ({
 						label: `${item.name} - ₱${item.basePrice}`,
 						value: item.id,
 					}))

@@ -2,17 +2,15 @@ import React, { useState, useEffect } from 'react'
 import {
 	View,
 	Text,
-	TouchableOpacity,
 	ActivityIndicator,
 	BackHandler,
 } from 'react-native'
 import {
 	useFocusEffect,
 } from '@react-navigation/native'
-import { useThemeContext, useConcessionContext } from '../../../context'
+import { useThemeContext, useConcessionContext, useMenuContext } from '../../../context'
 import { useResponsiveDimensions, useHideNavBar } from '../../../hooks'
 import { useCategoryBackend } from '../../../hooks/useBackend/useCategoryBackend'
-import { useMenuBackend } from '../../../hooks/useBackend/useMenuBackend'
 import {
 	useAlertModal,
 	useConfirmationModal,
@@ -33,10 +31,10 @@ import {
 	ImagePickerSection,
 	VariationGroupsSection,
 } from '../../../components/concessionaire/menu/addItem'
-import { apiCall } from '../../../services/api/api'
-import { AddMenuItemFormData, AddonInput, SelectionType } from '../../../types'
+import { AddMenuItemFormData, SelectionType } from '../../../types'
 import { useConcessionaireNavigation } from '../../../hooks/useNavigation'
 import AddonSection from '../../../components/concessionaire/menu/addItem/AddonSection'
+import { apiCall } from '../../../services/api/api'
 
 const AddMenuItemScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -44,6 +42,7 @@ const AddMenuItemScreen: React.FC = () => {
 	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
 	const navigation = useConcessionaireNavigation()
 	const { concession } = useConcessionContext()
+	const { getMenuItems, addMenuItem } = useMenuContext()
 
 	const {
 		visible: alertModalVisible,
@@ -51,7 +50,6 @@ const AddMenuItemScreen: React.FC = () => {
 		message: alertModalMessage,
 		showAlert,
 		hideAlert,
-		handleClose: handleCloseAlertModal,
 	} = useAlertModal()
 	const {
 		visible: confirmationModalVisible,
@@ -70,11 +68,6 @@ const AddMenuItemScreen: React.FC = () => {
 		loading: categoriesLoading,
 		getCategories,
 	} = useCategoryBackend()
-	const {
-		menuItems,
-		loading: menuItemsLoading,
-		getMenuItems,
-	} = useMenuBackend()
 
 	useHideNavBar()
 
@@ -94,7 +87,6 @@ const AddMenuItemScreen: React.FC = () => {
 	const [hasChanges, setHasChanges] = useState(false)
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [selectionTypes, setSelectionTypes] = useState<SelectionType[]>([])
-	const [loadingSelectionTypes, setLoadingSelectionTypes] = useState(false)
 
 	// Load categories on mount and when returning from category management
 	useFocusEffect(
@@ -109,7 +101,6 @@ const AddMenuItemScreen: React.FC = () => {
 	)
 
 	const loadSelectionTypes = async () => {
-		setLoadingSelectionTypes(true)
 		try {
 			const data = await apiCall('/menu/selection-types')
 			if (data.success && data.selectionTypes) {
@@ -119,8 +110,6 @@ const AddMenuItemScreen: React.FC = () => {
 			}
 		} catch (error) {
 			console.error('Failed to load selection types:', error)
-		} finally {
-			setLoadingSelectionTypes(false)
 		}
 	}
 
@@ -231,9 +220,6 @@ const AddMenuItemScreen: React.FC = () => {
 		validateForm(true)
 	}, [formData, selectionTypes])
 
-	// compute validity (no side-effects)
-	const isFormValid = validateForm(false)
-
 	const handleSave = () => {
 		const valid = validateForm(true)
 		if (!valid) {
@@ -251,61 +237,26 @@ const AddMenuItemScreen: React.FC = () => {
 			confirmText: 'Add',
 			cancelText: 'Cancel',
 			onConfirm: async () => {
-				try {
-					const response = await apiCall('/menu/add', {
-						method: 'POST',
-						body: JSON.stringify({
-							concessionId: concession?.id,
-							name: formData.name.trim(),
-							description: formData.description.trim() || null,
-							basePrice: formData.basePrice || '0',
-							images: formData.images,
-							displayImageIndex: formData.displayImageIndex,
-							categoryId: formData.categoryId,
-							availability: formData.availability,
-							variationGroups: formData.variationGroups.map((group) => ({
-								name: group.name.trim(),
-								selectionTypeId: group.selectionTypeId,
-								multiLimit: group.multiLimit,
-								mode: group.mode,
-								categoryFilterId: group.categoryFilterId,
-								options: group.options.map((opt) => ({
-									name: opt.name.trim(),
-									priceAdjustment: opt.priceAdjustment,
-									isDefault: opt.isDefault,
-									availability: opt.availability,
-									position: opt.position,
-								})),
-								existingMenuItemIds: (group as any).existingMenuItemIds || [],
-								position: group.position,
-							})),
-							addons: formData.addons.map((addon) => ({
-								menuItemId: addon.menuItemId,
-								label: addon.label?.trim() || null,
-								priceOverride: addon.priceOverride,
-								required: addon.required,
-								position: addon.position,
-							})),
-						}),
-					})
-
-					if (response.success) {
-						showAlert({
-							title: 'Success',
-							message: 'Item added successfully!',
-						})
-						navigation.goBack()
-					} else {
-						showAlert({
-							title: 'Error',
-							message: response.error || 'Failed to add item',
-						})
-					}
-				} catch (error) {
-					console.error('Error adding item:', error)
+				if (!concession?.id) {
 					showAlert({
 						title: 'Error',
-						message: 'Failed to add item. Please try again.',
+						message: 'Concession not found',
+					})
+					return
+				}
+
+				const response = await addMenuItem(concession.id, formData)
+
+				if (response.success) {
+					showAlert({
+						title: 'Success',
+						message: 'Item added successfully!',
+					})
+					navigation.goBack()
+				} else {
+					showAlert({
+						title: 'Error',
+						message: response.error || 'Failed to add item',
 					})
 				}
 			},
@@ -370,7 +321,6 @@ const AddMenuItemScreen: React.FC = () => {
 					setFormData={setFormData}
 					categories={categories}
 					selectionTypes={selectionTypes}
-					menuItems={menuItems}
 					errors={errors}
 					setErrors={setErrors}
 					showMenuModal={showMenuModal}
@@ -382,7 +332,6 @@ const AddMenuItemScreen: React.FC = () => {
 				<AddonSection
 					formData={formData}
 					setFormData={setFormData}
-					menuItems={menuItems}
 					showAlert={showAlert}
 					showMenuModal={showMenuModal}
 				/>
@@ -391,17 +340,7 @@ const AddMenuItemScreen: React.FC = () => {
 
 			{/* Bottom Actions */}
 			<View style={styles.bottomActions}>
-				<TouchableOpacity
-					style={styles.cancelButton}
-					onPress={handleCancel}>
-					<Text style={styles.cancelButtonText}>Cancel</Text>
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={[styles.saveButton, !isFormValid && styles.saveButtonDisabled]}
-					onPress={handleSave}
-					disabled={!isFormValid}>
-					<Text style={styles.saveButtonText}>Add Item</Text>
-				</TouchableOpacity>
+				
 			</View>
 
 			<AlertModal

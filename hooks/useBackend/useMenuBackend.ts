@@ -8,6 +8,7 @@ import {
 	toggleAvailability,
 	deleteMenuItem,
 	toggleVariationOptionAvailability,
+	addMenuItem,
 } from './useBackend_backend/menu'
 
 export const useMenuBackend = () => {
@@ -23,7 +24,6 @@ export const useMenuBackend = () => {
 			setMenuItems(value)
 		}
 	}
-
 	return {
 		loading,
 		error,
@@ -44,6 +44,11 @@ export const useMenuBackend = () => {
 			safeSetMenuItems as Dispatch<SetStateAction<any[]>>
 		),
 		toggleVariationOptionAvailability: toggleVariationOptionAvailability(
+			setLoading,
+			setError,
+			safeSetMenuItems as Dispatch<SetStateAction<any[]>>
+		),
+		addMenuItem: addMenuItem(
 			setLoading,
 			setError,
 			safeSetMenuItems as Dispatch<SetStateAction<any[]>>
