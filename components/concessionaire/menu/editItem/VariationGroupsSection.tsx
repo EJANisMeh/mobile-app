@@ -1,0 +1,215 @@
+import React from 'react'
+import { View, Text, TouchableOpacity } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { useThemeContext } from '../../../../context'
+import { useResponsiveDimensions } from '../../../../hooks'
+import { createConcessionaireEditMenuItemStyles } from '../../../../styles/concessionaire'
+import {
+	AddMenuItemFormData,
+	VariationGroupInput,
+	Category,
+	SelectionType,
+} from '../../../../types'
+import {
+	UseAlertModalType,
+	UseConfirmationModalType,
+	UseMenuModalType,
+} from '../../../../hooks/useModals/types'
+import {
+	VariationGroupHeader,
+	VariationGroupName,
+	VariationModeSelection,
+	VariationCategory,
+	VariationSelectionType,
+	VariationMultiLimit,
+	VariationCustomOptions,
+	VariationExistingItems,
+} from './variationGroup'
+
+interface VariationGroupsSectionProps {
+	formData: AddMenuItemFormData
+	setFormData: React.Dispatch<React.SetStateAction<AddMenuItemFormData>>
+	categories: Category[]
+	selectionTypes: SelectionType[]
+	errors: Record<string, string>
+	setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>
+	showMenuModal: UseMenuModalType['showMenu']
+	showAlert: UseAlertModalType['showAlert']
+	showConfirmation: UseConfirmationModalType['showConfirmation']
+	itemId: number
+}
+
+const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
+	formData,
+	setFormData,
+	categories,
+	selectionTypes,
+	errors,
+	setErrors,
+	showMenuModal,
+	showAlert,
+	showConfirmation,
+	itemId,
+}) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const styles = createConcessionaireEditMenuItemStyles(colors, responsive)
+
+	// Variation Group Handlers
+	const handleAddVariationGroup = () => {
+		const newGroup: VariationGroupInput = {
+			name: '',
+			selectionTypeId: 1, // Default to first selection type
+			multiLimit: null,
+			mode: 'custom',
+			categoryFilterId: null,
+			options: [],
+			existingMenuItemIds: [],
+			position: formData.variationGroups.length,
+		}
+		setFormData((prev) => ({
+			...prev,
+			variationGroups: [...prev.variationGroups, newGroup],
+		}))
+	}
+
+	const handleUpdateVariationGroup = (
+		index: number,
+		field: keyof VariationGroupInput,
+		value: any
+	) => {
+		setFormData((prev) => ({
+			...prev,
+			variationGroups: prev.variationGroups.map((group, i) =>
+				i === index ? { ...group, [field]: value } : group
+			),
+		}))
+	}
+
+	return (
+		<>
+			<View
+				style={{
+					flexDirection: 'row',
+					alignItems: 'center',
+					marginBottom: 8,
+				}}>
+				<Text style={[styles.sectionTitle, { marginBottom: 0, flex: 1 }]}>
+					Variations (Optional)
+				</Text>
+				<TouchableOpacity
+					style={{ padding: 6 }}
+					onPress={() =>
+						showAlert({
+							title: 'Variations Help',
+							message:
+								'Variations: group of choices for your menu item (e.g., sizes, toppings, rice type, etc.)',
+						})
+					}>
+					<Text style={{ color: colors.primary, fontWeight: '600' }}>?</Text>
+				</TouchableOpacity>
+			</View>
+			{formData.variationGroups.map((group, groupIndex) => (
+				<View
+					key={groupIndex}
+					style={{
+						backgroundColor: colors.surface,
+						borderRadius: 8,
+						padding: 12,
+						marginBottom: 12,
+						borderWidth: 1,
+						borderColor: colors.border,
+					}}>
+					<VariationGroupHeader
+						groupIndex={groupIndex}
+						setFormData={setFormData}
+						showConfirmation={showConfirmation}
+					/>
+
+					<VariationGroupName
+						group={group}
+						groupIndex={groupIndex}
+						errors={errors}
+						handleUpdateVariationGroup={handleUpdateVariationGroup}
+					/>
+
+					<VariationModeSelection
+						groupIndex={groupIndex}
+						group={group}
+						showAlert={showAlert}
+						handleUpdateVariationGroup={handleUpdateVariationGroup}
+					/>
+
+					{group.mode === 'category' && (
+						<VariationCategory
+							group={group}
+							groupIndex={groupIndex}
+							categories={categories}
+							showMenuModal={showMenuModal}
+							handleUpdateVariationGroup={handleUpdateVariationGroup}
+						/>
+					)}
+
+					<VariationSelectionType
+						groupIndex={groupIndex}
+						group={group}
+						selectionTypes={selectionTypes}
+						showAlert={showAlert}
+						showMenuModal={showMenuModal}
+						handleUpdateVariationGroup={handleUpdateVariationGroup}
+					/>
+
+					{(
+						selectionTypes.find((t) => t.id === group.selectionTypeId)?.code ||
+						''
+					).startsWith('multi') && (
+						<VariationMultiLimit
+							groupIndex={groupIndex}
+							group={group}
+							errors={errors}
+							setErrors={setErrors}
+							showAlert={showAlert}
+							handleUpdateVariationGroup={handleUpdateVariationGroup}
+						/>
+					)}
+
+					{group.mode === 'custom' && (
+						<VariationCustomOptions
+							formData={formData}
+							setFormData={setFormData}
+							groupIndex={groupIndex}
+							group={group}
+							errors={errors}
+							showAlert={showAlert}
+						/>
+					)}
+
+					{group.mode === 'existing' && (
+						<VariationExistingItems
+							setFormData={setFormData}
+							groupIndex={groupIndex}
+							group={group}
+							errors={errors}
+							showAlert={showAlert}
+							showMenuModal={showMenuModal}
+							itemId={itemId}
+						/>
+					)}
+				</View>
+			))}
+
+			<TouchableOpacity
+				style={styles.addCategoryButton}
+				onPress={handleAddVariationGroup}>
+				<Ionicons
+					name="add-circle-outline"
+					size={20}
+					color={colors.primary}
+				/>
+				<Text style={styles.addCategoryButtonText}>Add Variation Group</Text>
+			</TouchableOpacity>
+		</>
+	)
+}
+
+export default VariationGroupsSection
