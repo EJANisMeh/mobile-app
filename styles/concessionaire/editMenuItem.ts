@@ -289,5 +289,172 @@ export const createConcessionaireEditMenuItemStyles = (
 			fontSize: responsive.getResponsiveFontSize(14),
 			color: colors.text,
 		},
+
+		// Image Picker Section
+		imageHintText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.textSecondary,
+			marginBottom: spacing.xs,
+		},
+		imageScrollView: {
+			marginBottom: spacing.md,
+		},
+		imageContainer: {
+			flexDirection: 'row' as const,
+			gap: spacing.sm + spacing.xs, // 12
+		},
+		imageWrapper: {
+			width: 100,
+			height: 100,
+			borderRadius: 8,
+			overflow: 'hidden' as const,
+			position: 'relative' as const,
+		},
+		imageWrapperActive: {
+			borderWidth: 3,
+		},
+		imageWrapperInactive: {
+			borderWidth: 0,
+		},
+		image: {
+			width: '100%',
+			height: '100%',
+		},
+		displayBadge: {
+			position: 'absolute' as const,
+			bottom: spacing.xs / 2,
+			left: spacing.xs / 2,
+			right: spacing.xs / 2,
+			backgroundColor: colors.primary,
+			borderRadius: 4,
+			paddingVertical: 2,
+			paddingHorizontal: spacing.xs / 2,
+			alignItems: 'center' as const,
+		},
+		displayBadgeText: {
+			fontSize: responsive.getResponsiveFontSize(10),
+			fontWeight: '600' as const,
+			color: '#fff',
+		},
+		removeImageButton: {
+			position: 'absolute' as const,
+			top: spacing.xs / 2,
+			right: spacing.xs / 2,
+			backgroundColor: 'rgba(0,0,0,0.6)',
+			borderRadius: 12,
+			width: 24,
+			height: 24,
+			justifyContent: 'center' as const,
+			alignItems: 'center' as const,
+		},
+		addImageButton: {
+			width: 100,
+			height: 100,
+			borderRadius: 8,
+			borderWidth: 2,
+			borderStyle: 'dashed' as const,
+			borderColor: colors.border,
+			backgroundColor: colors.surface,
+			justifyContent: 'center' as const,
+			alignItems: 'center' as const,
+		},
+		addImageText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.textSecondary,
+			marginTop: spacing.xs / 2,
+		},
+
+		// Variation Option Row
+		variationOptionRow: {
+			flexDirection: 'row' as const,
+			gap: spacing.xs,
+			marginBottom: spacing.xs,
+			alignItems: 'center' as const,
+		},
+		variationOptionNameInput: {
+			flex: 2,
+		},
+		variationOptionPriceContainer: {
+			flexDirection: 'row' as const,
+			flex: 1,
+			gap: spacing.xs / 2,
+		},
+		variationOptionPriceSymbol: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.text,
+			alignSelf: 'center' as const,
+		},
+		variationOptionPriceInput: {
+			flex: 1,
+		},
+
+		// Variation Existing Items
+		existingItemRow: {
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			justifyContent: 'space-between' as const,
+			marginBottom: spacing.xs,
+			gap: spacing.xs,
+		},
+		existingItemName: {
+			color: colors.text,
+			fontSize: responsive.getResponsiveFontSize(14),
+		},
+
+		// Common Text Styles
+		labelSmall: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.text,
+		},
+		labelSmallFlex: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.text,
+			flex: 1,
+		},
+		errorTextInline: {
+			color: '#ef4444',
+			fontSize: responsive.getResponsiveFontSize(13),
+		},
+		errorTextMargin: {
+			color: '#ef4444',
+			fontSize: responsive.getResponsiveFontSize(13),
+			marginTop: spacing.xs / 2,
+		},
+		errorTextMarginBottom: {
+			color: '#ef4444',
+			fontSize: responsive.getResponsiveFontSize(13),
+			marginBottom: spacing.xs,
+		},
+
+		// Header with Action
+		headerWithAction: {
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			marginBottom: spacing.xs / 2,
+		},
+		flexOne: {
+			flex: 1,
+		},
+
+		// Category Filter Margin
+		categoryFilterMargin: {
+			marginBottom: spacing.xs,
+		},
+
+		// Addon Input Margin
+		addonInputMargin: {
+			marginBottom: spacing.xs,
+		},
+
+		// Multi Limit Container
+		multiLimitContainer: {
+			marginBottom: spacing.xs,
+		},
+
+		// Variation Add Button Inline
+		variationAddButtonInline: {
+			marginTop: spacing.xs / 2,
+			marginBottom: 0,
+		},
 	})
 }

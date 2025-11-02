@@ -39,20 +39,8 @@ const VariationGroupHeader: React.FC<VariationGroupHeaderProps> = ({
 	}
 
 	return (
-		<View
-			style={{
-				flexDirection: 'row',
-				alignItems: 'center',
-				marginBottom: 8,
-				gap: 8,
-			}}>
-			<Text
-				style={{
-					fontSize: 14,
-					fontWeight: '600',
-					color: colors.text,
-					flex: 1,
-				}}>
+		<View style={styles.variationGroupHeader}>
+			<Text style={styles.variationGroupTitle}>
 				Variation Group {groupIndex + 1}
 			</Text>
 			<TouchableOpacity onPress={() => handleRemoveVariationGroup(groupIndex)}>

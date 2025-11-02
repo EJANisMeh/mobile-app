@@ -37,17 +37,10 @@ const VariationSelectionType: React.FC<VariationSelectionTypeProps> = ({
 
 	return (
 		<>
-			<View
-				style={{
-					flexDirection: 'row',
-					alignItems: 'center',
-					marginBottom: 4,
-				}}>
-				<Text style={{ fontSize: 12, color: colors.text, flex: 1 }}>
-					Selection Type:
-				</Text>
+			<View style={styles.modeSelectionHeader}>
+				<Text style={styles.labelSmallFlex}>Selection Type:</Text>
 				<TouchableOpacity
-					style={{ padding: 6 }}
+					style={styles.helpButton}
 					onPress={() =>
 						showAlert({
 							title: 'Selection Type Help',
@@ -55,11 +48,11 @@ const VariationSelectionType: React.FC<VariationSelectionTypeProps> = ({
 								'Single - Required: user must pick exactly one option.\n\nSingle - Optional: user can pick zero or one.\n\nMulti - Required: user must pick at least one up to the limit.\n\nMulti - Optional: user can pick zero or more up to the limit.',
 						})
 					}>
-					<Text style={{ color: colors.primary, fontWeight: '600' }}>?</Text>
+					<Text style={styles.helpButtonText}>?</Text>
 				</TouchableOpacity>
 			</View>
 			<TouchableOpacity
-				style={[styles.categoryInputContainer, { marginBottom: 8 }]}
+				style={[styles.categoryInputContainer, styles.addonInputMargin]}
 				onPress={() => {
 					const typeOptions = selectionTypes.map((type) => ({
 						label: type.code,

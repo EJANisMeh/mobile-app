@@ -29,15 +29,10 @@ const VariationModeSelection: React.FC<VariationModeSelectionProps> = ({
 
 	return (
 		<>
-			<View
-				style={{
-					flexDirection: 'row',
-					alignItems: 'center',
-					marginBottom: 4,
-				}}>
-				<Text style={{ fontSize: 12, color: colors.text, flex: 1 }}>Mode:</Text>
+			<View style={styles.modeSelectionHeader}>
+				<Text style={styles.labelSmallFlex}>Mode:</Text>
 				<TouchableOpacity
-					style={{ padding: 6 }}
+					style={styles.helpButton}
 					onPress={() =>
 						showAlert({
 							title: 'Mode Help',
@@ -45,35 +40,27 @@ const VariationModeSelection: React.FC<VariationModeSelectionProps> = ({
 								'Custom: options specific to this menu item.\n\nCategory: include all menu items in a specified category.\n\nExisting Items: include individual existing items as options.',
 						})
 					}>
-					<Text style={{ color: colors.primary, fontWeight: '600' }}>?</Text>
+					<Text style={styles.helpButtonText}>?</Text>
 				</TouchableOpacity>
 			</View>
-			<View
-				style={{
-					flexDirection: 'row',
-					gap: 8,
-					marginBottom: 8,
-					flexWrap: 'wrap',
-				}}>
+			<View style={styles.modeButtonsContainer}>
 				{(['custom', 'category', 'existing'] as const).map((mode) => (
 					<TouchableOpacity
 						key={mode}
 						onPress={() => handleUpdateVariationGroup(groupIndex, 'mode', mode)}
-						style={{
-							paddingVertical: 6,
-							paddingHorizontal: 12,
-							borderRadius: 6,
-							backgroundColor:
-								group.mode === mode ? colors.primary : colors.background,
-							borderWidth: 1,
-							borderColor: colors.border,
-						}}>
+						style={[
+							styles.modeButton,
+							group.mode === mode
+								? styles.modeButtonActive
+								: styles.modeButtonInactive,
+						]}>
 						<Text
-							style={{
-								fontSize: 12,
-								color: group.mode === mode ? '#fff' : colors.text,
-								fontWeight: group.mode === mode ? '600' : '400',
-							}}>
+							style={[
+								styles.modeButtonText,
+								group.mode === mode
+									? styles.modeButtonTextActive
+									: styles.modeButtonTextInactive,
+							]}>
 							{mode === 'custom'
 								? 'Custom'
 								: mode === 'category'

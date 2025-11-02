@@ -105,28 +105,9 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 				return (
 					<View
 						key={index}
-						style={{
-							backgroundColor: colors.surface,
-							borderRadius: 8,
-							padding: 12,
-							marginBottom: 8,
-							borderWidth: 1,
-							borderColor: colors.border,
-						}}>
-						<View
-							style={{
-								flexDirection: 'row',
-								alignItems: 'center',
-								justifyContent: 'space-between',
-								marginBottom: 8,
-							}}>
-							<Text
-								style={{
-									fontSize: 14,
-									fontWeight: '600',
-									color: colors.text,
-									flex: 1,
-								}}>
+						style={styles.addonCard}>
+						<View style={styles.addonHeader}>
+							<Text style={styles.addonTitle}>
 								{menuItem?.name || 'Unknown Item'}
 							</Text>
 							<TouchableOpacity onPress={() => handleRemoveAddon(index)}>
@@ -140,7 +121,7 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 
 						{/* Custom Label */}
 						<TextInput
-							style={[styles.categoryInput, { marginBottom: 8 }]}
+							style={[styles.categoryInput, styles.addonInputMargin]}
 							value={addon.label || ''}
 							onChangeText={(text) =>
 								handleUpdateAddon(index, 'label', text || null)
@@ -150,17 +131,10 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 						/>
 
 						{/* Price Override */}
-						<View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
-							<Text
-								style={{
-									fontSize: 14,
-									color: colors.text,
-									alignSelf: 'center',
-								}}>
-								Price Override: ₱
-							</Text>
+						<View style={styles.addonPriceRow}>
+							<Text style={styles.addonPriceLabel}>Price Override: ₱</Text>
 							<TextInput
-								style={[styles.categoryInput, { flex: 1 }]}
+								style={[styles.categoryInput, styles.flexOne]}
 								value={addon.priceOverride || ''}
 								onChangeText={(text) =>
 									handleUpdateAddon(index, 'priceOverride', text || null)
@@ -173,27 +147,17 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 
 						{/* Required Toggle */}
 						<TouchableOpacity
-							style={{
-								flexDirection: 'row',
-								alignItems: 'center',
-								gap: 8,
-							}}
+							style={styles.checkboxRow}
 							onPress={() =>
 								handleUpdateAddon(index, 'required', !addon.required)
 							}>
 							<View
-								style={{
-									width: 20,
-									height: 20,
-									borderRadius: 4,
-									borderWidth: 2,
-									borderColor: addon.required ? colors.primary : colors.border,
-									backgroundColor: addon.required
-										? colors.primary
-										: 'transparent',
-									justifyContent: 'center',
-									alignItems: 'center',
-								}}>
+								style={[
+									styles.checkbox,
+									addon.required
+										? styles.checkboxChecked
+										: styles.checkboxUnchecked,
+								]}>
 								{addon.required && (
 									<Ionicons
 										name="checkmark"
@@ -202,7 +166,7 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 									/>
 								)}
 							</View>
-							<Text style={{ fontSize: 14, color: colors.text }}>Required</Text>
+							<Text style={styles.checkboxLabel}>Required</Text>
 						</TouchableOpacity>
 					</View>
 				)

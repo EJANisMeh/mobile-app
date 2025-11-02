@@ -88,17 +88,12 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 
 	return (
 		<>
-			<View
-				style={{
-					flexDirection: 'row',
-					alignItems: 'center',
-					marginBottom: 8,
-				}}>
+			<View style={styles.variationsSectionHeader}>
 				<Text style={[styles.sectionTitle, { marginBottom: 0, flex: 1 }]}>
 					Variations (Optional)
 				</Text>
 				<TouchableOpacity
-					style={{ padding: 6 }}
+					style={styles.helpButton}
 					onPress={() =>
 						showAlert({
 							title: 'Variations Help',
@@ -106,20 +101,13 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 								'Variations: group of choices for your menu item (e.g., sizes, toppings, rice type, etc.)',
 						})
 					}>
-					<Text style={{ color: colors.primary, fontWeight: '600' }}>?</Text>
+					<Text style={styles.helpButtonText}>?</Text>
 				</TouchableOpacity>
 			</View>
 			{formData.variationGroups.map((group, groupIndex) => (
 				<View
 					key={groupIndex}
-					style={{
-						backgroundColor: colors.surface,
-						borderRadius: 8,
-						padding: 12,
-						marginBottom: 12,
-						borderWidth: 1,
-						borderColor: colors.border,
-					}}>
+					style={styles.variationGroupCard}>
 					<VariationGroupHeader
 						groupIndex={groupIndex}
 						setFormData={setFormData}

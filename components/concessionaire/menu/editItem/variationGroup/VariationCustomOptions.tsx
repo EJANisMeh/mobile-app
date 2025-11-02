@@ -90,17 +90,10 @@ const VariationCustomOptions: React.FC<VariationCustomOptionsProps> = ({
 
 	return (
 		<>
-			<View
-				style={{
-					flexDirection: 'row',
-					alignItems: 'center',
-					marginBottom: 4,
-				}}>
-				<Text style={{ fontSize: 12, color: colors.text, flex: 1 }}>
-					Options:
-				</Text>
+			<View style={styles.modeSelectionHeader}>
+				<Text style={styles.labelSmallFlex}>Options:</Text>
 				<TouchableOpacity
-					style={{ padding: 6 }}
+					style={styles.helpButton}
 					onPress={() =>
 						showAlert({
 							title: 'Options Help',
@@ -108,20 +101,14 @@ const VariationCustomOptions: React.FC<VariationCustomOptionsProps> = ({
 								'Options: name of option and additional price of the option',
 						})
 					}>
-					<Text style={{ color: colors.primary, fontWeight: '600' }}>?</Text>
+					<Text style={styles.helpButtonText}>?</Text>
 				</TouchableOpacity>
 			</View>
 			{group.options.map((option, optionIndex) => (
 				<React.Fragment key={optionIndex}>
-					<View
-						style={{
-							flexDirection: 'row',
-							gap: 8,
-							marginBottom: 8,
-							alignItems: 'center',
-						}}>
+					<View style={styles.variationOptionRow}>
 						<TextInput
-							style={[styles.categoryInput, { flex: 2 }]}
+							style={[styles.categoryInput, styles.variationOptionNameInput]}
 							value={option.name}
 							onChangeText={(text) =>
 								handleUpdateVariationOption(
@@ -134,17 +121,10 @@ const VariationCustomOptions: React.FC<VariationCustomOptionsProps> = ({
 							placeholder="Option name"
 							placeholderTextColor={colors.textSecondary}
 						/>
-						<View style={{ flexDirection: 'row', flex: 1, gap: 4 }}>
-							<Text
-								style={{
-									fontSize: 14,
-									color: colors.text,
-									alignSelf: 'center',
-								}}>
-								₱
-							</Text>
+						<View style={styles.variationOptionPriceContainer}>
+							<Text style={styles.variationOptionPriceSymbol}>₱</Text>
 							<TextInput
-								style={[styles.categoryInput, { flex: 1 }]}
+								style={[styles.categoryInput, styles.variationOptionPriceInput]}
 								value={option.priceAdjustment}
 								onChangeText={(text) =>
 									handleUpdateVariationOption(
@@ -171,19 +151,19 @@ const VariationCustomOptions: React.FC<VariationCustomOptionsProps> = ({
 						</TouchableOpacity>
 					</View>
 					{errors[`variation-${groupIndex}-option-${optionIndex}`] && (
-						<Text style={{ color: '#ef4444', marginBottom: 8 }}>
+						<Text style={styles.errorTextMarginBottom}>
 							{errors[`variation-${groupIndex}-option-${optionIndex}`]}
 						</Text>
 					)}
 				</React.Fragment>
 			))}
 			{errors[`variation-${groupIndex}-options`] && (
-				<Text style={{ color: '#ef4444', marginBottom: 8 }}>
+				<Text style={styles.errorTextMarginBottom}>
 					{errors[`variation-${groupIndex}-options`]}
 				</Text>
 			)}
 			<TouchableOpacity
-				style={[styles.addCategoryButton, { marginTop: 4, marginBottom: 0 }]}
+				style={[styles.addCategoryButton, styles.variationAddButtonInline]}
 				onPress={() => handleAddVariationOption(groupIndex)}>
 				<Ionicons
 					name="add-circle-outline"

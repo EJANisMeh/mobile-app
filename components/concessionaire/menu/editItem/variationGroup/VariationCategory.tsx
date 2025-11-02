@@ -34,7 +34,7 @@ const VariationCategory: React.FC<VariationCategoryProps> = ({
 	return (
 		<>
 			<TouchableOpacity
-				style={[styles.categoryInputContainer, { marginBottom: 8 }]}
+				style={[styles.categoryInputContainer, styles.categoryFilterMargin]}
 				onPress={() => {
 					const categoryOptions = categories.map((cat) => ({
 						label: cat.name,

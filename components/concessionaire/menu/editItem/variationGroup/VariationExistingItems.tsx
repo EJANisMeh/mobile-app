@@ -37,23 +37,15 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 
 	return (
 		<>
-			<Text style={{ fontSize: 12, color: colors.text, marginBottom: 4 }}>
-				Options (Existing Items):
-			</Text>
+			<Text style={styles.modeSelectionLabel}>Options (Existing Items):</Text>
 			{(group as any).existingMenuItemIds?.map(
 				(itemIdInGroup: number, idx: number) => {
 					const mi = menuItems.find((m: any) => m.id === itemIdInGroup)
 					return (
 						<View
 							key={idx}
-							style={{
-								flexDirection: 'row',
-								alignItems: 'center',
-								justifyContent: 'space-between',
-								marginBottom: 8,
-								gap: 8,
-							}}>
-							<Text style={{ color: colors.text }}>
+							style={styles.existingItemRow}>
+							<Text style={styles.existingItemName}>
 								{mi?.name || 'Unknown'}
 							</Text>
 							<TouchableOpacity
@@ -86,7 +78,7 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 			)}
 
 			<TouchableOpacity
-				style={[styles.addCategoryButton, { marginTop: 4, marginBottom: 0 }]}
+				style={[styles.addCategoryButton, styles.variationAddButtonInline]}
 				onPress={() => {
 					const availableItems = menuItems.filter(
 						(item: any) => item.id !== itemId
@@ -135,7 +127,7 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 				</Text>
 			</TouchableOpacity>
 			{errors[`variation-${groupIndex}-existing`] && (
-				<Text style={{ color: '#ef4444', marginTop: 4 }}>
+				<Text style={styles.errorTextMargin}>
 					{errors[`variation-${groupIndex}-existing`]}
 				</Text>
 			)}

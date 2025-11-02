@@ -29,10 +29,7 @@ const VariationGroupName: React.FC<VariationGroupNameProps> = ({
 	return (
 		<>
 			<View
-				style={[
-					styles.categoryInputContainer,
-					{ marginBottom: 8, borderWidth: 1, borderColor: colors.border },
-				]}>
+				style={[styles.categoryInputContainer, styles.variationGroupNameInput]}>
 				<TextInput
 					style={styles.categoryInput}
 					value={group.name}
@@ -44,7 +41,7 @@ const VariationGroupName: React.FC<VariationGroupNameProps> = ({
 				/>
 			</View>
 			{errors[`variation-${groupIndex}-name`] && (
-				<Text style={{ color: '#ef4444', marginBottom: 8 }}>
+				<Text style={styles.errorTextMarginBottom}>
 					{errors[`variation-${groupIndex}-name`]}
 				</Text>
 			)}

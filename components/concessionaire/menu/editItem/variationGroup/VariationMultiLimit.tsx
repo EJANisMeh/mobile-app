@@ -33,18 +33,11 @@ const VariationMultiLimit: React.FC<VariationMultiLimitProps> = ({
 
 	return (
 		<>
-			<View style={{ marginBottom: 8 }}>
-				<View
-					style={{
-						flexDirection: 'row',
-						alignItems: 'center',
-						marginBottom: 4,
-					}}>
-					<Text style={{ fontSize: 12, color: colors.text, flex: 1 }}>
-						Limit
-					</Text>
+			<View style={styles.multiLimitContainer}>
+				<View style={styles.modeSelectionHeader}>
+					<Text style={styles.labelSmallFlex}>Limit</Text>
 					<TouchableOpacity
-						style={{ padding: 6 }}
+						style={styles.helpButton}
 						onPress={() =>
 							showAlert({
 								title: 'Limit Help',
@@ -52,7 +45,7 @@ const VariationMultiLimit: React.FC<VariationMultiLimitProps> = ({
 									'Limit: refers to up to how many choices user is required to enter.',
 							})
 						}>
-						<Text style={{ color: colors.primary, fontWeight: '600' }}>?</Text>
+						<Text style={styles.helpButtonText}>?</Text>
 					</TouchableOpacity>
 				</View>
 				<TextInput
@@ -72,7 +65,7 @@ const VariationMultiLimit: React.FC<VariationMultiLimitProps> = ({
 					placeholderTextColor={colors.textSecondary}
 				/>
 				{errors[`variation-${groupIndex}-multiLimit`] && (
-					<Text style={{ color: '#ef4444', marginTop: 4 }}>
+					<Text style={styles.errorTextMargin}>
 						{errors[`variation-${groupIndex}-multiLimit`]}
 					</Text>
 				)}
