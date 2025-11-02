@@ -7,10 +7,9 @@ import {
 	useFocusEffect,
 } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
-import { useThemeContext, useConcessionContext } from '../../../context'
+import { useThemeContext, useConcessionContext, useMenuContext } from '../../../context'
 import { useResponsiveDimensions, useHideNavBar } from '../../../hooks'
 import { useCategoryBackend } from '../../../hooks/useBackend/useCategoryBackend'
-import { useMenuBackend } from '../../../hooks/useBackend/useMenuBackend'
 import {
 	useAlertModal,
 	useConfirmationModal,
@@ -66,7 +65,7 @@ const EditMenuItemScreen: React.FC = () => {
 		loading: categoriesLoading,
 		getCategories,
 	} = useCategoryBackend()
-	const { menuItems, getMenuItems } = useMenuBackend()
+	const { getMenuItems } = useMenuContext()
 
 	useHideNavBar()
 

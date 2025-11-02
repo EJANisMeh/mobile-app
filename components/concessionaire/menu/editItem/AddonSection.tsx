@@ -1,9 +1,8 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, TextInput } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useThemeContext } from '../../../../context'
+import { useThemeContext, useMenuContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
-import { useMenuBackend } from '../../../../hooks/useBackend/useMenuBackend'
 import { createConcessionaireEditMenuItemStyles } from '../../../../styles/concessionaire'
 import { AddMenuItemFormData, AddonInput } from '../../../../types'
 import {
@@ -29,17 +28,25 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createConcessionaireEditMenuItemStyles(colors, responsive)
-	const { menuItems } = useMenuBackend()
+	const { menuItems } = useMenuContext()
 
 	// Add-on Handlers
 	const handleAddAddon = () => {
-		const availableItems = menuItems.filter((item: any) => item.id !== itemId)
+		// Get already added addon IDs
+		const addedAddonIds = formData.addons.map((addon) => addon.menuItemId)
+
+		// Filter out: current item AND already added addons
+		const availableItems = menuItems.filter(
+			(item: any) => item.id !== itemId && !addedAddonIds.includes(item.id)
+		)
 
 		if (availableItems.length === 0) {
 			showAlert({
 				title: 'No Items Available',
 				message:
-					'An item cannot be an addon of itself. Add other menu items first.',
+					addedAddonIds.length > 0
+						? 'All available items have already been added as addons.'
+						: 'No other menu items available. Add more items first.',
 			})
 			return
 		}

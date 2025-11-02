@@ -1,9 +1,8 @@
 import React from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { useThemeContext } from '../../../../../context'
+import { useThemeContext, useMenuContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
-import { useMenuBackend } from '../../../../../hooks/useBackend/useMenuBackend'
 import { createConcessionaireEditMenuItemStyles } from '../../../../../styles/concessionaire'
 import { AddMenuItemFormData, VariationGroupInput } from '../../../../../types'
 import {
@@ -33,7 +32,7 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createConcessionaireEditMenuItemStyles(colors, responsive)
-	const { menuItems } = useMenuBackend()
+	const { menuItems } = useMenuContext()
 
 	return (
 		<>
@@ -80,15 +79,21 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 			<TouchableOpacity
 				style={[styles.addCategoryButton, styles.variationAddButtonInline]}
 				onPress={() => {
+					// Get already added existing item IDs in this group
+					const addedItemIds = (group as any).existingMenuItemIds || []
+
+					// Filter out: current item AND already added items
 					const availableItems = menuItems.filter(
-						(item: any) => item.id !== itemId
+						(item: any) => item.id !== itemId && !addedItemIds.includes(item.id)
 					)
 
 					if (availableItems.length === 0) {
 						showAlert({
 							title: 'No Items Available',
 							message:
-								'An item cannot be a variation of itself. Add other menu items first.',
+								addedItemIds.length > 0
+									? 'All available items have already been added.'
+									: 'No other menu items available. Add more items first.',
 						})
 						return
 					}
