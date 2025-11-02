@@ -5,13 +5,13 @@ import { useResponsiveDimensions } from '../../../../hooks'
 import { createConcessionaireAddMenuItemStyles } from '../../../../styles/concessionaire/addMenuItem'
 
 interface FormActionsProps {
-	hasErrors: boolean
+	isFormValid: boolean
 	handleSave: () => void
 	handleCancel: () => void
 }
 
 const FormActions: React.FC<FormActionsProps> = ({
-	hasErrors,
+	isFormValid,
 	handleSave,
 	handleCancel,
 }) => {
@@ -27,9 +27,9 @@ const FormActions: React.FC<FormActionsProps> = ({
 				<Text style={styles.cancelButtonText}>Cancel</Text>
 			</TouchableOpacity>
 			<TouchableOpacity
-				style={[styles.saveButton, hasErrors && styles.saveButtonDisabled]}
+				style={[styles.saveButton, !isFormValid && styles.saveButtonDisabled]}
 				onPress={handleSave}
-				disabled={hasErrors}>
+				disabled={!isFormValid}>
 				<Text style={styles.saveButtonText}>Add Item</Text>
 			</TouchableOpacity>
 		</>

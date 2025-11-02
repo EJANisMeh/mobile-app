@@ -28,6 +28,7 @@ import {
 	CategorySelector,
 	ImagePickerSection,
 	VariationGroupsSection,
+	FormActions,
 } from '../../../components/concessionaire/menu/addItem'
 import { AddMenuItemFormData, SelectionType } from '../../../types'
 import { useConcessionaireNavigation } from '../../../hooks/useNavigation'
@@ -222,6 +223,8 @@ const AddMenuItemScreen: React.FC = () => {
 		validateForm(true)
 	}, [formData, selectionTypes])
 
+	const isFormValid = validateForm(false)
+
 	const handleSave = () => {
 		const valid = validateForm(true)
 		if (!valid) {
@@ -340,7 +343,13 @@ const AddMenuItemScreen: React.FC = () => {
 			</DynamicScrollView>
 
 			{/* Bottom Actions */}
-			<View style={styles.bottomActions}></View>
+			<View style={styles.bottomActions}>
+				<FormActions
+					isFormValid={isFormValid}
+					handleSave={handleSave}
+					handleCancel={handleCancel}
+				/>
+			</View>
 
 			<AlertModal
 				visible={alertModalVisible}

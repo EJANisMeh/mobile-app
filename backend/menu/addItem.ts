@@ -94,16 +94,6 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 				})
 			}
 
-			// 2. Create category links
-			for (const categoryId of categoryIds) {
-				await tx.menu_item_category_link.create({
-					data: {
-						menu_item_id: newItem.id,
-						category_id: categoryId,
-					},
-				})
-			}
-
 			// 3. Create variation groups if provided
 			if (
 				variationGroups &&
