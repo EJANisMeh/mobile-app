@@ -13,7 +13,6 @@ import {
 	useMenuContext,
 } from '../../../context'
 import { useResponsiveDimensions, useHideNavBar } from '../../../hooks'
-import { useCategoryBackend } from '../../../hooks/useBackend/useCategoryBackend'
 import {
 	useAlertModal,
 	useConfirmationModal,
@@ -23,13 +22,13 @@ import {
 import { createConcessionaireEditMenuItemStyles } from '../../../styles/concessionaire'
 import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 import { menuApi } from '../../../services/api'
+import { apiCall } from '../../../services/api/api'
 import {
 	AlertModal,
 	ConfirmationModal,
 	MenuModal,
 	CheckboxMenuModal,
 } from '../../../components/modals'
-import { apiCall } from '../../../services/api/api'
 import {
 	AddMenuItemFormData,
 	ConcessionaireStackParamList,
@@ -67,12 +66,8 @@ const EditMenuItemScreen: React.FC = () => {
 	const confirmationModal = useConfirmationModal()
 	const menuModal = useMenuModal()
 	const checkboxMenuModal = useCheckboxMenuModal()
-	const {
-		categories,
-		loading: categoriesLoading,
-		getCategories,
-	} = useCategoryBackend()
-	const { getMenuItems } = useMenuContext()
+	const { categories, getMenuItems, getCategories, editMenuItem, getMenuItemById } =
+		useMenuContext()
 
 	useHideNavBar()
 
@@ -98,6 +93,7 @@ const EditMenuItemScreen: React.FC = () => {
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [selectionTypes, setSelectionTypes] = useState<SelectionType[]>([])
 	const [loadingSelectionTypes, setLoadingSelectionTypes] = useState(false)
+	const [categoriesLoading, setCategoriesLoading] = useState(false)
 
 	// Load item data on mount
 	useEffect(() => {
@@ -108,7 +104,8 @@ const EditMenuItemScreen: React.FC = () => {
 	useFocusEffect(
 		React.useCallback(() => {
 			if (concession?.id) {
-				getCategories(concession.id)
+				setCategoriesLoading(true)
+				getCategories(concession.id).finally(() => setCategoriesLoading(false))
 				getMenuItems(concession.id)
 			}
 			// Load selection types
@@ -119,9 +116,16 @@ const EditMenuItemScreen: React.FC = () => {
 	const loadMenuItem = async () => {
 		setLoadingItem(true)
 		try {
-			const result = await menuApi.getMenuItemById(itemId)
+			const result = await getMenuItemById(itemId)
 			if (result.success && result.item) {
 				const item = result.item
+
+				// Extract category IDs from junction table
+				const categoryIds = item.menu_item_category_links
+					? item.menu_item_category_links.map((link: any) => link.category_id)
+					: item.categoryId
+					? [item.categoryId]
+					: []
 
 				// Transform backend data to form data structure
 				const transformedData: AddMenuItemFormData = {
@@ -130,7 +134,7 @@ const EditMenuItemScreen: React.FC = () => {
 					basePrice: item.basePrice ? item.basePrice.toString() : '',
 					images: item.images || [],
 					displayImageIndex: item.display_image_index ?? 0,
-					categoryIds: item.categoryId ? [item.categoryId] : [],
+					categoryIds: categoryIds,
 					availability: item.availability ?? true,
 					variationGroups:
 						item.menu_item_variation_groups?.map((group: any) => ({
@@ -343,41 +347,38 @@ const EditMenuItemScreen: React.FC = () => {
 			cancelText: 'Cancel',
 			onConfirm: async () => {
 				try {
-					const response = await apiCall(`/menu/edit/${itemId}`, {
-						method: 'PUT',
-						body: JSON.stringify({
-							concessionId: concession?.id,
-							name: formData.name.trim(),
-							description: formData.description.trim() || null,
-							basePrice: formData.basePrice || '0',
-							images: formData.images,
-							displayImageIndex: formData.displayImageIndex,
-							categoryIds: formData.categoryIds,
-							availability: formData.availability,
-							variationGroups: formData.variationGroups.map((group) => ({
-								name: group.name.trim(),
-								selectionTypeId: group.selectionTypeId,
-								multiLimit: group.multiLimit,
-								mode: group.mode,
-								categoryFilterId: group.categoryFilterId,
-								options: group.options.map((opt) => ({
-									name: opt.name.trim(),
-									priceAdjustment: opt.priceAdjustment,
-									isDefault: opt.isDefault,
-									availability: opt.availability,
-									position: opt.position,
-								})),
-								existingMenuItemIds: (group as any).existingMenuItemIds || [],
-								position: group.position,
+					const response = await editMenuItem(itemId, {
+						concessionId: concession?.id,
+						name: formData.name.trim(),
+						description: formData.description.trim() || null,
+						basePrice: formData.basePrice || '0',
+						images: formData.images,
+						displayImageIndex: formData.displayImageIndex,
+						categoryIds: formData.categoryIds,
+						availability: formData.availability,
+						variationGroups: formData.variationGroups.map((group) => ({
+							name: group.name.trim(),
+							selectionTypeId: group.selectionTypeId,
+							multiLimit: group.multiLimit,
+							mode: group.mode,
+							categoryFilterId: group.categoryFilterId,
+							options: group.options.map((opt) => ({
+								name: opt.name.trim(),
+								priceAdjustment: opt.priceAdjustment,
+								isDefault: opt.isDefault,
+								availability: opt.availability,
+								position: opt.position,
 							})),
-							addons: formData.addons.map((addon) => ({
-								menuItemId: addon.menuItemId,
-								label: addon.label?.trim() || null,
-								priceOverride: addon.priceOverride,
-								required: addon.required,
-								position: addon.position,
-							})),
-						}),
+							existingMenuItemIds: (group as any).existingMenuItemIds || [],
+							position: group.position,
+						})),
+						addons: formData.addons.map((addon) => ({
+							menuItemId: addon.menuItemId,
+							label: addon.label?.trim() || null,
+							priceOverride: addon.priceOverride,
+							required: addon.required,
+							position: addon.position,
+						})),
 					})
 
 					if (response.success) {

@@ -14,17 +14,17 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 			basePrice,
 			images,
 			displayImageIndex,
-			categoryId,
+			categoryIds,
 			availability,
 			variationGroups,
 			addons,
 		} = req.body
 
-		// Validate required fields: concessionId, name, category
-		if (!concessionId || !name || !categoryId) {
+		// Validate required fields: concessionId, name, categoryIds
+		if (!concessionId || !name || !categoryIds || !Array.isArray(categoryIds) || categoryIds.length === 0) {
 			return res.status(400).json({
 				success: false,
-				error: 'Concession ID, name, and category are required',
+				error: 'Concession ID, name, and at least one category are required',
 			})
 		}
 
@@ -72,14 +72,33 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 					basePrice: parsedPrice,
 					images: imageArray,
 					display_image_index: displayIndex,
-					categoryId: categoryId,
 					concessionId: concessionId,
 					availability: availability !== undefined ? availability : true,
 					position: 0, // You can implement custom positioning later
 				},
 			})
 
-			// 2. Create variation groups if provided
+			// 2. Create category links
+			for (const categoryId of categoryIds) {
+				await tx.menu_item_category_link.create({
+					data: {
+						menu_item_id: newItem.id,
+						category_id: categoryId,
+					},
+				})
+			}
+
+			// 2. Create category links
+			for (const categoryId of categoryIds) {
+				await tx.menu_item_category_link.create({
+					data: {
+						menu_item_id: newItem.id,
+						category_id: categoryId,
+					},
+				})
+			}
+
+			// 3. Create variation groups if provided
 			if (
 				variationGroups &&
 				Array.isArray(variationGroups) &&
@@ -165,7 +184,7 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 				}
 			}
 
-			// 4. Create add-ons if provided
+			// 5. Create add-ons if provided
 			if (addons && Array.isArray(addons) && addons.length > 0) {
 				for (const addon of addons) {
 					if (!addon.menuItemId) continue // Skip invalid add-ons
@@ -192,6 +211,11 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 				where: { id: newItem.id },
 				include: {
 					category: true,
+					menu_item_category_links: {
+						include: {
+							category: true,
+						},
+					},
 					menu_item_variation_groups: {
 						include: {
 							menu_item_variation_option_choices: true,

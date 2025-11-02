@@ -21,6 +21,11 @@ export const getItemById = async (
 				id: parseInt(itemId),
 			},
 			include: {
+				menu_item_category_links: {
+					include: {
+						category: true,
+					},
+				},
 				menu_item_variation_groups: {
 					where: {
 						kind: 'group',

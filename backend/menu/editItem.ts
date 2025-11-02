@@ -9,7 +9,7 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 			name,
 			description,
 			basePrice,
-			categoryId,
+			categoryIds,
 			availability,
 			images,
 			displayImageIndex,
@@ -36,7 +36,6 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 		if (description !== undefined)
 			updateData.description = description ? description.trim() : null
 		if (basePrice !== undefined) updateData.basePrice = parseFloat(basePrice)
-		if (categoryId !== undefined) updateData.categoryId = categoryId
 		if (availability !== undefined) updateData.availability = availability
 		if (images !== undefined) updateData.images = images
 		if (displayImageIndex !== undefined)
@@ -54,6 +53,24 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 				success: false,
 				error: 'Failed to update menu item',
 			})
+		}
+
+		// Handle category links if provided
+		if (categoryIds !== undefined && Array.isArray(categoryIds)) {
+			// Delete existing category links
+			await prisma.menu_item_category_link.deleteMany({
+				where: { menu_item_id: parseInt(id) },
+			})
+
+			// Create new category links
+			for (const categoryId of categoryIds) {
+				await prisma.menu_item_category_link.create({
+					data: {
+						menu_item_id: parseInt(id),
+						category_id: categoryId,
+					},
+				})
+			}
 		}
 
 		// Handle variation groups if provided

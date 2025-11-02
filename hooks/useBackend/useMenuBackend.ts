@@ -1,6 +1,7 @@
 /**
  * Menu Backend Hook
  * Communication layer between frontend and backend menu functions
+ * Includes category management
  */
 import { useState, Dispatch, SetStateAction } from 'react'
 import {
@@ -9,12 +10,17 @@ import {
 	deleteMenuItem,
 	toggleVariationOptionAvailability,
 	addMenuItem,
+	editMenuItem,
+	getMenuItemById,
 } from './useBackend_backend/menu'
+import { useGetCategories, useUpdateCategories } from './useBackend_backend/category'
+import { Category } from '../../types/categoryTypes'
 
 export const useMenuBackend = () => {
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 	const [menuItems, setMenuItems] = useState<any[]>([])
+	const [categories, setCategories] = useState<Category[]>([])
 
 	// Type-safe setter that accepts both value and callback
 	const safeSetMenuItems = (value: any[] | ((prev: any[]) => any[])) => {
@@ -24,10 +30,12 @@ export const useMenuBackend = () => {
 			setMenuItems(value)
 		}
 	}
+
 	return {
 		loading,
 		error,
 		menuItems,
+		categories,
 		getMenuItems: getMenuItems(
 			setLoading,
 			setError,
@@ -53,5 +61,13 @@ export const useMenuBackend = () => {
 			setError,
 			safeSetMenuItems as Dispatch<SetStateAction<any[]>>
 		),
+		editMenuItem: editMenuItem(
+			setLoading,
+			setError,
+			safeSetMenuItems as Dispatch<SetStateAction<any[]>>
+		),
+		getMenuItemById: getMenuItemById(setLoading, setError),
+		getCategories: useGetCategories(setCategories, setLoading, setError),
+		updateCategories: useUpdateCategories(setCategories, setLoading, setError),
 	}
 }

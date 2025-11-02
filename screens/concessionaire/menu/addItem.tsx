@@ -7,7 +7,6 @@ import {
 	useMenuContext,
 } from '../../../context'
 import { useResponsiveDimensions, useHideNavBar } from '../../../hooks'
-import { useCategoryBackend } from '../../../hooks/useBackend/useCategoryBackend'
 import {
 	useAlertModal,
 	useConfirmationModal,
@@ -41,7 +40,8 @@ const AddMenuItemScreen: React.FC = () => {
 	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
 	const navigation = useConcessionaireNavigation()
 	const { concession } = useConcessionContext()
-	const { getMenuItems, addMenuItem } = useMenuContext()
+	const { categories, getMenuItems, getCategories, addMenuItem } =
+		useMenuContext()
 
 	const {
 		visible: alertModalVisible,
@@ -68,11 +68,6 @@ const AddMenuItemScreen: React.FC = () => {
 		hideMenu: hideCheckboxMenuModal,
 		showMenu: showCheckboxMenuModal,
 	} = useCheckboxMenuModal()
-	const {
-		categories,
-		loading: categoriesLoading,
-		getCategories,
-	} = useCategoryBackend()
 
 	useHideNavBar()
 
@@ -92,12 +87,14 @@ const AddMenuItemScreen: React.FC = () => {
 	const [hasChanges, setHasChanges] = useState(false)
 	const [errors, setErrors] = useState<Record<string, string>>({})
 	const [selectionTypes, setSelectionTypes] = useState<SelectionType[]>([])
+	const [categoriesLoading, setCategoriesLoading] = useState(false)
 
 	// Load categories on mount and when returning from category management
 	useFocusEffect(
 		React.useCallback(() => {
 			if (concession?.id) {
-				getCategories(concession.id)
+				setCategoriesLoading(true)
+				getCategories(concession.id).finally(() => setCategoriesLoading(false))
 				getMenuItems(concession.id)
 			}
 			// Load selection types

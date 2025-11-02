@@ -7,9 +7,12 @@ import {
 	ActivityIndicator,
 	BackHandler,
 } from 'react-native'
-import { useThemeContext, useConcessionContext } from '../../../context'
+import {
+	useThemeContext,
+	useConcessionContext,
+	useMenuContext,
+} from '../../../context'
 import { useHideNavBar, useResponsiveDimensions } from '../../../hooks'
-import { useCategoryBackend } from '../../../hooks/useBackend/useCategoryBackend'
 import { useAlertModal } from '../../../hooks/useModals/useAlertModal'
 import { useConfirmationModal } from '../../../hooks/useModals/useConfirmationModal'
 import { createConcessionaireCategoryManagementStyles } from '../../../styles/concessionaire'
@@ -39,14 +42,14 @@ const CategoryManagementScreen: React.FC = () => {
 	const navigation = useNavigation()
 
 	const { concession } = useConcessionContext()
-	const { categories, loading, getCategories, updateCategories } =
-		useCategoryBackend()
+	const { categories, getCategories, updateCategories } = useMenuContext()
 
 	const alertModal = useAlertModal()
 	const confirmationModal = useConfirmationModal()
 
 	const [editedCategories, setEditedCategories] = useState<CategoryItem[]>([])
 	const [hasChanges, setHasChanges] = useState(false)
+	const [loading, setLoading] = useState(false)
 
 	useHideNavBar()
 
@@ -56,17 +59,19 @@ const CategoryManagementScreen: React.FC = () => {
 
 		const fetchCategories = async () => {
 			if (concession?.id) {
+				setLoading(true)
 				const result = await getCategories(concession.id)
 
 				if (isMounted && result.success && result.categories) {
 					setEditedCategories(
-						result.categories.map((cat) => ({
+						result.categories.map((cat: any) => ({
 							id: cat.id,
 							name: cat.name,
 							position: cat.position || 0,
 						}))
 					)
 				}
+				setLoading(false)
 			}
 		}
 
@@ -97,7 +102,7 @@ const CategoryManagementScreen: React.FC = () => {
 
 		// Check if any category has changed
 		const changed = nonEmptyEdited.some((edited) => {
-			const original = categories.find((cat) => cat.id === edited.id)
+			const original = categories.find((cat: any) => cat.id === edited.id)
 			if (!original) return true // New category with value
 			return original.name !== edited.name
 		})
@@ -156,7 +161,7 @@ const CategoryManagementScreen: React.FC = () => {
 				onConfirm: () => {
 					// Reset to original categories
 					setEditedCategories(
-						categories.map((cat) => ({
+						categories.map((cat: any) => ({
 							id: cat.id,
 							name: cat.name,
 							position: cat.position || 0,

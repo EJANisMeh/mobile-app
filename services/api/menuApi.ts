@@ -83,6 +83,20 @@ export const menuApi = {
 	},
 
 	/**
+	 * Edit menu item
+	 * Backend handles: validation, updating menu item with variations and addons
+	 */
+	editMenuItem: async (itemId: number, formData: any): Promise<any> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall(`/menu/edit/${itemId}`, {
+			method: 'PUT',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+			body: JSON.stringify(formData),
+		})
+	},
+
+	/**
 	 * Toggle menu item availability
 	 * Backend handles: validation, updating availability status
 	 */
