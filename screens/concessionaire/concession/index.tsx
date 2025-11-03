@@ -1,7 +1,5 @@
-import React, { useEffect } from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native'
+import React, { useEffect, useState } from 'react'
+import { View, Text } from 'react-native'
 import {
 	useThemeContext,
 	useConcessionContext,
@@ -21,7 +19,10 @@ import {
 	ConcessionStatusButton,
 	ConcessionEditDetailsButton,
 	PaymentMethodsList,
+	ConcessionScheduleButton,
+	ScheduleOverviewCard,
 } from '../../../components/concessionaire/concession/main'
+import { ConcessionScheduleModal } from '../../../components/concessionaire/concession/schedule'
 import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 
 const ConcessionScreen: React.FC = () => {
@@ -30,6 +31,7 @@ const ConcessionScreen: React.FC = () => {
 	const { user } = useAuthContext()
 	const { concession, loading, getConcession } = useConcessionContext()
 	const concessionStyles = createConcessionStyles(colors, responsive)
+	const [scheduleModalVisible, setScheduleModalVisible] = useState(false)
 
 	const { visible, title, message, showAlert, hideAlert, handleClose } =
 		useAlertModal()
@@ -41,24 +43,36 @@ const ConcessionScreen: React.FC = () => {
 		hideConfirmation,
 	} = useConfirmationModal()
 
-	// Load concession data on mount or when concession_id changes
 	useEffect(() => {
 		if (user?.concession_id) {
 			getConcession(user.concession_id)
 		}
-	}, [user?.concession_id])
+	}, [user?.concession_id, getConcession])
 
-	// Loading state
+	const handleOpenSchedule = () => {
+		setScheduleModalVisible(true)
+	}
+
+	const handleCloseSchedule = () => {
+		setScheduleModalVisible(false)
+	}
+
+	const handleScheduleEdit = () => {
+		showAlert({
+			title: 'Coming soon',
+			message:
+				'Schedule editing will be available in a future update. For now, you can review your current hours here.',
+		})
+	}
+
 	if (loading && !concession) {
 		return <LoadingConcession />
 	}
 
-	// No concession assigned
 	if (!concession && !loading) {
 		return <NoConcession />
 	}
 
-	// concession and !loading
 	return (
 		<DynamicKeyboardView>
 			<DynamicScrollView
@@ -66,23 +80,31 @@ const ConcessionScreen: React.FC = () => {
 				autoCenter={false}
 				showsVerticalScrollIndicator={true}>
 				<View style={concessionStyles.scrollContent}>
-					{/* Header Section */}
 					<ConcessionHeader />
 
-					{/* Status Section */}
 					<ConcessionStatusButton
 						showAlert={showAlert}
 						showConfirmation={showConfirmation}
 					/>
 
-					{/* Actions Section */}
+					<View style={concessionStyles.scheduleOverviewContainer}>
+						<Text style={concessionStyles.sectionTitle}>Schedule</Text>
+						<ScheduleOverviewCard
+							schedule={concession?.schedule ?? null}
+							isConcessionOpen={Boolean(concession?.is_open)}
+						/>
+					</View>
+
 					<View style={concessionStyles.actionsSection}>
 						<Text style={concessionStyles.sectionTitle}>Manage</Text>
 
 						<ConcessionEditDetailsButton />
+						<ConcessionScheduleButton
+							onPress={handleOpenSchedule}
+							hasSchedule={Boolean(concession?.schedule)}
+						/>
 					</View>
 
-					{/* Payment Methods Section */}
 					<View style={concessionStyles.paymentMethodsSection}>
 						<Text style={concessionStyles.sectionTitle}>Payment Methods</Text>
 
@@ -109,6 +131,14 @@ const ConcessionScreen: React.FC = () => {
 					hideConfirmation()
 				}}
 				onCancel={() => hideConfirmation()}
+			/>
+
+			<ConcessionScheduleModal
+				visible={scheduleModalVisible}
+				onClose={handleCloseSchedule}
+				schedule={concession?.schedule ?? null}
+				concessionName={concession?.name ?? 'Concession'}
+				onPressEdit={handleScheduleEdit}
 			/>
 		</DynamicKeyboardView>
 	)

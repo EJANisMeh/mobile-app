@@ -46,11 +46,66 @@ export const createConcessionStyles = (
 		statusSection: {
 			marginBottom: responsive.getResponsiveMargin().large,
 		},
+		scheduleOverviewContainer: {
+			marginBottom: responsive.getResponsiveMargin().large,
+		},
 		sectionTitle: {
 			fontSize: responsive.getResponsiveFontSize(18),
 			fontWeight: '600' as const,
 			color: colors.text,
 			marginBottom: responsive.getResponsiveMargin().medium,
+		},
+		scheduleOverviewCard: {
+			backgroundColor: colors.card,
+			borderRadius: 12,
+			borderWidth: 1,
+			borderColor: colors.border,
+			padding: responsive.getResponsiveSpacing().md,
+		},
+		scheduleOverviewHeader: {
+			flexDirection: 'row' as const,
+			justifyContent: 'space-between' as const,
+			alignItems: 'center' as const,
+			marginBottom: responsive.getResponsiveMargin().small,
+		},
+		scheduleOverviewTitle: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
+			color: colors.text,
+		},
+		scheduleStatusBadge: {
+			paddingHorizontal: responsive.getResponsiveSpacing().sm,
+			paddingVertical: 4,
+			borderRadius: 12,
+		},
+		scheduleStatusBadgeOpen: {
+			backgroundColor: '#e8f5e9',
+		},
+		scheduleStatusBadgeClosed: {
+			backgroundColor: '#ffebee',
+		},
+		scheduleStatusBadgeText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			fontWeight: '600' as const,
+			color: '#2e7d32',
+		},
+		scheduleStatusBadgeTextClosed: {
+			color: '#c62828',
+		},
+		scheduleOverviewDayLabel: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.placeholder,
+			marginBottom: responsive.getResponsiveMargin().small / 2,
+		},
+		scheduleOverviewHours: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
+			color: colors.text,
+			marginBottom: responsive.getResponsiveMargin().small,
+		},
+		scheduleOverviewFooter: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.textSecondary,
 		},
 		statusButton: {
 			flexDirection: 'row' as const,
@@ -188,5 +243,110 @@ export const createConcessionStyles = (
 			fontWeight: '600' as const,
 			marginTop: 6,
 			textAlign: 'right' as const,
+		},
+		scheduleModalScroll: {
+			maxHeight: responsive.getHeightPercent(60),
+		},
+		scheduleModalSectionTitle: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
+			color: colors.text,
+			marginBottom: responsive.getResponsiveMargin().small,
+		},
+		scheduleDayRow: {
+			flexDirection: 'row' as const,
+			justifyContent: 'space-between' as const,
+			alignItems: 'center' as const,
+			paddingVertical: 6,
+		},
+		scheduleDayLabel: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.text,
+		},
+		scheduleDayHours: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.textSecondary,
+			fontWeight: '500' as const,
+		},
+		scheduleModalDivider: {
+			height: 1,
+			backgroundColor: colors.border,
+			marginVertical: responsive.getResponsiveMargin().medium,
+		},
+		scheduleModalEmpty: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.placeholder,
+			fontStyle: 'italic' as const,
+			marginBottom: responsive.getResponsiveMargin().small,
+		},
+		scheduleBreakRow: {
+			flexDirection: 'row' as const,
+			justifyContent: 'space-between' as const,
+			alignItems: 'center' as const,
+			paddingVertical: 6,
+		},
+		scheduleBreakLabel: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.text,
+		},
+		scheduleBreakHours: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.textSecondary,
+			fontWeight: '500' as const,
+		},
+		scheduleSpecialRow: {
+			flexDirection: 'row' as const,
+			justifyContent: 'space-between' as const,
+			alignItems: 'center' as const,
+			paddingVertical: 8,
+		},
+		scheduleSpecialDate: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.text,
+			fontWeight: '600' as const,
+		},
+		scheduleSpecialReason: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.textSecondary,
+			marginTop: 4,
+			maxWidth: responsive.getContentMaxWidth() * 0.6,
+		},
+		scheduleSpecialBadge: {
+			paddingHorizontal: responsive.getResponsiveSpacing().sm,
+			paddingVertical: 4,
+			borderRadius: 12,
+		},
+		scheduleSpecialBadgeOpen: {
+			backgroundColor: '#e8f5e9',
+		},
+		scheduleSpecialBadgeClosed: {
+			backgroundColor: '#ffebee',
+		},
+		scheduleSpecialBadgeText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			fontWeight: '600' as const,
+			color: '#2e7d32',
+		},
+		scheduleSpecialBadgeTextClosed: {
+			color: '#c62828',
+		},
+		scheduleModalEditButton: {
+			marginTop: responsive.getResponsiveMargin().medium,
+			paddingVertical: 12,
+			borderRadius: 10,
+			backgroundColor: colors.primary,
+			alignItems: 'center' as const,
+			justifyContent: 'center' as const,
+		},
+		scheduleModalEditButtonDisabled: {
+			backgroundColor: colors.border,
+		},
+		scheduleModalEditButtonText: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
+			color: colors.textOnPrimary,
+		},
+		scheduleModalEditButtonTextDisabled: {
+			color: colors.placeholder,
 		},
 	})
