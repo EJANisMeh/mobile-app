@@ -338,15 +338,9 @@ export const createConcessionStyles = (
 			alignItems: 'center' as const,
 			justifyContent: 'center' as const,
 		},
-		scheduleModalEditButtonDisabled: {
-			backgroundColor: colors.border,
-		},
 		scheduleModalEditButtonText: {
 			fontSize: responsive.getResponsiveFontSize(16),
 			fontWeight: '600' as const,
 			color: colors.textOnPrimary,
-		},
-		scheduleModalEditButtonTextDisabled: {
-			color: colors.placeholder,
 		},
 	})

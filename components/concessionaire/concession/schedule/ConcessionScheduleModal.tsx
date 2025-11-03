@@ -127,21 +127,13 @@ const ConcessionScheduleModal: React.FC<ConcessionScheduleModalProps> = ({
 				)}
 			</ScrollView>
 
-			<TouchableOpacity
-				style={[
-					styles.scheduleModalEditButton,
-					!onPressEdit && styles.scheduleModalEditButtonDisabled,
-				]}
-				onPress={onPressEdit}
-				disabled={!onPressEdit}>
-				<Text
-					style={[
-						styles.scheduleModalEditButtonText,
-						!onPressEdit && styles.scheduleModalEditButtonTextDisabled,
-					]}>
-					Edit schedule
-				</Text>
-			</TouchableOpacity>
+			{onPressEdit ? (
+				<TouchableOpacity
+					style={styles.scheduleModalEditButton}
+					onPress={onPressEdit}>
+					<Text style={styles.scheduleModalEditButtonText}>Edit schedule</Text>
+				</TouchableOpacity>
+			) : null}
 		</BaseModal>
 	)
 }

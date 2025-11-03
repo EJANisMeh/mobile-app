@@ -57,14 +57,6 @@ const ConcessionScreen: React.FC = () => {
 		setScheduleModalVisible(false)
 	}
 
-	const handleScheduleEdit = () => {
-		showAlert({
-			title: 'Coming soon',
-			message:
-				'Schedule editing will be available in a future update. For now, you can review your current hours here.',
-		})
-	}
-
 	if (loading && !concession) {
 		return <LoadingConcession />
 	}
@@ -138,7 +130,6 @@ const ConcessionScreen: React.FC = () => {
 				onClose={handleCloseSchedule}
 				schedule={concession?.schedule ?? null}
 				concessionName={concession?.name ?? 'Concession'}
-				onPressEdit={handleScheduleEdit}
 			/>
 		</DynamicKeyboardView>
 	)

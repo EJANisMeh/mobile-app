@@ -3,7 +3,7 @@
  * Communication layer between frontend and backend concession functions
  * Used by ConcessionContext to manage concession data and operations
  */
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
 	getConcession,
 	toggleConcessionStatus,
@@ -16,16 +16,27 @@ export const useConcessionBackend = () => {
 	const [error, setError] = useState<string | null>(null)
 	const [concession, setConcession] = useState<ConcessionData | null>(null)
 
+	const getConcessionHandler = useMemo(
+		() => getConcession(setLoading, setError, setConcession),
+		[setLoading, setError, setConcession]
+	)
+
+	const updateConcessionHandler = useMemo(
+		() => updateConcession(setLoading, setError, setConcession),
+		[setLoading, setError, setConcession]
+	)
+
+	const toggleConcessionStatusHandler = useMemo(
+		() => toggleConcessionStatus(setLoading, setError, setConcession),
+		[setLoading, setError, setConcession]
+	)
+
 	return {
 		loading,
 		error,
 		concession,
-		getConcession: getConcession(setLoading, setError, setConcession),
-		updateConcession: updateConcession(setLoading, setError, setConcession),
-		toggleConcessionStatus: toggleConcessionStatus(
-			setLoading,
-			setError,
-			setConcession
-		),
+		getConcession: getConcessionHandler,
+		updateConcession: updateConcessionHandler,
+		toggleConcessionStatus: toggleConcessionStatusHandler,
 	}
 }
