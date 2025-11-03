@@ -16,4 +16,5 @@ export {
 	RawSelectionType,
 	RawMenuItemAddon,
 	ConcessionMenuItemListItem,
+	MenuSearchParams,
 } from './MenuApiTypes'

@@ -1,50 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { menuApi } from '../../services/api'
-import type {
-	ConcessionMenuItemListItem,
-	MenuItemsResponse,
-	RawMenuItem,
-} from '../../types'
-
-const toNumber = (value: number | string | null | undefined): number => {
-	if (typeof value === 'number') {
-		return Number.isFinite(value) ? value : 0
-	}
-
-	if (typeof value === 'string') {
-		const parsed = parseFloat(value)
-		return Number.isFinite(parsed) ? parsed : 0
-	}
-
-	return 0
-}
-
-const transformMenuItem = (item: RawMenuItem): ConcessionMenuItemListItem => {
-	const images = Array.isArray(item.images) ? item.images : []
-	const fallbackIndex = images.length > 0 ? 0 : -1
-	const rawIndex =
-		typeof item.display_image_index === 'number'
-			? item.display_image_index
-			: fallbackIndex
-	const safeIndex =
-		rawIndex >= 0 && rawIndex < images.length ? rawIndex : fallbackIndex
-	const imageToDisplay = safeIndex >= 0 ? images[safeIndex] : null
-
-	const basePrice = toNumber(item.basePrice)
-	const priceDisplay = `₱${basePrice.toFixed(2)}`
-
-	return {
-		id: item.id,
-		name: item.name,
-		description: item.description ?? null,
-		basePrice,
-		availability: Boolean(item.availability),
-		images,
-		displayImageIndex: safeIndex === -1 ? 0 : safeIndex,
-		imageToDisplay,
-		priceDisplay,
-	}
-}
+import type { ConcessionMenuItemListItem, MenuItemsResponse } from '../../types'
+import { transformRawMenuItem } from '../../utils/menuItemTransform'
 
 interface ConcessionMenuMeta {
 	count: number
@@ -87,7 +44,7 @@ export const useConcessionMenuItems = (
 				return
 			}
 
-			const transformedItems = response.menuItems.map(transformMenuItem)
+			const transformedItems = response.menuItems.map(transformRawMenuItem)
 			setMenuItems(transformedItems)
 			setMeta({
 				count: response.count,

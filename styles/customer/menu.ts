@@ -10,6 +10,37 @@ export const createCustomerMenuStyles = (
 		container: {
 			backgroundColor: colors.background,
 		},
+		searchSection: {
+			paddingHorizontal: responsive.getResponsivePadding().horizontal,
+			paddingTop: responsive.getResponsivePadding().vertical,
+			paddingBottom: responsive.getResponsivePadding().vertical / 2,
+		},
+		searchInputWrapper: {
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			backgroundColor: colors.surface,
+			borderRadius: 12,
+			borderWidth: 1,
+			borderColor: colors.border,
+			paddingHorizontal: responsive.getResponsivePadding().horizontal / 2,
+		},
+		searchIcon: {
+			marginRight: responsive.getResponsiveSpacing().xs,
+		},
+		searchInput: {
+			flex: 1,
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.text,
+			paddingVertical: responsive.getResponsivePadding().vertical / 3,
+		},
+		clearButton: {
+			padding: responsive.getResponsiveSpacing().xs,
+		},
+		clearButtonText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.primary,
+			fontWeight: '600' as const,
+		},
 		containerText: {
 			fontSize: responsive.getResponsiveFontSize(24),
 			fontWeight: 'bold' as const,
@@ -76,6 +107,25 @@ export const createCustomerMenuStyles = (
 		},
 		menuItemsContainer: {
 			paddingLeft: responsive.getResponsivePadding().horizontal,
+		},
+		searchResultsSection: {
+			paddingHorizontal: responsive.getResponsivePadding().horizontal,
+			paddingBottom: responsive.getResponsivePadding().vertical,
+		},
+		searchResultTitle: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
+			color: colors.text,
+			marginBottom: responsive.getResponsiveSpacing().sm,
+		},
+		searchResultEmpty: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.textSecondary,
+			textAlign: 'center' as const,
+			marginTop: responsive.getResponsiveSpacing().md,
+		},
+		searchResultList: {
+			marginTop: responsive.getResponsiveSpacing().xs,
 		},
 		menuItemCard: {
 			width: 140,

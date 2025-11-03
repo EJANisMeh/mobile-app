@@ -17,6 +17,10 @@ export interface RawMenuItem {
 	availability: boolean
 	concessionId: number
 	categoryId?: number | null
+	category?: {
+		id: number
+		name: string
+	} | null
 	images?: string[] | null
 	display_image_index?: number | null
 	menu_item_variation_groups?: RawMenuItemVariationGroup[]
@@ -73,4 +77,13 @@ export interface ConcessionMenuItemListItem
 	description: string | null
 	imageToDisplay: string | null
 	priceDisplay: string
+	category: MenuItemForCustomer['category']
+}
+
+export interface MenuSearchParams {
+	search?: string
+	category?: string
+	availableOnly?: boolean
+	page?: number
+	limit?: number
 }

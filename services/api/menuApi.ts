@@ -9,6 +9,7 @@ import {
 	CreateOrderPayload,
 	CreateOrderResponse,
 	MenuItemsResponse,
+	MenuSearchParams,
 } from '../../types'
 
 export const menuApi = {
@@ -58,6 +59,42 @@ export const menuApi = {
 					position: addon.position,
 				})),
 			}),
+		})
+	},
+
+	/**
+	 * Search menu items across concessions
+	 * Supports query text, category filters, and availability flag
+	 */
+	searchMenuItems: async (
+		params: MenuSearchParams
+	): Promise<MenuItemsResponse> => {
+		const token = await AsyncStorage.getItem('authToken')
+		const query = new URLSearchParams()
+
+		if (params.search) {
+			query.append('search', params.search)
+		}
+		if (params.category) {
+			query.append('category', params.category)
+		}
+		if (params.availableOnly) {
+			query.append('available', 'true')
+		}
+		if (params.page) {
+			query.append('page', String(params.page))
+		}
+		if (params.limit) {
+			query.append('limit', String(params.limit))
+		}
+
+		const endpoint = `/menu/get${
+			query.toString() ? `?${query.toString()}` : ''
+		}`
+
+		return await apiCall<MenuItemsResponse>(endpoint, {
+			method: 'GET',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
 		})
 	},
 

@@ -61,6 +61,12 @@ const MenuItemListItem: React.FC<MenuItemListItemProps> = ({
 					</Text>
 				) : null}
 
+				{item.category ? (
+					<Text style={styles.listItemCategory}>
+						Category: {item.category.name}
+					</Text>
+				) : null}
+
 				<View style={styles.listItemFooter}>
 					<View
 						style={[
