@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef, useEffect } from 'react'
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
@@ -20,6 +20,12 @@ const ConcessionCard: React.FC<ConcessionCardProps> = ({ concession }) => {
 	const responsive = useResponsiveDimensions()
 	const styles = createCustomerMenuStyles(colors, responsive)
 	const navigation = useNavigation<NavigationProp>()
+	const scrollViewRef = useRef<ScrollView>(null)
+
+	// Reset scroll position when component mounts or concession changes
+	useEffect(() => {
+		scrollViewRef.current?.scrollTo({ x: 0, animated: false })
+	}, [concession.id])
 
 	const handleViewAll = () => {
 		navigation.navigate('FullMenuList', {
@@ -54,6 +60,7 @@ const ConcessionCard: React.FC<ConcessionCardProps> = ({ concession }) => {
 			{concession.is_open ? (
 				concession.menuItems.length > 0 ? (
 					<ScrollView
+						ref={scrollViewRef}
 						horizontal
 						showsHorizontalScrollIndicator={true}
 						contentContainerStyle={styles.menuItemsContainer}>

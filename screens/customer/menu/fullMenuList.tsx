@@ -1,11 +1,11 @@
 import React from 'react'
 import { View, Text } from 'react-native'
-import { useThemeContext } from '../../../../context'
-import { useResponsiveDimensions } from '../../../../hooks'
-import { DynamicKeyboardView, DynamicScrollView } from '../../../../components'
-import { createCustomerMenuStyles } from '../../../../styles/customer'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
+import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
+import { createCustomerMenuStyles } from '../../../styles/customer'
 
-const MenuItemViewScreen: React.FC = () => {
+const FullMenuListScreen: React.FC = () => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const customerMenuStyles = createCustomerMenuStyles(colors, responsive)
@@ -19,7 +19,7 @@ const MenuItemViewScreen: React.FC = () => {
 				<View>
 					<Text style={customerMenuStyles.containerText}>Coming Soon</Text>
 					<Text style={customerMenuStyles.containerSubtext}>
-						Menu item details will be displayed here
+						Full menu list will be displayed here
 					</Text>
 				</View>
 			</DynamicScrollView>
@@ -27,4 +27,4 @@ const MenuItemViewScreen: React.FC = () => {
 	)
 }
 
-export default MenuItemViewScreen
+export default FullMenuListScreen
