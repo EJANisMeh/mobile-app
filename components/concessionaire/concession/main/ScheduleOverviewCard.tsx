@@ -62,14 +62,12 @@ const ScheduleOverviewCard: React.FC<ScheduleOverviewCardProps> = ({
 						isConcessionOpen
 							? styles.scheduleStatusBadgeOpen
 							: styles.scheduleStatusBadgeClosed,
-					]}
-				>
+					]}>
 					<Text
 						style={[
 							styles.scheduleStatusBadgeText,
 							!isConcessionOpen && styles.scheduleStatusBadgeTextClosed,
-						]}
-					>
+						]}>
 						{isConcessionOpen ? 'Open Now' : 'Closed'}
 					</Text>
 				</View>

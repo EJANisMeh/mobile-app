@@ -44,10 +44,8 @@ export const createDefaultScheduleDay = (
 })
 
 export const createDefaultSchedule = (): ConcessionSchedule => {
-	const base: Record<ConcessionScheduleDayKey, ConcessionScheduleDay> = {} as Record<
-		ConcessionScheduleDayKey,
-		ConcessionScheduleDay
-	>
+	const base: Record<ConcessionScheduleDayKey, ConcessionScheduleDay> =
+		{} as Record<ConcessionScheduleDayKey, ConcessionScheduleDay>
 
 	CONCESSION_SCHEDULE_DAY_KEYS.forEach((key) => {
 		base[key] = createDefaultScheduleDay()
@@ -74,10 +72,10 @@ export const normalizeConcessionSchedule = (
 		breaks: Array.isArray(schedule.breaks) ? schedule.breaks : [],
 		specialDates: Array.isArray(schedule.specialDates)
 			? schedule.specialDates.map((special) => ({
-				date: special.date,
-				isOpen: Boolean(special.isOpen),
-				reason: special.reason ?? '',
-			}))
+					date: special.date,
+					isOpen: Boolean(special.isOpen),
+					reason: special.reason ?? '',
+			  }))
 			: [],
 	}
 
@@ -88,7 +86,9 @@ export const normalizeConcessionSchedule = (
 				open:
 					typeof dayData.open === 'string' ? dayData.open : defaults[key].open,
 				close:
-					typeof dayData.close === 'string' ? dayData.close : defaults[key].close,
+					typeof dayData.close === 'string'
+						? dayData.close
+						: defaults[key].close,
 				isOpen: Boolean(dayData.isOpen),
 			})
 		} else {
@@ -107,7 +107,12 @@ export const timeStringToDate = (value: string | null): Date => {
 	}
 
 	const [hours, minutes] = value.split(':').map((part) => parseInt(part, 10))
-	date.setHours(Number.isNaN(hours) ? 9 : hours, Number.isNaN(minutes) ? 0 : minutes, 0, 0)
+	date.setHours(
+		Number.isNaN(hours) ? 9 : hours,
+		Number.isNaN(minutes) ? 0 : minutes,
+		0,
+		0
+	)
 	return date
 }
 
@@ -120,7 +125,9 @@ export const formatTimeDisplay = (time: string | null): string => {
 		return '--:--'
 	}
 
-	const [hoursRaw, minutesRaw] = time.split(':').map((part) => parseInt(part, 10))
+	const [hoursRaw, minutesRaw] = time
+		.split(':')
+		.map((part) => parseInt(part, 10))
 	const hours = Number.isNaN(hoursRaw) ? 0 : hoursRaw
 	const minutes = Number.isNaN(minutesRaw) ? 0 : minutesRaw
 	const period = hours >= 12 ? 'PM' : 'AM'

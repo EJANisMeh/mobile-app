@@ -19,7 +19,9 @@ const ConcessionScheduleButton: React.FC<ConcessionScheduleButtonProps> = ({
 	const styles = createConcessionStyles(colors, responsive)
 
 	return (
-		<TouchableOpacity style={styles.actionButton} onPress={onPress}>
+		<TouchableOpacity
+			style={styles.actionButton}
+			onPress={onPress}>
 			<MaterialCommunityIcons
 				name="calendar-clock"
 				size={24}

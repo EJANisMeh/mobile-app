@@ -50,7 +50,9 @@ const ConcessionScheduleModal: React.FC<ConcessionScheduleModalProps> = ({
 				{CONCESSION_SCHEDULE_DAY_KEYS.map((key) => {
 					const day = normalizedSchedule[key]
 					return (
-						<View key={key} style={styles.scheduleDayRow}>
+						<View
+							key={key}
+							style={styles.scheduleDayRow}>
 							<Text style={styles.scheduleDayLabel}>
 								{CONCESSION_SCHEDULE_DAY_LABELS[key]}
 							</Text>
@@ -72,8 +74,12 @@ const ConcessionScheduleModal: React.FC<ConcessionScheduleModalProps> = ({
 					<Text style={styles.scheduleModalEmpty}>No breaks added yet.</Text>
 				) : (
 					breaks.map((breakItem, index) => (
-						<View key={`${breakItem.start}-${index}`} style={styles.scheduleBreakRow}>
-							<Text style={styles.scheduleBreakLabel}>{`Break ${index + 1}`}</Text>
+						<View
+							key={`${breakItem.start}-${index}`}
+							style={styles.scheduleBreakRow}>
+							<Text style={styles.scheduleBreakLabel}>{`Break ${
+								index + 1
+							}`}</Text>
 							<Text style={styles.scheduleBreakHours}>
 								{`${formatTimeDisplay(breakItem.start)} - ${formatTimeDisplay(
 									breakItem.end
@@ -90,7 +96,9 @@ const ConcessionScheduleModal: React.FC<ConcessionScheduleModalProps> = ({
 					<Text style={styles.scheduleModalEmpty}>No special dates yet.</Text>
 				) : (
 					specialDates.map((special, index) => (
-						<View key={`${special.date}-${index}`} style={styles.scheduleSpecialRow}>
+						<View
+							key={`${special.date}-${index}`}
+							style={styles.scheduleSpecialRow}>
 							<View>
 								<Text style={styles.scheduleSpecialDate}>
 									{formatDateDisplay(special.date)}
@@ -105,14 +113,12 @@ const ConcessionScheduleModal: React.FC<ConcessionScheduleModalProps> = ({
 									special.isOpen
 										? styles.scheduleSpecialBadgeOpen
 										: styles.scheduleSpecialBadgeClosed,
-								]}
-							>
+								]}>
 								<Text
 									style={[
 										styles.scheduleSpecialBadgeText,
 										!special.isOpen && styles.scheduleSpecialBadgeTextClosed,
-									]}
-								>
+									]}>
 									{special.isOpen ? 'Open' : 'Closed'}
 								</Text>
 							</View>
@@ -132,8 +138,7 @@ const ConcessionScheduleModal: React.FC<ConcessionScheduleModalProps> = ({
 					style={[
 						styles.scheduleModalEditButtonText,
 						!onPressEdit && styles.scheduleModalEditButtonTextDisabled,
-					]}
-				>
+					]}>
 					Edit schedule
 				</Text>
 			</TouchableOpacity>
