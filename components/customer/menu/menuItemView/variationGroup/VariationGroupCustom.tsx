@@ -11,7 +11,9 @@ import {
 interface VariationGroupCustomProps {
 	group: any
 	selection: VariationSelection
-	setVariationSelections: Dispatch<SetStateAction<Map<number, VariationSelection>>>
+	setVariationSelections: Dispatch<
+		SetStateAction<Map<number, VariationSelection>>
+	>
 }
 
 const VariationGroupCustom: React.FC<VariationGroupCustomProps> = ({
@@ -139,9 +141,7 @@ const VariationGroupCustom: React.FC<VariationGroupCustomProps> = ({
 				<Text style={styles.variationGroupName}>{group.name}</Text>
 				{isRequired && <Text style={styles.requiredBadge}>Required</Text>}
 				{!isSingleType && multiLimit > 0 && (
-					<Text style={styles.multiLimitText}>
-						(Select up to {multiLimit})
-					</Text>
+					<Text style={styles.multiLimitText}>(Select up to {multiLimit})</Text>
 				)}
 			</View>
 

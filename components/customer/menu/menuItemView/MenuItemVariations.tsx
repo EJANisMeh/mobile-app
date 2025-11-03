@@ -9,7 +9,9 @@ import VariationGroupCustom from './variationGroup/VariationGroupCustom'
 interface MenuItemVariationsProps {
 	variationGroups: any[]
 	variationSelections: Map<number, VariationSelection>
-	setVariationSelections: Dispatch<SetStateAction<Map<number, VariationSelection>>>
+	setVariationSelections: Dispatch<
+		SetStateAction<Map<number, VariationSelection>>
+	>
 }
 
 const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({

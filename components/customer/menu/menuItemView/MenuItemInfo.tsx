@@ -9,7 +9,10 @@ interface MenuItemInfoProps {
 	totalPrice: number // Dynamic price based on selections
 }
 
-const MenuItemInfo: React.FC<MenuItemInfoProps> = ({ menuItem, totalPrice }) => {
+const MenuItemInfo: React.FC<MenuItemInfoProps> = ({
+	menuItem,
+	totalPrice,
+}) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createCustomerMenuItemViewStyles(colors, responsive)
