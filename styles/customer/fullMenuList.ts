@@ -170,7 +170,7 @@ export const createCustomerFullMenuStyles = (
 			flexDirection: 'row',
 			paddingHorizontal: padding.horizontal,
 			paddingVertical: padding.vertical,
-			marginHorizontal: padding.horizontal,
+			marginHorizontal: 0,
 			marginBottom: spacing.sm,
 			borderRadius: 12,
 			backgroundColor: colors.card,

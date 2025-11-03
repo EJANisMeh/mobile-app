@@ -13,6 +13,11 @@ import {
 	AddonSelection,
 	PriceCalculation,
 	CreateOrderPayload,
+	VariationGroupSnapshot,
+	VariationOptionSnapshot,
+	AddonSnapshot,
+	CartItemInput,
+	RawMenuItem,
 } from '../../../types'
 import { menuApi } from '../../../services/api'
 import {
@@ -24,6 +29,7 @@ import {
 	MenuItemActions,
 } from '../../../components/customer/menu/menuItemView'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
+import { transformRawMenuItem, appendCartItemForUser } from '../../../utils'
 
 type MenuItemViewRouteProp = RouteProp<CustomerStackParamList, 'MenuItemView'>
 
@@ -51,6 +57,7 @@ const MenuItemViewScreen: React.FC = () => {
 	>(new Map())
 	const [quantity, setQuantity] = useState(1)
 	const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
+	const [isAddingToCart, setIsAddingToCart] = useState(false)
 
 	const menuItemId = route.params.menuItemId
 
@@ -244,9 +251,14 @@ const MenuItemViewScreen: React.FC = () => {
 		!areVariationRequirementsMet ||
 		!areAddonRequirementsMet ||
 		quantity < 1 ||
-		!user
+		!user ||
+		isAddingToCart
 
-	const buildSelectionSnapshots = () => {
+	const buildSelectionSnapshots = (): {
+		variationGroupsSnapshot: VariationGroupSnapshot[]
+		optionsSnapshot: VariationOptionSnapshot[]
+		addonsSnapshot: AddonSnapshot[]
+	} => {
 		const variationGroupsSnapshot = Array.from(
 			variationSelections.values()
 		).map((selection) => ({
@@ -347,28 +359,74 @@ const MenuItemViewScreen: React.FC = () => {
 		}
 	}
 
-	const handleConfirmAddToCart = () => {
+	const handleConfirmAddToCart = async (): Promise<void> => {
 		if (!menuItem) {
 			return
 		}
 
-		const { variationGroupsSnapshot, addonsSnapshot } =
+		if (!user) {
+			alertModal.showAlert({
+				title: 'Sign In Required',
+				message: 'Please sign in to add items to your cart.',
+			})
+			return
+		}
+
+		const concessionId = getConcessionId()
+		if (concessionId === null) {
+			alertModal.showAlert({
+				title: 'Unable to Add Item',
+				message:
+					'This item is missing concession details. Please try again later.',
+			})
+			return
+		}
+
+		const { variationGroupsSnapshot, optionsSnapshot, addonsSnapshot } =
 			buildSelectionSnapshots()
 
-		console.log('Cart item (preview only):', {
-			menuItemId: menuItem.id,
-			quantity,
-			unitPrice: priceCalculation.unitPrice,
-			totalPrice: priceCalculation.totalPrice,
-			variations: variationGroupsSnapshot,
-			addons: addonsSnapshot,
-		})
+		const transformedItem = transformRawMenuItem(menuItem as RawMenuItem)
+		const sanitizedQuantity = Math.max(1, quantity)
+		const unitPrice = roundCurrency(priceCalculation.unitPrice)
+		const concessionName =
+			typeof menuItem.concession?.name === 'string'
+				? menuItem.concession.name
+				: null
 
-		alertModal.showAlert({
-			title: 'Added to Cart',
-			message: 'Item added to cart preview. Cart storage coming soon.',
-			onClose: navigateBackToMenu,
-		})
+		const cartItemInput: CartItemInput = {
+			menuItemId: menuItem.id,
+			concessionId,
+			concessionName,
+			name: menuItem.name ?? transformedItem.name,
+			description: menuItem.description ?? null,
+			image: transformedItem.imageToDisplay,
+			categoryName: transformedItem.category?.name ?? null,
+			quantity: sanitizedQuantity,
+			unitPrice,
+			variationGroups: variationGroupsSnapshot,
+			variationOptions: optionsSnapshot,
+			addons: addonsSnapshot,
+		}
+
+		try {
+			setIsAddingToCart(true)
+			await appendCartItemForUser(user.id, cartItemInput)
+			alertModal.showAlert({
+				title: 'Added to Cart',
+				message: 'This item was added to your cart.',
+			})
+		} catch (err) {
+			console.error('Add to cart error:', err)
+			alertModal.showAlert({
+				title: 'Add to Cart Failed',
+				message:
+					err instanceof Error
+						? err.message
+						: 'We could not add this item to your cart. Please try again.',
+			})
+		} finally {
+			setIsAddingToCart(false)
+		}
 	}
 
 	const handleAddToCartPress = () => {
@@ -381,7 +439,9 @@ const MenuItemViewScreen: React.FC = () => {
 			message: 'Add this item to your cart?',
 			confirmText: 'Add to Cart',
 			cancelText: 'Cancel',
-			onConfirm: handleConfirmAddToCart,
+			onConfirm: () => {
+				void handleConfirmAddToCart()
+			},
 		})
 	}
 

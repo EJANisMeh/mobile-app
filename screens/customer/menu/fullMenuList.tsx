@@ -12,6 +12,7 @@ import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 import { useThemeContext } from '../../../context'
 import { useConcessionMenuItems } from '../../../hooks/useBackend'
 import { useResponsiveDimensions } from '../../../hooks'
+import { useHideNavBar } from '../../../hooks/useHideNavBar'
 import { useCustomerNavigation } from '../../../hooks/useNavigation'
 import { MenuItemListItem } from '../../../components/customer/menu'
 import { createCustomerFullMenuStyles } from '../../../styles/customer'
@@ -22,6 +23,7 @@ type FullMenuRouteProp = RouteProp<CustomerStackParamList, 'FullMenuList'>
 const FullMenuListScreen: React.FC = () => {
 	const route = useRoute<FullMenuRouteProp>()
 	const navigation = useCustomerNavigation()
+	useHideNavBar()
 	const { concessionId, concessionName } = route.params
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
@@ -67,8 +69,7 @@ const FullMenuListScreen: React.FC = () => {
 		return menuItems.filter((item) => {
 			const matchesSearch =
 				normalizedQuery.length === 0 ||
-				item.name.toLowerCase().includes(normalizedQuery) ||
-				(item.description ?? '').toLowerCase().includes(normalizedQuery)
+				item.name.toLowerCase().includes(normalizedQuery)
 
 			const matchesCategory =
 				selectedCategories.size === 0 ||

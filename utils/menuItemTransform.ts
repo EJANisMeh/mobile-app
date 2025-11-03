@@ -44,6 +44,10 @@ export const transformRawMenuItem = (
 		raw.images,
 		raw.display_image_index
 	)
+	const linkedCategory =
+		raw.menu_item_category_links?.find((link) => link?.category != null)
+			?.category ?? null
+	const resolvedCategory = raw.category ?? linkedCategory ?? null
 
 	return {
 		id: raw.id,
@@ -55,6 +59,6 @@ export const transformRawMenuItem = (
 		displayImageIndex,
 		imageToDisplay,
 		priceDisplay: `₱${basePrice.toFixed(2)}`,
-		category: raw.category ?? null,
+		category: resolvedCategory,
 	}
 }

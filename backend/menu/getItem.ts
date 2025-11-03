@@ -24,26 +24,20 @@ export const getItem = async (req: express.Request, res: express.Response) => {
 
 		if (category) {
 			whereConditions.category = {
-				contains: category as string,
-				mode: 'insensitive',
+				is: {
+					name: {
+						contains: category as string,
+						mode: 'insensitive',
+					},
+				},
 			}
 		}
 
 		if (search) {
-			whereConditions.OR = [
-				{
-					name: {
-						contains: search as string,
-						mode: 'insensitive',
-					},
-				},
-				{
-					description: {
-						contains: search as string,
-						mode: 'insensitive',
-					},
-				},
-			]
+			whereConditions.name = {
+				contains: search as string,
+				mode: 'insensitive',
+			}
 		}
 
 		if (available !== undefined) {
@@ -63,6 +57,22 @@ export const getItem = async (req: express.Request, res: express.Response) => {
 			table: 'menuItem',
 			where: whereConditions,
 			include: {
+				menu_item_category_links: {
+					include: {
+						category: {
+							select: {
+								id: true,
+								name: true,
+							},
+						},
+					},
+				},
+				category: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
 				concession: {
 					select: {
 						id: true,
@@ -116,4 +126,3 @@ export const getItem = async (req: express.Request, res: express.Response) => {
 		})
 	}
 }
-

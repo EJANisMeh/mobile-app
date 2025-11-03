@@ -26,6 +26,7 @@ export interface RawMenuItem {
 	menu_item_variation_groups?: RawMenuItemVariationGroup[]
 	menu_item_addons_menu_item_addons_menu_item_idTomenu_items?: RawMenuItemAddon[]
 	menu_item_addons_menu_item_addons_target_menu_item_idTomenu_items?: RawMenuItemAddon[]
+	menu_item_category_links?: RawMenuItemCategoryLink[]
 	concession?: {
 		id: number
 		name: string
@@ -62,6 +63,13 @@ export interface RawMenuItemAddon {
 	label: string | null
 	price_override: number | string | null
 	required: boolean
+}
+
+export interface RawMenuItemCategoryLink {
+	category?: {
+		id: number
+		name: string
+	} | null
 }
 
 export interface ConcessionMenuItemListItem
