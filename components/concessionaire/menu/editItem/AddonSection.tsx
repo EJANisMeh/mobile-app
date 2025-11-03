@@ -32,12 +32,27 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 
 	// Add-on Handlers
 	const handleAddAddon = () => {
+		// Safety check: Ensure menuItems is an array
+		if (!Array.isArray(menuItems) || menuItems.length === 0) {
+			showAlert({
+				title: 'No Items Available',
+				message: 'No menu items available. Add more items first.',
+			})
+			return
+		}
+
 		// Get already added addon IDs
 		const addedAddonIds = formData.addons.map((addon) => addon.menuItemId)
 
 		// Filter out: current item AND already added addons
+		// Also filter out any undefined/null items or items without valid IDs
 		const availableItems = menuItems.filter(
-			(item: any) => item.id !== itemId && !addedAddonIds.includes(item.id)
+			(item: any) =>
+				item &&
+				item.id !== undefined &&
+				item.id !== null &&
+				item.id !== itemId &&
+				!addedAddonIds.includes(item.id)
 		)
 
 		if (availableItems.length === 0) {
@@ -106,9 +121,11 @@ const AddonSection: React.FC<AddonSectionProps> = ({
 				Add-ons (Optional)
 			</Text>
 			{formData.addons.map((addon, index) => {
-				const menuItem = menuItems.find(
-					(item: any) => item.id === addon.menuItemId
-				)
+				// Safety check: Ensure menuItems is an array before finding
+				const menuItem = Array.isArray(menuItems)
+					? menuItems.find((item: any) => item && item.id === addon.menuItemId)
+					: null
+
 				return (
 					<View
 						key={index}
