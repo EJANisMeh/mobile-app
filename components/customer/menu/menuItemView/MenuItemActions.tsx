@@ -3,24 +3,51 @@ import { View, TouchableOpacity, Text } from 'react-native'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../styles/customer'
+import { VariationSelection, AddonSelection } from '../../../../types'
 
 interface MenuItemActionsProps {
 	menuItem: any
+	variationSelections: Map<number, VariationSelection>
+	addonSelections: Map<number, AddonSelection>
+	totalPrice: number
 }
 
-const MenuItemActions: React.FC<MenuItemActionsProps> = ({ menuItem }) => {
+const MenuItemActions: React.FC<MenuItemActionsProps> = ({
+	menuItem,
+	variationSelections,
+	addonSelections,
+	totalPrice,
+}) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createCustomerMenuItemViewStyles(colors, responsive)
 
 	const handleAddToCart = () => {
-		// TODO: Implement add to cart functionality
-		console.log('Add to cart:', menuItem.id)
+		// TODO: Validate required selections before adding to cart
+		// TODO: Implement add to cart functionality with selections
+		console.log('Add to cart:', {
+			menuItemId: menuItem.id,
+			menuItemName: menuItem.name,
+			variationSelections: Array.from(variationSelections.values()),
+			addonSelections: Array.from(addonSelections.values()).filter(
+				(a) => a.selected
+			),
+			totalPrice,
+		})
 	}
 
 	const handleOrderNow = () => {
-		// TODO: Implement order now functionality
-		console.log('Order now:', menuItem.id)
+		// TODO: Validate required selections before ordering
+		// TODO: Implement order now functionality with selections
+		console.log('Order now:', {
+			menuItemId: menuItem.id,
+			menuItemName: menuItem.name,
+			variationSelections: Array.from(variationSelections.values()),
+			addonSelections: Array.from(addonSelections.values()).filter(
+				(a) => a.selected
+			),
+			totalPrice,
+		})
 	}
 
 	if (!menuItem.availability) {

@@ -107,11 +107,21 @@ export const createCustomerMenuItemViewStyles = (
 		variationGroup: {
 			marginBottom: spacing.md,
 		},
+		variationGroupHeader: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			marginBottom: spacing.sm,
+			gap: spacing.xs,
+		},
 		variationGroupName: {
 			fontSize: responsive.getResponsiveFontSize(16),
 			fontWeight: '600',
 			color: colors.text,
-			marginBottom: spacing.sm,
+		},
+		multiLimitText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.textSecondary,
+			fontStyle: 'italic',
 		},
 		optionsList: {
 			gap: spacing.xs,
@@ -125,16 +135,81 @@ export const createCustomerMenuItemViewStyles = (
 			backgroundColor: colors.surfaceSecondary,
 			borderRadius: 8,
 		},
+		optionItemButton: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			paddingVertical: spacing.sm,
+			paddingHorizontal: spacing.sm,
+			backgroundColor: colors.surfaceSecondary,
+			borderRadius: 8,
+			borderWidth: 1,
+			borderColor: colors.border,
+			gap: spacing.sm,
+		},
+		optionItemSelected: {
+			backgroundColor: colors.primaryLight,
+			borderColor: colors.primary,
+		},
+		optionItemDisabled: {
+			opacity: 0.5,
+		},
+		optionContent: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
+			flex: 1,
+		},
 		optionName: {
 			fontSize: responsive.getResponsiveFontSize(14),
 			color: colors.text,
 			flex: 1,
+		},
+		optionNameDisabled: {
+			color: colors.textSecondary,
 		},
 		optionPrice: {
 			fontSize: responsive.getResponsiveFontSize(14),
 			fontWeight: '600',
 			color: colors.primary,
 			marginLeft: spacing.sm,
+		},
+		// Radio Button
+		radioButton: {
+			width: 20,
+			height: 20,
+			borderRadius: 10,
+			borderWidth: 2,
+			borderColor: colors.primary,
+			alignItems: 'center',
+			justifyContent: 'center',
+		},
+		radioButtonInner: {
+			width: 10,
+			height: 10,
+			borderRadius: 5,
+			backgroundColor: colors.primary,
+		},
+		// Checkbox
+		checkbox: {
+			width: 20,
+			height: 20,
+			borderRadius: 4,
+			borderWidth: 2,
+			borderColor: colors.primary,
+			alignItems: 'center',
+			justifyContent: 'center',
+		},
+		checkboxChecked: {
+			backgroundColor: colors.primary,
+		},
+		checkboxDisabled: {
+			borderColor: colors.border,
+			backgroundColor: colors.surfaceSecondary,
+		},
+		checkboxCheck: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			fontWeight: 'bold',
+			color: colors.surface,
 		},
 
 		// Add-ons Section
@@ -146,6 +221,9 @@ export const createCustomerMenuItemViewStyles = (
 			borderWidth: 1,
 			borderColor: colors.border,
 		},
+		addonsList: {
+			gap: spacing.xs,
+		},
 		addonItem: {
 			flexDirection: 'row',
 			justifyContent: 'space-between',
@@ -154,13 +232,33 @@ export const createCustomerMenuItemViewStyles = (
 			paddingHorizontal: spacing.sm,
 			backgroundColor: colors.surfaceSecondary,
 			borderRadius: 8,
-			marginBottom: spacing.xs,
+		},
+		addonItemButton: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			paddingVertical: spacing.sm,
+			paddingHorizontal: spacing.sm,
+			backgroundColor: colors.surfaceSecondary,
+			borderRadius: 8,
+			borderWidth: 1,
+			borderColor: colors.border,
+			gap: spacing.sm,
+		},
+		addonItemSelected: {
+			backgroundColor: colors.primaryLight,
+			borderColor: colors.primary,
 		},
 		addonInfo: {
 			flexDirection: 'row',
 			alignItems: 'center',
 			flex: 1,
 			gap: spacing.xs,
+		},
+		addonContent: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
+			flex: 1,
 		},
 		addonName: {
 			fontSize: responsive.getResponsiveFontSize(14),

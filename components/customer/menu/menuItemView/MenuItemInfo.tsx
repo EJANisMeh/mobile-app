@@ -6,9 +6,10 @@ import { createCustomerMenuItemViewStyles } from '../../../../styles/customer'
 
 interface MenuItemInfoProps {
 	menuItem: any
+	totalPrice: number // Dynamic price based on selections
 }
 
-const MenuItemInfo: React.FC<MenuItemInfoProps> = ({ menuItem }) => {
+const MenuItemInfo: React.FC<MenuItemInfoProps> = ({ menuItem, totalPrice }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createCustomerMenuItemViewStyles(colors, responsive)
@@ -20,10 +21,10 @@ const MenuItemInfo: React.FC<MenuItemInfoProps> = ({ menuItem }) => {
 
 	return (
 		<View style={styles.infoContainer}>
-			{/* Base Price */}
+			{/* Dynamic Price */}
 			<View style={styles.priceSection}>
-				<Text style={styles.priceLabel}>Base Price</Text>
-				<Text style={styles.basePrice}>{formatPrice(menuItem.basePrice)}</Text>
+				<Text style={styles.priceLabel}>Price</Text>
+				<Text style={styles.basePrice}>{formatPrice(totalPrice)}</Text>
 			</View>
 
 			{/* Description */}

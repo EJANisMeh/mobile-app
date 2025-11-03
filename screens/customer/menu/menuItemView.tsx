@@ -1,11 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { View, Text, ActivityIndicator } from 'react-native'
 import { useRoute, RouteProp } from '@react-navigation/native'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions, useHideNavBar } from '../../../hooks'
 import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 import { createCustomerMenuItemViewStyles } from '../../../styles/customer'
-import { CustomerStackParamList } from '../../../types'
+import {
+	CustomerStackParamList,
+	VariationSelection,
+	AddonSelection,
+	PriceCalculation,
+} from '../../../types'
 import { menuApi } from '../../../services/api'
 import {
 	MenuItemHeader,
@@ -28,6 +33,14 @@ const MenuItemViewScreen: React.FC = () => {
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
+	// Selection state
+	const [variationSelections, setVariationSelections] = useState<
+		Map<number, VariationSelection>
+	>(new Map())
+	const [addonSelections, setAddonSelections] = useState<
+		Map<number, AddonSelection>
+	>(new Map())
+
 	const menuItemId = route.params.menuItemId
 
 	useHideNavBar()
@@ -44,6 +57,7 @@ const MenuItemViewScreen: React.FC = () => {
 			const result = await menuApi.getMenuItemById(menuItemId)
 			if (result.success && result.item) {
 				setMenuItem(result.item)
+				initializeSelections(result.item)
 			} else {
 				setError(result.error || 'Failed to load menu item')
 			}
@@ -54,6 +68,81 @@ const MenuItemViewScreen: React.FC = () => {
 			setLoading(false)
 		}
 	}
+
+	// Initialize selection state
+	const initializeSelections = (item: any) => {
+		const varSelections = new Map<number, VariationSelection>()
+		const addSelections = new Map<number, AddonSelection>()
+
+		// Initialize variation selections
+		if (item.menu_item_variation_groups) {
+			item.menu_item_variation_groups.forEach((group: any) => {
+				varSelections.set(group.id, {
+					groupId: group.id,
+					groupName: group.name,
+					selectionTypeCode: group.selection_types.code,
+					multiLimit: group.multiLimit,
+					selectedOptions: [],
+				})
+			})
+		}
+
+		// Initialize addon selections
+		if (item.menu_item_addons_menu_item_addons_menu_item_idTomenu_items) {
+			item.menu_item_addons_menu_item_addons_menu_item_idTomenu_items.forEach(
+				(addon: any) => {
+					addSelections.set(addon.id, {
+						addonId: addon.id,
+						addonName: addon.name,
+						price: parseFloat(addon.price),
+						selected: false,
+					})
+				}
+			)
+		}
+
+		setVariationSelections(varSelections)
+		setAddonSelections(addSelections)
+	}
+
+	// Calculate total price based on selections
+	const priceCalculation: PriceCalculation = useMemo(() => {
+		if (!menuItem) {
+			return {
+				basePrice: 0,
+				variationAdjustments: 0,
+				addonsTotal: 0,
+				totalPrice: 0,
+			}
+		}
+
+		const basePrice = parseFloat(menuItem.basePrice)
+
+		// Sum variation price adjustments
+		let variationAdjustments = 0
+		variationSelections.forEach((selection) => {
+			selection.selectedOptions.forEach((option) => {
+				variationAdjustments += option.priceAdjustment
+			})
+		})
+
+		// Sum addon prices
+		let addonsTotal = 0
+		addonSelections.forEach((addon) => {
+			if (addon.selected) {
+				addonsTotal += addon.price
+			}
+		})
+
+		const totalPrice = basePrice + variationAdjustments + addonsTotal
+
+		return {
+			basePrice,
+			variationAdjustments,
+			addonsTotal,
+			totalPrice,
+		}
+	}, [menuItem, variationSelections, addonSelections])
 
 	if (loading) {
 		return (
@@ -95,14 +184,19 @@ const MenuItemViewScreen: React.FC = () => {
 					<MenuItemImages images={menuItem.images} />
 				)}
 
-				{/* Basic Info: Description and Base Price */}
-				<MenuItemInfo menuItem={menuItem} />
+				{/* Basic Info: Description and Dynamic Price */}
+				<MenuItemInfo
+					menuItem={menuItem}
+					totalPrice={priceCalculation.totalPrice}
+				/>
 
 				{/* Variations Section */}
 				{menuItem.menu_item_variation_groups &&
 					menuItem.menu_item_variation_groups.length > 0 && (
 						<MenuItemVariations
 							variationGroups={menuItem.menu_item_variation_groups}
+							variationSelections={variationSelections}
+							setVariationSelections={setVariationSelections}
 						/>
 					)}
 
@@ -114,12 +208,19 @@ const MenuItemViewScreen: React.FC = () => {
 							addons={
 								menuItem.menu_item_addons_menu_item_addons_menu_item_idTomenu_items
 							}
+							addonSelections={addonSelections}
+							setAddonSelections={setAddonSelections}
 						/>
 					)}
 			</DynamicScrollView>
 
 			{/* Bottom Actions: Add to Cart / Order Now */}
-			<MenuItemActions menuItem={menuItem} />
+			<MenuItemActions
+				menuItem={menuItem}
+				variationSelections={variationSelections}
+				addonSelections={addonSelections}
+				totalPrice={priceCalculation.totalPrice}
+			/>
 		</DynamicKeyboardView>
 	)
 }
