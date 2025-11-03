@@ -8,3 +8,12 @@ export {
 	VariationOptionSnapshot,
 	AddonSnapshot,
 } from './OrderApiTypes'
+export {
+	MenuItemsResponse,
+	RawMenuItem,
+	RawMenuItemVariationGroup,
+	RawMenuItemVariationOptionChoice,
+	RawSelectionType,
+	RawMenuItemAddon,
+	ConcessionMenuItemListItem,
+} from './MenuApiTypes'

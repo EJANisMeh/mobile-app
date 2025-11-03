@@ -8,6 +8,7 @@ import {
 	AddMenuItemFormData,
 	CreateOrderPayload,
 	CreateOrderResponse,
+	MenuItemsResponse,
 } from '../../types'
 
 export const menuApi = {
@@ -64,13 +65,16 @@ export const menuApi = {
 	 * Get menu items for a concession
 	 * Backend handles: menu item lookup, filtering, pagination
 	 */
-	getMenuItems: async (concessionId: number): Promise<any> => {
+	getMenuItems: async (concessionId: number): Promise<MenuItemsResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
-		return await apiCall(`/menu/get?concession_id=${concessionId}&limit=100`, {
-			method: 'GET',
-			headers: token ? { Authorization: `Bearer ${token}` } : {},
-		})
+		return await apiCall<MenuItemsResponse>(
+			`/menu/get?concession_id=${concessionId}&limit=100`,
+			{
+				method: 'GET',
+				headers: token ? { Authorization: `Bearer ${token}` } : {},
+			}
+		)
 	},
 
 	/**

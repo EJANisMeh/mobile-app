@@ -1,5 +1,6 @@
 export { createCustomerMenuStyles } from './menu'
 export { createCustomerMenuItemViewStyles } from './menuItemView'
+export { createCustomerFullMenuStyles } from './fullMenuList'
 export { createCustomerCartStyles } from './cart'
 export { createCustomerOrdersStyles } from './orders'
 export { createCustomerNotificationsStyles } from './notifications'
