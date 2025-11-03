@@ -40,6 +40,7 @@ const MenuItemViewScreen: React.FC = () => {
 	const [addonSelections, setAddonSelections] = useState<
 		Map<number, AddonSelection>
 	>(new Map())
+	const [quantity, setQuantity] = useState(1)
 
 	const menuItemId = route.params.menuItemId
 
@@ -91,11 +92,17 @@ const MenuItemViewScreen: React.FC = () => {
 		if (item.menu_item_addons_menu_item_addons_menu_item_idTomenu_items) {
 			item.menu_item_addons_menu_item_addons_menu_item_idTomenu_items.forEach(
 				(addon: any) => {
+					const targetItem =
+						addon.menu_items_menu_item_addons_target_menu_item_idTomenu_items
+					const displayName = addon.label || targetItem?.name || 'Unknown'
+					const displayPrice =
+						addon.price_override ?? targetItem?.basePrice ?? 0
+
 					addSelections.set(addon.id, {
 						addonId: addon.id,
-						addonName: addon.name,
-						price: parseFloat(addon.price),
-						selected: false,
+						addonName: displayName,
+						price: parseFloat(displayPrice),
+						selected: addon.required, // Auto-select required addons
 					})
 				}
 			)
@@ -184,10 +191,21 @@ const MenuItemViewScreen: React.FC = () => {
 					<MenuItemImages images={menuItem.images} />
 				)}
 
-				{/* Basic Info: Description and Dynamic Price */}
+				{/* Description */}
+				{menuItem.description && (
+					<MenuItemInfo
+						menuItem={menuItem}
+						showPrice={false}
+					/>
+				)}
+
+				{/* Price and Quantity */}
 				<MenuItemInfo
 					menuItem={menuItem}
 					totalPrice={priceCalculation.totalPrice}
+					quantity={quantity}
+					setQuantity={setQuantity}
+					showPrice={true}
 				/>
 
 				{/* Variations Section */}
@@ -212,15 +230,16 @@ const MenuItemViewScreen: React.FC = () => {
 							setAddonSelections={setAddonSelections}
 						/>
 					)}
-			</DynamicScrollView>
 
-			{/* Bottom Actions: Add to Cart / Order Now */}
-			<MenuItemActions
-				menuItem={menuItem}
-				variationSelections={variationSelections}
-				addonSelections={addonSelections}
-				totalPrice={priceCalculation.totalPrice}
-			/>
+				{/* Bottom Actions: Add to Cart / Order Now */}
+				<MenuItemActions
+					menuItem={menuItem}
+					variationSelections={variationSelections}
+					addonSelections={addonSelections}
+					totalPrice={priceCalculation.totalPrice}
+					quantity={quantity}
+				/>
+			</DynamicScrollView>
 		</DynamicKeyboardView>
 	)
 }

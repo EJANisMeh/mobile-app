@@ -33,10 +33,29 @@ export const createCustomerMenuItemViewStyles = (
 		imageWrapper: {
 			width: '100%',
 			aspectRatio: 16 / 9,
+			position: 'relative',
 		},
 		mainImage: {
 			width: '100%',
 			height: '100%',
+		},
+		imageNavButton: {
+			position: 'absolute',
+			top: '50%',
+			transform: [{ translateY: -20 }],
+			backgroundColor: 'rgba(0, 0, 0, 0.5)',
+			borderRadius: 20,
+			width: 40,
+			height: 40,
+			justifyContent: 'center',
+			alignItems: 'center',
+			zIndex: 10,
+		},
+		imageNavButtonLeft: {
+			left: spacing.sm,
+		},
+		imageNavButtonRight: {
+			right: spacing.sm,
 		},
 		imageIndicators: {
 			flexDirection: 'row',
@@ -60,8 +79,14 @@ export const createCustomerMenuItemViewStyles = (
 		infoContainer: {
 			marginBottom: spacing.lg,
 		},
+		priceQuantityRow: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'flex-start',
+			gap: spacing.md,
+		},
 		priceSection: {
-			marginBottom: spacing.md,
+			flex: 1,
 		},
 		priceLabel: {
 			fontSize: responsive.getResponsiveFontSize(12),
@@ -73,6 +98,41 @@ export const createCustomerMenuItemViewStyles = (
 			fontSize: responsive.getResponsiveFontSize(28),
 			fontWeight: 'bold',
 			color: colors.primary,
+		},
+		quantitySection: {
+			flex: 1,
+		},
+		quantityLabel: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.textSecondary,
+			marginBottom: spacing.xs,
+			textTransform: 'uppercase',
+		},
+		quantityControls: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			borderWidth: 1,
+			borderColor: colors.border,
+			borderRadius: 8,
+			paddingHorizontal: spacing.xs,
+			paddingVertical: spacing.xs,
+			backgroundColor: colors.surface,
+		},
+		quantityButton: {
+			padding: spacing.xs,
+			borderRadius: 6,
+			backgroundColor: colors.surfaceSecondary,
+		},
+		quantityButtonDisabled: {
+			opacity: 0.5,
+		},
+		quantityValue: {
+			fontSize: responsive.getResponsiveFontSize(18),
+			fontWeight: '600',
+			color: colors.text,
+			minWidth: 40,
+			textAlign: 'center',
 		},
 		descriptionSection: {
 			marginTop: spacing.md,
@@ -286,9 +346,18 @@ export const createCustomerMenuItemViewStyles = (
 			flexDirection: 'row',
 			padding: padding.md,
 			gap: spacing.sm,
-			borderTopWidth: 1,
-			borderTopColor: colors.border,
-			backgroundColor: colors.surface,
+			alignItems: 'center',
+			marginTop: spacing.lg,
+		},
+		helpButton: {
+			backgroundColor: colors.surfaceSecondary,
+			paddingVertical: spacing.md,
+			paddingHorizontal: spacing.sm,
+			borderRadius: 8,
+			alignItems: 'center',
+			justifyContent: 'center',
+			borderWidth: 1,
+			borderColor: colors.border,
 		},
 		addToCartButton: {
 			flex: 1,

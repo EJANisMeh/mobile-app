@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { View, Image, TouchableOpacity, Dimensions } from 'react-native'
+import { View, Image, TouchableOpacity } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../styles/customer'
@@ -27,16 +28,42 @@ const MenuItemImages: React.FC<MenuItemImagesProps> = ({ images }) => {
 
 	return (
 		<View style={styles.imageContainer}>
-			<TouchableOpacity
-				style={styles.imageWrapper}
-				onPress={handleNextImage}
-				activeOpacity={0.9}>
+			<View style={styles.imageWrapper}>
 				<Image
 					source={{ uri: images[currentImageIndex] }}
 					style={styles.mainImage}
 					resizeMode="cover"
 				/>
-			</TouchableOpacity>
+
+				{/* Navigation buttons (only show if multiple images) */}
+				{images.length > 1 && (
+					<>
+						{/* Left button */}
+						<TouchableOpacity
+							style={[styles.imageNavButton, styles.imageNavButtonLeft]}
+							onPress={handlePrevImage}
+							activeOpacity={0.7}>
+							<Ionicons
+								name="chevron-back"
+								size={24}
+								color={colors.surface}
+							/>
+						</TouchableOpacity>
+
+						{/* Right button */}
+						<TouchableOpacity
+							style={[styles.imageNavButton, styles.imageNavButtonRight]}
+							onPress={handleNextImage}
+							activeOpacity={0.7}>
+							<Ionicons
+								name="chevron-forward"
+								size={24}
+								color={colors.surface}
+							/>
+						</TouchableOpacity>
+					</>
+				)}
+			</View>
 
 			{/* Image indicators */}
 			{images.length > 1 && (

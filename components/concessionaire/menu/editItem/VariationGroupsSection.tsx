@@ -57,9 +57,13 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 
 	// Variation Group Handlers
 	const handleAddVariationGroup = () => {
+		// Use first available selection type, or fallback to 1
+		const defaultSelectionTypeId =
+			selectionTypes.length > 0 ? selectionTypes[0].id : 1
+
 		const newGroup: VariationGroupInput = {
 			name: '',
-			selectionTypeId: 1, // Default to first selection type
+			selectionTypeId: defaultSelectionTypeId,
 			multiLimit: null,
 			mode: 'custom',
 			categoryFilterId: null,
@@ -147,19 +151,20 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 						handleUpdateVariationGroup={handleUpdateVariationGroup}
 					/>
 
-					{(
-						selectionTypes.find((t) => t.id === group.selectionTypeId)?.code ||
-						''
-					).startsWith('multi') && (
-						<VariationMultiLimit
-							groupIndex={groupIndex}
-							group={group}
-							errors={errors}
-							setErrors={setErrors}
-							showAlert={showAlert}
-							handleUpdateVariationGroup={handleUpdateVariationGroup}
-						/>
-					)}
+					{selectionTypes.length > 0 &&
+						(
+							selectionTypes.find((t) => t.id === group.selectionTypeId)
+								?.code || ''
+						).startsWith('multi') && (
+							<VariationMultiLimit
+								groupIndex={groupIndex}
+								group={group}
+								errors={errors}
+								setErrors={setErrors}
+								showAlert={showAlert}
+								handleUpdateVariationGroup={handleUpdateVariationGroup}
+							/>
+						)}
 
 					{group.mode === 'custom' && (
 						<VariationCustomOptions

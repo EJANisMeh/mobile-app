@@ -282,7 +282,10 @@ const EditMenuItemScreen: React.FC = () => {
 			if (!group.name.trim()) {
 				newErrors[`${prefix}-name`] = 'Group name is required'
 			}
-			const selType = selectionTypes.find((t) => t.id === group.selectionTypeId)
+			const selType =
+				selectionTypes.length > 0
+					? selectionTypes.find((t) => t.id === group.selectionTypeId)
+					: undefined
 			const isMulti = selType?.code?.startsWith('multi')
 			if (isMulti) {
 				if (!group.multiLimit && group.multiLimit !== 0) {
