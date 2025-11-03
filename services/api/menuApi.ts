@@ -4,7 +4,11 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { apiCall } from './api'
-import { AddMenuItemFormData } from '../../types'
+import {
+	AddMenuItemFormData,
+	CreateOrderPayload,
+	CreateOrderResponse,
+} from '../../types'
 
 export const menuApi = {
 	/**
@@ -93,6 +97,22 @@ export const menuApi = {
 			method: 'PUT',
 			headers: token ? { Authorization: `Bearer ${token}` } : {},
 			body: JSON.stringify(formData),
+		})
+	},
+
+	/**
+	 * Create customer order
+	 * Backend handles: persisting order, default pending status
+	 */
+	createOrder: async (
+		payload: CreateOrderPayload
+	): Promise<CreateOrderResponse> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall<CreateOrderResponse>('/orders/create', {
+			method: 'POST',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+			body: JSON.stringify(payload),
 		})
 	},
 

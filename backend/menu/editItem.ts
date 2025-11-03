@@ -5,6 +5,13 @@ import { prisma, updateQuery, selectOne } from '../db'
 export const editItem = async (req: express.Request, res: express.Response) => {
 	try {
 		const { id } = req.params
+		const menuItemId = parseInt(id, 10)
+		if (Number.isNaN(menuItemId)) {
+			return res.status(400).json({
+				success: false,
+				error: 'Valid menu item ID is required',
+			})
+		}
 		const {
 			name,
 			description,
@@ -20,7 +27,7 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 		// Validate menu item exists
 		const existingItemResult = await selectOne(prisma, {
 			table: 'menuItem',
-			where: { id: parseInt(id) },
+			where: { id: menuItemId },
 		})
 
 		if (!existingItemResult.success || !existingItemResult.data) {
@@ -44,7 +51,7 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 		// Update menu item using simplified query
 		const menuItemResult = await updateQuery(prisma, {
 			table: 'menuItem',
-			where: { id: parseInt(id) },
+			where: { id: menuItemId },
 			data: updateData,
 		})
 
@@ -59,14 +66,14 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 		if (categoryIds !== undefined && Array.isArray(categoryIds)) {
 			// Delete existing category links
 			await prisma.menu_item_category_link.deleteMany({
-				where: { menu_item_id: parseInt(id) },
+				where: { menu_item_id: menuItemId },
 			})
 
 			// Create new category links
 			for (const categoryId of categoryIds) {
 				await prisma.menu_item_category_link.create({
 					data: {
-						menu_item_id: parseInt(id),
+						menu_item_id: menuItemId,
 						category_id: categoryId,
 					},
 				})
@@ -78,7 +85,7 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 			// Delete existing variation groups for this item
 			await prisma.menu_item_variation_groups.deleteMany({
 				where: {
-					menu_item_id: parseInt(id),
+					menu_item_id: menuItemId,
 					kind: 'group',
 				},
 			})
@@ -87,7 +94,7 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 			for (const group of variationGroups) {
 				const createdGroup = await prisma.menu_item_variation_groups.create({
 					data: {
-						menu_item_id: parseInt(id),
+						menu_item_id: menuItemId,
 						kind: 'group',
 						code: group.mode, // Store mode in code field
 						name: group.name,
@@ -165,14 +172,14 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 		if (addons !== undefined) {
 			// Delete existing addons for this item
 			await prisma.menu_item_addons.deleteMany({
-				where: { menu_item_id: parseInt(id) },
+				where: { menu_item_id: menuItemId },
 			})
 
 			// Create new addons
 			for (const addon of addons) {
 				await prisma.menu_item_addons.create({
 					data: {
-						menu_item_id: parseInt(id),
+						menu_item_id: menuItemId,
 						target_menu_item_id: addon.menuItemId,
 						label: addon.label,
 						price_override: addon.priceOverride
@@ -185,9 +192,41 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 			}
 		}
 
+		const updatedMenuItem = await prisma.menuItem.findUnique({
+			where: { id: menuItemId },
+			include: {
+				menu_item_category_links: {
+					include: {
+						category: true,
+					},
+				},
+				menu_item_variation_groups: {
+					where: { kind: 'group' },
+					include: {
+						menu_item_variation_option_choices: {
+							orderBy: { position: 'asc' },
+						},
+						selection_types: true,
+					},
+					orderBy: { position: 'asc' },
+				},
+				menu_item_addons_menu_item_addons_menu_item_idTomenu_items: {
+					include: {
+						menu_items_menu_item_addons_target_menu_item_idTomenu_items: {
+							select: {
+								id: true,
+								name: true,
+								basePrice: true,
+							},
+						},
+					},
+				},
+			},
+		})
 		res.json({
 			success: true,
 			message: 'Menu item updated successfully',
+			menuItem: updatedMenuItem,
 		})
 	} catch (error) {
 		console.error('Edit menu item error:', error)

@@ -34,5 +34,6 @@ export interface PriceCalculation {
 	basePrice: number
 	variationAdjustments: number
 	addonsTotal: number
+	unitPrice: number
 	totalPrice: number
 }

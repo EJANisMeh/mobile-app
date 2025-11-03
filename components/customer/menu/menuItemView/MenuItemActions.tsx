@@ -1,27 +1,26 @@
 import React from 'react'
-import { View, TouchableOpacity, Text } from 'react-native'
+import { View, TouchableOpacity, Text, ActivityIndicator } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { useAlertModal } from '../../../../hooks/useModals'
 import { AlertModal } from '../../../modals'
 import { createCustomerMenuItemViewStyles } from '../../../../styles/customer'
-import { VariationSelection, AddonSelection } from '../../../../types'
 
 interface MenuItemActionsProps {
 	menuItem: any
-	variationSelections: Map<number, VariationSelection>
-	addonSelections: Map<number, AddonSelection>
-	totalPrice: number
-	quantity: number
+	disabled: boolean
+	isProcessing: boolean
+	onAddToCart: () => void
+	onOrderNow: () => void
 }
 
 const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 	menuItem,
-	variationSelections,
-	addonSelections,
-	totalPrice,
-	quantity,
+	disabled,
+	isProcessing,
+	onAddToCart,
+	onOrderNow,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
@@ -36,36 +35,6 @@ const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 		})
 	}
 
-	const handleAddToCart = () => {
-		// TODO: Validate required selections before adding to cart
-		// TODO: Implement add to cart functionality with selections
-		console.log('Add to cart:', {
-			menuItemId: menuItem.id,
-			menuItemName: menuItem.name,
-			variationSelections: Array.from(variationSelections.values()),
-			addonSelections: Array.from(addonSelections.values()).filter(
-				(a) => a.selected
-			),
-			totalPrice,
-			quantity,
-		})
-	}
-
-	const handleOrderNow = () => {
-		// TODO: Validate required selections before ordering
-		// TODO: Implement order now functionality with selections
-		console.log('Order now:', {
-			menuItemId: menuItem.id,
-			menuItemName: menuItem.name,
-			variationSelections: Array.from(variationSelections.values()),
-			addonSelections: Array.from(addonSelections.values()).filter(
-				(a) => a.selected
-			),
-			totalPrice,
-			quantity,
-		})
-	}
-
 	if (!menuItem.availability) {
 		return (
 			<View style={styles.actionsContainer}>
@@ -76,13 +45,16 @@ const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 		)
 	}
 
+	const addToCartDisabled = disabled || isProcessing
+	const orderNowDisabled = disabled || isProcessing
+
 	return (
 		<>
 			<View style={styles.actionsContainer}>
-				{/* Help button */}
 				<TouchableOpacity
 					style={styles.helpButton}
-					onPress={handleShowHelp}>
+					onPress={handleShowHelp}
+					accessibilityLabel="Show ordering help">
 					<Ionicons
 						name="help-circle-outline"
 						size={24}
@@ -90,24 +62,51 @@ const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 					/>
 				</TouchableOpacity>
 
-				{/* Add to Cart button */}
 				<TouchableOpacity
-					style={styles.addToCartButton}
-					onPress={handleAddToCart}>
-					<Text style={styles.addToCartText}>Add to Cart</Text>
+					style={[
+						styles.addToCartButton,
+						addToCartDisabled && styles.disabledButton,
+					]}
+					onPress={onAddToCart}
+					disabled={addToCartDisabled}
+					accessibilityLabel="Add item to cart">
+					<Text
+						style={[
+							styles.addToCartText,
+							addToCartDisabled && styles.disabledButtonText,
+						]}>
+						Add to Cart
+					</Text>
 				</TouchableOpacity>
 
-				{/* Order Now button */}
 				<TouchableOpacity
-					style={styles.orderNowButton}
-					onPress={handleOrderNow}>
-					<Text style={styles.orderNowText}>Order Now</Text>
+					style={[
+						styles.orderNowButton,
+						orderNowDisabled && styles.disabledPrimaryButton,
+					]}
+					onPress={onOrderNow}
+					disabled={orderNowDisabled}
+					accessibilityLabel="Place order now">
+					{isProcessing ? (
+						<ActivityIndicator
+							size="small"
+							color={colors.surface}
+						/>
+					) : (
+						<Text
+							style={[
+								styles.orderNowText,
+								orderNowDisabled && styles.disabledButtonText,
+							]}>
+							Order Now
+						</Text>
+					)}
 				</TouchableOpacity>
 			</View>
 
 			<AlertModal
 				visible={alertModal.visible}
-				onClose={alertModal.hideAlert}
+				onClose={alertModal.handleClose}
 				title={alertModal.title}
 				message={alertModal.message}
 			/>

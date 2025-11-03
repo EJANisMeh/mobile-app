@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { View, Text, ActivityIndicator, BackHandler } from 'react-native'
 import {
 	useNavigation,
@@ -21,7 +21,6 @@ import {
 } from '../../../hooks/useModals'
 import { createConcessionaireEditMenuItemStyles } from '../../../styles/concessionaire'
 import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
-import { menuApi } from '../../../services/api'
 import { apiCall } from '../../../services/api/api'
 import {
 	AlertModal,
@@ -259,6 +258,13 @@ const EditMenuItemScreen: React.FC = () => {
 	// Compute quick validity (no side-effects) will be computed after validateForm is declared
 
 	const validateForm = (setErrorMsgs = true) => {
+		if (!initialFormData) {
+			if (setErrorMsgs) {
+				setErrors({})
+			}
+			return false
+		}
+
 		const newErrors: Record<string, string> = {}
 		// name
 		if (!formData.name.trim()) {
@@ -287,16 +293,14 @@ const EditMenuItemScreen: React.FC = () => {
 					? selectionTypes.find((t) => t.id === group.selectionTypeId)
 					: undefined
 			const isMulti = selType?.code?.startsWith('multi')
-			if (isMulti) {
-				if (!group.multiLimit && group.multiLimit !== 0) {
-					newErrors[`${prefix}-multiLimit`] =
-						'Limit is required for multi selection types'
-				}
+			if (isMulti && (group.multiLimit === null || group.multiLimit < 1)) {
+				newErrors[`${prefix}-multiLimit`] =
+					'Max choices is required for multi selection types'
 			}
 			if (group.mode === 'custom') {
-				if (!group.options || group.options.length < 2) {
+				if (!group.options || group.options.length < 1) {
 					newErrors[`${prefix}-options`] =
-						'Add at least 2 options for custom mode'
+						'Add at least one option for custom mode'
 				}
 				// check each option name
 				group.options.forEach((opt, j) => {
@@ -312,7 +316,7 @@ const EditMenuItemScreen: React.FC = () => {
 			} else if (group.mode === 'existing') {
 				const ids = (group as any).existingMenuItemIds || []
 				if (!ids || ids.length < 2) {
-					newErrors[`${prefix}-existing`] = 'Select at least 2 existing items'
+					newErrors[`${prefix}-existing`] = 'Select at least two existing items'
 				}
 			}
 		})
@@ -323,11 +327,31 @@ const EditMenuItemScreen: React.FC = () => {
 
 	// Live validation on form data changes
 	useEffect(() => {
+		if (!initialFormData) {
+			return
+		}
 		validateForm(true)
-	}, [formData, selectionTypes])
+	}, [formData, selectionTypes, initialFormData])
 
-	// compute validity (no side-effects)
-	const isFormValid = validateForm(false)
+	// compute primary validity for enabling Save button
+	const isFormValid = useMemo(() => {
+		if (!initialFormData) {
+			return false
+		}
+		if (!formData.name.trim()) {
+			return false
+		}
+		if (formData.categoryIds.length === 0) {
+			return false
+		}
+		if (formData.basePrice.trim()) {
+			const p = parseFloat(formData.basePrice)
+			if (isNaN(p) || p < 0) {
+				return false
+			}
+		}
+		return true
+	}, [formData, initialFormData])
 
 	const handleSave = () => {
 		const valid = validateForm(true)

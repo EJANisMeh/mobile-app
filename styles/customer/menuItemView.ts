@@ -387,6 +387,15 @@ export const createCustomerMenuItemViewStyles = (
 			fontWeight: '600',
 			color: colors.surface,
 		},
+		disabledButton: {
+			opacity: 0.6,
+		},
+		disabledPrimaryButton: {
+			opacity: 0.7,
+		},
+		disabledButtonText: {
+			opacity: 0.7,
+		},
 		unavailableContainer: {
 			flex: 1,
 			backgroundColor: colors.surfaceSecondary,
