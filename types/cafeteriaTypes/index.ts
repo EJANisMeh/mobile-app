@@ -1,3 +1,5 @@
+import type { MenuItemAvailabilitySchedule } from '../menuItemTypes'
+
 export interface MenuItemForCustomer {
 	id: number
 	name: string
@@ -5,6 +7,7 @@ export interface MenuItemForCustomer {
 	images: string[]
 	availability: boolean
 	displayImageIndex: number
+	availabilitySchedule?: MenuItemAvailabilitySchedule | null
 	category: {
 		id: number
 		name: string

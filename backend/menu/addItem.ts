@@ -1,6 +1,10 @@
 import express from 'express'
 import { PrismaClient } from '@prisma/client'
 import { VariationGroupMode, getKindFromMode } from '../../types'
+import {
+	normalizeMenuItemSchedule,
+	hasAnyMenuItemScheduleDay,
+} from '../../utils/menuItemSchedule'
 
 const prisma = new PrismaClient()
 
@@ -18,6 +22,7 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 			availability,
 			variationGroups,
 			addons,
+			availabilitySchedule,
 		} = req.body
 
 		// Validate required fields: concessionId, name, categoryIds
@@ -68,6 +73,14 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 			})
 		}
 
+		const normalizedSchedule = normalizeMenuItemSchedule(availabilitySchedule)
+		if (!hasAnyMenuItemScheduleDay(normalizedSchedule)) {
+			return res.status(400).json({
+				success: false,
+				error: 'Select at least one day in the availability schedule',
+			})
+		}
+
 		// Create menu item with all related data in a transaction
 		const menuItem = await prisma.$transaction(async (tx) => {
 			// 1. Create the base menu item
@@ -80,6 +93,7 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 					display_image_index: displayIndex,
 					concessionId: concessionId,
 					availability: availability !== undefined ? availability : true,
+					availabilitySchedule: normalizedSchedule,
 					position: 0, // You can implement custom positioning later
 				},
 			})

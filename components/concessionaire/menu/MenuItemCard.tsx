@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
 	View,
 	Text,
@@ -17,6 +17,15 @@ import {
 	UseConfirmationModalType,
 } from '../../../hooks/useModals/types'
 import { useConcessionaireNavigation } from '../../../hooks/useNavigation'
+import {
+	normalizeMenuItemSchedule,
+	getMenuItemAvailabilityStatus,
+} from '../../../utils'
+import type {
+	MenuItemAvailabilitySchedule,
+	RawMenuItemVariationGroup,
+	RawMenuItemVariationOptionChoice,
+} from '../../../types'
 
 interface MenuItemCardProps {
 	id: number
@@ -25,7 +34,8 @@ interface MenuItemCardProps {
 	images: string[]
 	displayImageIndex: number
 	availability: boolean
-	customVariations?: any[] // Custom variation groups
+	availabilitySchedule?: MenuItemAvailabilitySchedule | null
+	customVariations?: RawMenuItemVariationGroup[]
 	isExpanded?: boolean
 	onToggleExpand?: () => void
 	showAlert: UseAlertModalType['showAlert']
@@ -47,6 +57,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 	images,
 	displayImageIndex,
 	availability,
+	availabilitySchedule,
 	customVariations = [],
 	isExpanded = false,
 	onToggleExpand,
@@ -62,6 +73,36 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 	const responsive = useResponsiveDimensions()
 	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
 	const navigation = useConcessionaireNavigation()
+	const normalizedSchedule = useMemo(
+		() => normalizeMenuItemSchedule(availabilitySchedule),
+		[availabilitySchedule]
+	)
+	const availabilityStatus = getMenuItemAvailabilityStatus(
+		normalizedSchedule,
+		availability
+	)
+	const statusDisplay = (() => {
+		switch (availabilityStatus) {
+			case 'not_served_today':
+				return {
+					indicatorStyle: styles.statusIndicatorScheduled,
+					textStyle: styles.statusTextScheduled,
+					label: 'Not available today',
+				}
+			case 'out_of_stock':
+				return {
+					indicatorStyle: styles.statusIndicatorUnavailable,
+					textStyle: styles.statusTextUnavailable,
+					label: 'Out of stock',
+				}
+			default:
+				return {
+					indicatorStyle: styles.statusIndicatorAvailable,
+					textStyle: styles.statusTextAvailable,
+					label: 'Available',
+				}
+		}
+	})()
 
 	// Handle back button press to close menu
 	useEffect(() => {
@@ -155,21 +196,10 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 					</Text>
 					<View style={styles.menuItemStatus}>
 						<View
-							style={[
-								styles.statusIndicator,
-								availability
-									? styles.statusIndicatorAvailable
-									: styles.statusIndicatorUnavailable,
-							]}
+							style={[styles.statusIndicator, statusDisplay.indicatorStyle]}
 						/>
-						<Text
-							style={[
-								styles.statusText,
-								availability
-									? styles.statusTextAvailable
-									: styles.statusTextUnavailable,
-							]}>
-							{availability ? 'Available' : 'Unavailable'}
+						<Text style={[styles.statusText, statusDisplay.textStyle]}>
+							{statusDisplay.label}
 						</Text>
 					</View>
 				</View>
@@ -263,7 +293,10 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 									style={styles.variationGroup}>
 									<Text style={styles.variationGroupName}>{group.name}</Text>
 									{group.menu_item_variation_option_choices?.map(
-										(option: any, optionIndex: number) => (
+										(
+											option: RawMenuItemVariationOptionChoice,
+											optionIndex: number
+										) => (
 											<View
 												key={optionIndex}
 												style={styles.variationOption}>

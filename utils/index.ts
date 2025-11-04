@@ -8,3 +8,4 @@ export {
 	clearCartItemsForUser,
 } from './cartStorage'
 export * from './concessionSchedule'
+export * from './menuItemSchedule'

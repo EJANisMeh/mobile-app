@@ -38,6 +38,77 @@ export const createConcessionaireAddMenuItemStyles = (
 			marginBottom: spacing.xs,
 			marginTop: spacing.md,
 		},
+		scheduleSection: {
+			backgroundColor: colors.surface,
+			borderRadius: 8,
+			padding: spacing.sm + spacing.xs / 2,
+			borderWidth: 1,
+			borderColor: colors.border,
+			marginTop: spacing.sm,
+			marginBottom: spacing.md,
+			gap: spacing.xs,
+		},
+		scheduleHeaderRow: {
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			justifyContent: 'space-between' as const,
+		},
+		scheduleActionsRow: {
+			flexDirection: 'row' as const,
+			gap: spacing.xs,
+		},
+		scheduleActionButton: {
+			paddingVertical: spacing.xs / 2,
+			paddingHorizontal: spacing.sm,
+			borderRadius: 6,
+			backgroundColor: colors.background,
+			borderWidth: 1,
+			borderColor: colors.border,
+		},
+		scheduleActionText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			fontWeight: '600' as const,
+			color: colors.primary,
+		},
+		scheduleSummaryText: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.textSecondary,
+		},
+		scheduleDayGrid: {
+			flexDirection: 'row' as const,
+			flexWrap: 'wrap' as const,
+			gap: spacing.xs,
+		},
+		scheduleDayButton: {
+			minWidth: 52,
+			paddingVertical: spacing.xs / 2,
+			borderRadius: 6,
+			borderWidth: 1,
+			borderColor: colors.border,
+			alignItems: 'center' as const,
+			justifyContent: 'center' as const,
+			backgroundColor: colors.background,
+		},
+		scheduleDayButtonActive: {
+			backgroundColor: colors.primary,
+			borderColor: colors.primary,
+		},
+		scheduleDayText: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			fontWeight: '600' as const,
+			color: colors.text,
+		},
+		scheduleDayTextActive: {
+			color: colors.textOnPrimary,
+		},
+		scheduleHintText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.textSecondary,
+		},
+		scheduleErrorText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.error,
+		},
 
 		// Currency Symbol
 		currencySymbol: {
@@ -665,6 +736,9 @@ export const createConcessionaireAddMenuItemStyles = (
 		statusIndicatorUnavailable: {
 			backgroundColor: '#ef4444',
 		},
+		statusIndicatorScheduled: {
+			backgroundColor: '#f59e0b',
+		},
 		statusText: {
 			fontSize: responsive.getResponsiveFontSize(12),
 			fontWeight: '600' as const,
@@ -674,6 +748,9 @@ export const createConcessionaireAddMenuItemStyles = (
 		},
 		statusTextUnavailable: {
 			color: '#ef4444',
+		},
+		statusTextScheduled: {
+			color: '#f59e0b',
 		},
 		menuButton: {
 			padding: spacing.xs,

@@ -17,6 +17,7 @@ import {
 } from '../../../components/concessionaire/menu'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
 import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
+import type { RawMenuItemVariationGroup } from '../../../types'
 
 const MenuScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -122,8 +123,13 @@ const MenuScreen: React.FC = () => {
 										item.display_image_index ?? item.displayImageIndex ?? 0
 									}
 									availability={item.availability}
+									availabilitySchedule={
+										item.availabilitySchedule ??
+										item.availability_schedule ??
+										null
+									}
 									customVariations={item.menu_item_variation_groups?.filter(
-										(group: any) => group.kind === 'group'
+										(group: RawMenuItemVariationGroup) => group.kind === 'group'
 									)}
 									isExpanded={expandedItems.has(item.id)}
 									onToggleExpand={() => {

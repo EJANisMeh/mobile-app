@@ -2,6 +2,22 @@
  * Types for Add/Edit Menu Item functionality
  */
 
+export type MenuItemDayKey =
+	| 'monday'
+	| 'tuesday'
+	| 'wednesday'
+	| 'thursday'
+	| 'friday'
+	| 'saturday'
+	| 'sunday'
+
+export type MenuItemAvailabilitySchedule = Record<MenuItemDayKey, boolean>
+
+export type MenuItemAvailabilityStatus =
+	| 'available'
+	| 'not_served_today'
+	| 'out_of_stock'
+
 export interface AddMenuItemFormData {
 	name: string
 	description: string
@@ -12,6 +28,7 @@ export interface AddMenuItemFormData {
 	availability: boolean
 	variationGroups: VariationGroupInput[]
 	addons: AddonInput[]
+	availabilitySchedule: MenuItemAvailabilitySchedule
 }
 
 export interface VariationGroupInput {

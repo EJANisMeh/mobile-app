@@ -32,6 +32,9 @@ import {
 	AddMenuItemFormData,
 	ConcessionaireStackParamList,
 	SelectionType,
+	VariationGroupMode,
+	RawMenuItemVariationGroup,
+	RawMenuItemVariationOptionChoice,
 } from '../../../types'
 import {
 	NameInput,
@@ -43,6 +46,12 @@ import {
 	AddonSection,
 	FormActions,
 } from '../../../components/concessionaire/menu/editItem'
+import MenuAvailabilitySection from '../../../components/concessionaire/menu/shared/MenuAvailabilitySection'
+import {
+	createDefaultMenuItemSchedule,
+	normalizeMenuItemSchedule,
+	hasAnyMenuItemScheduleDay,
+} from '../../../utils'
 
 type EditMenuItemScreenNavigationProp = StackNavigationProp<
 	ConcessionaireStackParamList,
@@ -77,6 +86,15 @@ const EditMenuItemScreen: React.FC = () => {
 
 	const itemId = parseInt(route.params.itemId)
 
+	const goBackToMenu = () => {
+		if (navigation.canGoBack()) {
+			navigation.goBack()
+			return
+		}
+
+		navigation.navigate('MainTabs')
+	}
+
 	// Form state
 	const [formData, setFormData] = useState<AddMenuItemFormData>({
 		name: '',
@@ -88,6 +106,7 @@ const EditMenuItemScreen: React.FC = () => {
 		availability: true,
 		variationGroups: [],
 		addons: [],
+		availabilitySchedule: createDefaultMenuItemSchedule(),
 	})
 
 	const [initialFormData, setInitialFormData] =
@@ -132,6 +151,61 @@ const EditMenuItemScreen: React.FC = () => {
 					: []
 
 				// Transform backend data to form data structure
+				const rawGroups = (item.menu_item_variation_groups ??
+					[]) as RawMenuItemVariationGroup[]
+				const transformedGroups = rawGroups.map((group) => {
+					const fallbackMode: VariationGroupMode =
+						group.kind === 'category_filter'
+							? 'category'
+							: group.kind === 'existing_items'
+							? 'existing'
+							: 'custom'
+					const groupMode: VariationGroupMode =
+						(group.code as VariationGroupMode | undefined) || fallbackMode
+					const optionChoices = (group.menu_item_variation_option_choices ??
+						[]) as RawMenuItemVariationOptionChoice[]
+					const options =
+						groupMode === 'custom'
+							? optionChoices.map((option) => ({
+									name: option.name || '',
+									priceAdjustment:
+										option.price_adjustment != null
+											? option.price_adjustment.toString()
+											: '0',
+									availability: option.availability ?? true,
+									isDefault: option.is_default ?? false,
+									position: option.position ?? 0,
+							  }))
+							: []
+					const existingMenuItemIds =
+						groupMode === 'existing'
+							? optionChoices
+									.map((option) => {
+										if (!option.code) {
+											return null
+										}
+										const match = option.code.match(/item_(\d+)/)
+										if (!match) {
+											return null
+										}
+										const parsed = parseInt(match[1], 10)
+										return Number.isNaN(parsed) ? null : parsed
+									})
+									.filter((maybeId): maybeId is number => maybeId != null)
+							: []
+
+					return {
+						name: group.name || '',
+						selectionTypeId: group.selection_type_id ?? 1,
+						multiLimit: group.multi_limit ?? null,
+						mode: groupMode,
+						categoryFilterId: group.category_filter_id ?? null,
+						options,
+						existingMenuItemIds,
+						position: group.position ?? 0,
+					}
+				})
+
 				const transformedData: AddMenuItemFormData = {
 					name: item.name || '',
 					description: item.description || '',
@@ -140,31 +214,10 @@ const EditMenuItemScreen: React.FC = () => {
 					displayImageIndex: item.display_image_index ?? 0,
 					categoryIds: categoryIds,
 					availability: item.availability ?? true,
-					variationGroups:
-						item.menu_item_variation_groups?.map((group: any) => ({
-							name: group.name || '',
-							selectionTypeId: group.selection_type_id ?? 1,
-							multiLimit: group.multi_limit ?? null,
-							mode: (group.code || 'custom') as
-								| 'custom'
-								| 'category'
-								| 'existing',
-							categoryFilterId: group.category_filter_id ?? null,
-							options:
-								group.menu_item_variation_option_choices?.map(
-									(option: any) => ({
-										name: option.name || '',
-										priceAdjustment: option.price_adjustment
-											? option.price_adjustment.toString()
-											: '0',
-										availability: option.availability ?? true,
-										isDefault: option.is_default ?? false,
-										position: option.position ?? 0,
-									})
-								) || [],
-							existingMenuItemIds: [],
-							position: group.position ?? 0,
-						})) || [],
+					availabilitySchedule: normalizeMenuItemSchedule(
+						item.availability_schedule ?? item.availabilitySchedule
+					),
+					variationGroups: transformedGroups,
 					addons:
 						item.menu_item_addons_menu_item_addons_menu_item_idTomenu_items?.map(
 							(addon: any) => ({
@@ -186,7 +239,7 @@ const EditMenuItemScreen: React.FC = () => {
 					title: 'Error',
 					message: result.error || 'Failed to load menu item',
 				})
-				navigation.goBack()
+				goBackToMenu()
 			}
 		} catch (error) {
 			console.error('Load menu item error:', error)
@@ -194,7 +247,7 @@ const EditMenuItemScreen: React.FC = () => {
 				title: 'Error',
 				message: 'Failed to load menu item',
 			})
-			navigation.goBack()
+			goBackToMenu()
 		} finally {
 			setLoadingItem(false)
 		}
@@ -248,10 +301,10 @@ const EditMenuItemScreen: React.FC = () => {
 				confirmText: 'Discard',
 				cancelText: 'Keep Editing',
 				confirmStyle: 'destructive',
-				onConfirm: () => navigation.goBack(),
+				onConfirm: () => goBackToMenu(),
 			})
 		} else {
-			navigation.goBack()
+			goBackToMenu()
 		}
 	}
 
@@ -280,6 +333,9 @@ const EditMenuItemScreen: React.FC = () => {
 			if (isNaN(p) || p < 0) {
 				newErrors['basePrice'] = 'Enter a valid price or leave empty'
 			}
+		}
+		if (!hasAnyMenuItemScheduleDay(formData.availabilitySchedule)) {
+			newErrors['availabilitySchedule'] = 'Select at least one day'
 		}
 
 		// Variation groups validations
@@ -350,6 +406,9 @@ const EditMenuItemScreen: React.FC = () => {
 				return false
 			}
 		}
+		if (!hasAnyMenuItemScheduleDay(formData.availabilitySchedule)) {
+			return false
+		}
 		return true
 	}, [formData, initialFormData])
 
@@ -388,6 +447,7 @@ const EditMenuItemScreen: React.FC = () => {
 						displayImageIndex: formData.displayImageIndex,
 						categoryIds: formData.categoryIds,
 						availability: formData.availability,
+						availabilitySchedule: formData.availabilitySchedule,
 						variationGroups: formData.variationGroups.map((group) => ({
 							name: group.name.trim(),
 							selectionTypeId: group.selectionTypeId,
@@ -496,6 +556,18 @@ const EditMenuItemScreen: React.FC = () => {
 					onNavigateToCategoryManagement={() =>
 						navigation.navigate('CategoryManagement')
 					}
+				/>
+
+				<MenuAvailabilitySection
+					schedule={formData.availabilitySchedule}
+					onChange={(next) =>
+						setFormData((prev) => ({
+							...prev,
+							availabilitySchedule: next,
+						}))
+					}
+					error={errors['availabilitySchedule']}
+					variant="edit"
 				/>
 
 				<ImagePickerSection

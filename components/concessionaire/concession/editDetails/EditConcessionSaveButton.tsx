@@ -35,6 +35,15 @@ const EditConcessionSaveButton: React.FC<EditConcessionSaveButtonProps> = ({
 	const { concession, updateConcession } = useConcessionContext()
 	const navigation = useConcessionaireNavigation()
 
+	const goBackToConcession = () => {
+		if (navigation.canGoBack()) {
+			navigation.goBack()
+			return
+		}
+
+		navigation.navigate('MainTabs')
+	}
+
 	const handleSave = async () => {
 		// Early return if no changes or already saving
 		if (!edited || isSaving) {
@@ -77,7 +86,7 @@ const EditConcessionSaveButton: React.FC<EditConcessionSaveButtonProps> = ({
 				})
 				// Navigate back after a short delay
 				setTimeout(() => {
-					navigation.goBack()
+					goBackToConcession()
 				}, 1500)
 			} else {
 				showAlert({

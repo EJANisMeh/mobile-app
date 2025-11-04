@@ -30,10 +30,16 @@ import {
 	VariationGroupsSection,
 	FormActions,
 } from '../../../components/concessionaire/menu/addItem'
+import MenuAvailabilitySection from '../../../components/concessionaire/menu/shared/MenuAvailabilitySection'
 import { AddMenuItemFormData, SelectionType } from '../../../types'
 import { useConcessionaireNavigation } from '../../../hooks/useNavigation'
 import AddonSection from '../../../components/concessionaire/menu/addItem/AddonSection'
 import { apiCall } from '../../../services/api/api'
+import {
+	createDefaultMenuItemSchedule,
+	hasAnyMenuItemScheduleDay,
+	isMenuItemScheduleAllDays,
+} from '../../../utils'
 
 const AddMenuItemScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -83,6 +89,7 @@ const AddMenuItemScreen: React.FC = () => {
 		availability: true,
 		variationGroups: [],
 		addons: [],
+		availabilitySchedule: createDefaultMenuItemSchedule(),
 	})
 
 	const [hasChanges, setHasChanges] = useState(false)
@@ -118,12 +125,16 @@ const AddMenuItemScreen: React.FC = () => {
 
 	// Track changes
 	useEffect(() => {
+		const scheduleChanged = !isMenuItemScheduleAllDays(
+			formData.availabilitySchedule
+		)
 		const changed =
 			formData.name.trim() !== '' ||
 			formData.description.trim() !== '' ||
 			formData.basePrice.trim() !== '' ||
 			formData.images.length > 0 ||
-			formData.categoryIds.length > 0
+			formData.categoryIds.length > 0 ||
+			scheduleChanged
 
 		setHasChanges(changed)
 	}, [formData])
@@ -174,6 +185,9 @@ const AddMenuItemScreen: React.FC = () => {
 			if (isNaN(p) || p < 0) {
 				newErrors['basePrice'] = 'Enter a valid price or leave empty'
 			}
+		}
+		if (!hasAnyMenuItemScheduleDay(formData.availabilitySchedule)) {
+			newErrors['availabilitySchedule'] = 'Select at least one day'
 		}
 
 		// Variation groups validations
@@ -311,6 +325,19 @@ const AddMenuItemScreen: React.FC = () => {
 					errors={errors}
 					showCheckboxMenu={showCheckboxMenuModal}
 					hideCheckboxMenu={hideCheckboxMenuModal}
+				/>
+
+				{/* Availability Schedule */}
+				<MenuAvailabilitySection
+					schedule={formData.availabilitySchedule}
+					onChange={(next) =>
+						setFormData((prev) => ({
+							...prev,
+							availabilitySchedule: next,
+						}))
+					}
+					error={errors['availabilitySchedule']}
+					variant="add"
 				/>
 
 				{/* Images Section */}

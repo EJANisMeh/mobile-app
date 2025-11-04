@@ -35,6 +35,7 @@ export const menuApi = {
 				displayImageIndex: formData.displayImageIndex,
 				categoryIds: formData.categoryIds,
 				availability: formData.availability,
+				availabilitySchedule: formData.availabilitySchedule,
 				variationGroups: formData.variationGroups.map((group) => ({
 					name: group.name.trim(),
 					selectionTypeId: group.selectionTypeId,

@@ -1,4 +1,5 @@
 import { MenuItemForCustomer } from '../cafeteriaTypes'
+import type { MenuItemAvailabilitySchedule } from '../menuItemTypes'
 
 export interface MenuItemsResponse {
 	success: boolean
@@ -23,6 +24,7 @@ export interface RawMenuItem {
 	} | null
 	images?: string[] | null
 	display_image_index?: number | null
+	availability_schedule?: MenuItemAvailabilitySchedule | null
 	menu_item_variation_groups?: RawMenuItemVariationGroup[]
 	menu_item_addons_menu_item_addons_menu_item_idTomenu_items?: RawMenuItemAddon[]
 	menu_item_addons_menu_item_addons_target_menu_item_idTomenu_items?: RawMenuItemAddon[]
@@ -37,14 +39,19 @@ export interface RawMenuItem {
 export interface RawMenuItemVariationGroup {
 	id: number
 	name: string
+	code?: string | null
 	selection_type_id?: number | null
 	selection_types?: RawSelectionType | null
 	multi_limit?: number | null
+	kind?: string | null
+	category_filter_id?: number | null
+	position?: number | null
 	menu_item_variation_option_choices?: RawMenuItemVariationOptionChoice[]
 }
 
 export interface RawMenuItemVariationOptionChoice {
 	id: number
+	code?: string | null
 	name: string
 	price_adjustment: number | string
 	is_default: boolean
@@ -81,6 +88,7 @@ export interface ConcessionMenuItemListItem
 		| 'images'
 		| 'availability'
 		| 'displayImageIndex'
+		| 'availabilitySchedule'
 	> {
 	description: string | null
 	imageToDisplay: string | null

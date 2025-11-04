@@ -277,6 +277,15 @@ const EditConcessionDetailsScreen: React.FC = () => {
 	} = useConfirmationModal()
 	const [isSaving, setIsSaving] = useState(false)
 
+	const goBackToConcession = () => {
+		if (navigation.canGoBack()) {
+			navigation.goBack()
+			return
+		}
+
+		navigation.navigate('MainTabs')
+	}
+
 	// Form state
 	const [name, setName] = useState('')
 	const [description, setDescription] = useState('')
@@ -360,13 +369,13 @@ const EditConcessionDetailsScreen: React.FC = () => {
 				cancelText: 'Keep Editing',
 				confirmStyle: 'destructive',
 				onConfirm: () => {
-					navigation.goBack()
+					goBackToConcession()
 				},
 			})
 			return
 		}
 
-		navigation.goBack()
+		goBackToConcession()
 	}
 
 	useEffect(() => {

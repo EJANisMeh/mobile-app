@@ -1,4 +1,5 @@
 import type { ConcessionMenuItemListItem, RawMenuItem } from '../types'
+import { normalizeMenuItemSchedule } from './menuItemSchedule'
 
 const toNumber = (value: number | string | null | undefined): number => {
 	if (typeof value === 'number') {
@@ -60,5 +61,8 @@ export const transformRawMenuItem = (
 		imageToDisplay,
 		priceDisplay: `₱${basePrice.toFixed(2)}`,
 		category: resolvedCategory,
+		availabilitySchedule: normalizeMenuItemSchedule(
+			raw.availability_schedule ?? undefined
+		),
 	}
 }

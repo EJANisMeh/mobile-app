@@ -69,6 +69,7 @@ model MenuItem {
   description                                                       String?
   basePrice                                                         Decimal                      @map("base_price") @db.Decimal(10, 2)
   availability                                                      Boolean                      @default(false)
+  availabilitySchedule                                              Json?                        @default("{}") @map("availability_schedule")
   concessionId                                                      Int                          @map("concession_id")
   categoryId                                                        Int?                         @map("category_id")
   position                                                          Int?                         @default(0)

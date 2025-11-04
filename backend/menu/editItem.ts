@@ -1,5 +1,9 @@
 import express from 'express'
 import { prisma, updateQuery, selectOne } from '../db'
+import {
+	normalizeMenuItemSchedule,
+	hasAnyMenuItemScheduleDay,
+} from '../../utils/menuItemSchedule'
 
 // Edit menu item endpoint
 export const editItem = async (req: express.Request, res: express.Response) => {
@@ -22,6 +26,7 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 			displayImageIndex,
 			variationGroups,
 			addons,
+			availabilitySchedule,
 		} = req.body
 
 		// Validate menu item exists
@@ -47,6 +52,16 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 		if (images !== undefined) updateData.images = images
 		if (displayImageIndex !== undefined)
 			updateData.display_image_index = displayImageIndex
+		if (availabilitySchedule !== undefined) {
+			const normalizedSchedule = normalizeMenuItemSchedule(availabilitySchedule)
+			if (!hasAnyMenuItemScheduleDay(normalizedSchedule)) {
+				return res.status(400).json({
+					success: false,
+					error: 'Select at least one day in the availability schedule',
+				})
+			}
+			updateData.availabilitySchedule = normalizedSchedule
+		}
 
 		// Update menu item using simplified query
 		const menuItemResult = await updateQuery(prisma, {
@@ -79,8 +94,6 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 				})
 			}
 		}
-
-		// Handle variation groups if provided
 		if (variationGroups !== undefined) {
 			// Delete existing variation groups for this item
 			await prisma.menu_item_variation_groups.deleteMany({
