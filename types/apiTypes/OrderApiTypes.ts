@@ -33,6 +33,8 @@ export interface OrderItemPayload {
 }
 
 export interface CreateOrderPayload {
+	orderMode: 'now' | 'scheduled'
+	scheduledFor?: string | null
 	customerId: number
 	concessionId: number
 	orderItems: OrderItemPayload[]

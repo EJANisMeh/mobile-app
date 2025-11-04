@@ -1,5 +1,6 @@
 import { MenuItemForCustomer } from '../cafeteriaTypes'
 import type { MenuItemAvailabilitySchedule } from '../menuItemTypes'
+import type { ConcessionSchedule } from '../concessionTypes'
 
 export interface MenuItemsResponse {
 	success: boolean
@@ -33,6 +34,8 @@ export interface RawMenuItem {
 		id: number
 		name: string
 		cafeteriaId: number | null
+		schedule?: ConcessionSchedule | null
+		is_open?: boolean | null
 	} | null
 }
 

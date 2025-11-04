@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { View, Text, ActivityIndicator } from 'react-native'
 import { useRoute, RouteProp } from '@react-navigation/native'
-import { useAuthContext, useThemeContext } from '../../../context'
+import {
+	useAuthContext,
+	useThemeContext,
+	useOrderContext,
+} from '../../../context'
 import { useResponsiveDimensions, useHideNavBar } from '../../../hooks'
 import { useCustomerNavigation } from '../../../hooks/useNavigation'
 import { useAlertModal, useConfirmationModal } from '../../../hooks/useModals'
@@ -18,6 +22,9 @@ import {
 	AddonSnapshot,
 	CartItemInput,
 	RawMenuItem,
+	MenuItemAvailabilityStatus,
+	ScheduleSelectionState,
+	MenuItemDayKey,
 } from '../../../types'
 import { menuApi } from '../../../services/api'
 import {
@@ -29,7 +36,17 @@ import {
 	MenuItemActions,
 } from '../../../components/customer/menu/menuItemView'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
-import { transformRawMenuItem, appendCartItemForUser } from '../../../utils'
+import { OrderScheduleModal } from '../../../components/customer/cart'
+import {
+	transformRawMenuItem,
+	appendCartItemForUser,
+	normalizeMenuItemSchedule,
+	getMenuItemAvailabilityStatus,
+	getMenuItemDayKeyForDate,
+	normalizeConcessionSchedule,
+	CONCESSION_SCHEDULE_DAY_KEYS,
+	CONCESSION_SCHEDULE_DAY_LABELS,
+} from '../../../utils'
 
 type MenuItemViewRouteProp = RouteProp<CustomerStackParamList, 'MenuItemView'>
 
@@ -43,6 +60,7 @@ const MenuItemViewScreen: React.FC = () => {
 	const alertModal = useAlertModal()
 	const addToCartConfirmation = useConfirmationModal()
 	const orderConfirmation = useConfirmationModal()
+	const orderBackend = useOrderContext()
 
 	const [menuItem, setMenuItem] = useState<any>(null)
 	const [loading, setLoading] = useState(true)
@@ -56,8 +74,8 @@ const MenuItemViewScreen: React.FC = () => {
 		Map<number, AddonSelection>
 	>(new Map())
 	const [quantity, setQuantity] = useState(1)
-	const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
 	const [isAddingToCart, setIsAddingToCart] = useState(false)
+	const [isOrderModalVisible, setOrderModalVisible] = useState(false)
 
 	const menuItemId = route.params.menuItemId
 
@@ -150,6 +168,65 @@ const MenuItemViewScreen: React.FC = () => {
 
 	const roundCurrency = (value: number): number =>
 		Number.isFinite(value) ? Number(value.toFixed(2)) : 0
+
+	const normalizedSchedule = useMemo(
+		() =>
+			normalizeMenuItemSchedule(menuItem?.availabilitySchedule ?? undefined),
+		[menuItem?.availabilitySchedule]
+	)
+
+	const availabilityStatus: MenuItemAvailabilityStatus | null = useMemo(() => {
+		if (!menuItem) {
+			return null
+		}
+
+		return getMenuItemAvailabilityStatus(
+			normalizedSchedule,
+			Boolean(menuItem.availability)
+		)
+	}, [menuItem, normalizedSchedule])
+
+	const normalizedConcessionSchedule = useMemo(
+		() =>
+			normalizeConcessionSchedule(menuItem?.concession?.schedule ?? undefined),
+		[menuItem?.concession?.schedule]
+	)
+
+	const scheduleDayDetails = useMemo(() => {
+		if (!menuItem) {
+			return []
+		}
+
+		const todayKey = getMenuItemDayKeyForDate(new Date())
+
+		return CONCESSION_SCHEDULE_DAY_KEYS.map((dayKey) => ({
+			key: dayKey as MenuItemDayKey,
+			label: CONCESSION_SCHEDULE_DAY_LABELS[dayKey],
+			isAvailable: Boolean(normalizedSchedule[dayKey as MenuItemDayKey]),
+			isToday: dayKey === todayKey,
+		}))
+	}, [menuItem, normalizedSchedule])
+
+	const orderNowAllowed = availabilityStatus === 'available'
+
+	const orderRestrictionMessage = useMemo(() => {
+		if (!menuItem || !availabilityStatus) {
+			return null
+		}
+
+		switch (availabilityStatus) {
+			case 'out_of_stock':
+				return `${menuItem.name ?? 'This item'} is out of stock right now.`
+			case 'not_served_today':
+				return `${
+					menuItem.name ?? 'This item'
+				} is not being sold today. You can schedule an advanced order on an available day.`
+			default:
+				return null
+		}
+	}, [availabilityStatus, menuItem])
+
+	const isOrdering = orderBackend.isProcessing
 
 	// Calculate total price based on selections
 	const priceCalculation: PriceCalculation = useMemo(() => {
@@ -251,8 +328,8 @@ const MenuItemViewScreen: React.FC = () => {
 		!areVariationRequirementsMet ||
 		!areAddonRequirementsMet ||
 		quantity < 1 ||
-		!user ||
-		isAddingToCart
+		isAddingToCart ||
+		isOrdering
 
 	const buildSelectionSnapshots = (): {
 		variationGroupsSnapshot: VariationGroupSnapshot[]
@@ -325,7 +402,9 @@ const MenuItemViewScreen: React.FC = () => {
 		return null
 	}
 
-	const buildOrderPayload = (): CreateOrderPayload | null => {
+	const buildOrderPayload = (
+		selection: ScheduleSelectionState
+	): CreateOrderPayload | null => {
 		const concessionId = getConcessionId()
 		if (!menuItem || !user || concessionId === null) {
 			return null
@@ -336,8 +415,14 @@ const MenuItemViewScreen: React.FC = () => {
 		const unitPrice = roundCurrency(priceCalculation.unitPrice)
 		const itemTotal = roundCurrency(unitPrice * Math.max(quantity, 1))
 		const total = itemTotal
+		const scheduledForIso =
+			selection.mode === 'scheduled' && selection.scheduledAt
+				? selection.scheduledAt.toISOString()
+				: null
 
 		return {
+			orderMode: selection.mode,
+			scheduledFor: scheduledForIso,
 			customerId: user.id,
 			concessionId,
 			total,
@@ -430,7 +515,7 @@ const MenuItemViewScreen: React.FC = () => {
 	}
 
 	const handleAddToCartPress = () => {
-		if (isActionDisabled || isSubmittingOrder) {
+		if (isActionDisabled || isOrdering) {
 			return
 		}
 
@@ -445,8 +530,8 @@ const MenuItemViewScreen: React.FC = () => {
 		})
 	}
 
-	const placeOrder = async () => {
-		const payload = buildOrderPayload()
+	const placeOrder = async (selection: ScheduleSelectionState) => {
+		const payload = buildOrderPayload(selection)
 		if (!payload) {
 			alertModal.showAlert({
 				title: 'Unable to Order',
@@ -455,9 +540,8 @@ const MenuItemViewScreen: React.FC = () => {
 			return
 		}
 
-		setIsSubmittingOrder(true)
 		try {
-			const response = await menuApi.createOrder(payload)
+			const response = await orderBackend.createOrder(payload)
 			if (response.success) {
 				alertModal.showAlert({
 					title: 'Order Placed',
@@ -465,6 +549,19 @@ const MenuItemViewScreen: React.FC = () => {
 						response.message ||
 						'Your order was placed successfully. We will notify you with updates.',
 					onClose: navigateBackToMenu,
+				})
+			} else if (
+				'reasons' in response &&
+				Array.isArray(response.reasons) &&
+				response.reasons.length > 0
+			) {
+				const reasonsList = response.reasons
+					.map((reason: string, index: number) => `${index + 1}. ${reason}`)
+					.join('\n')
+
+				alertModal.showAlert({
+					title: 'Order Failed',
+					message: `${response.error}\n\n${reasonsList}`,
 				})
 			} else {
 				alertModal.showAlert({
@@ -482,23 +579,50 @@ const MenuItemViewScreen: React.FC = () => {
 						? err.message
 						: 'Unexpected error occurred. Please try again.',
 			})
-		} finally {
-			setIsSubmittingOrder(false)
 		}
 	}
 
-	const handleOrderNowPress = () => {
-		if (isActionDisabled || isSubmittingOrder) {
+	const handleStartOrderFlow = () => {
+		if (isActionDisabled) {
 			return
 		}
 
+		if (!user) {
+			alertModal.showAlert({
+				title: 'Sign In Required',
+				message: 'Please sign in to place an order.',
+			})
+			return
+		}
+
+		setOrderModalVisible(true)
+	}
+
+	const handleOrderModalClose = () => {
+		setOrderModalVisible(false)
+	}
+
+	const handleScheduleSelectionConfirm = (
+		selection: ScheduleSelectionState
+	) => {
+		setOrderModalVisible(false)
+
+		const isScheduled = selection.mode === 'scheduled'
+		const scheduleDetail =
+			isScheduled && selection.scheduledAt
+				? `Scheduled for ${selection.scheduledAt.toLocaleString()}.`
+				: 'We will request this order for immediate preparation.'
+
 		orderConfirmation.showConfirmation({
-			title: 'Order Now',
-			message: 'Place this order now?',
-			confirmText: 'Order Now',
-			cancelText: 'Cancel',
+			title: isScheduled ? 'Confirm Scheduled Order' : 'Confirm Order',
+			message: `${scheduleDetail}\n\nDo you want to continue?`,
+			confirmText: 'Place Order',
+			cancelText: 'Back',
 			onConfirm: () => {
-				void placeOrder()
+				void placeOrder(selection)
+			},
+			onCancel: () => {
+				setOrderModalVisible(true)
 			},
 		})
 	}
@@ -543,11 +667,13 @@ const MenuItemViewScreen: React.FC = () => {
 					<MenuItemImages images={menuItem.images} />
 				)}
 
-				{/* Description */}
-				{menuItem.description && (
+				{/* Description and schedule */}
+				{(menuItem.description || scheduleDayDetails.length > 0) && (
 					<MenuItemInfo
 						menuItem={menuItem}
 						showPrice={false}
+						scheduleDays={scheduleDayDetails}
+						availabilityStatus={availabilityStatus}
 					/>
 				)}
 
@@ -583,13 +709,14 @@ const MenuItemViewScreen: React.FC = () => {
 						/>
 					)}
 
-				{/* Bottom Actions: Add to Cart / Order Now */}
+				{/* Bottom Actions: Add to Cart / Order Flow */}
 				<MenuItemActions
-					menuItem={menuItem}
-					disabled={isActionDisabled || isSubmittingOrder}
-					isProcessing={isSubmittingOrder}
+					disabled={isActionDisabled}
+					isProcessing={isOrdering}
 					onAddToCart={handleAddToCartPress}
-					onOrderNow={handleOrderNowPress}
+					onStartOrder={handleStartOrderFlow}
+					orderNowAllowed={orderNowAllowed}
+					orderRestrictionMessage={orderRestrictionMessage}
 				/>
 			</DynamicScrollView>
 
@@ -622,6 +749,16 @@ const MenuItemViewScreen: React.FC = () => {
 				onConfirm={orderConfirmation.props.onConfirm}
 				onCancel={orderConfirmation.props.onCancel}
 				confirmStyle={orderConfirmation.props.confirmStyle || 'default'}
+			/>
+
+			<OrderScheduleModal
+				visible={isOrderModalVisible}
+				onClose={handleOrderModalClose}
+				onConfirm={handleScheduleSelectionConfirm}
+				schedule={menuItem.availabilitySchedule}
+				concessionSchedule={normalizedConcessionSchedule}
+				availabilityStatus={availabilityStatus ?? 'not_served_today'}
+				itemName={menuItem.name ?? 'this item'}
 			/>
 		</DynamicKeyboardView>
 	)

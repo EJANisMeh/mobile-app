@@ -148,6 +148,56 @@ export const createCustomerMenuItemViewStyles = (
 			color: colors.textSecondary,
 			lineHeight: responsive.getResponsiveFontSize(20),
 		},
+		scheduleSection: {
+			marginTop: spacing.md,
+		},
+		scheduleLabel: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.textSecondary,
+			marginBottom: spacing.xs,
+			textTransform: 'uppercase',
+		},
+		scheduleDayGroups: {
+			gap: spacing.md,
+		},
+		scheduleDayGroup: {
+			gap: spacing.xs,
+		},
+		scheduleGroupLabel: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			fontWeight: '600',
+			color: colors.text,
+		},
+		scheduleChipRow: {
+			flexDirection: 'row',
+			flexWrap: 'wrap',
+			gap: spacing.xs,
+		},
+		scheduleChip: {
+			paddingHorizontal: spacing.sm,
+			paddingVertical: spacing.xs,
+			borderRadius: 16,
+			borderWidth: 1,
+			borderColor: colors.border,
+			backgroundColor: colors.surfaceSecondary,
+		},
+		scheduleChipAvailable: {
+			borderColor: colors.primary,
+			backgroundColor: colors.primaryLight,
+		},
+		scheduleChipToday: {
+			borderColor: colors.success,
+			backgroundColor: colors.successLight ?? colors.success,
+		},
+		scheduleChipUnavailable: {
+			borderColor: colors.error,
+			backgroundColor: colors.errorLight,
+		},
+		scheduleChipText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			fontWeight: '600',
+			color: colors.text,
+		},
 
 		// Variations Section
 		variationsContainer: {

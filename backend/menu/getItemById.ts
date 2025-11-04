@@ -21,6 +21,14 @@ export const getItemById = async (
 				id: parseInt(itemId),
 			},
 			include: {
+				concession: {
+					select: {
+						id: true,
+						name: true,
+						schedule: true,
+						is_open: true,
+					},
+				},
 				menu_item_category_links: {
 					include: {
 						category: true,

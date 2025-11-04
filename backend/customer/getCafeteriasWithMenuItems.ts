@@ -56,6 +56,7 @@ export const getCafeteriasWithMenuItems = async (
 					basePrice: Number(item.basePrice), // Convert Decimal to number
 					images: item.images,
 					availability: item.availability,
+					availabilitySchedule: item.availabilitySchedule,
 					displayImageIndex: item.display_image_index,
 					category: item.category,
 				})),

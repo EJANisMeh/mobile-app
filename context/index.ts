@@ -5,4 +5,5 @@ export {
 	useConcessionContext,
 	useThemeContext,
 	useMenuContext,
+	useOrderContext,
 } from './AppProvider'

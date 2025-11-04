@@ -1,0 +1,489 @@
+import React, { useEffect, useMemo, useState } from 'react'
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import DateTimePickerModal from 'react-native-modal-datetime-picker'
+import BaseModal from '../../modals/BaseModal'
+import type {
+	MenuItemAvailabilitySchedule,
+	MenuItemAvailabilityStatus,
+	OrderMode,
+	ScheduleSelectionState,
+	ConcessionSchedule,
+} from '../../../types'
+import {
+	getMenuItemScheduleSummary,
+	isMenuItemScheduledOnDate,
+	normalizeMenuItemSchedule,
+	getMenuItemDayKeyForDate,
+	normalizeConcessionSchedule,
+	CONCESSION_SCHEDULE_DAY_KEYS,
+	CONCESSION_SCHEDULE_DAY_LABELS,
+	formatTimeDisplay,
+} from '../../../utils'
+
+interface OrderScheduleModalProps {
+	visible: boolean
+	onClose: () => void
+	onConfirm: (selection: ScheduleSelectionState) => void
+	schedule: MenuItemAvailabilitySchedule | undefined | null
+	concessionSchedule: ConcessionSchedule | undefined | null
+	availabilityStatus: MenuItemAvailabilityStatus
+	itemName: string
+}
+const DEFAULT_SCHEDULED_HOUR = 11
+const DEFAULT_SCHEDULED_MINUTE = 0
+
+interface QuickPickOption {
+	id: string
+	label: string
+	date: Date
+}
+
+const combineDateAndTime = (base: Date, timeValue: string | null): Date => {
+	const [hoursRaw, minutesRaw] = (timeValue ?? '').split(':')
+	const hours = Number.isFinite(Number(hoursRaw))
+		? parseInt(hoursRaw as string, 10)
+		: DEFAULT_SCHEDULED_HOUR
+	const minutes = Number.isFinite(Number(minutesRaw))
+		? parseInt(minutesRaw as string, 10)
+		: DEFAULT_SCHEDULED_MINUTE
+
+	const combined = new Date(base)
+	combined.setHours(hours, minutes, 0, 0)
+	return combined
+}
+
+const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
+	visible,
+	onClose,
+	onConfirm,
+	schedule,
+	concessionSchedule,
+	availabilityStatus,
+	itemName,
+}) => {
+	const normalizedSchedule = useMemo(
+		() => normalizeMenuItemSchedule(schedule ?? undefined),
+		[schedule]
+	)
+
+	const normalizedConcessionSchedule = useMemo(
+		() => normalizeConcessionSchedule(concessionSchedule ?? undefined),
+		[concessionSchedule]
+	)
+
+	const [mode, setMode] = useState<OrderMode>(
+		availabilityStatus === 'available' ? 'now' : 'scheduled'
+	)
+	const [scheduledAt, setScheduledAt] = useState<Date | null>(null)
+	const [error, setError] = useState<string | null>(null)
+	const [pickerVisible, setPickerVisible] = useState(false)
+
+	useEffect(() => {
+		if (visible) {
+			setMode(availabilityStatus === 'available' ? 'now' : 'scheduled')
+			setScheduledAt(null)
+			setError(null)
+			setPickerVisible(false)
+		}
+	}, [visible, availabilityStatus])
+
+	const scheduleSummary = useMemo(() => {
+		const sellingDays = CONCESSION_SCHEDULE_DAY_KEYS.filter((dayKey) =>
+			Boolean(normalizedSchedule[dayKey])
+		)
+		if (sellingDays.length === 0) {
+			return 'Not scheduled'
+		}
+		return sellingDays
+			.map((dayKey) => CONCESSION_SCHEDULE_DAY_LABELS[dayKey])
+			.join(', ')
+	}, [normalizedSchedule])
+
+	const isOrderNowDisabled = availabilityStatus !== 'available'
+
+	const availableDayKeys = useMemo(() => {
+		return CONCESSION_SCHEDULE_DAY_KEYS.filter((dayKey) => {
+			const itemAvailable = Boolean(normalizedSchedule[dayKey])
+			const concessionDay = normalizedConcessionSchedule[dayKey]
+			return (
+				itemAvailable &&
+				Boolean(concessionDay?.isOpen) &&
+				typeof concessionDay?.open === 'string' &&
+				typeof concessionDay?.close === 'string'
+			)
+		})
+	}, [normalizedConcessionSchedule, normalizedSchedule])
+
+	const quickPickOptions = useMemo(() => {
+		const results: QuickPickOption[] = []
+		const now = new Date()
+
+		let offset = 1
+		while (results.length < 3 && offset <= 21) {
+			const candidateDate = new Date(now)
+			candidateDate.setDate(now.getDate() + offset)
+			candidateDate.setSeconds(0, 0)
+
+			const dayKey = getMenuItemDayKeyForDate(candidateDate)
+			if (!availableDayKeys.includes(dayKey)) {
+				offset += 1
+				continue
+			}
+
+			const concessionDay = normalizedConcessionSchedule[dayKey]
+			const openTime =
+				typeof concessionDay?.open === 'string'
+					? concessionDay.open
+					: `${DEFAULT_SCHEDULED_HOUR}:${DEFAULT_SCHEDULED_MINUTE.toString().padStart(
+							2,
+							'0'
+					  )}`
+			const scheduledDate = combineDateAndTime(candidateDate, openTime)
+			if (scheduledDate.getTime() <= now.getTime()) {
+				offset += 1
+				continue
+			}
+
+			const label = `${
+				CONCESSION_SCHEDULE_DAY_LABELS[dayKey]
+			} • ${scheduledDate.toLocaleDateString(undefined, {
+				month: 'short',
+				day: 'numeric',
+			})} ${formatTimeDisplay(openTime)}`
+
+			results.push({
+				id: `${dayKey}-${offset}`,
+				label,
+				date: scheduledDate,
+			})
+			offset += 1
+		}
+
+		return results
+	}, [availableDayKeys, normalizedConcessionSchedule])
+
+	const validateScheduledDate = (candidate: Date): boolean => {
+		const now = new Date()
+		if (candidate.getTime() <= now.getTime()) {
+			setError('Please choose a future date and time.')
+			return false
+		}
+
+		if (!isMenuItemScheduledOnDate(normalizedSchedule, candidate)) {
+			setError(
+				'This item is not available on the selected day. Pick another day.'
+			)
+			return false
+		}
+
+		const dayKey = getMenuItemDayKeyForDate(candidate)
+		const concessionDay = normalizedConcessionSchedule[dayKey]
+		if (
+			!concessionDay?.isOpen ||
+			typeof concessionDay.open !== 'string' ||
+			typeof concessionDay.close !== 'string'
+		) {
+			setError(
+				'The concession is closed on the selected day. Pick another date.'
+			)
+			return false
+		}
+
+		const opensAt = combineDateAndTime(candidate, concessionDay.open)
+		const closesAt = combineDateAndTime(candidate, concessionDay.close)
+
+		if (candidate < opensAt || candidate > closesAt) {
+			setError(
+				`Please choose a time between ${formatTimeDisplay(
+					concessionDay.open
+				)} and ${formatTimeDisplay(concessionDay.close)}.`
+			)
+			return false
+		}
+
+		setError(null)
+		return true
+	}
+
+	const handleShowPicker = () => {
+		setPickerVisible(true)
+	}
+
+	const handleHidePicker = () => {
+		setPickerVisible(false)
+	}
+
+	const handlePickerConfirm = (date: Date) => {
+		handleHidePicker()
+		if (validateScheduledDate(date)) {
+			setMode('scheduled')
+			setScheduledAt(date)
+		}
+	}
+
+	const applyQuickPick = (option: QuickPickOption) => {
+		if (validateScheduledDate(option.date)) {
+			setMode('scheduled')
+			setScheduledAt(option.date)
+		}
+	}
+
+	const handleConfirmSelection = () => {
+		if (mode === 'now') {
+			onConfirm({ mode: 'now', scheduledAt: null })
+			onClose()
+			return
+		}
+
+		if (!scheduledAt) {
+			setError('Select a valid date and time for your scheduled order.')
+			return
+		}
+
+		if (!validateScheduledDate(scheduledAt)) {
+			return
+		}
+
+		onConfirm({ mode: 'scheduled', scheduledAt })
+		onClose()
+	}
+
+	const modeButton = (id: OrderMode, label: string, disabled = false) => {
+		const isActive = mode === id
+		return (
+			<TouchableOpacity
+				style={[
+					styles.modeButton,
+					isActive && styles.modeButtonActive,
+					disabled && styles.modeButtonDisabled,
+				]}
+				onPress={() => {
+					if (disabled) {
+						return
+					}
+					setMode(id)
+					setError(null)
+				}}
+				disabled={disabled}>
+				<Text
+					style={[
+						styles.modeButtonText,
+						isActive && styles.modeButtonTextActive,
+						disabled && styles.modeButtonTextDisabled,
+					]}>
+					{label}
+				</Text>
+			</TouchableOpacity>
+		)
+	}
+
+	return (
+		<>
+			<BaseModal
+				visible={visible}
+				onClose={onClose}
+				title={`How would you like to order ${itemName}?`}>
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Choose order mode</Text>
+					<View style={styles.modeRow}>
+						{modeButton('now', 'Order Now', isOrderNowDisabled)}
+						{modeButton('scheduled', 'Schedule Order')}
+					</View>
+					{isOrderNowDisabled ? (
+						<Text style={styles.helperText}>
+							Currently unavailable for immediate pick-up.
+						</Text>
+					) : null}
+				</View>
+
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Selling schedule</Text>
+					<Text style={styles.helperText}>{scheduleSummary}</Text>
+					{availableDayKeys.length === 0 ? (
+						<Text style={styles.helperText}>
+							No days are currently available for scheduling.
+						</Text>
+					) : null}
+				</View>
+
+				{mode === 'scheduled' ? (
+					<View style={styles.section}>
+						{quickPickOptions.length > 0 ? (
+							<>
+								<Text style={styles.sectionTitle}>Quick picks</Text>
+								<View style={styles.presetRow}>
+									{quickPickOptions.map((option) => (
+										<TouchableOpacity
+											key={option.id}
+											style={styles.presetButton}
+											onPress={() => applyQuickPick(option)}>
+											<Text style={styles.presetButtonText}>
+												{option.label}
+											</Text>
+										</TouchableOpacity>
+									))}
+								</View>
+							</>
+						) : null}
+
+						<View style={styles.sectionSpacer} />
+
+						<TouchableOpacity
+							style={styles.datetimeButton}
+							onPress={handleShowPicker}>
+							<Text style={styles.datetimeButtonText}>
+								{scheduledAt
+									? `Scheduled for ${scheduledAt.toLocaleString()}`
+									: 'Pick date & time'}
+							</Text>
+						</TouchableOpacity>
+					</View>
+				) : null}
+
+				{error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+				<View style={styles.actionsRow}>
+					<TouchableOpacity
+						style={[styles.actionButton, styles.cancelButton]}
+						onPress={onClose}>
+						<Text style={styles.actionButtonText}>Cancel</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={[styles.actionButton, styles.confirmButton]}
+						onPress={handleConfirmSelection}>
+						<Text style={[styles.actionButtonText, styles.confirmButtonText]}>
+							Continue
+						</Text>
+					</TouchableOpacity>
+				</View>
+			</BaseModal>
+
+			<DateTimePickerModal
+				isVisible={pickerVisible}
+				mode="datetime"
+				minimumDate={new Date(Date.now() + 5 * 60 * 1000)}
+				onConfirm={handlePickerConfirm}
+				onCancel={handleHidePicker}
+			/>
+		</>
+	)
+}
+
+const styles = StyleSheet.create({
+	section: {
+		marginBottom: 16,
+	},
+	sectionTitle: {
+		fontSize: 16,
+		fontWeight: '600',
+		marginBottom: 8,
+		color: '#222',
+	},
+	helperText: {
+		fontSize: 14,
+		color: '#555',
+		lineHeight: 20,
+	},
+	modeRow: {
+		flexDirection: 'row',
+		gap: 12,
+	},
+	modeButton: {
+		flex: 1,
+		paddingVertical: 12,
+		borderRadius: 10,
+		borderWidth: 1,
+		borderColor: '#d0d0d0',
+		alignItems: 'center',
+	},
+	modeButtonActive: {
+		backgroundColor: '#0066ff10',
+		borderColor: '#0066ff',
+	},
+	modeButtonDisabled: {
+		opacity: 0.4,
+	},
+	modeButtonText: {
+		fontSize: 14,
+		fontWeight: '600',
+		color: '#333',
+	},
+	modeButtonTextActive: {
+		color: '#0066ff',
+	},
+	modeButtonTextDisabled: {
+		color: '#666',
+	},
+	presetRow: {
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		gap: 10,
+	},
+	presetButton: {
+		paddingVertical: 10,
+		paddingHorizontal: 12,
+		borderRadius: 20,
+		borderWidth: 1,
+		borderColor: '#0066ff',
+	},
+	presetButtonDisabled: {
+		opacity: 0.3,
+	},
+	presetButtonText: {
+		fontSize: 13,
+		fontWeight: '600',
+		color: '#0066ff',
+	},
+	presetButtonTextDisabled: {
+		color: '#666',
+	},
+	sectionSpacer: {
+		height: 12,
+	},
+	datetimeButton: {
+		paddingVertical: 12,
+		paddingHorizontal: 12,
+		borderRadius: 10,
+		borderWidth: 1,
+		borderColor: '#d0d0d0',
+		alignItems: 'center',
+	},
+	datetimeButtonText: {
+		fontSize: 14,
+		fontWeight: '600',
+		color: '#333',
+	},
+	errorText: {
+		color: '#cc0000',
+		marginBottom: 12,
+		fontSize: 13,
+	},
+	actionsRow: {
+		flexDirection: 'row',
+		justifyContent: 'flex-end',
+		gap: 12,
+	},
+	actionButton: {
+		paddingVertical: 12,
+		paddingHorizontal: 20,
+		borderRadius: 8,
+		borderWidth: 1,
+		borderColor: '#0066ff',
+	},
+	cancelButton: {
+		backgroundColor: '#fff',
+	},
+	confirmButton: {
+		backgroundColor: '#0066ff',
+		borderColor: '#0066ff',
+	},
+	actionButtonText: {
+		fontSize: 15,
+		fontWeight: '600',
+	},
+	confirmButtonText: {
+		color: '#fff',
+	},
+})
+
+export default OrderScheduleModal

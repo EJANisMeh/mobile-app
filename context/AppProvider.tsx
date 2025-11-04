@@ -9,6 +9,7 @@ import {
 	useAuthBackend,
 	useConcessionBackend,
 	useMenuBackend,
+	useOrderBackend,
 } from '../hooks/useBackend'
 
 const GlobalContext = createContext<any>(null)
@@ -20,6 +21,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 		auth: useAuthBackend(),
 		concession: useConcessionBackend(),
 		menu: useMenuBackend(),
+		order: useOrderBackend(),
 	}
 
 	return (
@@ -32,3 +34,4 @@ export const useThemeContext = () => useContext(GlobalContext).theme
 export const useAuthContext = () => useContext(GlobalContext).auth
 export const useConcessionContext = () => useContext(GlobalContext).concession
 export const useMenuContext = () => useContext(GlobalContext).menu
+export const useOrderContext = () => useContext(GlobalContext).order

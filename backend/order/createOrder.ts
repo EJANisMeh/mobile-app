@@ -1,5 +1,11 @@
 import express from 'express'
 import { prisma, selectOne } from '../db'
+import {
+	isMenuItemScheduledOnDate,
+	normalizeMenuItemSchedule,
+} from '../../utils/menuItemSchedule'
+
+type OrderMode = 'now' | 'scheduled'
 
 // Create a new order
 export const createOrder = async (
@@ -14,6 +20,8 @@ export const createOrder = async (
 			total,
 			payment_mode,
 			concession_note,
+			orderMode,
+			scheduledFor,
 		} = req.body
 
 		// Validate required fields
@@ -28,6 +36,79 @@ export const createOrder = async (
 				success: false,
 				error:
 					'Missing required fields: customerId, concessionId, and orderItems',
+			})
+		}
+
+		const resolvedMode: OrderMode =
+			typeof orderMode === 'string' && orderMode.toLowerCase() === 'scheduled'
+				? 'scheduled'
+				: 'now'
+
+		const validationErrors: string[] = []
+		const now = new Date()
+		let scheduledDate: Date | null = null
+
+		if (resolvedMode === 'scheduled') {
+			if (typeof scheduledFor !== 'string') {
+				validationErrors.push(
+					'Scheduled orders require a future date and time.'
+				)
+			} else {
+				const parsed = new Date(scheduledFor)
+				if (Number.isNaN(parsed.getTime())) {
+					validationErrors.push('Scheduled date and time is invalid.')
+				} else if (parsed.getTime() <= now.getTime()) {
+					validationErrors.push(
+						'Scheduled date and time must be in the future.'
+					)
+				} else {
+					scheduledDate = parsed
+				}
+			}
+		}
+
+		// Fetch menu items to validate availability and schedule
+		for (const item of orderItems) {
+			const menuItem = await prisma.menuItem.findUnique({
+				where: { id: item.menuItemId },
+				select: {
+					name: true,
+					availability: true,
+					availabilitySchedule: true,
+				},
+			})
+
+			if (!menuItem) {
+				validationErrors.push(
+					`Menu item ${item.menuItemId} is no longer available. Please refresh and try again.`
+				)
+				continue
+			}
+
+			const schedule = normalizeMenuItemSchedule(
+				menuItem.availabilitySchedule ?? undefined
+			)
+
+			if (resolvedMode === 'now') {
+				if (!menuItem.availability) {
+					validationErrors.push(`${menuItem.name} is out of stock.`)
+				} else if (!isMenuItemScheduledOnDate(schedule, now)) {
+					validationErrors.push(`${menuItem.name} is not being sold today.`)
+				}
+			} else if (scheduledDate) {
+				if (!isMenuItemScheduledOnDate(schedule, scheduledDate)) {
+					validationErrors.push(
+						`${menuItem.name} is not available at the scheduled date and time.`
+					)
+				}
+			}
+		}
+
+		if (validationErrors.length > 0) {
+			return res.status(400).json({
+				success: false,
+				error: 'Order validation failed',
+				reasons: validationErrors,
 			})
 		}
 
@@ -57,6 +138,8 @@ export const createOrder = async (
 					payment_mode: payment_mode || {},
 					status_id: pendingStatus.id,
 					concession_note: concession_note || null,
+					orderMode: resolvedMode,
+					scheduledFor: scheduledDate,
 				},
 			})
 

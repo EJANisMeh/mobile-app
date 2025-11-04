@@ -4,6 +4,17 @@ import { Ionicons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../styles/customer'
+import type {
+	MenuItemAvailabilityStatus,
+	MenuItemDayKey,
+} from '../../../../types'
+
+interface ScheduleDayDetail {
+	key: MenuItemDayKey
+	label: string
+	isAvailable: boolean
+	isToday: boolean
+}
 
 interface MenuItemInfoProps {
 	menuItem: any
@@ -11,6 +22,8 @@ interface MenuItemInfoProps {
 	quantity?: number
 	setQuantity?: Dispatch<SetStateAction<number>>
 	showPrice?: boolean
+	scheduleDays?: ScheduleDayDetail[]
+	availabilityStatus?: MenuItemAvailabilityStatus | null
 }
 
 const MenuItemInfo: React.FC<MenuItemInfoProps> = ({
@@ -19,6 +32,8 @@ const MenuItemInfo: React.FC<MenuItemInfoProps> = ({
 	quantity,
 	setQuantity,
 	showPrice = true,
+	scheduleDays,
+	availabilityStatus,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
@@ -50,6 +65,49 @@ const MenuItemInfo: React.FC<MenuItemInfoProps> = ({
 					<Text style={styles.description}>{menuItem.description}</Text>
 				</View>
 			)}
+
+			{scheduleDays && scheduleDays.length > 0 ? (
+				<View style={styles.scheduleSection}>
+					<Text style={styles.scheduleLabel}>Selling Days</Text>
+					<View style={styles.scheduleDayGroups}>
+						<View style={styles.scheduleDayGroup}>
+							<Text style={styles.scheduleGroupLabel}>Days Sold</Text>
+							<View style={styles.scheduleChipRow}>
+								{scheduleDays
+									.filter((day) => day.isAvailable)
+									.map((day) => (
+										<View
+											key={`available-${day.key}`}
+											style={[
+												styles.scheduleChip,
+												styles.scheduleChipAvailable,
+												day.isToday && styles.scheduleChipToday,
+											]}>
+											<Text style={styles.scheduleChipText}>{day.label}</Text>
+										</View>
+									))}
+							</View>
+						</View>
+						<View style={styles.scheduleDayGroup}>
+							<Text style={styles.scheduleGroupLabel}>Days Not Sold</Text>
+							<View style={styles.scheduleChipRow}>
+								{scheduleDays
+									.filter((day) => !day.isAvailable)
+									.map((day) => (
+										<View
+											key={`unavailable-${day.key}`}
+											style={[
+												styles.scheduleChip,
+												styles.scheduleChipUnavailable,
+											]}>
+											<Text style={styles.scheduleChipText}>{day.label}</Text>
+										</View>
+									))}
+							</View>
+						</View>
+					</View>
+				</View>
+			) : null}
 
 			{/* Price and Quantity (shown when showPrice is true) */}
 			{showPrice && totalPrice !== undefined && (

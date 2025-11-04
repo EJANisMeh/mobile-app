@@ -8,19 +8,21 @@ import { AlertModal } from '../../../modals'
 import { createCustomerMenuItemViewStyles } from '../../../../styles/customer'
 
 interface MenuItemActionsProps {
-	menuItem: any
 	disabled: boolean
 	isProcessing: boolean
 	onAddToCart: () => void
-	onOrderNow: () => void
+	onStartOrder: () => void
+	orderNowAllowed: boolean
+	orderRestrictionMessage?: string | null
 }
 
 const MenuItemActions: React.FC<MenuItemActionsProps> = ({
-	menuItem,
 	disabled,
 	isProcessing,
 	onAddToCart,
-	onOrderNow,
+	onStartOrder,
+	orderNowAllowed,
+	orderRestrictionMessage,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
@@ -31,22 +33,12 @@ const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 		alertModal.showAlert({
 			title: 'Order Options',
 			message:
-				'Add to Cart: Add this item to your cart to continue shopping and add more items before placing your order.\n\nOrder Now: Place an order immediately with just this item.',
+				'Add to Cart: Save this item while you continue browsing.\n\nPlace Order: Choose to order now or schedule a pickup time that works for you.',
 		})
 	}
 
-	if (!menuItem.availability) {
-		return (
-			<View style={styles.actionsContainer}>
-				<View style={styles.unavailableContainer}>
-					<Text style={styles.unavailableText}>Currently Unavailable</Text>
-				</View>
-			</View>
-		)
-	}
-
 	const addToCartDisabled = disabled || isProcessing
-	const orderNowDisabled = disabled || isProcessing
+	const orderActionDisabled = disabled || isProcessing
 
 	return (
 		<>
@@ -82,11 +74,12 @@ const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 				<TouchableOpacity
 					style={[
 						styles.orderNowButton,
-						orderNowDisabled && styles.disabledPrimaryButton,
+						(orderActionDisabled || !orderNowAllowed) &&
+							styles.disabledPrimaryButton,
 					]}
-					onPress={onOrderNow}
-					disabled={orderNowDisabled}
-					accessibilityLabel="Place order now">
+					onPress={onStartOrder}
+					disabled={orderActionDisabled}
+					accessibilityLabel="Start order flow">
 					{isProcessing ? (
 						<ActivityIndicator
 							size="small"
@@ -96,13 +89,18 @@ const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 						<Text
 							style={[
 								styles.orderNowText,
-								orderNowDisabled && styles.disabledButtonText,
+								(orderActionDisabled || !orderNowAllowed) &&
+									styles.disabledButtonText,
 							]}>
-							Order Now
+							Place Order
 						</Text>
 					)}
 				</TouchableOpacity>
 			</View>
+
+			{!orderNowAllowed && orderRestrictionMessage ? (
+				<Text style={styles.unavailableText}>{orderRestrictionMessage}</Text>
+			) : null}
 
 			<AlertModal
 				visible={alertModal.visible}
