@@ -4,7 +4,7 @@ import { useThemeContext, useConcessionContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createEditConcessionStyles } from '../../../../styles/concessionaire'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import { UpdateConcessionData } from '../../../../types/concessionTypes'
+import { ConcessionSchedule, UpdateConcessionData } from '../../../../types'
 import { UseAlertModalType } from '../../../../hooks/useModals/types'
 import { useConcessionaireNavigation } from '../../../../hooks/useNavigation'
 
@@ -12,6 +12,7 @@ interface EditConcessionSaveButtonProps {
 	name: string
 	description: string
 	imageUrl: string
+	schedule: ConcessionSchedule
 	isSaving: boolean
 	setIsSaving: React.Dispatch<React.SetStateAction<boolean>>
 	showAlert: UseAlertModalType['showAlert']
@@ -22,6 +23,7 @@ const EditConcessionSaveButton: React.FC<EditConcessionSaveButtonProps> = ({
 	name,
 	description,
 	imageUrl,
+	schedule,
 	isSaving,
 	setIsSaving,
 	showAlert,
@@ -63,6 +65,7 @@ const EditConcessionSaveButton: React.FC<EditConcessionSaveButtonProps> = ({
 				name: name.trim(),
 				description: description.trim() || null,
 				image_url: imageUrl.trim() || null,
+				schedule,
 			}
 
 			const result = await updateConcession(concession.id, updateData)

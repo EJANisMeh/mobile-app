@@ -133,10 +133,17 @@ export const createEditConcessionStyles = (
 		scheduleIcon: {
 			marginRight: responsive.getResponsiveMargin().medium,
 		},
-		scheduleButtonText: {
+		scheduleTextWrapper: {
 			flex: 1,
+		},
+		scheduleButtonText: {
 			fontSize: responsive.getResponsiveFontSize(16),
 			color: colors.text,
+		},
+		scheduleSummary: {
+			marginTop: 4,
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.placeholder,
 		},
 		// Action Buttons
 		actionButtonsContainer: {
@@ -184,5 +191,83 @@ export const createEditConcessionStyles = (
 			fontSize: responsive.getResponsiveFontSize(16),
 			fontWeight: '600',
 			color: '#fff',
+		},
+		// Schedule Editor Modal
+		scheduleEditorScroll: {
+			maxHeight: responsive.getHeightPercent(60),
+		},
+		scheduleEditorDayCard: {
+			paddingVertical: responsive.getResponsiveSpacing().sm,
+			borderBottomWidth: 1,
+			borderBottomColor: colors.border,
+		},
+		scheduleEditorDayHeader: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			marginBottom: responsive.getResponsiveMargin().small,
+		},
+		scheduleEditorDayLabel: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600',
+			color: colors.text,
+		},
+		scheduleEditorTimeRow: {
+			flexDirection: 'row',
+			gap: responsive.getResponsiveSpacing().xs,
+		},
+		scheduleEditorTimeButton: {
+			flex: 1,
+			paddingVertical: responsive.getResponsiveSpacing().sm,
+			paddingHorizontal: responsive.getResponsiveSpacing().md,
+			borderRadius: 10,
+			borderWidth: 1,
+			borderColor: colors.border,
+			backgroundColor: colors.card,
+		},
+		scheduleEditorTimeButtonDisabled: {
+			opacity: 0.4,
+		},
+		scheduleEditorTimeLabel: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.placeholder,
+			marginBottom: responsive.getResponsiveSpacing().xs,
+		},
+		scheduleEditorTimeValue: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600',
+			color: colors.text,
+		},
+		scheduleEditorFooter: {
+			flexDirection: 'row',
+			justifyContent: 'flex-end',
+			paddingTop: responsive.getResponsivePadding().vertical,
+			gap: responsive.getResponsiveSpacing().xs,
+		},
+		scheduleEditorActionButton: {
+			paddingVertical: responsive.getResponsiveSpacing().sm,
+			paddingHorizontal: responsive.getResponsiveSpacing().lg,
+			borderRadius: 10,
+			borderWidth: 1,
+			borderColor: colors.border,
+			backgroundColor: colors.card,
+		},
+		scheduleEditorActionButtonPrimary: {
+			backgroundColor: colors.primary,
+			borderColor: colors.primary,
+		},
+		scheduleEditorActionButtonDisabled: {
+			opacity: 0.5,
+		},
+		scheduleEditorActionButtonText: {
+			fontSize: responsive.getResponsiveFontSize(15),
+			fontWeight: '600',
+			color: colors.text,
+		},
+		scheduleEditorActionButtonPrimaryText: {
+			color: colors.textOnPrimary,
+		},
+		scheduleEditorActionButtonDisabledText: {
+			color: colors.placeholder,
 		},
 	})
