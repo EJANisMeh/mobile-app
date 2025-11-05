@@ -844,7 +844,7 @@ const MenuItemViewScreen: React.FC = () => {
 				availabilityStatus={availabilityStatus ?? 'not_served_today'}
 				isConcessionOpen={Boolean(menuItem.concession?.is_open)}
 				itemName={menuItem.name ?? 'this item'}
-			/>{' '}
+			/>
 			<PaymentMethodModal
 				visible={paymentModalVisible}
 				onClose={handlePaymentModalClose}

@@ -113,20 +113,18 @@ export const createOrder = async (
 			})
 		}
 
-		// Get pending status ID using simplified query
-		const pendingStatusResult = await selectOne(prisma, {
-			table: 'order_statuses',
-			where: { code: 'PENDING' },
+	// Get pending status ID using simplified query
+	const pendingStatusResult = await selectOne(prisma, {
+		table: 'order_statuses',
+		where: { code: 'pending' },
+	})
+
+	if (!pendingStatusResult.success || !pendingStatusResult.data) {
+		return res.status(500).json({
+			success: false,
+			error: 'Order status configuration error',
 		})
-
-		if (!pendingStatusResult.success || !pendingStatusResult.data) {
-			return res.status(500).json({
-				success: false,
-				error: 'Order status configuration error',
-			})
-		}
-
-		const pendingStatus = pendingStatusResult.data
+	}		const pendingStatus = pendingStatusResult.data
 
 		// Create order with items in a transaction
 		const result = await prisma.$transaction(async (tx) => {
