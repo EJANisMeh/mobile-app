@@ -112,13 +112,15 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 			day: 'numeric',
 			year: 'numeric',
 		})
-		
+
 		const hours = date.getHours()
 		const minutes = date.getMinutes()
 		const period = hours >= 12 ? 'PM' : 'AM'
 		const twelveHour = hours % 12 === 0 ? 12 : hours % 12
-		const timeStr = `${twelveHour}:${minutes.toString().padStart(2, '0')} ${period}`
-		
+		const timeStr = `${twelveHour}:${minutes
+			.toString()
+			.padStart(2, '0')} ${period}`
+
 		return `${dateStr} at ${timeStr}`
 	}
 

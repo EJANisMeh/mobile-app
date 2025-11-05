@@ -425,7 +425,9 @@ const CartScreen: React.FC = () => {
 			if (group.requiresSplitScheduling) {
 				const isSingleItem = group.items.length === 1
 				return {
-					label: isSingleItem ? 'No common selling days' : 'Different schedules',
+					label: isSingleItem
+						? 'No common selling days'
+						: 'Different schedules',
 					helper: isSingleItem
 						? 'Schedule this item on an available day.'
 						: 'Order each item separately to pick different days.',
