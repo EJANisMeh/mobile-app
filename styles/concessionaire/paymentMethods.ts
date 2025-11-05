@@ -10,11 +10,6 @@ export const createPaymentMethodsStyles = (
 		container: {
 			backgroundColor: colors.background,
 		},
-		scrollContent: {
-			paddingHorizontal: responsive.getResponsiveSpacing().xl,
-			paddingVertical: responsive.getResponsiveSpacing().md,
-			paddingBottom: 100, // Space for action buttons
-		},
 		loadingContainer: {
 			flex: 1,
 			justifyContent: 'center',
@@ -28,14 +23,16 @@ export const createPaymentMethodsStyles = (
 		},
 		// Info Section
 		infoSection: {
-			flexDirection: 'row',
+			backgroundColor: colors.card,
+			borderRadius: 10,
+			padding: responsive.getResponsiveSpacing().md,
 			marginBottom: responsive.getResponsiveMargin().large,
-			alignItems: 'flex-start',
+			borderWidth: 1,
+			borderColor: colors.border,
 		},
 		infoText: {
-			flex: 1,
 			fontSize: responsive.getResponsiveFontSize(14),
-			color: colors.text,
+			color: colors.textSecondary,
 			lineHeight: 20,
 		},
 		// Methods Section
@@ -270,6 +267,62 @@ export const createPaymentMethodsStyles = (
 		saveButtonText: {
 			fontSize: responsive.getResponsiveFontSize(16),
 			fontWeight: '600',
+			color: '#fff',
+		},
+		// Proof of Payment Section
+		proofSection: {
+			marginTop: responsive.getResponsiveMargin().medium,
+			paddingTop: responsive.getResponsiveMargin().medium,
+			borderTopWidth: 1,
+			borderTopColor: colors.border,
+		},
+		proofToggleRow: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			marginBottom: responsive.getResponsiveMargin().small,
+		},
+		proofLabel: {
+			flex: 1,
+			fontSize: responsive.getResponsiveFontSize(15),
+			color: colors.text,
+			fontWeight: '500',
+		},
+		proofModeContainer: {
+			marginTop: responsive.getResponsiveMargin().small,
+			paddingLeft: 28, // Align with label (icon width + margin)
+		},
+		proofModeLabel: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.textSecondary,
+			marginBottom: responsive.getResponsiveMargin().small,
+		},
+		proofModeButtons: {
+			flexDirection: 'row',
+			gap: responsive.getResponsiveMargin().small,
+		},
+		proofModeButton: {
+			flex: 1,
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'center',
+			paddingVertical: 12,
+			paddingHorizontal: responsive.getResponsiveSpacing().sm,
+			borderRadius: 8,
+			borderWidth: 1,
+			borderColor: colors.border,
+			backgroundColor: colors.background,
+			gap: 6,
+		},
+		proofModeButtonActive: {
+			backgroundColor: colors.primary,
+			borderColor: colors.primary,
+		},
+		proofModeButtonText: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.textSecondary,
+			fontWeight: '600',
+		},
+		proofModeButtonTextActive: {
 			color: '#fff',
 		},
 	})

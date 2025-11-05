@@ -18,41 +18,78 @@ const PaymentMethodsList: React.FC = () => {
 		navigation.navigate('ManagePaymentMethods' as never)
 	}
 
-	// Parse payment methods from tuple format [["type", "details"], ...]
+	// Parse payment methods from tuple format [["type", "details", needsProof, proofMode], ...]
 	const paymentMethods =
 		(concession?.payment_methods as PaymentMethodTuple[]) || []
 
+	const getProofModeIcon = (proofMode: 'text' | 'screenshot' | null) => {
+		if (proofMode === 'text') return 'text-box-outline'
+		if (proofMode === 'screenshot') return 'camera-outline'
+		return null
+	}
+
+	const getProofModeLabel = (proofMode: 'text' | 'screenshot' | null) => {
+		if (proofMode === 'text') return 'Text'
+		if (proofMode === 'screenshot') return 'Screenshot'
+		return null
+	}
+
 	return (
 		<View style={concessionStyles.paymentMethodsList}>
-			{paymentMethods.map(([type, details], index: number) => {
-				const isCash = type.toLowerCase() === 'cash'
+			{paymentMethods.map(
+				([type, details, needsProof, proofMode], index: number) => {
+					const isCash = type.toLowerCase() === 'cash' && index === 0
 
-				return (
-					<View
-						key={index}
-						style={[
-							concessionStyles.paymentMethodItem,
-						]}>
-						<View style={concessionStyles.paymentMethodContent}>
-							<Text
-								style={[
-									concessionStyles.paymentMethodText,
-								]}>
-								{type}
-							</Text>
-							{details && (
-								<Text
-									style={[
-										concessionStyles.paymentMethodDetails,
-									]}>
-									{' '}
-									• {details}
+					return (
+						<View
+							key={index}
+							style={concessionStyles.paymentMethodItem}>
+							<View style={concessionStyles.paymentMethodMainContent}>
+								{/* Type and Details Row */}
+								<View style={concessionStyles.paymentMethodTypeRow}>
+									<Text style={concessionStyles.paymentMethodType}>
+										{type}
+										{isCash && (
+											<View style={concessionStyles.inlineBadge}>
+												<Text style={concessionStyles.inlineBadgeText}>
+													{' '}
+													DEFAULT
+												</Text>
+											</View>
+										)}
+									</Text>
+								</View>
+
+								<Text style={concessionStyles.paymentMethodDetails}>
+									{details}
 								</Text>
-							)}
+
+								{/* Proof of Payment Info */}
+								{needsProof && proofMode && (
+									<View style={concessionStyles.proofInfoRow}>
+										<MaterialCommunityIcons
+											name="file-document-check"
+											size={16}
+											color={colors.primary}
+										/>
+										<Text style={concessionStyles.proofInfoText}>
+											Needs proof:{' '}
+										</Text>
+										<MaterialCommunityIcons
+											name={getProofModeIcon(proofMode) || 'help-circle'}
+											size={16}
+											color={colors.textSecondary}
+										/>
+										<Text style={concessionStyles.proofModeText}>
+											{getProofModeLabel(proofMode)}
+										</Text>
+									</View>
+								)}
+							</View>
 						</View>
-					</View>
-				)
-			})}
+					)
+				}
+			)}
 
 			<TouchableOpacity
 				style={concessionStyles.addPaymentButton}

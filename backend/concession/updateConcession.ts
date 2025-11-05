@@ -33,17 +33,19 @@ export const updateConcession = async (
 		if (image_url !== undefined) updateData.image_url = image_url
 		if (is_open !== undefined) updateData.is_open = is_open
 		if (payment_methods !== undefined) {
-			// Ensure payment_methods is an array of [type, details] tuples
-			// Format: [["cash", "Pay cash on counter"], ["gcash", "09171234567"], ...]
+			// Ensure payment_methods is an array of tuples
+			// Format: [["cash", "Pay cash on counter", false, null], ["gcash", "09171234567", true, "screenshot"], ...]
 			const methods = Array.isArray(payment_methods) ? payment_methods : []
 
-			// Validate that each method is a tuple [type, details]
+			// Validate that each method is a tuple [type, details, needsProof, proofMode]
 			const validMethods = methods.filter(
 				(m) =>
 					Array.isArray(m) &&
-					m.length === 2 &&
-					typeof m[0] === 'string' &&
-					typeof m[1] === 'string'
+					m.length === 4 &&
+					typeof m[0] === 'string' && // type
+					typeof m[1] === 'string' && // details
+					typeof m[2] === 'boolean' && // needsProof
+					(m[3] === null || m[3] === 'text' || m[3] === 'screenshot') // proofMode
 			)
 
 			// Ensure cash is always present at index 0
@@ -56,8 +58,8 @@ export const updateConcession = async (
 				const cash = validMethods.splice(cashIndex, 1)[0]
 				validMethods.unshift(cash)
 			} else if (cashIndex === -1) {
-				// Add cash if not present
-				validMethods.unshift(['cash', 'Pay cash on counter'])
+				// Add cash if not present (with new format)
+				validMethods.unshift(['cash', 'Pay cash on counter', false, null])
 			}
 
 			updateData.payment_methods = validMethods

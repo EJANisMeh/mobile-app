@@ -36,27 +36,48 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 	const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
 
 	// Initialize payment methods from concession data
-	// Expected format: [["cash", "Pay cash on counter"], ["gcash", "09171234567"], ...]
+	// Expected format: [["cash", "Pay cash on counter", false, null], ["gcash", "09171234567", true, "screenshot"], ...]
 	useEffect(() => {
 		if (!concession?.payment_methods) {
 			// Default to cash if no payment methods exist
-			setPaymentMethods([{ type: 'cash', details: 'Pay cash on counter' }])
+			setPaymentMethods([
+				{
+					type: 'cash',
+					details: 'Pay cash on counter',
+					needsProof: false,
+					proofMode: null,
+					isDefaultCash: true,
+				},
+			])
 			return
 		}
 
 		const methods = concession.payment_methods as PaymentMethodTuple[]
-		const parsed: PaymentMethod[] = methods.map(([type, details]) => ({
-			type,
-			details,
-		}))
+		const parsed: PaymentMethod[] = methods.map(
+			([type, details, needsProof, proofMode], index) => ({
+				type,
+				details,
+				needsProof: needsProof ?? false,
+				proofMode: proofMode ?? null,
+				// Mark the first cash method as default
+				isDefaultCash: index === 0 && type.toLowerCase() === 'cash',
+			})
+		)
 
-		// Ensure cash is always first
-		const cashIndex = parsed.findIndex((m) => m.type.toLowerCase() === 'cash')
-		if (cashIndex > 0) {
-			const cash = parsed.splice(cashIndex, 1)[0]
+		// Ensure default cash is always first
+		const defaultCashIndex = parsed.findIndex((m) => m.isDefaultCash === true)
+		if (defaultCashIndex > 0) {
+			const cash = parsed.splice(defaultCashIndex, 1)[0]
 			parsed.unshift(cash)
-		} else if (cashIndex === -1) {
-			parsed.unshift({ type: 'cash', details: 'Pay cash on counter' })
+		} else if (defaultCashIndex === -1) {
+			// No default cash found, add it
+			parsed.unshift({
+				type: 'cash',
+				details: 'Pay cash on counter',
+				needsProof: false,
+				proofMode: null,
+				isDefaultCash: true,
+			})
 		}
 
 		setPaymentMethods(parsed)
@@ -90,8 +111,8 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 	const handleRemoveMethod = (index: number) => {
 		const method = paymentMethods[index]
 
-		// Prevent removing cash
-		if (method.type.toLowerCase() === 'cash') {
+		// Prevent removing default cash
+		if (method.isDefaultCash === true) {
 			showAlert({
 				title: 'Cannot Remove',
 				message: 'Cash is the default payment method and cannot be removed',
@@ -112,8 +133,8 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 	}
 
 	const handleSave = async () => {
-		// Validation: Ensure cash is always present
-		if (!paymentMethods.some((m) => m.type.toLowerCase() === 'cash')) {
+		// Validation: Ensure default cash is always present
+		if (!paymentMethods.some((m) => m.isDefaultCash === true)) {
 			showAlert({
 				title: 'Validation Error',
 				message: 'Cash payment method must be included',
@@ -134,6 +155,20 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 			return
 		}
 
+		// Validate proof mode when proof is needed
+		const invalidProofMethods = paymentMethods.filter(
+			(m) => m.needsProof && !m.proofMode
+		)
+
+		if (invalidProofMethods.length > 0) {
+			showAlert({
+				title: 'Missing Information',
+				message:
+					'Please select a proof of payment mode (Text or Screenshot) for all methods that require proof',
+			})
+			return
+		}
+
 		if (!concession?.id) {
 			showAlert({
 				title: 'Error',
@@ -149,6 +184,8 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 			const methodTuples: PaymentMethodTuple[] = paymentMethods.map((m) => [
 				m.type,
 				m.details,
+				m.needsProof,
+				m.proofMode,
 			])
 
 			const result = await updateConcession(concession.id, {
@@ -200,60 +237,59 @@ const ManagePaymentMethodsScreen: React.FC = () => {
 	return (
 		<DynamicKeyboardView>
 			<DynamicScrollView
-				styles={styles.container}
+				style={styles.container}
 				autoCenter={false}
-				showsVerticalScrollIndicator={true}>
-				<View style={styles.scrollContent}>
-					{/* Info Section */}
-					<View style={styles.infoSection}>
-						<Text style={styles.infoText}>
-							Manage your concession's accepted payment methods. Add custom
-							payment types with their details.
-						</Text>
-					</View>
+				showsVerticalScrollIndicator={true}
+				contentContainerStyle={{ paddingBottom: 100 }}>
+				{/* Info Section */}
+				<View style={styles.infoSection}>
+					<Text style={styles.infoText}>
+						Manage your concession's accepted payment methods. Add custom
+						payment types with their details.
+					</Text>
+				</View>
 
-					{/* Payment Methods List */}
-					<View style={styles.methodsSection}>
-						<Text style={styles.sectionTitle}>Active Payment Methods</Text>
+				{/* Payment Methods List */}
+				<View style={styles.methodsSection}>
+					<Text style={styles.sectionTitle}>Active Payment Methods</Text>
 
-						<PaymentMethodsList
-							paymentMethods={paymentMethods}
-							onUpdateMethod={handleUpdateMethod}
-							onRemoveMethod={handleRemoveMethod}
-						/>
+					<PaymentMethodsList
+						paymentMethods={paymentMethods}
+						onUpdateMethod={handleUpdateMethod}
+						onRemoveMethod={handleRemoveMethod}
+					/>
 
-						{/* Add Method Input */}
-						<AddPaymentMethodInput
-							onAdd={handleAddMethod}
-							existingTypes={paymentMethods.map((m) => m.type)}
-						/>
-					</View>
-
-					{/* Action Buttons */}
-					<View style={styles.actionButtonsContainer}>
-						<TouchableOpacity
-							style={styles.cancelButton}
-							onPress={handleCancel}
-							disabled={isSaving}>
-							<Text style={styles.cancelButtonText}>Cancel</Text>
-						</TouchableOpacity>
-
-						<TouchableOpacity
-							style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
-							onPress={handleSave}
-							disabled={isSaving}>
-							{isSaving ? (
-								<ActivityIndicator
-									size="small"
-									color="#fff"
-								/>
-							) : (
-								<Text style={styles.saveButtonText}>Save Changes</Text>
-							)}
-						</TouchableOpacity>
-					</View>
+					{/* Add Method Input */}
+					<AddPaymentMethodInput
+						onAdd={handleAddMethod}
+						existingTypes={paymentMethods.map((m) => m.type)}
+					/>
 				</View>
 			</DynamicScrollView>
+
+			{/* Action Buttons - Fixed at bottom */}
+			<View style={styles.actionButtonsContainer}>
+				<TouchableOpacity
+					style={styles.cancelButton}
+					onPress={handleCancel}
+					disabled={isSaving}>
+					<Text style={styles.cancelButtonText}>Cancel</Text>
+				</TouchableOpacity>
+
+				<TouchableOpacity
+					style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
+					onPress={handleSave}
+					disabled={isSaving}>
+					{isSaving ? (
+						<ActivityIndicator
+							size="small"
+							color="#fff"
+						/>
+					) : (
+						<Text style={styles.saveButtonText}>Save Changes</Text>
+					)}
+				</TouchableOpacity>
+			</View>
 
 			<AlertModal
 				visible={visible}

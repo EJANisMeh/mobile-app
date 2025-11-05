@@ -175,9 +175,6 @@ export const createConcessionStyles = (
 			marginTop: responsive.getResponsiveMargin().small,
 		},
 		paymentMethodItem: {
-			flexDirection: 'row' as const,
-			alignItems: 'center' as const,
-			justifyContent: 'space-between' as const,
 			padding: 14,
 			backgroundColor: colors.card,
 			borderRadius: 10,
@@ -188,6 +185,32 @@ export const createConcessionStyles = (
 		paymentMethodDefault: {
 			backgroundColor: colors.primary + '15',
 			borderColor: colors.primary,
+		},
+		paymentMethodMainContent: {
+			flex: 1,
+		},
+		paymentMethodTypeRow: {
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			marginBottom: 4,
+		},
+		paymentMethodType: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			color: colors.text,
+			fontWeight: '600' as const,
+			textTransform: 'capitalize' as const,
+		},
+		inlineBadge: {
+			backgroundColor: colors.primary,
+			paddingHorizontal: 6,
+			paddingVertical: 2,
+			borderRadius: 4,
+			marginLeft: 6,
+		},
+		inlineBadgeText: {
+			color: '#fff',
+			fontSize: responsive.getResponsiveFontSize(10),
+			fontWeight: 'bold' as const,
 		},
 		paymentMethodContent: {
 			flexDirection: 'row' as const,
@@ -217,9 +240,29 @@ export const createConcessionStyles = (
 			fontWeight: 'bold' as const,
 		},
 		paymentMethodDetails: {
-			fontSize: responsive.getResponsiveFontSize(13),
+			fontSize: responsive.getResponsiveFontSize(14),
 			color: colors.textSecondary,
 			fontWeight: '400' as const,
+			marginBottom: 6,
+		},
+		proofInfoRow: {
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			marginTop: 8,
+			paddingTop: 8,
+			borderTopWidth: 1,
+			borderTopColor: colors.border + '40',
+			gap: 4,
+		},
+		proofInfoText: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.primary,
+			fontWeight: '500' as const,
+		},
+		proofModeText: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.textSecondary,
+			fontWeight: '500' as const,
 		},
 		addPaymentButton: {
 			flexDirection: 'row' as const,

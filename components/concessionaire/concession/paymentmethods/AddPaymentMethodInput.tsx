@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, TextInput, TouchableOpacity, Text } from 'react-native'
+import { View, TextInput, TouchableOpacity, Text, Switch } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
@@ -16,6 +16,10 @@ const AddPaymentMethodInput: React.FC<AddPaymentMethodInputProps> = ({
 
 	const [type, setType] = useState('')
 	const [details, setDetails] = useState('')
+	const [needsProof, setNeedsProof] = useState(false)
+	const [proofMode, setProofMode] = useState<'text' | 'screenshot'>(
+		'screenshot'
+	)
 	const [showInputs, setShowInputs] = useState(false)
 
 	const handleAdd = () => {
@@ -26,15 +30,24 @@ const AddPaymentMethodInput: React.FC<AddPaymentMethodInputProps> = ({
 			return
 		}
 
-		onAdd({ type: trimmedType, details: trimmedDetails })
+		onAdd({
+			type: trimmedType,
+			details: trimmedDetails,
+			needsProof,
+			proofMode: needsProof ? proofMode : null,
+		})
 		setType('')
 		setDetails('')
+		setNeedsProof(false)
+		setProofMode('screenshot')
 		setShowInputs(false)
 	}
 
 	const handleCancel = () => {
 		setType('')
 		setDetails('')
+		setNeedsProof(false)
+		setProofMode('screenshot')
 		setShowInputs(false)
 	}
 
@@ -75,6 +88,84 @@ const AddPaymentMethodInput: React.FC<AddPaymentMethodInputProps> = ({
 				multiline
 				numberOfLines={3}
 			/>
+
+			{/* Proof of Payment Section */}
+			<View style={styles.proofSection}>
+				<View style={styles.proofToggleRow}>
+					<MaterialCommunityIcons
+						name="file-document-check-outline"
+						size={20}
+						color={needsProof ? colors.primary : colors.placeholder}
+						style={{ marginRight: 8 }}
+					/>
+					<Text
+						style={[
+							styles.proofLabel,
+							needsProof && { color: colors.primary },
+						]}>
+						Need proof of payment?
+					</Text>
+					<Switch
+						value={needsProof}
+						onValueChange={setNeedsProof}
+						trackColor={{
+							false: colors.border,
+							true: colors.primary + '80',
+						}}
+						thumbColor={needsProof ? colors.primary : '#f4f3f4'}
+					/>
+				</View>
+
+				{needsProof && (
+					<View style={styles.proofModeContainer}>
+						<Text style={styles.proofModeLabel}>Proof of payment mode:</Text>
+						<View style={styles.proofModeButtons}>
+							<TouchableOpacity
+								style={[
+									styles.proofModeButton,
+									proofMode === 'text' && styles.proofModeButtonActive,
+								]}
+								onPress={() => setProofMode('text')}>
+								<MaterialCommunityIcons
+									name="text-box-outline"
+									size={20}
+									color={proofMode === 'text' ? '#fff' : colors.textSecondary}
+								/>
+								<Text
+									style={[
+										styles.proofModeButtonText,
+										proofMode === 'text' && styles.proofModeButtonTextActive,
+									]}>
+									Text
+								</Text>
+							</TouchableOpacity>
+
+							<TouchableOpacity
+								style={[
+									styles.proofModeButton,
+									proofMode === 'screenshot' && styles.proofModeButtonActive,
+								]}
+								onPress={() => setProofMode('screenshot')}>
+								<MaterialCommunityIcons
+									name="camera-outline"
+									size={20}
+									color={
+										proofMode === 'screenshot' ? '#fff' : colors.textSecondary
+									}
+								/>
+								<Text
+									style={[
+										styles.proofModeButtonText,
+										proofMode === 'screenshot' &&
+											styles.proofModeButtonTextActive,
+									]}>
+									Screenshot
+								</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				)}
+			</View>
 
 			<View style={styles.addInputActions}>
 				<TouchableOpacity
