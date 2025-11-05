@@ -238,6 +238,13 @@ export const createEditConcessionStyles = (
 			fontWeight: '600',
 			color: colors.text,
 		},
+		scheduleEditorDurationText: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.textSecondary,
+			fontStyle: 'italic',
+			marginTop: responsive.getResponsiveSpacing().xs,
+			textAlign: 'center',
+		},
 		scheduleEditorFooter: {
 			flexDirection: 'row',
 			justifyContent: 'flex-end',

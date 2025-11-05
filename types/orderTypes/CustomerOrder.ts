@@ -68,9 +68,9 @@ export interface SortRule {
 
 export interface OrderFilters {
 	searchQuery: string
-	searchField: 'concessionName' | 'status' | 'all'
-	statusFilter: string | null
-	orderModeFilter: 'now' | 'scheduled' | null
+	searchField: 'concessionName' | 'status'
+	statusFilters: string[] // Multi-select: empty array means all statuses
+	orderModeFilters: Array<'now' | 'scheduled'> // Multi-select: empty array means all modes
 	dateFrom: Date | null
 	dateTo: Date | null
 }

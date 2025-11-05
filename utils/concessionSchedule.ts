@@ -148,6 +148,86 @@ export const formatDateDisplay = (dateValue: string): string => {
 	})
 }
 
+/**
+ * Calculate the duration between opening and closing times
+ * Handles overnight hours (e.g., 8:00 AM to 2:00 AM next day = 18 hours)
+ * @param openTime - Opening time in HH:mm format
+ * @param closeTime - Closing time in HH:mm format
+ * @returns Object with hours and minutes, or null if times are invalid
+ */
+export const calculateDuration = (
+	openTime: string | null,
+	closeTime: string | null
+): { hours: number; minutes: number } | null => {
+	if (!openTime || !closeTime) {
+		return null
+	}
+
+	const [openHours, openMinutes] = openTime
+		.split(':')
+		.map((part) => parseInt(part, 10))
+	const [closeHours, closeMinutes] = closeTime
+		.split(':')
+		.map((part) => parseInt(part, 10))
+
+	if (
+		Number.isNaN(openHours) ||
+		Number.isNaN(openMinutes) ||
+		Number.isNaN(closeHours) ||
+		Number.isNaN(closeMinutes)
+	) {
+		return null
+	}
+
+	let openTotalMinutes = openHours * 60 + openMinutes
+	let closeTotalMinutes = closeHours * 60 + closeMinutes
+
+	// If close time is less than or equal to open time, it means overnight (next day)
+	if (closeTotalMinutes <= openTotalMinutes) {
+		closeTotalMinutes += 24 * 60 // Add 24 hours
+	}
+
+	const durationMinutes = closeTotalMinutes - openTotalMinutes
+	const hours = Math.floor(durationMinutes / 60)
+	const minutes = durationMinutes % 60
+
+	return { hours, minutes }
+}
+
+/**
+ * Format duration for display
+ * @param duration - Duration object with hours and minutes
+ * @returns Formatted string like "8 hours 30 minutes" or "24 hours"
+ */
+export const formatDuration = (
+	duration: {
+		hours: number
+		minutes: number
+	} | null
+): string => {
+	if (!duration) {
+		return ''
+	}
+
+	const { hours, minutes } = duration
+
+	if (hours === 0 && minutes === 0) {
+		return '24 hours' // Same time = full day
+	}
+
+	if (minutes === 0) {
+		return `${hours} ${hours === 1 ? 'hour' : 'hours'}`
+	}
+
+	if (hours === 0) {
+		return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`
+	}
+
+	return `${hours} ${hours === 1 ? 'hour' : 'hours'} ${minutes} ${
+		minutes === 1 ? 'minute' : 'minutes'
+	}`
+}
+
 export const areSchedulesEqual = (
 	a: ConcessionSchedule | null | undefined,
 	b: ConcessionSchedule | null | undefined
@@ -157,6 +237,7 @@ export const areSchedulesEqual = (
 
 /**
  * Check if a concession is currently open based on their schedule and is_open status
+ * Handles overnight hours correctly (e.g., 8:00 AM Wed to 2:00 AM Thu)
  * @param isConcessionOpen - The concession's is_open boolean from database
  * @param schedule - The concession's operating hours schedule
  * @returns true if concession is marked open AND currently within operating hours
@@ -195,33 +276,73 @@ export const isConcessionOpenNow = (
 		}
 	}
 
-	// Get current day key
-	const dayIndex = now.getDay() // 0 = Sunday, 1 = Monday, etc.
-	const dayKey = CONCESSION_SCHEDULE_DAY_KEYS[(dayIndex + 6) % 7] // Convert to our format
-	const todaySchedule = normalized[dayKey]
-
-	// Check if concession is marked as open for today
-	if (!todaySchedule.isOpen) {
-		return false
-	}
-
-	// Check if open/close times are set
-	if (!todaySchedule.open || !todaySchedule.close) {
-		return false
-	}
-
-	// Parse current time and operating hours
 	const currentTime = now.getHours() * 60 + now.getMinutes()
-	const [openHours, openMinutes] = todaySchedule.open
-		.split(':')
-		.map((part) => parseInt(part, 10))
-	const [closeHours, closeMinutes] = todaySchedule.close
-		.split(':')
-		.map((part) => parseInt(part, 10))
+	const dayIndex = now.getDay() // 0 = Sunday, 1 = Monday, etc.
 
-	const openTime = openHours * 60 + openMinutes
-	const closeTime = closeHours * 60 + closeMinutes
+	// Helper function to check if current time is within a day's operating hours
+	const isWithinHours = (daySchedule: ConcessionScheduleDay): boolean => {
+		if (!daySchedule.isOpen || !daySchedule.open || !daySchedule.close) {
+			return false
+		}
 
-	// Check if current time is within operating hours
-	return currentTime >= openTime && currentTime <= closeTime
+		const [openHours, openMinutes] = daySchedule.open
+			.split(':')
+			.map((part) => parseInt(part, 10))
+		const [closeHours, closeMinutes] = daySchedule.close
+			.split(':')
+			.map((part) => parseInt(part, 10))
+
+		const openTime = openHours * 60 + openMinutes
+		let closeTime = closeHours * 60 + closeMinutes
+
+		// Check if this is overnight hours (close time <= open time)
+		if (closeTime <= openTime) {
+			// Overnight schedule - open crosses midnight into next day
+			return currentTime >= openTime || currentTime <= closeTime
+		} else {
+			// Regular same-day schedule
+			return currentTime >= openTime && currentTime <= closeTime
+		}
+	}
+
+	// Get today's schedule key
+	const todayKey = CONCESSION_SCHEDULE_DAY_KEYS[(dayIndex + 6) % 7]
+	const todaySchedule = normalized[todayKey]
+
+	// Check if we're currently in today's operating hours
+	if (isWithinHours(todaySchedule)) {
+		return true
+	}
+
+	// Check if we're in yesterday's overnight hours
+	// (e.g., it's 1:00 AM Thursday, but Wednesday was open until 2:00 AM)
+	const yesterdayIndex = (dayIndex + 6) % 7 // Go back one day
+	const yesterdayKey = CONCESSION_SCHEDULE_DAY_KEYS[(yesterdayIndex + 6) % 7]
+	const yesterdaySchedule = normalized[yesterdayKey]
+
+	if (
+		yesterdaySchedule.isOpen &&
+		yesterdaySchedule.open &&
+		yesterdaySchedule.close
+	) {
+		const [openHours, openMinutes] = yesterdaySchedule.open
+			.split(':')
+			.map((part) => parseInt(part, 10))
+		const [closeHours, closeMinutes] = yesterdaySchedule.close
+			.split(':')
+			.map((part) => parseInt(part, 10))
+
+		const openTime = openHours * 60 + openMinutes
+		const closeTime = closeHours * 60 + closeMinutes
+
+		// Check if yesterday had overnight hours and we're still within them
+		if (closeTime <= openTime) {
+			// Yesterday was open overnight, check if current time is before closing
+			if (currentTime <= closeTime) {
+				return true
+			}
+		}
+	}
+
+	return false
 }

@@ -108,12 +108,12 @@ const CustomerStack: React.FC = () => {
 	return (
 		<Stack.Navigator
 			screenOptions={{
-				headerShown: true,
+				headerShown: false,
 			}}>
 			<Stack.Screen
 				name="Menu"
 				component={TabNavigator}
-				options={{ headerShown: true }}
+				options={{ headerShown: false }}
 			/>
 			<Stack.Screen
 				name="MenuItemView"

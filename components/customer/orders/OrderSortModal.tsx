@@ -133,7 +133,14 @@ const OrderSortModal: React.FC<OrderSortModalProps> = ({
 							<View style={styles.sortRuleHeader}>
 								<Text style={styles.sortRulePriority}>
 									{index + 1}
-									{index === 0 ? 'st' : index === 1 ? 'nd' : index === 2 ? 'rd' : 'th'} Priority
+									{index === 0
+										? 'st'
+										: index === 1
+										? 'nd'
+										: index === 2
+										? 'rd'
+										: 'th'}{' '}
+									Priority
 								</Text>
 								<View style={styles.sortRuleMoveButtons}>
 									<TouchableOpacity
@@ -216,9 +223,7 @@ const OrderSortModal: React.FC<OrderSortModalProps> = ({
 											rule.direction === 'asc' &&
 												styles.sortDirectionButtonSelected,
 										]}
-										onPress={() =>
-											updateSortRule(index, rule.field, 'asc')
-										}>
+										onPress={() => updateSortRule(index, rule.field, 'asc')}>
 										<MaterialCommunityIcons
 											name="sort-ascending"
 											size={20}
@@ -243,9 +248,7 @@ const OrderSortModal: React.FC<OrderSortModalProps> = ({
 											rule.direction === 'desc' &&
 												styles.sortDirectionButtonSelected,
 										]}
-										onPress={() =>
-											updateSortRule(index, rule.field, 'desc')
-										}>
+										onPress={() => updateSortRule(index, rule.field, 'desc')}>
 										<MaterialCommunityIcons
 											name="sort-descending"
 											size={20}

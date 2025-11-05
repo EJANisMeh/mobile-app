@@ -42,13 +42,71 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 	const handleReset = () => {
 		const resetFilters: OrderFilters = {
 			searchQuery: '',
-			searchField: 'all',
-			statusFilter: null,
-			orderModeFilter: null,
+			searchField: 'concessionName',
+			statusFilters: [],
+			orderModeFilters: [],
 			dateFrom: null,
 			dateTo: null,
 		}
 		setFilters(resetFilters)
+	}
+
+	const handleStatusToggle = (status: string) => {
+		const currentStatuses = filters.statusFilters
+
+		if (status === 'all') {
+			// If "All Statuses" is pressed, clear all selections
+			setFilters({ ...filters, statusFilters: [] })
+		} else {
+			// Check if status is already selected
+			const isSelected = currentStatuses.includes(status)
+
+			if (isSelected) {
+				// Deselect the status
+				const newStatuses = currentStatuses.filter((s) => s !== status)
+				setFilters({ ...filters, statusFilters: newStatuses })
+			} else {
+				// Add the status
+				const newStatuses = [...currentStatuses, status]
+
+				// Check if all available statuses are now selected
+				if (newStatuses.length === availableStatuses.length) {
+					// All statuses selected = All Statuses behavior, so clear all
+					setFilters({ ...filters, statusFilters: [] })
+				} else {
+					setFilters({ ...filters, statusFilters: newStatuses })
+				}
+			}
+		}
+	}
+
+	const handleModeToggle = (mode: 'now' | 'scheduled') => {
+		const currentModes = filters.orderModeFilters
+
+		if (mode === ('all' as any)) {
+			// If "All Modes" is pressed, clear all selections
+			setFilters({ ...filters, orderModeFilters: [] })
+		} else {
+			// Check if mode is already selected
+			const isSelected = currentModes.includes(mode)
+
+			if (isSelected) {
+				// Deselect the mode
+				const newModes = currentModes.filter((m) => m !== mode)
+				setFilters({ ...filters, orderModeFilters: newModes })
+			} else {
+				// Add the mode
+				const newModes = [...currentModes, mode]
+
+				// Check if all modes are now selected (both 'now' and 'scheduled')
+				if (newModes.length === 2) {
+					// All modes selected = All Modes behavior, so clear all
+					setFilters({ ...filters, orderModeFilters: [] })
+				} else {
+					setFilters({ ...filters, orderModeFilters: newModes })
+				}
+			}
+		}
 	}
 
 	return (
@@ -65,7 +123,6 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 					<Text style={styles.filterSectionTitle}>Search In</Text>
 					<View style={styles.filterOptions}>
 						{[
-							{ value: 'all', label: 'All Fields' },
 							{ value: 'concessionName', label: 'Concession Name' },
 							{ value: 'status', label: 'Status' },
 						].map((option) => (
@@ -102,18 +159,14 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 						<TouchableOpacity
 							style={[
 								styles.filterOption,
-								filters.statusFilter === null && styles.filterOptionSelected,
+								filters.statusFilters.length === 0 &&
+									styles.filterOptionSelected,
 							]}
-							onPress={() =>
-								setFilters({
-									...filters,
-									statusFilter: null,
-								})
-							}>
+							onPress={() => handleStatusToggle('all')}>
 							<Text
 								style={[
 									styles.filterOptionText,
-									filters.statusFilter === null &&
+									filters.statusFilters.length === 0 &&
 										styles.filterOptionTextSelected,
 								]}>
 								All Statuses
@@ -124,19 +177,14 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 								key={status}
 								style={[
 									styles.filterOption,
-									filters.statusFilter === status &&
+									filters.statusFilters.includes(status) &&
 										styles.filterOptionSelected,
 								]}
-								onPress={() =>
-									setFilters({
-										...filters,
-										statusFilter: status,
-									})
-								}>
+								onPress={() => handleStatusToggle(status)}>
 								<Text
 									style={[
 										styles.filterOptionText,
-										filters.statusFilter === status &&
+										filters.statusFilters.includes(status) &&
 											styles.filterOptionTextSelected,
 									]}>
 									{status}
@@ -150,28 +198,38 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 				<View style={styles.filterSection}>
 					<Text style={styles.filterSectionTitle}>Order Mode</Text>
 					<View style={styles.filterOptions}>
+						<TouchableOpacity
+							style={[
+								styles.filterOption,
+								filters.orderModeFilters.length === 0 &&
+									styles.filterOptionSelected,
+							]}
+							onPress={() => handleModeToggle('all' as any)}>
+							<Text
+								style={[
+									styles.filterOptionText,
+									filters.orderModeFilters.length === 0 &&
+										styles.filterOptionTextSelected,
+								]}>
+								All Modes
+							</Text>
+						</TouchableOpacity>
 						{[
-							{ value: null, label: 'All Modes' },
-							{ value: 'now', label: 'Order Now' },
-							{ value: 'scheduled', label: 'Scheduled' },
+							{ value: 'now' as const, label: 'Order Now' },
+							{ value: 'scheduled' as const, label: 'Scheduled' },
 						].map((option) => (
 							<TouchableOpacity
-								key={option.label}
+								key={option.value}
 								style={[
 									styles.filterOption,
-									filters.orderModeFilter === option.value &&
+									filters.orderModeFilters.includes(option.value) &&
 										styles.filterOptionSelected,
 								]}
-								onPress={() =>
-									setFilters({
-										...filters,
-										orderModeFilter: option.value as any,
-									})
-								}>
+								onPress={() => handleModeToggle(option.value)}>
 								<Text
 									style={[
 										styles.filterOptionText,
-										filters.orderModeFilter === option.value &&
+										filters.orderModeFilters.includes(option.value) &&
 											styles.filterOptionTextSelected,
 									]}>
 									{option.label}

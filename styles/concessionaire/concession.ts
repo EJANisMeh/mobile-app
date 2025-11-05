@@ -101,6 +101,11 @@ export const createConcessionStyles = (
 			fontSize: responsive.getResponsiveFontSize(16),
 			fontWeight: '600' as const,
 			color: colors.text,
+			marginBottom: responsive.getResponsiveMargin().small / 2,
+		},
+		scheduleOverviewDuration: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.textSecondary,
 			marginBottom: responsive.getResponsiveMargin().small,
 		},
 		scheduleOverviewFooter: {

@@ -42,6 +42,8 @@ import {
 	normalizeConcessionSchedule,
 	timeStringToDate,
 	formatTimeDisplay,
+	calculateDuration,
+	formatDuration,
 } from '../../../utils'
 
 const DEFAULT_OPEN_TIME = '08:00'
@@ -137,16 +139,6 @@ const ScheduleEditorModal: React.FC<ScheduleEditorModalProps> = ({
 					})
 					return
 				}
-
-				const openDate = timeStringToDate(day.open)
-				const closeDate = timeStringToDate(day.close)
-				if (closeDate <= openDate) {
-					showAlert({
-						title: 'Invalid time range',
-						message: `${CONCESSION_SCHEDULE_DAY_LABELS[key]} closing time must be after opening time.`,
-					})
-					return
-				}
 			}
 		}
 
@@ -176,6 +168,12 @@ const ScheduleEditorModal: React.FC<ScheduleEditorModalProps> = ({
 				<ScrollView style={styles.scheduleEditorScroll}>
 					{CONCESSION_SCHEDULE_DAY_KEYS.map((dayKey) => {
 						const day = draft[dayKey]
+						const duration =
+							day.isOpen && day.open && day.close
+								? calculateDuration(day.open, day.close)
+								: null
+						const durationText = duration ? formatDuration(duration) : null
+
 						return (
 							<View
 								key={dayKey}
@@ -215,6 +213,11 @@ const ScheduleEditorModal: React.FC<ScheduleEditorModalProps> = ({
 										</Text>
 									</TouchableOpacity>
 								</View>
+								{durationText && (
+									<Text style={styles.scheduleEditorDurationText}>
+										Open for {durationText}
+									</Text>
+								)}
 							</View>
 						)
 					})}

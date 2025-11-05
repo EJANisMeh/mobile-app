@@ -33,9 +33,9 @@ const OrdersScreen: React.FC = () => {
 
 	const [filters, setFilters] = useState<OrderFilters>({
 		searchQuery: '',
-		searchField: 'all',
-		statusFilter: null,
-		orderModeFilter: null,
+		searchField: 'concessionName',
+		statusFilters: [],
+		orderModeFilters: [],
 		dateFrom: null,
 		dateTo: null,
 	})
@@ -100,27 +100,23 @@ const OrdersScreen: React.FC = () => {
 						order.order_statuses?.description?.toLowerCase().includes(query)
 					)
 				}
-				// 'all' - search in all fields
-				return (
-					order.concession?.name.toLowerCase().includes(query) ||
-					order.order_statuses?.code.toLowerCase().includes(query) ||
-					order.order_statuses?.description?.toLowerCase().includes(query) ||
-					order.id.toString().includes(query)
-				)
+				return false
 			})
 		}
 
 		// Apply status filter
-		if (filters.statusFilter) {
-			result = result.filter(
-				(order) => order.order_statuses?.code === filters.statusFilter
+		// Empty array means all statuses (no filter applied)
+		if (filters.statusFilters.length > 0) {
+			result = result.filter((order) =>
+				filters.statusFilters.includes(order.order_statuses?.code || '')
 			)
 		}
 
 		// Apply order mode filter
-		if (filters.orderModeFilter) {
-			result = result.filter(
-				(order) => order.orderMode === filters.orderModeFilter
+		// Empty array means all modes (no filter applied)
+		if (filters.orderModeFilters.length > 0) {
+			result = result.filter((order) =>
+				filters.orderModeFilters.includes(order.orderMode)
 			)
 		}
 
@@ -156,8 +152,12 @@ const OrdersScreen: React.FC = () => {
 							new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
 						break
 					case 'scheduledFor':
-						const dateA = a.scheduledFor ? new Date(a.scheduledFor).getTime() : 0
-						const dateB = b.scheduledFor ? new Date(b.scheduledFor).getTime() : 0
+						const dateA = a.scheduledFor
+							? new Date(a.scheduledFor).getTime()
+							: 0
+						const dateB = b.scheduledFor
+							? new Date(b.scheduledFor).getTime()
+							: 0
 						comparison = dateA - dateB
 						break
 				}
@@ -173,7 +173,10 @@ const OrdersScreen: React.FC = () => {
 		return result
 	}, [filteredOrders, sortRules])
 
-	const formatCurrency = useCallback((value: number) => `₱${value.toFixed(2)}`, [])
+	const formatCurrency = useCallback(
+		(value: number) => `₱${value.toFixed(2)}`,
+		[]
+	)
 
 	const formatDate = useCallback((date: Date) => {
 		return new Date(date).toLocaleDateString('en-US', {
@@ -261,7 +264,9 @@ const OrdersScreen: React.FC = () => {
 	}
 
 	return (
-		<DynamicKeyboardView style={styles.container}>
+		<DynamicKeyboardView
+			style={styles.container}
+			useSafeArea={true}>
 			<View style={styles.header}>
 				<Text style={styles.headerTitle}>My Orders</Text>
 			</View>
