@@ -79,46 +79,7 @@ const ScheduleOverviewCard: React.FC<ScheduleOverviewCardProps> = ({
 		// Check if it's 24 hours (same open and close time)
 		const is24Hours = openTime === closeTime
 
-		// Check if tomorrow has conflicting schedule (overlap detection)
-		if (
-			is24Hours &&
-			tomorrowDay.isOpen &&
-			tomorrowDay.open &&
-			tomorrowDay.close
-		) {
-			const [tomorrowOpenHours, tomorrowOpenMinutes] = tomorrowDay.open
-				.split(':')
-				.map((p) => parseInt(p, 10))
-			const [todayCloseHours, todayCloseMinutes] = closeTime
-				.split(':')
-				.map((p) => parseInt(p, 10))
-
-			const tomorrowOpenTime = tomorrowOpenHours * 60 + tomorrowOpenMinutes
-			const todayCloseTime = todayCloseHours * 60 + todayCloseMinutes
-
-			// If tomorrow's opening time is before today's 24-hour closing time, there's overlap
-			// Today's 24-hour schedule "wins" and extends to tomorrow
-			if (tomorrowOpenTime < todayCloseTime) {
-				return {
-					timeRange: `${formatTimeDisplay(openTime)} - ${formatTimeDisplay(
-						closeTime
-					)}`,
-					duration,
-					label: `${CONCESSION_SCHEDULE_DAY_LABELS[dayKey]} to ${CONCESSION_SCHEDULE_DAY_LABELS[tomorrowKey]}`,
-				}
-			}
-
-			// No overlap, show as regular 24-hour day without label
-			return {
-				timeRange: `${formatTimeDisplay(openTime)} - ${formatTimeDisplay(
-					closeTime
-				)}`,
-				duration,
-				label: null,
-			}
-		}
-
-		// 24 hours without tomorrow schedule - show with label
+		// 24 hours always shows "Day to Day" label
 		if (is24Hours) {
 			return {
 				timeRange: `${formatTimeDisplay(openTime)} - ${formatTimeDisplay(
