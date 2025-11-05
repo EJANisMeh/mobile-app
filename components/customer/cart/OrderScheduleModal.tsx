@@ -187,6 +187,40 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 		return results
 	}, [availableDayKeys, normalizedConcessionSchedule])
 
+	const isDateValid = (candidate: Date | null): boolean => {
+		if (!candidate) {
+			return false
+		}
+
+		const now = new Date()
+		if (candidate.getTime() <= now.getTime()) {
+			return false
+		}
+
+		if (!isMenuItemScheduledOnDate(normalizedSchedule, candidate)) {
+			return false
+		}
+
+		const dayKey = getMenuItemDayKeyForDate(candidate)
+		const concessionDay = normalizedConcessionSchedule[dayKey]
+		if (
+			!concessionDay?.isOpen ||
+			typeof concessionDay.open !== 'string' ||
+			typeof concessionDay.close !== 'string'
+		) {
+			return false
+		}
+
+		const opensAt = combineDateAndTime(candidate, concessionDay.open)
+		const closesAt = combineDateAndTime(candidate, concessionDay.close)
+
+		if (candidate < opensAt || candidate > closesAt) {
+			return false
+		}
+
+		return true
+	}
+
 	const validateScheduledDate = (candidate: Date): boolean => {
 		const now = new Date()
 		if (candidate.getTime() <= now.getTime()) {
@@ -196,7 +230,7 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 
 		if (!isMenuItemScheduledOnDate(normalizedSchedule, candidate)) {
 			setError(
-				'This item is not available on the selected day. Pick another day.'
+				'This item is not available on the selected day/time. Pick another day/time.'
 			)
 			return false
 		}
@@ -209,7 +243,7 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 			typeof concessionDay.close !== 'string'
 		) {
 			setError(
-				'The concession is closed on the selected day. Pick another date.'
+				'The concession is closed on the selected day/time. Pick another date/time.'
 			)
 			return false
 		}
@@ -240,17 +274,15 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 
 	const handlePickerConfirm = (date: Date) => {
 		handleHidePicker()
-		if (validateScheduledDate(date)) {
-			setMode('scheduled')
-			setScheduledAt(date)
-		}
+		setMode('scheduled')
+		setScheduledAt(date)
+		validateScheduledDate(date)
 	}
 
 	const applyQuickPick = (option: QuickPickOption) => {
-		if (validateScheduledDate(option.date)) {
-			setMode('scheduled')
-			setScheduledAt(option.date)
-		}
+		setMode('scheduled')
+		setScheduledAt(option.date)
+		validateScheduledDate(option.date)
 	}
 
 	const handleConfirmSelection = () => {
@@ -302,7 +334,8 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 		)
 	}
 
-	const isConfirmDisabled = mode === 'scheduled' && !scheduledAt
+	const isConfirmDisabled =
+		mode === 'scheduled' && (!scheduledAt || !isDateValid(scheduledAt))
 
 	return (
 		<>
@@ -331,7 +364,7 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 						<View style={styles.section}>
 							<Text style={styles.sectionTitle}>Selling schedule</Text>
 							<Text style={styles.helperText}>
-								Days this item is available for ordering:
+								Days this order is available for ordering:
 							</Text>
 							<View style={styles.scheduleDaysRow}>
 								{CONCESSION_SCHEDULE_DAY_KEYS.map((dayKey) => {

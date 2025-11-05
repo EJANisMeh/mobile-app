@@ -13,6 +13,7 @@ import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 import {
 	CartGroupCard,
 	OrderScheduleModal,
+	PaymentMethodModal,
 } from '../../../components/customer/cart'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
 import {
@@ -63,6 +64,7 @@ const CartScreen: React.FC = () => {
 	const [metaLoading, setMetaLoading] = useState(false)
 	const [metaError, setMetaError] = useState<string | null>(null)
 	const [scheduleModalVisible, setScheduleModalVisible] = useState(false)
+	const [paymentModalVisible, setPaymentModalVisible] = useState(false)
 	const [activeGroupId, setActiveGroupId] = useState<number | null>(null)
 	const [processingGroupId, setProcessingGroupId] = useState<number | null>(
 		null
@@ -71,6 +73,11 @@ const CartScreen: React.FC = () => {
 	const [splitIndex, setSplitIndex] = useState(0)
 	const [scheduleContext, setScheduleContext] =
 		useState<ScheduleContext>('group')
+	const [pendingScheduleSelection, setPendingScheduleSelection] =
+		useState<ScheduleSelectionState | null>(null)
+	const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+		string | null
+	>(null)
 
 	const refreshCart = useCallback(async () => {
 		if (!user?.id) {
@@ -705,10 +712,22 @@ const CartScreen: React.FC = () => {
 
 	const handleScheduleModalClose = () => {
 		setScheduleModalVisible(false)
+		// Don't reset state here - only reset after final confirmation or cancel
+	}
+
+	const handlePaymentModalClose = () => {
+		setPaymentModalVisible(false)
+	}
+
+	const handleResetOrderFlow = () => {
+		setScheduleModalVisible(false)
+		setPaymentModalVisible(false)
 		setActiveGroupId(null)
 		setSplitQueue([])
 		setSplitIndex(0)
 		setScheduleContext('group')
+		setPendingScheduleSelection(null)
+		setSelectedPaymentMethod(null)
 	}
 
 	const buildOrderPayload = (
@@ -853,13 +872,13 @@ const CartScreen: React.FC = () => {
 			const response = await orderBackend.createOrder(payload)
 			if (response.success) {
 				await removeGroupFromCart(group)
+				handleResetOrderFlow()
 				alertModal.showAlert({
 					title: 'Order Placed',
 					message:
 						response.message ||
 						`We sent your order to ${group.concessionName}. We will keep you updated.`,
 					onClose: () => {
-						setActiveGroupId(null)
 						void refreshCart()
 					},
 				})
@@ -935,8 +954,7 @@ const CartScreen: React.FC = () => {
 							setActiveGroupId(group.concessionId)
 							setScheduleModalVisible(true)
 						} else {
-							setScheduleContext('group')
-							setActiveGroupId(null)
+							handleResetOrderFlow()
 							void refreshCart()
 						}
 					},
@@ -984,15 +1002,44 @@ const CartScreen: React.FC = () => {
 				message:
 					'We could not find the items for this concession. Please try again.',
 			})
+			handleResetOrderFlow()
+			return
+		}
+
+		// Store the schedule selection and move to payment method selection
+		setPendingScheduleSelection(selection)
+		setScheduleModalVisible(false)
+		setPaymentModalVisible(true)
+	}
+
+	const handlePaymentMethodConfirm = (paymentMethod: string) => {
+		setSelectedPaymentMethod(paymentMethod)
+		setPaymentModalVisible(false)
+
+		if (!activeGroup || !pendingScheduleSelection) {
+			alertModal.showAlert({
+				title: 'Unable to Continue',
+				message: 'Something went wrong. Please try again.',
+			})
+			handleResetOrderFlow()
 			return
 		}
 
 		const concessionLabel = activeGroup.concessionName ?? 'this concession'
-		const isScheduled = selection.mode === 'scheduled'
+		const isScheduled = pendingScheduleSelection.mode === 'scheduled'
 		const scheduleDetail =
-			isScheduled && selection.scheduledAt
-				? `Scheduled for ${selection.scheduledAt.toLocaleString()}.`
+			isScheduled && pendingScheduleSelection.scheduledAt
+				? `Scheduled for ${pendingScheduleSelection.scheduledAt.toLocaleString()}.`
 				: 'We will request this order for immediate preparation.'
+
+		const paymentMethodLabel =
+			paymentMethod === 'cash'
+				? 'Cash'
+				: paymentMethod === 'gcash'
+				? 'GCash'
+				: paymentMethod === 'maya'
+				? 'Maya (PayMaya)'
+				: paymentMethod
 
 		if (scheduleContext === 'split') {
 			const currentItem = splitActiveItem
@@ -1002,6 +1049,7 @@ const CartScreen: React.FC = () => {
 					message:
 						'The selected item is no longer in your cart. Please reload your cart and try again.',
 				})
+				handleResetOrderFlow()
 				return
 			}
 
@@ -1009,16 +1057,19 @@ const CartScreen: React.FC = () => {
 				title: isScheduled
 					? `Confirm Schedule for ${currentItem.name}`
 					: `Confirm Order for ${currentItem.name}`,
-				message: `${scheduleDetail}\n\nContinue with ${currentItem.quantity} x ${currentItem.name} from ${concessionLabel}?`,
+				message: `${scheduleDetail}\nPayment: ${paymentMethodLabel}\n\nContinue with ${currentItem.quantity} x ${currentItem.name} from ${concessionLabel}?`,
 				confirmText: 'Place Order',
 				cancelText: 'Back',
 				onConfirm: () => {
-					void placeOrderForSplitItem(activeGroup, currentItem, selection)
+					void placeOrderForSplitItem(
+						activeGroup,
+						currentItem,
+						pendingScheduleSelection
+					)
 				},
 				onCancel: () => {
-					setActiveGroupId(activeGroup.concessionId)
-					setScheduleContext('split')
-					setScheduleModalVisible(true)
+					// Go back to payment selection
+					setPaymentModalVisible(true)
 				},
 			})
 			return
@@ -1026,7 +1077,7 @@ const CartScreen: React.FC = () => {
 
 		orderConfirmation.showConfirmation({
 			title: isScheduled ? 'Confirm Scheduled Order' : 'Confirm Order',
-			message: `${scheduleDetail}\n\nContinue with ${
+			message: `${scheduleDetail}\nPayment: ${paymentMethodLabel}\n\nContinue with ${
 				activeGroup.totalQuantity
 			} ${
 				activeGroup.totalQuantity === 1 ? 'item' : 'items'
@@ -1034,11 +1085,11 @@ const CartScreen: React.FC = () => {
 			confirmText: 'Place Order',
 			cancelText: 'Back',
 			onConfirm: () => {
-				void placeOrderForGroup(activeGroup, selection)
+				void placeOrderForGroup(activeGroup, pendingScheduleSelection)
 			},
 			onCancel: () => {
-				setActiveGroupId(activeGroup.concessionId)
-				setScheduleModalVisible(true)
+				// Go back to payment selection
+				setPaymentModalVisible(true)
 			},
 		})
 	}
@@ -1150,6 +1201,13 @@ const CartScreen: React.FC = () => {
 				concessionSchedule={scheduleModalState.concessionSchedule}
 				availabilityStatus={scheduleModalState.availabilityStatus}
 				itemName={scheduleModalState.itemName}
+			/>
+
+			<PaymentMethodModal
+				visible={paymentModalVisible}
+				onClose={handlePaymentModalClose}
+				onConfirm={handlePaymentMethodConfirm}
+				selectedMethod={selectedPaymentMethod}
 			/>
 		</DynamicKeyboardView>
 	)

@@ -36,7 +36,10 @@ import {
 	MenuItemActions,
 } from '../../../components/customer/menu/menuItemView'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
-import { OrderScheduleModal } from '../../../components/customer/cart'
+import {
+	OrderScheduleModal,
+	PaymentMethodModal,
+} from '../../../components/customer/cart'
 import {
 	transformRawMenuItem,
 	appendCartItemForUser,
@@ -76,6 +79,12 @@ const MenuItemViewScreen: React.FC = () => {
 	const [quantity, setQuantity] = useState(1)
 	const [isAddingToCart, setIsAddingToCart] = useState(false)
 	const [isOrderModalVisible, setOrderModalVisible] = useState(false)
+	const [paymentModalVisible, setPaymentModalVisible] = useState(false)
+	const [pendingScheduleSelection, setPendingScheduleSelection] =
+		useState<ScheduleSelectionState | null>(null)
+	const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+		string | null
+	>(null)
 
 	const menuItemId = route.params.menuItemId
 
@@ -602,27 +611,63 @@ const MenuItemViewScreen: React.FC = () => {
 		setOrderModalVisible(false)
 	}
 
+	const handlePaymentModalClose = () => {
+		setPaymentModalVisible(false)
+	}
+
+	const handleResetOrderFlow = () => {
+		setOrderModalVisible(false)
+		setPaymentModalVisible(false)
+		setPendingScheduleSelection(null)
+		setSelectedPaymentMethod(null)
+	}
+
 	const handleScheduleSelectionConfirm = (
 		selection: ScheduleSelectionState
 	) => {
+		setPendingScheduleSelection(selection)
 		setOrderModalVisible(false)
+		setPaymentModalVisible(true)
+	}
 
-		const isScheduled = selection.mode === 'scheduled'
+	const handlePaymentMethodConfirm = (paymentMethod: string) => {
+		setSelectedPaymentMethod(paymentMethod)
+		setPaymentModalVisible(false)
+
+		if (!pendingScheduleSelection) {
+			alertModal.showAlert({
+				title: 'Unable to Continue',
+				message: 'Something went wrong. Please try again.',
+			})
+			handleResetOrderFlow()
+			return
+		}
+
+		const isScheduled = pendingScheduleSelection.mode === 'scheduled'
 		const scheduleDetail =
-			isScheduled && selection.scheduledAt
-				? `Scheduled for ${selection.scheduledAt.toLocaleString()}.`
+			isScheduled && pendingScheduleSelection.scheduledAt
+				? `Scheduled for ${pendingScheduleSelection.scheduledAt.toLocaleString()}.`
 				: 'We will request this order for immediate preparation.'
+
+		const paymentMethodLabel =
+			paymentMethod === 'cash'
+				? 'Cash'
+				: paymentMethod === 'gcash'
+				? 'GCash'
+				: paymentMethod === 'maya'
+				? 'Maya (PayMaya)'
+				: paymentMethod
 
 		orderConfirmation.showConfirmation({
 			title: isScheduled ? 'Confirm Scheduled Order' : 'Confirm Order',
-			message: `${scheduleDetail}\n\nDo you want to continue?`,
+			message: `${scheduleDetail}\nPayment: ${paymentMethodLabel}\n\nDo you want to continue?`,
 			confirmText: 'Place Order',
 			cancelText: 'Back',
 			onConfirm: () => {
-				void placeOrder(selection)
+				void placeOrder(pendingScheduleSelection)
 			},
 			onCancel: () => {
-				setOrderModalVisible(true)
+				setPaymentModalVisible(true)
 			},
 		})
 	}
@@ -759,6 +804,13 @@ const MenuItemViewScreen: React.FC = () => {
 				concessionSchedule={normalizedConcessionSchedule}
 				availabilityStatus={availabilityStatus ?? 'not_served_today'}
 				itemName={menuItem.name ?? 'this item'}
+			/>
+
+			<PaymentMethodModal
+				visible={paymentModalVisible}
+				onClose={handlePaymentModalClose}
+				onConfirm={handlePaymentMethodConfirm}
+				selectedMethod={selectedPaymentMethod}
 			/>
 		</DynamicKeyboardView>
 	)
