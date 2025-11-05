@@ -37,6 +37,7 @@ const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 		})
 	}
 
+	// Only disable if there are variation/addon requirement issues or processing
 	const addToCartDisabled = disabled || isProcessing
 	const orderActionDisabled = disabled || isProcessing
 
@@ -74,8 +75,7 @@ const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 				<TouchableOpacity
 					style={[
 						styles.orderNowButton,
-						(orderActionDisabled || !orderNowAllowed) &&
-							styles.disabledPrimaryButton,
+						orderActionDisabled && styles.disabledPrimaryButton,
 					]}
 					onPress={onStartOrder}
 					disabled={orderActionDisabled}
@@ -89,8 +89,7 @@ const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 						<Text
 							style={[
 								styles.orderNowText,
-								(orderActionDisabled || !orderNowAllowed) &&
-									styles.disabledButtonText,
+								orderActionDisabled && styles.disabledButtonText,
 							]}>
 							Place Order
 						</Text>

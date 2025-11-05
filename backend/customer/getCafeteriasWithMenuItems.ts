@@ -49,7 +49,11 @@ export const getCafeteriasWithMenuItems = async (
 		const transformedCafeterias = cafeterias.map((cafeteria) => ({
 			...cafeteria,
 			concessions: cafeteria.concessions.map((concession) => ({
-				...concession,
+				id: concession.id,
+				name: concession.name,
+				image_url: concession.image_url,
+				is_open: concession.is_open,
+				schedule: concession.schedule,
 				menuItems: concession.menuItems.map((item) => ({
 					id: item.id,
 					name: item.name,

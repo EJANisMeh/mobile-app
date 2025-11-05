@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useMemo, useRef } from 'react'
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
@@ -6,6 +6,7 @@ import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createCustomerMenuStyles } from '../../../styles/customer'
 import { CustomerStackParamList } from '../../../types/navigation'
+import { isConcessionOpenNow } from '../../../utils'
 import MenuItemCard from './MenuItemCard'
 import type { ConcessionWithMenuItems } from '../../../types'
 
@@ -21,6 +22,11 @@ const ConcessionCard: React.FC<ConcessionCardProps> = ({ concession }) => {
 	const styles = createCustomerMenuStyles(colors, responsive)
 	const navigation = useNavigation<NavigationProp>()
 	const scrollViewRef = useRef<ScrollView>(null)
+
+	const isActuallyOpen = useMemo(
+		() => isConcessionOpenNow(concession.is_open, concession.schedule),
+		[concession.is_open, concession.schedule]
+	)
 
 	const handleViewAll = () => {
 		navigation.navigate('FullMenuList', {
@@ -42,17 +48,17 @@ const ConcessionCard: React.FC<ConcessionCardProps> = ({ concession }) => {
 					<Text style={styles.concessionName}>{concession.name}</Text>
 					<Text
 						style={
-							concession.is_open
+							isActuallyOpen
 								? styles.concessionStatus
 								: styles.concessionClosedStatus
 						}>
-						{concession.is_open ? 'Open' : 'Closed'}
+						{isActuallyOpen ? 'Open' : 'Closed'}
 					</Text>
 				</View>
 			</View>
 
 			{/* Show menu items if open, otherwise show closed message */}
-			{concession.is_open ? (
+			{isActuallyOpen ? (
 				concession.menuItems.length > 0 ? (
 					<ScrollView
 						ref={scrollViewRef}

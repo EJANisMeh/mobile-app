@@ -1,4 +1,5 @@
 import type { MenuItemAvailabilitySchedule } from '../menuItemTypes'
+import type { ConcessionSchedule } from '../concessionTypes'
 
 export interface MenuItemForCustomer {
 	id: number
@@ -19,6 +20,7 @@ export interface ConcessionWithMenuItems {
 	name: string
 	image_url: string | null
 	is_open: boolean
+	schedule?: ConcessionSchedule | null
 	menuItems: MenuItemForCustomer[]
 }
 

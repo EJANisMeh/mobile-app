@@ -26,7 +26,7 @@ const ConcessionEditDetailsButton: React.FC = () => {
 				color={colors.primary}
 				style={concessionStyles.actionIcon}
 			/>
-			<Text style={concessionStyles.actionText}>Edit Details</Text>
+			<Text style={concessionStyles.actionText}>Edit Details & Schedule</Text>
 			<MaterialCommunityIcons
 				name="chevron-right"
 				size={24}

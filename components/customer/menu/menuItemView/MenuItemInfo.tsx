@@ -56,6 +56,33 @@ const MenuItemInfo: React.FC<MenuItemInfoProps> = ({
 		}
 	}
 
+	const getAvailabilityDisplay = () => {
+		switch (availabilityStatus) {
+			case 'available':
+				return {
+					text: 'Available',
+					badgeStyle: styles.availabilityBadgeAvailable,
+					textStyle: styles.availabilityBadgeTextAvailable,
+				}
+			case 'not_served_today':
+				return {
+					text: 'Not available for the day',
+					badgeStyle: styles.availabilityBadgeScheduled,
+					textStyle: styles.availabilityBadgeTextScheduled,
+				}
+			case 'out_of_stock':
+				return {
+					text: 'Out of stock',
+					badgeStyle: styles.availabilityBadgeUnavailable,
+					textStyle: styles.availabilityBadgeTextUnavailable,
+				}
+			default:
+				return null
+		}
+	}
+
+	const availabilityDisplay = getAvailabilityDisplay()
+
 	return (
 		<View style={styles.infoContainer}>
 			{/* Description (shown when showPrice is false) */}
@@ -63,6 +90,20 @@ const MenuItemInfo: React.FC<MenuItemInfoProps> = ({
 				<View style={styles.descriptionSection}>
 					<Text style={styles.descriptionLabel}>Description</Text>
 					<Text style={styles.description}>{menuItem.description}</Text>
+				</View>
+			)}
+
+			{/* Availability Status */}
+			{!showPrice && availabilityDisplay && (
+				<View
+					style={[styles.availabilityBadge, availabilityDisplay.badgeStyle]}>
+					<Text
+						style={[
+							styles.availabilityBadgeText,
+							availabilityDisplay.textStyle,
+						]}>
+						{availabilityDisplay.text}
+					</Text>
 				</View>
 			)}
 
@@ -75,17 +116,18 @@ const MenuItemInfo: React.FC<MenuItemInfoProps> = ({
 							<View style={styles.scheduleChipRow}>
 								{scheduleDays
 									.filter((day) => day.isAvailable)
-									.map((day) => (
-										<View
-											key={`available-${day.key}`}
-											style={[
-												styles.scheduleChip,
-												styles.scheduleChipAvailable,
-												day.isToday && styles.scheduleChipToday,
-											]}>
-											<Text style={styles.scheduleChipText}>{day.label}</Text>
-										</View>
-									))}
+									.map((day) => {
+										const chipStyle = day.isToday
+											? styles.scheduleChipTodayAvailable
+											: styles.scheduleChipAvailable
+										return (
+											<View
+												key={`available-${day.key}`}
+												style={[styles.scheduleChip, chipStyle]}>
+												<Text style={styles.scheduleChipText}>{day.label}</Text>
+											</View>
+										)
+									})}
 							</View>
 						</View>
 						<View style={styles.scheduleDayGroup}>
@@ -93,16 +135,18 @@ const MenuItemInfo: React.FC<MenuItemInfoProps> = ({
 							<View style={styles.scheduleChipRow}>
 								{scheduleDays
 									.filter((day) => !day.isAvailable)
-									.map((day) => (
-										<View
-											key={`unavailable-${day.key}`}
-											style={[
-												styles.scheduleChip,
-												styles.scheduleChipUnavailable,
-											]}>
-											<Text style={styles.scheduleChipText}>{day.label}</Text>
-										</View>
-									))}
+									.map((day) => {
+										const chipStyle = day.isToday
+											? styles.scheduleChipTodayUnavailable
+											: styles.scheduleChipUnavailable
+										return (
+											<View
+												key={`unavailable-${day.key}`}
+												style={[styles.scheduleChip, chipStyle]}>
+												<Text style={styles.scheduleChipText}>{day.label}</Text>
+											</View>
+										)
+									})}
 							</View>
 						</View>
 					</View>

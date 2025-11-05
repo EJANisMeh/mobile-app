@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
 import DateTimePickerModal from 'react-native-modal-datetime-picker'
 import BaseModal from '../../modals/BaseModal'
+import { useThemeContext } from '../../../context'
+import { useResponsiveDimensions } from '../../../hooks'
+import { createOrderScheduleModalStyles } from '../../../styles/customer'
 import type {
 	MenuItemAvailabilitySchedule,
 	MenuItemAvailabilityStatus,
@@ -10,7 +13,6 @@ import type {
 	ConcessionSchedule,
 } from '../../../types'
 import {
-	getMenuItemScheduleSummary,
 	isMenuItemScheduledOnDate,
 	normalizeMenuItemSchedule,
 	getMenuItemDayKeyForDate,
@@ -61,6 +63,10 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 	availabilityStatus,
 	itemName,
 }) => {
+	const { colors } = useThemeContext()
+	const responsive = useResponsiveDimensions()
+	const styles = createOrderScheduleModalStyles(colors, responsive)
+
 	const normalizedSchedule = useMemo(
 		() => normalizeMenuItemSchedule(schedule ?? undefined),
 		[schedule]
@@ -98,6 +104,23 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 			.map((dayKey) => CONCESSION_SCHEDULE_DAY_LABELS[dayKey])
 			.join(', ')
 	}, [normalizedSchedule])
+
+	const formatScheduledDateTime = (date: Date): string => {
+		const dateStr = date.toLocaleDateString(undefined, {
+			weekday: 'short',
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric',
+		})
+		
+		const hours = date.getHours()
+		const minutes = date.getMinutes()
+		const period = hours >= 12 ? 'PM' : 'AM'
+		const twelveHour = hours % 12 === 0 ? 12 : hours % 12
+		const timeStr = `${twelveHour}:${minutes.toString().padStart(2, '0')} ${period}`
+		
+		return `${dateStr} at ${timeStr}`
+	}
 
 	const isOrderNowDisabled = availabilityStatus !== 'available'
 
@@ -277,85 +300,143 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 		)
 	}
 
+	const isConfirmDisabled = mode === 'scheduled' && !scheduledAt
+
 	return (
 		<>
 			<BaseModal
 				visible={visible}
 				onClose={onClose}
 				title={`How would you like to order ${itemName}?`}>
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Choose order mode</Text>
-					<View style={styles.modeRow}>
-						{modeButton('now', 'Order Now', isOrderNowDisabled)}
-						{modeButton('scheduled', 'Schedule Order')}
-					</View>
-					{isOrderNowDisabled ? (
-						<Text style={styles.helperText}>
-							Currently unavailable for immediate pick-up.
-						</Text>
-					) : null}
-				</View>
-
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Selling schedule</Text>
-					<Text style={styles.helperText}>{scheduleSummary}</Text>
-					{availableDayKeys.length === 0 ? (
-						<Text style={styles.helperText}>
-							No days are currently available for scheduling.
-						</Text>
-					) : null}
-				</View>
-
-				{mode === 'scheduled' ? (
+				<ScrollView
+					style={styles.scrollArea}
+					contentContainerStyle={styles.scrollContent}
+					showsVerticalScrollIndicator={true}>
 					<View style={styles.section}>
-						{quickPickOptions.length > 0 ? (
-							<>
-								<Text style={styles.sectionTitle}>Quick picks</Text>
-								<View style={styles.presetRow}>
-									{quickPickOptions.map((option) => (
-										<TouchableOpacity
-											key={option.id}
-											style={styles.presetButton}
-											onPress={() => applyQuickPick(option)}>
-											<Text style={styles.presetButtonText}>
-												{option.label}
-											</Text>
-										</TouchableOpacity>
-									))}
-								</View>
-							</>
+						<Text style={styles.sectionTitle}>Choose order mode</Text>
+						<View style={styles.modeRow}>
+							{modeButton('now', 'Order Now', isOrderNowDisabled)}
+							{modeButton('scheduled', 'Schedule Order')}
+						</View>
+						{isOrderNowDisabled ? (
+							<Text style={styles.helperText}>
+								Currently unavailable for immediate pick-up.
+							</Text>
 						) : null}
+					</View>
 
-						<View style={styles.sectionSpacer} />
+					{mode === 'scheduled' ? (
+						<View style={styles.section}>
+							<Text style={styles.sectionTitle}>Selling schedule</Text>
+							<Text style={styles.helperText}>
+								Days this item is available for ordering:
+							</Text>
+							<View style={styles.scheduleDaysRow}>
+								{CONCESSION_SCHEDULE_DAY_KEYS.map((dayKey) => {
+									const isActive = Boolean(normalizedSchedule[dayKey])
+									return (
+										<View
+											key={dayKey}
+											style={[
+												styles.scheduleDayChip,
+												isActive
+													? styles.scheduleDayChipActive
+													: styles.scheduleDayChipInactive,
+											]}>
+											<Text
+												style={[
+													styles.scheduleDayChipText,
+													isActive
+														? styles.scheduleDayChipTextActive
+														: styles.scheduleDayChipTextInactive,
+												]}>
+												{CONCESSION_SCHEDULE_DAY_LABELS[dayKey].slice(0, 3)}
+											</Text>
+										</View>
+									)
+								})}
+							</View>
+							{availableDayKeys.length === 0 ? (
+								<Text style={[styles.helperText, { marginTop: 8 }]}>
+									No days are currently available for scheduling.
+								</Text>
+							) : null}
+						</View>
+					) : null}
 
+					{mode === 'scheduled' ? (
+						<View style={styles.section}>
+							{quickPickOptions.length > 0 ? (
+								<>
+									<Text style={styles.sectionTitle}>Quick picks</Text>
+									<View style={styles.presetRow}>
+										{quickPickOptions.map((option) => (
+											<TouchableOpacity
+												key={option.id}
+												style={styles.presetButton}
+												onPress={() => applyQuickPick(option)}>
+												<Text style={styles.presetButtonText}>
+													{option.label}
+												</Text>
+											</TouchableOpacity>
+										))}
+									</View>
+								</>
+							) : null}
+
+							<View style={styles.sectionSpacer} />
+
+							<View style={styles.dateTimeSection}>
+								<TouchableOpacity
+									style={styles.pickerButton}
+									onPress={handleShowPicker}>
+									<Text style={styles.pickerButtonText}>
+										{scheduledAt ? 'Change date & time' : 'Pick date & time'}
+									</Text>
+								</TouchableOpacity>
+
+								{scheduledAt ? (
+									<View style={styles.selectedDateTimeCard}>
+										<Text style={styles.selectedDateTimeLabel}>
+											Scheduled for:
+										</Text>
+										<Text style={styles.selectedDateTimeValue}>
+											{formatScheduledDateTime(scheduledAt)}
+										</Text>
+									</View>
+								) : null}
+							</View>
+						</View>
+					) : null}
+
+					{error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+					<View style={styles.actionsRow}>
 						<TouchableOpacity
-							style={styles.datetimeButton}
-							onPress={handleShowPicker}>
-							<Text style={styles.datetimeButtonText}>
-								{scheduledAt
-									? `Scheduled for ${scheduledAt.toLocaleString()}`
-									: 'Pick date & time'}
+							style={[styles.actionButton, styles.cancelButton]}
+							onPress={onClose}>
+							<Text style={styles.actionButtonText}>Cancel</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={[
+								styles.actionButton,
+								styles.confirmButton,
+								styles.actionButtonSpacing,
+								isConfirmDisabled && styles.confirmButtonDisabled,
+							]}
+							onPress={handleConfirmSelection}
+							disabled={isConfirmDisabled}>
+							<Text
+								style={[
+									styles.actionButtonText,
+									styles.confirmButtonText,
+									isConfirmDisabled && styles.confirmButtonTextDisabled,
+								]}>
+								Continue
 							</Text>
 						</TouchableOpacity>
 					</View>
-				) : null}
-
-				{error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-				<View style={styles.actionsRow}>
-					<TouchableOpacity
-						style={[styles.actionButton, styles.cancelButton]}
-						onPress={onClose}>
-						<Text style={styles.actionButtonText}>Cancel</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={[styles.actionButton, styles.confirmButton]}
-						onPress={handleConfirmSelection}>
-						<Text style={[styles.actionButtonText, styles.confirmButtonText]}>
-							Continue
-						</Text>
-					</TouchableOpacity>
-				</View>
+				</ScrollView>
 			</BaseModal>
 
 			<DateTimePickerModal
@@ -368,122 +449,5 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 		</>
 	)
 }
-
-const styles = StyleSheet.create({
-	section: {
-		marginBottom: 16,
-	},
-	sectionTitle: {
-		fontSize: 16,
-		fontWeight: '600',
-		marginBottom: 8,
-		color: '#222',
-	},
-	helperText: {
-		fontSize: 14,
-		color: '#555',
-		lineHeight: 20,
-	},
-	modeRow: {
-		flexDirection: 'row',
-		gap: 12,
-	},
-	modeButton: {
-		flex: 1,
-		paddingVertical: 12,
-		borderRadius: 10,
-		borderWidth: 1,
-		borderColor: '#d0d0d0',
-		alignItems: 'center',
-	},
-	modeButtonActive: {
-		backgroundColor: '#0066ff10',
-		borderColor: '#0066ff',
-	},
-	modeButtonDisabled: {
-		opacity: 0.4,
-	},
-	modeButtonText: {
-		fontSize: 14,
-		fontWeight: '600',
-		color: '#333',
-	},
-	modeButtonTextActive: {
-		color: '#0066ff',
-	},
-	modeButtonTextDisabled: {
-		color: '#666',
-	},
-	presetRow: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		gap: 10,
-	},
-	presetButton: {
-		paddingVertical: 10,
-		paddingHorizontal: 12,
-		borderRadius: 20,
-		borderWidth: 1,
-		borderColor: '#0066ff',
-	},
-	presetButtonDisabled: {
-		opacity: 0.3,
-	},
-	presetButtonText: {
-		fontSize: 13,
-		fontWeight: '600',
-		color: '#0066ff',
-	},
-	presetButtonTextDisabled: {
-		color: '#666',
-	},
-	sectionSpacer: {
-		height: 12,
-	},
-	datetimeButton: {
-		paddingVertical: 12,
-		paddingHorizontal: 12,
-		borderRadius: 10,
-		borderWidth: 1,
-		borderColor: '#d0d0d0',
-		alignItems: 'center',
-	},
-	datetimeButtonText: {
-		fontSize: 14,
-		fontWeight: '600',
-		color: '#333',
-	},
-	errorText: {
-		color: '#cc0000',
-		marginBottom: 12,
-		fontSize: 13,
-	},
-	actionsRow: {
-		flexDirection: 'row',
-		justifyContent: 'flex-end',
-		gap: 12,
-	},
-	actionButton: {
-		paddingVertical: 12,
-		paddingHorizontal: 20,
-		borderRadius: 8,
-		borderWidth: 1,
-		borderColor: '#0066ff',
-	},
-	cancelButton: {
-		backgroundColor: '#fff',
-	},
-	confirmButton: {
-		backgroundColor: '#0066ff',
-		borderColor: '#0066ff',
-	},
-	actionButtonText: {
-		fontSize: 15,
-		fontWeight: '600',
-	},
-	confirmButtonText: {
-		color: '#fff',
-	},
-})
 
 export default OrderScheduleModal

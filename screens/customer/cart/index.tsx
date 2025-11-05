@@ -1,13 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-	View,
-	Text,
-	ActivityIndicator,
-	Image,
-	TouchableOpacity,
-} from 'react-native'
+import { View, Text, ActivityIndicator } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
-import { Ionicons } from '@expo/vector-icons'
 import {
 	useAuthContext,
 	useThemeContext,
@@ -17,7 +10,10 @@ import { useResponsiveDimensions } from '../../../hooks'
 import { useAlertModal, useConfirmationModal } from '../../../hooks/useModals'
 import { createCustomerCartStyles } from '../../../styles/customer'
 import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
-import { OrderScheduleModal } from '../../../components/customer/cart'
+import {
+	CartGroupCard,
+	OrderScheduleModal,
+} from '../../../components/customer/cart'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
 import {
 	loadCartItemsForUser,
@@ -25,46 +21,26 @@ import {
 	normalizeMenuItemSchedule,
 	normalizeConcessionSchedule,
 	CONCESSION_SCHEDULE_DAY_KEYS,
-	CONCESSION_SCHEDULE_DAY_LABELS,
 	getMenuItemDayKeyForDate,
 	getMenuItemAvailabilityStatus,
+	hasAnyMenuItemScheduleDay,
 } from '../../../utils'
 import { menuApi } from '../../../services/api'
 import type {
 	CartItem,
+	CartGroup,
+	CartMenuItemMeta,
 	MenuItemAvailabilitySchedule,
 	ConcessionSchedule,
 	ScheduleSelectionState,
 	MenuItemAvailabilityStatus,
 	MenuItemDayKey,
 	CreateOrderPayload,
+	GroupStatusInfo,
+	CartItemStatusInfo,
 } from '../../../types'
 
-interface CartMenuItemMeta {
-	schedule: MenuItemAvailabilitySchedule
-	availabilityStatus: MenuItemAvailabilityStatus
-	concessionSchedule: ConcessionSchedule | null
-	concessionIsOpen: boolean
-	concessionName: string | null
-}
-
-interface CartGroup {
-	concessionId: number
-	concessionName: string
-	items: CartItem[]
-	menuMeta: Record<number, CartMenuItemMeta>
-	missingMetaItemIds: number[]
-	hasCompleteMeta: boolean
-	status: MenuItemAvailabilityStatus
-	concessionSchedule: ConcessionSchedule | null
-	concessionIsOpen: boolean
-	combinedSchedule: MenuItemAvailabilitySchedule | null
-	hasServingDay: boolean
-	totalQuantity: number
-	totalAmount: number
-}
-
-type StatusTone = 'success' | 'warning' | 'error' | 'info'
+type ScheduleContext = 'group' | 'split'
 
 const roundCurrency = (value: number): number =>
 	Number.isFinite(value) ? Number(value.toFixed(2)) : 0
@@ -77,6 +53,7 @@ const CartScreen: React.FC = () => {
 	const styles = createCustomerCartStyles(colors, responsive)
 	const alertModal = useAlertModal()
 	const orderConfirmation = useConfirmationModal()
+
 	const [cartItems, setCartItems] = useState<CartItem[]>([])
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
@@ -90,6 +67,10 @@ const CartScreen: React.FC = () => {
 	const [processingGroupId, setProcessingGroupId] = useState<number | null>(
 		null
 	)
+	const [splitQueue, setSplitQueue] = useState<CartItem[]>([])
+	const [splitIndex, setSplitIndex] = useState(0)
+	const [scheduleContext, setScheduleContext] =
+		useState<ScheduleContext>('group')
 
 	const refreshCart = useCallback(async () => {
 		if (!user?.id) {
@@ -238,6 +219,8 @@ const CartScreen: React.FC = () => {
 				concessionIsOpen: false,
 				combinedSchedule: null,
 				hasServingDay: false,
+				sharedServingDays: [],
+				requiresSplitScheduling: false,
 				totalQuantity: 0,
 				totalAmount: 0,
 			}
@@ -290,6 +273,26 @@ const CartScreen: React.FC = () => {
 				combinedSchedule = template
 			}
 
+			const sharedServingDays: MenuItemDayKey[] = combinedSchedule
+				? (CONCESSION_SCHEDULE_DAY_KEYS.filter((dayKey) => {
+						const typedKey = dayKey as MenuItemDayKey
+						if (!combinedSchedule?.[typedKey]) {
+							return false
+						}
+
+						if (!concessionSchedule) {
+							return true
+						}
+
+						const concessionDay = concessionSchedule[dayKey]
+						return Boolean(
+							concessionDay?.isOpen &&
+								typeof concessionDay.open === 'string' &&
+								typeof concessionDay.close === 'string'
+						)
+				  }) as MenuItemDayKey[])
+				: []
+
 			const statusSequence = metaEntries.map((meta) => meta.availabilityStatus)
 			let status: MenuItemAvailabilityStatus = 'available'
 
@@ -299,18 +302,17 @@ const CartScreen: React.FC = () => {
 				status = 'not_served_today'
 			}
 
-			const hasServingDay = Boolean(
-				combinedSchedule &&
-					CONCESSION_SCHEDULE_DAY_KEYS.some((dayKey) =>
-						Boolean(combinedSchedule?.[dayKey as MenuItemDayKey])
-					)
+			const hasServingDay = sharedServingDays.length > 0
+
+			const requiresSplitScheduling = Boolean(
+				hasCompleteMeta &&
+					sharedServingDays.length === 0 &&
+					metaEntries.some((meta) => hasAnyMenuItemScheduleDay(meta.schedule))
 			)
 
 			if (status === 'available') {
 				const todayKey = getMenuItemDayKeyForDate(new Date())
-				const servesToday = Boolean(
-					combinedSchedule?.[todayKey as MenuItemDayKey]
-				)
+				const servesToday = sharedServingDays.includes(todayKey)
 
 				if (!servesToday || !concessionIsOpen) {
 					status = 'not_served_today'
@@ -325,6 +327,8 @@ const CartScreen: React.FC = () => {
 				concessionIsOpen,
 				combinedSchedule,
 				hasServingDay,
+				sharedServingDays,
+				requiresSplitScheduling,
 				concessionName: group.concessionName || 'Concession',
 			})
 		})
@@ -343,6 +347,52 @@ const CartScreen: React.FC = () => {
 		)
 	}, [activeGroupId, groupedCart])
 
+	const splitActiveItem = useMemo(() => {
+		if (splitQueue.length === 0) {
+			return null
+		}
+		const index = Math.min(splitIndex, splitQueue.length - 1)
+		return splitQueue[index] ?? null
+	}, [splitIndex, splitQueue])
+
+	const scheduleModalState = useMemo<{
+		schedule: MenuItemAvailabilitySchedule | null | undefined
+		concessionSchedule: ConcessionSchedule | null | undefined
+		availabilityStatus: MenuItemAvailabilityStatus
+		itemName: string
+	}>(() => {
+		if (!activeGroup) {
+			return {
+				schedule: undefined,
+				concessionSchedule: undefined,
+				availabilityStatus: 'not_served_today',
+				itemName: 'from this concession',
+			}
+		}
+
+		const concessionLabel = activeGroup.concessionName ?? 'this concession'
+
+		if (scheduleContext === 'split' && splitActiveItem) {
+			const itemMeta = activeGroup.menuMeta[splitActiveItem.menuItemId]
+			return {
+				schedule: itemMeta?.schedule ?? null,
+				concessionSchedule:
+					itemMeta?.concessionSchedule ??
+					activeGroup.concessionSchedule ??
+					null,
+				availabilityStatus: itemMeta?.availabilityStatus ?? 'not_served_today',
+				itemName: `${splitActiveItem.name} from ${concessionLabel}`,
+			}
+		}
+
+		return {
+			schedule: activeGroup.combinedSchedule ?? null,
+			concessionSchedule: activeGroup.concessionSchedule ?? null,
+			availabilityStatus: activeGroup.status,
+			itemName: `items from ${concessionLabel}`,
+		}
+	}, [activeGroup, scheduleContext, splitActiveItem])
+
 	const totalItems = useMemo(
 		() => cartItems.reduce((sum, item) => sum + item.quantity, 0),
 		[cartItems]
@@ -358,18 +408,9 @@ const CartScreen: React.FC = () => {
 		[]
 	)
 
-	const getGroupStatusInfo = (
-		group: CartGroup
-	): {
-		label: string
-		helper: string | null
-		tone: StatusTone
-		servedToday: boolean
-	} => {
+	const getGroupStatusInfo = (group: CartGroup): GroupStatusInfo => {
 		const todayKey = getMenuItemDayKeyForDate(new Date())
-		const servedToday = Boolean(
-			group.combinedSchedule?.[todayKey as MenuItemDayKey]
-		)
+		const servedToday = group.sharedServingDays.includes(todayKey)
 
 		if (!group.hasCompleteMeta) {
 			return {
@@ -381,6 +422,17 @@ const CartScreen: React.FC = () => {
 		}
 
 		if (!group.hasServingDay) {
+			if (group.requiresSplitScheduling) {
+				const isSingleItem = group.items.length === 1
+				return {
+					label: isSingleItem ? 'No common selling days' : 'Different schedules',
+					helper: isSingleItem
+						? 'Schedule this item on an available day.'
+						: 'Order each item separately to pick different days.',
+					tone: 'warning',
+					servedToday,
+				}
+			}
 			return {
 				label: 'No selling days',
 				helper: 'These items are not open for ordering right now.',
@@ -401,7 +453,7 @@ const CartScreen: React.FC = () => {
 		if (!group.concessionIsOpen) {
 			return {
 				label: 'Concession closed',
-				helper: 'Schedule this order for another day.',
+				helper: 'Schedule this order/items for another day.',
 				tone: 'warning',
 				servedToday,
 			}
@@ -409,20 +461,106 @@ const CartScreen: React.FC = () => {
 
 		if (group.status === 'not_served_today' || !servedToday) {
 			return {
-				label: 'Not sold today',
-				helper: 'Schedule this order on a selling day.',
+				label: 'Includes items not sold today',
+				helper: 'Schedule this order/items on a selling day.',
 				tone: 'warning',
 				servedToday,
 			}
 		}
 
 		return {
-			label: 'Ready today',
+			label: 'All items available',
 			helper: 'Order now or schedule ahead.',
 			tone: 'success',
 			servedToday,
 		}
 	}
+
+	const getCartItemStatusInfo = useCallback(
+		(item: CartItem): CartItemStatusInfo => {
+			const meta = menuItemMeta[item.menuItemId]
+			if (!meta) {
+				return {
+					label: 'Checking availability…',
+					tone: 'info',
+				}
+			}
+
+			if (!hasAnyMenuItemScheduleDay(meta.schedule)) {
+				return {
+					label: 'No selling days',
+					tone: 'warning',
+				}
+			}
+
+			if (!meta.concessionIsOpen) {
+				return {
+					label: 'Concession closed',
+					tone: 'warning',
+				}
+			}
+
+			switch (meta.availabilityStatus) {
+				case 'out_of_stock':
+					return {
+						label: 'Out of stock',
+						tone: 'error',
+					}
+				case 'not_served_today':
+					return {
+						label: 'Not available for today',
+						tone: 'warning',
+					}
+				default:
+					return {
+						label: 'Available',
+						tone: 'success',
+					}
+			}
+		},
+		[menuItemMeta]
+	)
+
+	const cartGroupCards = useMemo(
+		() =>
+			groupedCart.map((group) => {
+				const statusInfo = getGroupStatusInfo(group)
+				const isGroupLoading = metaLoading && !group.hasCompleteMeta
+				const buttonDisabled =
+					orderBackend.isProcessing || isGroupLoading || !group.hasCompleteMeta
+				const showProcessingIndicator =
+					orderBackend.isProcessing && processingGroupId === group.concessionId
+				const itemsWithStatus = group.items.map((item) => {
+					const meta = group.menuMeta[item.menuItemId]
+					const canOrderIndividually = Boolean(
+						group.items.length > 1 &&
+							meta &&
+							hasAnyMenuItemScheduleDay(meta.schedule)
+					)
+					return {
+						item,
+						status: getCartItemStatusInfo(item),
+						canOrderIndividually,
+					}
+				})
+
+				return {
+					group,
+					statusInfo,
+					buttonLabel: 'Place Order',
+					buttonDisabled,
+					showProcessingIndicator,
+					items: itemsWithStatus,
+				}
+			}),
+		[
+			groupedCart,
+			getCartItemStatusInfo,
+			metaLoading,
+			orderBackend.isProcessing,
+			processingGroupId,
+		]
+	)
 
 	const handlePlaceOrderPress = (group: CartGroup) => {
 		if (!user) {
@@ -447,6 +585,29 @@ const CartScreen: React.FC = () => {
 		}
 
 		if (!group.hasServingDay) {
+			if (group.requiresSplitScheduling) {
+				const eligibleItems = group.items.filter((item) => {
+					const meta = group.menuMeta[item.menuItemId]
+					return Boolean(meta && hasAnyMenuItemScheduleDay(meta.schedule))
+				})
+
+				if (eligibleItems.length === 0) {
+					alertModal.showAlert({
+						title: 'Items Unavailable',
+						message:
+							'We could not load item schedules right now. Please try again later.',
+					})
+					return
+				}
+
+				setScheduleContext('split')
+				setActiveGroupId(group.concessionId)
+				setSplitQueue(eligibleItems)
+				setSplitIndex(0)
+				setScheduleModalVisible(true)
+				return
+			}
+
 			alertModal.showAlert({
 				title: 'No Selling Days',
 				message:
@@ -464,13 +625,88 @@ const CartScreen: React.FC = () => {
 			return
 		}
 
+		setScheduleContext('group')
 		setActiveGroupId(group.concessionId)
 		setScheduleModalVisible(true)
+	}
+
+	const handleOrderSingleItemPress = (group: CartGroup, item: CartItem) => {
+		if (!user) {
+			alertModal.showAlert({
+				title: 'Sign In Required',
+				message: 'Please sign in to place an order.',
+			})
+			return
+		}
+
+		if (orderBackend.isProcessing) {
+			return
+		}
+
+		const meta = group.menuMeta[item.menuItemId]
+		if (!meta) {
+			alertModal.showAlert({
+				title: 'Checking Availability',
+				message:
+					'We are still confirming the schedule for this item. Please try again shortly.',
+			})
+			return
+		}
+
+		if (!hasAnyMenuItemScheduleDay(meta.schedule)) {
+			alertModal.showAlert({
+				title: 'Cannot Order This Item',
+				message: 'This item is not accepting orders right now.',
+			})
+			return
+		}
+
+		setScheduleContext('split')
+		setActiveGroupId(group.concessionId)
+		setSplitQueue([item])
+		setSplitIndex(0)
+		setScheduleModalVisible(true)
+	}
+
+	const handleRemoveItemPress = (group: CartGroup, item: CartItem) => {
+		orderConfirmation.showConfirmation({
+			title: 'Remove item?',
+			message: `Remove ${item.name} from ${group.concessionName}?`,
+			confirmText: 'Remove',
+			cancelText: 'Keep item',
+			confirmStyle: 'destructive',
+			onConfirm: () => {
+				void removeItemsFromCart([item])
+				setSplitQueue((prev) => prev.filter((queued) => queued.id !== item.id))
+			},
+		})
+	}
+
+	const handleUpdateQuantity = async (item: CartItem, newQuantity: number) => {
+		if (!user || newQuantity < 1) {
+			return
+		}
+
+		const updatedItems = cartItems.map((cartItem) =>
+			cartItem.id === item.id
+				? {
+						...cartItem,
+						quantity: newQuantity,
+						totalPrice: roundCurrency(cartItem.unitPrice * newQuantity),
+				  }
+				: cartItem
+		)
+
+		await overwriteCartItemsForUser(user.id, updatedItems)
+		setCartItems(updatedItems)
 	}
 
 	const handleScheduleModalClose = () => {
 		setScheduleModalVisible(false)
 		setActiveGroupId(null)
+		setSplitQueue([])
+		setSplitIndex(0)
+		setScheduleContext('group')
 	}
 
 	const buildOrderPayload = (
@@ -514,6 +750,44 @@ const CartScreen: React.FC = () => {
 		}
 	}
 
+	const buildSingleItemOrderPayload = (
+		group: CartGroup,
+		item: CartItem,
+		selection: ScheduleSelectionState
+	): CreateOrderPayload | null => {
+		if (!user) {
+			return null
+		}
+
+		const orderItem = {
+			menuItemId: item.menuItemId,
+			variationId: null,
+			addon_menu_item_id: null,
+			quantity: item.quantity,
+			unitPrice: roundCurrency(item.unitPrice),
+			variation_snapshot: item.variationGroups,
+			options_snapshot: item.variationOptions,
+			addons_snapshot: item.addons,
+			item_total: roundCurrency(item.totalPrice),
+		}
+
+		const scheduledForIso =
+			selection.mode === 'scheduled' && selection.scheduledAt
+				? selection.scheduledAt.toISOString()
+				: null
+
+		return {
+			orderMode: selection.mode,
+			scheduledFor: scheduledForIso,
+			customerId: user.id,
+			concessionId: group.concessionId,
+			total: roundCurrency(orderItem.item_total),
+			payment_mode: {},
+			concession_note: null,
+			orderItems: [orderItem],
+		}
+	}
+
 	const removeGroupFromCart = async (group: CartGroup) => {
 		if (!user) {
 			return
@@ -529,6 +803,30 @@ const CartScreen: React.FC = () => {
 			const next = { ...prev }
 			group.items.forEach((item) => {
 				delete next[item.menuItemId]
+			})
+			return next
+		})
+	}
+
+	const removeItemsFromCart = async (itemsToRemove: CartItem[]) => {
+		if (!user || itemsToRemove.length === 0) {
+			return
+		}
+
+		const idsToRemove = new Set(itemsToRemove.map((item) => item.id))
+		const remaining = cartItems.filter((item) => !idsToRemove.has(item.id))
+
+		await overwriteCartItemsForUser(user.id, remaining)
+		setCartItems(remaining)
+		setMenuItemMeta((prev) => {
+			const next = { ...prev }
+			itemsToRemove.forEach((item) => {
+				const stillInCart = remaining.some(
+					(remainingItem) => remainingItem.menuItemId === item.menuItemId
+				)
+				if (!stillInCart) {
+					delete next[item.menuItemId]
+				}
 			})
 			return next
 		})
@@ -597,6 +895,84 @@ const CartScreen: React.FC = () => {
 		}
 	}
 
+	const placeOrderForSplitItem = async (
+		group: CartGroup,
+		item: CartItem,
+		selection: ScheduleSelectionState
+	) => {
+		const payload = buildSingleItemOrderPayload(group, item, selection)
+		if (!payload) {
+			alertModal.showAlert({
+				title: 'Unable to Order',
+				message: 'Please sign in before placing an order.',
+			})
+			return
+		}
+
+		setProcessingGroupId(group.concessionId)
+
+		try {
+			const response = await orderBackend.createOrder(payload)
+			if (response.success) {
+				const remainingQueue = splitQueue.filter(
+					(queued) => queued.id !== item.id
+				)
+
+				await removeItemsFromCart([item])
+				setSplitQueue(remainingQueue)
+				setSplitIndex(0)
+
+				alertModal.showAlert({
+					title: 'Order Placed',
+					message:
+						response.message ||
+						`We sent your order for ${item.name} to ${group.concessionName}.`,
+					onClose: () => {
+						if (remainingQueue.length > 0) {
+							setScheduleContext('split')
+							setActiveGroupId(group.concessionId)
+							setScheduleModalVisible(true)
+						} else {
+							setScheduleContext('group')
+							setActiveGroupId(null)
+							void refreshCart()
+						}
+					},
+				})
+				return
+			}
+
+			if ('reasons' in response && Array.isArray(response.reasons)) {
+				const reasonsList = response.reasons
+					.map((reason: string, index: number) => `${index + 1}. ${reason}`)
+					.join('\n')
+
+				alertModal.showAlert({
+					title: 'Order Failed',
+					message: `${response.error}\n\n${reasonsList}`,
+				})
+				return
+			}
+
+			alertModal.showAlert({
+				title: 'Order Failed',
+				message:
+					response.error ||
+					'Unable to place your order right now. Please try again.',
+			})
+		} catch (err) {
+			alertModal.showAlert({
+				title: 'Order Failed',
+				message:
+					err instanceof Error
+						? err.message
+						: 'Unexpected error occurred. Please try again.',
+			})
+		} finally {
+			setProcessingGroupId(null)
+		}
+	}
+
 	const handleScheduleSelectionConfirm = (
 		selection: ScheduleSelectionState
 	) => {
@@ -609,19 +985,50 @@ const CartScreen: React.FC = () => {
 			return
 		}
 
+		const concessionLabel = activeGroup.concessionName ?? 'this concession'
 		const isScheduled = selection.mode === 'scheduled'
 		const scheduleDetail =
 			isScheduled && selection.scheduledAt
 				? `Scheduled for ${selection.scheduledAt.toLocaleString()}.`
 				: 'We will request this order for immediate preparation.'
 
+		if (scheduleContext === 'split') {
+			const currentItem = splitActiveItem
+			if (!currentItem) {
+				alertModal.showAlert({
+					title: 'Unable to Continue',
+					message:
+						'The selected item is no longer in your cart. Please reload your cart and try again.',
+				})
+				return
+			}
+
+			orderConfirmation.showConfirmation({
+				title: isScheduled
+					? `Confirm Schedule for ${currentItem.name}`
+					: `Confirm Order for ${currentItem.name}`,
+				message: `${scheduleDetail}\n\nContinue with ${currentItem.quantity} x ${currentItem.name} from ${concessionLabel}?`,
+				confirmText: 'Place Order',
+				cancelText: 'Back',
+				onConfirm: () => {
+					void placeOrderForSplitItem(activeGroup, currentItem, selection)
+				},
+				onCancel: () => {
+					setActiveGroupId(activeGroup.concessionId)
+					setScheduleContext('split')
+					setScheduleModalVisible(true)
+				},
+			})
+			return
+		}
+
 		orderConfirmation.showConfirmation({
 			title: isScheduled ? 'Confirm Scheduled Order' : 'Confirm Order',
 			message: `${scheduleDetail}\n\nContinue with ${
 				activeGroup.totalQuantity
-			} ${activeGroup.totalQuantity === 1 ? 'item' : 'items'} from ${
-				activeGroup.concessionName
-			}?`,
+			} ${
+				activeGroup.totalQuantity === 1 ? 'item' : 'items'
+			} from ${concessionLabel}?`,
 			confirmText: 'Place Order',
 			cancelText: 'Back',
 			onConfirm: () => {
@@ -633,59 +1040,6 @@ const CartScreen: React.FC = () => {
 			},
 		})
 	}
-
-	const renderCartItem = (item: CartItem) => (
-		<View
-			key={item.id}
-			style={styles.cartGroupItem}>
-			<View style={styles.cartGroupItemImageWrapper}>
-				{item.image ? (
-					<Image
-						source={{ uri: item.image }}
-						style={styles.cartGroupItemImage}
-						resizeMode="cover"
-					/>
-				) : (
-					<View style={styles.cartGroupItemPlaceholder}>
-						<Ionicons
-							name="fast-food-outline"
-							size={responsive.getResponsiveFontSize(18)}
-							color={colors.textSecondary}
-						/>
-					</View>
-				)}
-			</View>
-			<View style={styles.cartGroupItemDetails}>
-				<Text style={styles.cartGroupItemName}>{item.name}</Text>
-				{item.categoryName ? (
-					<Text style={styles.cartGroupItemCategory}>{item.categoryName}</Text>
-				) : null}
-				{item.variationGroups
-					.filter((group) => group.selectedOptions.length > 0)
-					.map((group) => (
-						<Text
-							key={`${item.id}-variation-${group.groupId}`}
-							style={styles.cartGroupItemMeta}>
-							{group.groupName}:{' '}
-							{group.selectedOptions
-								.map((option) => option.optionName)
-								.join(', ')}
-						</Text>
-					))}
-				{item.addons.length > 0 ? (
-					<Text style={styles.cartGroupItemMeta}>
-						Add-ons: {item.addons.map((addon) => addon.addonName).join(', ')}
-					</Text>
-				) : null}
-				<View style={styles.cartGroupItemFooter}>
-					<Text style={styles.cartGroupItemQuantity}>Qty: {item.quantity}</Text>
-					<Text style={styles.cartGroupItemPrice}>
-						{formatCurrency(item.totalPrice)}
-					</Text>
-				</View>
-			</View>
-		</View>
-	)
 
 	let content: React.ReactNode
 
@@ -728,127 +1082,23 @@ const CartScreen: React.FC = () => {
 				{metaError ? (
 					<Text style={styles.metaErrorText}>{metaError}</Text>
 				) : null}
-				{groupedCart.map((group) => {
-					const statusInfo = getGroupStatusInfo(group)
-					const isGroupLoading = metaLoading && !group.hasCompleteMeta
-					const buttonDisabled =
-						orderBackend.isProcessing ||
-						isGroupLoading ||
-						!group.hasCompleteMeta ||
-						group.status === 'out_of_stock' ||
-						!group.hasServingDay
-					const buttonLabel =
-						statusInfo.servedToday &&
-						group.concessionIsOpen &&
-						group.status === 'available'
-							? 'Place Order'
-							: 'Schedule Order'
-					const showProcessingIndicator =
-						orderBackend.isProcessing &&
-						processingGroupId === group.concessionId
-					const badgeStyle =
-						statusInfo.tone === 'success'
-							? styles.groupBadgeSuccess
-							: statusInfo.tone === 'warning'
-							? styles.groupBadgeWarning
-							: statusInfo.tone === 'error'
-							? styles.groupBadgeError
-							: styles.groupBadgeInfo
-
-					return (
-						<View
-							key={group.concessionId}
-							style={styles.cartGroupCard}>
-							<View style={styles.cartGroupHeader}>
-								<View style={styles.cartGroupHeaderText}>
-									<Text style={styles.cartGroupTitle}>
-										{group.concessionName}
-									</Text>
-									<Text style={styles.groupSubtext}>
-										{group.totalQuantity}{' '}
-										{group.totalQuantity === 1 ? 'item' : 'items'} •{' '}
-										{formatCurrency(group.totalAmount)}
-									</Text>
-								</View>
-								<View style={[styles.groupBadge, badgeStyle]}>
-									<Text style={styles.groupBadgeText}>{statusInfo.label}</Text>
-								</View>
-							</View>
-
-							{statusInfo.helper ? (
-								<Text
-									style={[
-										styles.groupHelperText,
-										statusInfo.tone === 'warning'
-											? styles.groupHelperWarning
-											: undefined,
-									]}>
-									{statusInfo.helper}
-								</Text>
-							) : null}
-
-							<View style={styles.cartGroupScheduleRow}>
-								{CONCESSION_SCHEDULE_DAY_KEYS.map((dayKey) => {
-									const label = CONCESSION_SCHEDULE_DAY_LABELS[dayKey]
-									const dayAvailable = Boolean(
-										group.combinedSchedule?.[dayKey as MenuItemDayKey]
-									)
-									return (
-										<View
-											key={`${group.concessionId}-${dayKey}`}
-											style={[
-												styles.scheduleChip,
-												dayAvailable
-													? styles.scheduleChipActive
-													: styles.scheduleChipInactive,
-											]}>
-											<Text
-												style={[
-													styles.scheduleChipText,
-													dayAvailable
-														? styles.scheduleChipTextActive
-														: styles.scheduleChipTextInactive,
-												]}>
-												{label.slice(0, 3)}
-											</Text>
-										</View>
-									)
-								})}
-							</View>
-
-							<View style={styles.cartGroupItems}>
-								{group.items.map(renderCartItem)}
-							</View>
-
-							<View style={styles.cartGroupFooter}>
-								<View>
-									<Text style={styles.groupTotalLabel}>Group Total</Text>
-									<Text style={styles.groupTotalValue}>
-										{formatCurrency(group.totalAmount)}
-									</Text>
-								</View>
-								<TouchableOpacity
-									style={[
-										styles.placeOrderButton,
-										buttonDisabled && styles.placeOrderButtonDisabled,
-									]}
-									onPress={() => handlePlaceOrderPress(group)}
-									disabled={buttonDisabled}>
-									{showProcessingIndicator ? (
-										<ActivityIndicator
-											color="#fff"
-											size="small"
-										/>
-									) : (
-										<Text style={styles.placeOrderButtonText}>
-											{buttonLabel}
-										</Text>
-									)}
-								</TouchableOpacity>
-							</View>
-						</View>
-					)
-				})}
+				{cartGroupCards.map((card) => (
+					<CartGroupCard
+						key={card.group.concessionId}
+						group={card.group}
+						items={card.items}
+						styles={styles}
+						formatCurrency={formatCurrency}
+						statusInfo={card.statusInfo}
+						buttonLabel={card.buttonLabel}
+						buttonDisabled={card.buttonDisabled}
+						showProcessingIndicator={card.showProcessingIndicator}
+						onPlaceOrder={() => handlePlaceOrderPress(card.group)}
+						onOrderItem={(item) => handleOrderSingleItemPress(card.group, item)}
+						onRemoveItem={(item) => handleRemoveItemPress(card.group, item)}
+						onUpdateQuantity={handleUpdateQuantity}
+					/>
+				))}
 			</View>
 		)
 	}
@@ -894,10 +1144,10 @@ const CartScreen: React.FC = () => {
 				visible={scheduleModalVisible}
 				onClose={handleScheduleModalClose}
 				onConfirm={handleScheduleSelectionConfirm}
-				schedule={activeGroup?.combinedSchedule ?? undefined}
-				concessionSchedule={activeGroup?.concessionSchedule ?? undefined}
-				availabilityStatus={activeGroup?.status ?? 'not_served_today'}
-				itemName={`from ${activeGroup?.concessionName ?? 'this concession'}`}
+				schedule={scheduleModalState.schedule}
+				concessionSchedule={scheduleModalState.concessionSchedule}
+				availabilityStatus={scheduleModalState.availabilityStatus}
+				itemName={scheduleModalState.itemName}
 			/>
 		</DynamicKeyboardView>
 	)

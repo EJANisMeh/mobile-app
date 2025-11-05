@@ -9,6 +9,7 @@ import {
 	CONCESSION_SCHEDULE_DAY_LABELS,
 	formatTimeDisplay,
 	normalizeConcessionSchedule,
+	isConcessionOpenNow,
 } from '../../../../utils'
 
 interface ScheduleOverviewCardProps {
@@ -27,6 +28,11 @@ const ScheduleOverviewCard: React.FC<ScheduleOverviewCardProps> = ({
 	const normalizedSchedule = useMemo(
 		() => normalizeConcessionSchedule(schedule),
 		[schedule]
+	)
+
+	const isActuallyOpen = useMemo(
+		() => isConcessionOpenNow(isConcessionOpen, schedule),
+		[isConcessionOpen, schedule]
 	)
 
 	const todayDetails = useMemo(() => {
@@ -59,16 +65,16 @@ const ScheduleOverviewCard: React.FC<ScheduleOverviewCardProps> = ({
 				<View
 					style={[
 						styles.scheduleStatusBadge,
-						isConcessionOpen
+						isActuallyOpen
 							? styles.scheduleStatusBadgeOpen
 							: styles.scheduleStatusBadgeClosed,
 					]}>
 					<Text
 						style={[
 							styles.scheduleStatusBadgeText,
-							!isConcessionOpen && styles.scheduleStatusBadgeTextClosed,
+							!isActuallyOpen && styles.scheduleStatusBadgeTextClosed,
 						]}>
-						{isConcessionOpen ? 'Open Now' : 'Closed'}
+						{isActuallyOpen ? 'Open Now' : 'Closed'}
 					</Text>
 				</View>
 			</View>

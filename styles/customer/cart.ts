@@ -122,11 +122,28 @@ export const createCustomerCartStyles = (
 		groupHelperWarning: {
 			color: colors.warning,
 		},
+		groupStatusLabel: {
+			marginTop: spacing.sm,
+			fontSize: fontSize(13),
+			fontWeight: '600',
+			color: colors.text,
+		},
+		groupStatusLabelSuccess: {
+			color: colors.success,
+		},
+		groupStatusLabelWarning: {
+			color: colors.warning,
+		},
+		groupStatusLabelError: {
+			color: colors.error,
+		},
+		groupStatusLabelInfo: {
+			color: colors.info,
+		},
 		cartGroupScheduleRow: {
 			flexDirection: 'row',
 			flexWrap: 'wrap',
 			gap: spacing.xs,
-			marginTop: spacing.sm,
 		},
 		scheduleChip: {
 			paddingHorizontal: spacing.sm,
@@ -158,9 +175,13 @@ export const createCustomerCartStyles = (
 			gap: spacing.sm,
 		},
 		cartGroupItem: {
+			paddingVertical: spacing.sm,
+			borderBottomWidth: 0,
+			overflow: 'hidden',
+		},
+		cartGroupItemMain: {
 			flexDirection: 'row',
 			alignItems: 'flex-start',
-			gap: spacing.md,
 		},
 		cartGroupItemImageWrapper: {
 			width: 72,
@@ -170,6 +191,7 @@ export const createCustomerCartStyles = (
 			alignItems: 'center',
 			justifyContent: 'center',
 			overflow: 'hidden',
+			marginRight: spacing.md,
 		},
 		cartGroupItemImage: {
 			width: '100%',
@@ -188,6 +210,9 @@ export const createCustomerCartStyles = (
 			fontWeight: '600',
 			color: colors.text,
 		},
+		cartGroupItemStatusRow: {
+			marginTop: spacing.sm,
+		},
 		cartGroupItemCategory: {
 			marginTop: spacing.xs,
 			fontSize: fontSize(12),
@@ -204,9 +229,77 @@ export const createCustomerCartStyles = (
 			alignItems: 'center',
 			marginTop: spacing.sm,
 		},
+		cartGroupItemActionsRow: {
+			flexDirection: 'row',
+			marginTop: spacing.sm,
+			alignItems: 'center',
+		},
+		itemActionButtonWrapper: {
+			flex: 1,
+			marginRight: spacing.sm,
+		},
+		itemActionButton: {
+			flex: 1,
+			paddingVertical: spacing.xs,
+			paddingHorizontal: spacing.sm,
+			borderRadius: 999,
+			borderWidth: 1,
+			borderColor: colors.primary,
+			backgroundColor: colors.surface,
+			alignItems: 'center',
+			justifyContent: 'center',
+		},
+		itemActionButtonText: {
+			fontSize: fontSize(12),
+			fontWeight: '600',
+			color: colors.primary,
+		},
+		itemActionButtonDisabled: {
+			opacity: 0.4,
+		},
+		itemRemoveIconButton: {
+			width: 44,
+			height: 44,
+			borderRadius: 22,
+			borderWidth: 1,
+			borderColor: colors.error,
+			backgroundColor: colors.surface,
+			alignItems: 'center',
+			justifyContent: 'center',
+		},
+		itemRemoveIcon: {
+			color: colors.error,
+		},
+		cartGroupItemDivider: {
+			height: 1,
+			backgroundColor: colors.border,
+			marginTop: spacing.sm,
+		},
+		cartGroupItemQuantityControl: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: spacing.sm,
+		},
+		quantityButton: {
+			width: 28,
+			height: 28,
+			borderRadius: 14,
+			borderWidth: 1,
+			borderColor: colors.primary,
+			backgroundColor: colors.surface,
+			alignItems: 'center',
+			justifyContent: 'center',
+		},
+		quantityButtonDisabled: {
+			borderColor: colors.border,
+			opacity: 0.5,
+		},
 		cartGroupItemQuantity: {
-			fontSize: fontSize(13),
+			fontSize: fontSize(14),
+			fontWeight: '600',
 			color: colors.text,
+			minWidth: 24,
+			textAlign: 'center',
 		},
 		cartGroupItemPrice: {
 			fontSize: fontSize(14),
@@ -215,12 +308,34 @@ export const createCustomerCartStyles = (
 		},
 		cartGroupFooter: {
 			marginTop: spacing.md,
-			flexDirection: 'row',
-			justifyContent: 'space-between',
-			alignItems: 'center',
+			flexDirection: 'column',
+			gap: spacing.md,
 			paddingTop: spacing.sm,
 			borderTopWidth: 1,
 			borderTopColor: colors.border,
+		},
+		cartGroupScheduleBlock: {
+			gap: spacing.xs,
+		},
+		cartGroupScheduleLabel: {
+			fontSize: fontSize(12),
+			fontWeight: '600',
+			color: colors.textSecondary,
+		},
+		cartGroupFooterRow: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'flex-end',
+			gap: spacing.md,
+		},
+		cartGroupTotals: {
+			flex: 1,
+		},
+		cartGroupButtons: {
+			flexShrink: 0,
+			minWidth: 160,
+			gap: spacing.xs,
+			flexDirection: 'column',
 		},
 		groupTotalLabel: {
 			fontSize: fontSize(13),
@@ -240,6 +355,7 @@ export const createCustomerCartStyles = (
 			alignItems: 'center',
 			justifyContent: 'center',
 			minWidth: 140,
+			alignSelf: 'stretch',
 		},
 		placeOrderButtonDisabled: {
 			backgroundColor: colors.border,
@@ -248,6 +364,44 @@ export const createCustomerCartStyles = (
 			fontSize: fontSize(14),
 			fontWeight: '700',
 			color: colors.textOnPrimary,
+		},
+		itemStatusBadge: {
+			paddingHorizontal: spacing.sm,
+			paddingVertical: spacing.xs,
+			borderRadius: 999,
+			borderWidth: 1,
+			borderColor: colors.border,
+			backgroundColor: colors.surface,
+			alignSelf: 'flex-start',
+		},
+		itemStatusBadgeSuccess: {
+			borderColor: colors.success,
+		},
+		itemStatusBadgeWarning: {
+			borderColor: colors.warning,
+		},
+		itemStatusBadgeError: {
+			borderColor: colors.error,
+		},
+		itemStatusBadgeInfo: {
+			borderColor: colors.info,
+		},
+		itemStatusBadgeText: {
+			fontSize: fontSize(11),
+			fontWeight: '600',
+			color: colors.textSecondary,
+		},
+		itemStatusBadgeTextSuccess: {
+			color: colors.success,
+		},
+		itemStatusBadgeTextWarning: {
+			color: colors.warning,
+		},
+		itemStatusBadgeTextError: {
+			color: colors.error,
+		},
+		itemStatusBadgeTextInfo: {
+			color: colors.info,
 		},
 		cartItemCard: {
 			flexDirection: 'row',

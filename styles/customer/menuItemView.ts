@@ -157,6 +157,35 @@ export const createCustomerMenuItemViewStyles = (
 			marginBottom: spacing.xs,
 			textTransform: 'uppercase',
 		},
+		availabilityBadge: {
+			alignSelf: 'flex-start',
+			paddingHorizontal: spacing.md,
+			paddingVertical: spacing.xs,
+			borderRadius: 20,
+			marginBottom: spacing.sm,
+		},
+		availabilityBadgeAvailable: {
+			backgroundColor: colors.successLight ?? colors.success + '20',
+		},
+		availabilityBadgeScheduled: {
+			backgroundColor: colors.warningLight ?? colors.warning + '20',
+		},
+		availabilityBadgeUnavailable: {
+			backgroundColor: colors.errorLight ?? colors.error + '20',
+		},
+		availabilityBadgeText: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			fontWeight: '600',
+		},
+		availabilityBadgeTextAvailable: {
+			color: colors.success,
+		},
+		availabilityBadgeTextScheduled: {
+			color: colors.warning,
+		},
+		availabilityBadgeTextUnavailable: {
+			color: colors.error,
+		},
 		scheduleDayGroups: {
 			gap: spacing.md,
 		},
@@ -177,21 +206,24 @@ export const createCustomerMenuItemViewStyles = (
 			paddingHorizontal: spacing.sm,
 			paddingVertical: spacing.xs,
 			borderRadius: 16,
-			borderWidth: 1,
+			borderWidth: 1.5,
+		},
+		scheduleChipAvailable: {
 			borderColor: colors.border,
 			backgroundColor: colors.surfaceSecondary,
 		},
-		scheduleChipAvailable: {
-			borderColor: colors.primary,
-			backgroundColor: colors.primaryLight,
-		},
-		scheduleChipToday: {
+		scheduleChipTodayAvailable: {
 			borderColor: colors.success,
-			backgroundColor: colors.successLight ?? colors.success,
+			backgroundColor: colors.successLight ?? colors.success + '20',
+		},
+		scheduleChipTodayUnavailable: {
+			borderColor: colors.error,
+			backgroundColor: colors.errorLight ?? colors.error + '20',
 		},
 		scheduleChipUnavailable: {
-			borderColor: colors.error,
-			backgroundColor: colors.errorLight,
+			borderColor: colors.border,
+			backgroundColor: colors.surfaceSecondary,
+			opacity: 0.5,
 		},
 		scheduleChipText: {
 			fontSize: responsive.getResponsiveFontSize(12),
