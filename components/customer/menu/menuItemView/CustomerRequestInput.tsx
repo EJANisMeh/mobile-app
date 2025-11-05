@@ -42,9 +42,7 @@ const CustomerRequestInput: React.FC<CustomerRequestInputProps> = ({
 				maxLength={500}
 				textAlignVertical="top"
 			/>
-			<Text style={styles.characterCount}>
-				{customerRequest.length}/500
-			</Text>
+			<Text style={styles.characterCount}>{customerRequest.length}/500</Text>
 		</View>
 	)
 }

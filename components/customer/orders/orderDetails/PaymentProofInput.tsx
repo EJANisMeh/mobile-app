@@ -52,8 +52,8 @@ const PaymentProofInput: React.FC<PaymentProofInputProps> = ({
 					{proofMode === 'text'
 						? 'transaction details'
 						: proofMode === 'screenshot'
-							? 'a screenshot'
-							: 'proof'}{' '}
+						? 'a screenshot'
+						: 'proof'}{' '}
 					to help the concessionaire verify your payment.
 				</Text>
 			</View>
@@ -89,9 +89,7 @@ const PaymentProofInput: React.FC<PaymentProofInputProps> = ({
 							<MaterialCommunityIcons
 								name="image-plus"
 								size={24}
-								color={
-									proofText.trim() ? colors.textSecondary : colors.primary
-								}
+								color={proofText.trim() ? colors.textSecondary : colors.primary}
 							/>
 							<Text
 								style={[

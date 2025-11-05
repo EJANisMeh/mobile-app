@@ -104,7 +104,8 @@ const OrdersScreen: React.FC = () => {
 		if (filters.searchQuery.trim()) {
 			const query = filters.searchQuery.toLowerCase()
 			result = result.filter((order) => {
-				const orderNum = order.concession_order_number?.toString() || order.id.toString()
+				const orderNum =
+					order.concession_order_number?.toString() || order.id.toString()
 				return orderNum.includes(query)
 			})
 		}
@@ -153,6 +154,26 @@ const OrdersScreen: React.FC = () => {
 				} else if (filters.paymentProofFilter === 'missing') {
 					return needsProof && !hasProof
 				}
+				return true
+			})
+		}
+
+		// Apply date range filter
+		if (filters.dateFrom || filters.dateTo) {
+			result = result.filter((order) => {
+				const orderDate = new Date(order.createdAt)
+
+				if (filters.dateFrom && filters.dateTo) {
+					// Both dates specified - filter between range
+					return orderDate >= filters.dateFrom && orderDate <= filters.dateTo
+				} else if (filters.dateFrom) {
+					// Only start date - filter from this date onwards
+					return orderDate >= filters.dateFrom
+				} else if (filters.dateTo) {
+					// Only end date - filter up to this date
+					return orderDate <= filters.dateTo
+				}
+
 				return true
 			})
 		}

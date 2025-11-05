@@ -14,8 +14,10 @@ import {
 	PaymentProofInput,
 	OrderInformationSection,
 } from '../../../components/customer/orders/orderDetails'
+import { AlertModal, ConfirmationModal } from '../../../components/modals'
 import { useThemeContext, useAuthContext } from '../../../context'
 import { useResponsiveDimensions, useCustomerNavigation } from '../../../hooks'
+import { useAlertModal, useConfirmationModal } from '../../../hooks/useModals'
 import { createOrderDetailsStyles } from '../../../styles/customer'
 import { orderApi } from '../../../services/api'
 import type { PaymentProof } from '../../../types'
@@ -29,6 +31,8 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 	const responsive = useResponsiveDimensions()
 	const navigation = useCustomerNavigation()
 	const styles = createOrderDetailsStyles(colors, responsive)
+	const alertModal = useAlertModal()
+	const confirmationModal = useConfirmationModal()
 
 	const [order, setOrder] = useState<any>(null)
 	const [loading, setLoading] = useState(true)
@@ -97,7 +101,10 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 			await ImagePicker.requestMediaLibraryPermissionsAsync()
 
 		if (!permissionResult.granted) {
-			alert('Permission to access gallery is required!')
+			alertModal.showAlert({
+				title: 'Permission Required',
+				message: 'Permission to access gallery is required!',
+			})
 			return
 		}
 
@@ -143,7 +150,10 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 			}
 		} catch (err) {
 			console.error('Submit proof error:', err)
-			alert('Failed to submit payment proof. Please try again.')
+			alertModal.showAlert({
+				title: 'Error',
+				message: 'Failed to submit payment proof. Please try again.',
+			})
 		} finally {
 			setSubmittingProof(false)
 		}
@@ -155,32 +165,52 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 		}
 
 		if (order.order_statuses?.code !== ORDER_STATUS_CODES.PENDING) {
-			alert('Only pending orders can be cancelled')
+			alertModal.showAlert({
+				title: 'Cannot Cancel',
+				message: 'Only pending orders can be cancelled',
+			})
 			return
 		}
 
-		// Ask for confirmation
-		if (!confirm('Are you sure you want to cancel this order?')) {
-			return
-		}
+		// Show confirmation modal
+		confirmationModal.showConfirmation({
+			title: 'Cancel Order',
+			message: 'Are you sure you want to cancel this order?',
+			confirmText: 'Yes, Cancel',
+			cancelText: 'No, Keep Order',
+			confirmStyle: 'destructive',
+			onConfirm: async () => {
+				confirmationModal.hideConfirmation()
+				setCancelling(true)
+				try {
+					const response = await orderApi.cancelOrder(order.id)
 
-		setCancelling(true)
-		try {
-			const response = await orderApi.cancelOrder(order.id)
-
-			if (response.success) {
-				// Reload order details to show updated status
-				await loadOrderDetails()
-				alert('Order cancelled successfully')
-			} else {
-				throw new Error(response.error || 'Failed to cancel order')
-			}
-		} catch (err) {
-			console.error('Cancel order error:', err)
-			alert('Failed to cancel order. Please try again.')
-		} finally {
-			setCancelling(false)
-		}
+					if (response.success) {
+						alertModal.showAlert({
+							title: 'Success',
+							message: 'Order cancelled successfully',
+						})
+						// Navigate back to orders list
+						setTimeout(() => {
+							navigation.goBack()
+						}, 1500)
+					} else {
+						throw new Error(response.error || 'Failed to cancel order')
+					}
+				} catch (err) {
+					console.error('Cancel order error:', err)
+					alertModal.showAlert({
+						title: 'Error',
+						message: 'Failed to cancel order. Please try again.',
+					})
+				} finally {
+					setCancelling(false)
+				}
+			},
+			onCancel: () => {
+				confirmationModal.hideConfirmation()
+			},
+		})
 	}
 
 	const handleEditProof = () => {
@@ -216,7 +246,8 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 
 	const showPaymentFirst = needsProof && (!order?.payment_proof || editingProof)
 
-	const canCancelOrder = order?.order_statuses?.code === ORDER_STATUS_CODES.PENDING
+	const canCancelOrder =
+		order?.order_statuses?.code === ORDER_STATUS_CODES.PENDING
 
 	if (loading) {
 		return (
@@ -264,7 +295,9 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 					<Text style={styles.headerTitle}>
 						Order #
 						{order.concession_order_number
-							? `${order.concession?.name?.substring(0, 1) || 'C'}-${order.concession_order_number}`
+							? `${order.concession?.name?.substring(0, 1) || 'C'}-${
+									order.concession_order_number
+							  }`
 							: order.id}
 					</Text>
 					<View style={styles.statusBadge}>
@@ -350,7 +383,10 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 				{/* Cancel Order Button */}
 				{canCancelOrder && (
 					<TouchableOpacity
-						style={[styles.cancelOrderButton, cancelling && styles.disabledButton]}
+						style={[
+							styles.cancelOrderButton,
+							cancelling && styles.disabledButton,
+						]}
 						onPress={handleCancelOrder}
 						disabled={cancelling}>
 						{cancelling ? (
@@ -364,6 +400,25 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 					</TouchableOpacity>
 				)}
 			</ScrollView>
+
+			<AlertModal
+				visible={alertModal.visible}
+				onClose={alertModal.handleClose}
+				title={alertModal.title}
+				message={alertModal.message}
+			/>
+
+			<ConfirmationModal
+				visible={confirmationModal.visible}
+				onClose={confirmationModal.hideConfirmation}
+				title={confirmationModal.props.title}
+				message={confirmationModal.props.message}
+				confirmText={confirmationModal.props.confirmText}
+				cancelText={confirmationModal.props.cancelText}
+				onConfirm={confirmationModal.props.onConfirm}
+				onCancel={confirmationModal.props.onCancel}
+				confirmStyle={confirmationModal.props.confirmStyle}
+			/>
 		</DynamicKeyboardView>
 	)
 }

@@ -66,6 +66,50 @@ const OrderCard: React.FC<OrderCardProps> = ({
 	}
 
 	const statusColor = getStatusColor(order.order_statuses.code)
+	const isCancelled = order.order_statuses.code.toLowerCase() === 'cancelled'
+
+	// If cancelled, show minimal view
+	if (isCancelled) {
+		return (
+			<View style={[styles.orderCard, { opacity: 0.7 }]}>
+				<View style={styles.orderHeader}>
+					<View>
+						<Text style={styles.orderIdText}>
+							Order #
+							{order.concession_order_number
+								? `${order.concession?.name?.substring(0, 1) || 'C'}-${
+										order.concession_order_number
+								  }`
+								: order.id}
+						</Text>
+						<View
+							style={[
+								styles.orderStatusBadge,
+								{ backgroundColor: statusColor, marginTop: 4 },
+							]}>
+							<Text style={styles.orderStatusText}>
+								{order.order_statuses.description || order.order_statuses.code}
+							</Text>
+						</View>
+					</View>
+				</View>
+
+				<View style={styles.orderBody}>
+					<View style={styles.orderInfoRow}>
+						<MaterialCommunityIcons
+							name="clock-outline"
+							size={16}
+							color="#666"
+						/>
+						<Text style={styles.orderInfoLabel}>Cancelled:</Text>
+						<Text style={styles.orderInfoValue}>
+							{formatDate(new Date(order.updatedAt))}
+						</Text>
+					</View>
+				</View>
+			</View>
+		)
+	}
 
 	return (
 		<TouchableOpacity

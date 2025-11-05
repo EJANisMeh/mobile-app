@@ -56,6 +56,37 @@ export const createOrderFilterModalStyles = (
 			color: colors.primary,
 			fontWeight: '600',
 		},
+		customDateContainer: {
+			marginTop: 12,
+			gap: 12,
+		},
+		datePickerRow: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: 12,
+		},
+		dateLabel: {
+			fontSize: 14,
+			fontWeight: '500',
+			color: colors.text,
+			width: 50,
+		},
+		dateButton: {
+			flex: 1,
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: 8,
+			paddingVertical: 12,
+			paddingHorizontal: 16,
+			borderRadius: 8,
+			borderWidth: 1,
+			borderColor: colors.border,
+			backgroundColor: colors.surface,
+		},
+		dateButtonText: {
+			fontSize: 14,
+			color: colors.text,
+		},
 		actionsRow: {
 			flexDirection: 'row',
 			justifyContent: 'flex-end',
