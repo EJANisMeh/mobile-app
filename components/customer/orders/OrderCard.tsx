@@ -75,7 +75,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
 				<Text style={styles.orderIdText}>
 					Order #
 					{order.concession_order_number
-						? `${order.concession?.name?.substring(0, 1) || 'C'}-${order.concession_order_number}`
+						? `${order.concession?.name?.substring(0, 1) || 'C'}-${
+								order.concession_order_number
+						  }`
 						: order.id}
 				</Text>
 				<View

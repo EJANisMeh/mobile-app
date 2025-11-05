@@ -209,7 +209,10 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 							onValueChange={handleCafeteriaChange}
 							style={styles.picker}
 							dropdownIconColor={colors.text}>
-							<Picker.Item label="All Cafeterias" value={null} />
+							<Picker.Item
+								label="All Cafeterias"
+								value={null}
+							/>
 							{cafeterias.map((cafeteria) => (
 								<Picker.Item
 									key={cafeteria.id}
@@ -231,9 +234,7 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 								filters.concessionFilters.length === 0 &&
 									styles.filterOptionSelected,
 							]}
-							onPress={() =>
-								setFilters({ ...filters, concessionFilters: [] })
-							}>
+							onPress={() => setFilters({ ...filters, concessionFilters: [] })}>
 							<Text
 								style={[
 									styles.filterOptionText,

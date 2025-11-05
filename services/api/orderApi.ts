@@ -95,15 +95,18 @@ export const orderApi = {
 		)
 	},
 
-	cancelOrder: async (orderId: number): Promise<{ success: boolean; message?: string; error?: string }> => {
+	cancelOrder: async (
+		orderId: number
+	): Promise<{ success: boolean; message?: string; error?: string }> => {
 		const token = await AsyncStorage.getItem('authToken')
 
-		return await apiCall<{ success: boolean; message?: string; error?: string }>(
-			`/orders/cancel/${orderId}`,
-			{
-				method: 'PUT',
-				headers: token ? { Authorization: `Bearer ${token}` } : {},
-			}
-		)
+		return await apiCall<{
+			success: boolean
+			message?: string
+			error?: string
+		}>(`/orders/cancel/${orderId}`, {
+			method: 'PUT',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+		})
 	},
 }
