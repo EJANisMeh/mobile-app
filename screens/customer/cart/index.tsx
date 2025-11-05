@@ -40,6 +40,7 @@ import type {
 	GroupStatusInfo,
 	CartItemStatusInfo,
 	PaymentMethodTuple,
+	PaymentProof,
 } from '../../../types'
 
 type ScheduleContext = 'group' | 'split'
@@ -78,6 +79,9 @@ const CartScreen: React.FC = () => {
 		useState<ScheduleSelectionState | null>(null)
 	const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
 		string | null
+	>(null)
+	const [selectedPaymentProof, setSelectedPaymentProof] = useState<
+		PaymentProof | null
 	>(null)
 	const [concessionPaymentMethods, setConcessionPaymentMethods] = useState<
 		PaymentMethodTuple[]
@@ -372,6 +376,7 @@ const CartScreen: React.FC = () => {
 		concessionSchedule: ConcessionSchedule | null | undefined
 		availabilityStatus: MenuItemAvailabilityStatus
 		itemName: string
+		isConcessionOpen: boolean
 	}>(() => {
 		if (!activeGroup) {
 			return {
@@ -379,6 +384,7 @@ const CartScreen: React.FC = () => {
 				concessionSchedule: undefined,
 				availabilityStatus: 'not_served_today',
 				itemName: 'from this concession',
+				isConcessionOpen: false,
 			}
 		}
 
@@ -394,6 +400,7 @@ const CartScreen: React.FC = () => {
 					null,
 				availabilityStatus: itemMeta?.availabilityStatus ?? 'not_served_today',
 				itemName: `${splitActiveItem.name} from ${concessionLabel}`,
+				isConcessionOpen: itemMeta?.concessionIsOpen ?? activeGroup.concessionIsOpen,
 			}
 		}
 
@@ -402,6 +409,7 @@ const CartScreen: React.FC = () => {
 			concessionSchedule: activeGroup.concessionSchedule ?? null,
 			availabilityStatus: activeGroup.status,
 			itemName: `items from ${concessionLabel}`,
+			isConcessionOpen: activeGroup.concessionIsOpen,
 		}
 	}, [activeGroup, scheduleContext, splitActiveItem])
 
@@ -733,13 +741,15 @@ const CartScreen: React.FC = () => {
 		setScheduleContext('group')
 		setPendingScheduleSelection(null)
 		setSelectedPaymentMethod(null)
+		setSelectedPaymentProof(null)
 		setConcessionPaymentMethods([])
 		setPaymentMethodsLoading(false)
 	}
 
 	const buildOrderPayload = (
 		group: CartGroup,
-		selection: ScheduleSelectionState
+		selection: ScheduleSelectionState,
+		proof: PaymentProof | null
 	): CreateOrderPayload | null => {
 		if (!user) {
 			return null
@@ -773,6 +783,7 @@ const CartScreen: React.FC = () => {
 			concessionId: group.concessionId,
 			total,
 			payment_mode: {},
+			payment_proof: proof,
 			concession_note: null,
 			orderItems,
 		}
@@ -781,7 +792,8 @@ const CartScreen: React.FC = () => {
 	const buildSingleItemOrderPayload = (
 		group: CartGroup,
 		item: CartItem,
-		selection: ScheduleSelectionState
+		selection: ScheduleSelectionState,
+		proof: PaymentProof | null
 	): CreateOrderPayload | null => {
 		if (!user) {
 			return null
@@ -811,6 +823,7 @@ const CartScreen: React.FC = () => {
 			concessionId: group.concessionId,
 			total: roundCurrency(orderItem.item_total),
 			payment_mode: {},
+			payment_proof: proof,
 			concession_note: null,
 			orderItems: [orderItem],
 		}
@@ -864,7 +877,7 @@ const CartScreen: React.FC = () => {
 		group: CartGroup,
 		selection: ScheduleSelectionState
 	) => {
-		const payload = buildOrderPayload(group, selection)
+		const payload = buildOrderPayload(group, selection, selectedPaymentProof)
 		if (!payload) {
 			alertModal.showAlert({
 				title: 'Unable to Order',
@@ -928,7 +941,12 @@ const CartScreen: React.FC = () => {
 		item: CartItem,
 		selection: ScheduleSelectionState
 	) => {
-		const payload = buildSingleItemOrderPayload(group, item, selection)
+		const payload = buildSingleItemOrderPayload(
+			group,
+			item,
+			selection,
+			selectedPaymentProof
+		)
 		if (!payload) {
 			alertModal.showAlert({
 				title: 'Unable to Order',
@@ -1049,9 +1067,11 @@ const CartScreen: React.FC = () => {
 		paymentMethod: string,
 		paymentDetails: string,
 		needsProof: boolean,
-		proofMode: 'text' | 'screenshot' | null
+		proofMode: 'text' | 'screenshot' | null,
+		proof: PaymentProof | null
 	) => {
 		setSelectedPaymentMethod(paymentMethod)
+		setSelectedPaymentProof(proof)
 		setPaymentModalVisible(false)
 
 		if (!activeGroup || !pendingScheduleSelection) {
@@ -1228,17 +1248,16 @@ const CartScreen: React.FC = () => {
 				confirmStyle={orderConfirmation.props.confirmStyle || 'default'}
 			/>
 
-			<OrderScheduleModal
-				visible={scheduleModalVisible}
-				onClose={handleScheduleModalClose}
-				onConfirm={handleScheduleSelectionConfirm}
-				schedule={scheduleModalState.schedule}
-				concessionSchedule={scheduleModalState.concessionSchedule}
-				availabilityStatus={scheduleModalState.availabilityStatus}
-				itemName={scheduleModalState.itemName}
-			/>
-
-			<PaymentMethodModal
+		<OrderScheduleModal
+			visible={scheduleModalVisible}
+			onClose={handleScheduleModalClose}
+			onConfirm={handleScheduleSelectionConfirm}
+			schedule={scheduleModalState.schedule}
+			concessionSchedule={scheduleModalState.concessionSchedule}
+			availabilityStatus={scheduleModalState.availabilityStatus}
+			isConcessionOpen={scheduleModalState.isConcessionOpen}
+			itemName={scheduleModalState.itemName}
+		/>			<PaymentMethodModal
 				visible={paymentModalVisible}
 				onClose={handlePaymentModalClose}
 				onConfirm={handlePaymentMethodConfirm}

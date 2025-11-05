@@ -7,6 +7,7 @@ export {
 	VariationGroupSnapshot,
 	VariationOptionSnapshot,
 	AddonSnapshot,
+	PaymentProof,
 } from './OrderApiTypes'
 export {
 	MenuItemsResponse,

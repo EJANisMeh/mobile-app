@@ -20,6 +20,12 @@ export interface AddonSnapshot {
 	price: number
 }
 
+export interface PaymentProof {
+	mode: 'text' | 'screenshot'
+	value: string
+	submittedAt?: string
+}
+
 export interface OrderItemPayload {
 	menuItemId: number
 	variationId: number | null
@@ -40,6 +46,7 @@ export interface CreateOrderPayload {
 	orderItems: OrderItemPayload[]
 	total: number
 	payment_mode?: Record<string, unknown>
+	payment_proof?: PaymentProof | null
 	concession_note?: string | null
 }
 

@@ -839,17 +839,16 @@ const MenuItemViewScreen: React.FC = () => {
 				confirmStyle={orderConfirmation.props.confirmStyle || 'default'}
 			/>
 
-			<OrderScheduleModal
-				visible={isOrderModalVisible}
-				onClose={handleOrderModalClose}
-				onConfirm={handleScheduleSelectionConfirm}
-				schedule={menuItem.availabilitySchedule}
-				concessionSchedule={normalizedConcessionSchedule}
-				availabilityStatus={availabilityStatus ?? 'not_served_today'}
-				itemName={menuItem.name ?? 'this item'}
-			/>
-
-			<PaymentMethodModal
+		<OrderScheduleModal
+			visible={isOrderModalVisible}
+			onClose={handleOrderModalClose}
+			onConfirm={handleScheduleSelectionConfirm}
+			schedule={menuItem.availabilitySchedule}
+			concessionSchedule={normalizedConcessionSchedule}
+			availabilityStatus={availabilityStatus ?? 'not_served_today'}
+			isConcessionOpen={Boolean(menuItem.concession?.is_open)}
+			itemName={menuItem.name ?? 'this item'}
+		/>			<PaymentMethodModal
 				visible={paymentModalVisible}
 				onClose={handlePaymentModalClose}
 				onConfirm={handlePaymentMethodConfirm}

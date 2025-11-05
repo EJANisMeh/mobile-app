@@ -346,3 +346,72 @@ export const isConcessionOpenNow = (
 
 	return false
 }
+
+/**
+ * Check if a concession is closing soon (within 30 minutes)
+ * Used to disable "Order Now" mode when concession is about to close
+ * @param isConcessionOpen - The concession's is_open boolean from database
+ * @param schedule - The concession's operating hours schedule
+ * @param minutesBeforeClose - Minutes before closing time to consider as "closing soon" (default: 30)
+ * @returns true if concession is open but closing within the specified minutes
+ */
+export const isConcessionClosingSoon = (
+	isConcessionOpen: boolean,
+	schedule: ConcessionSchedule | null | undefined,
+	minutesBeforeClose = 30
+): boolean => {
+	// If concession is not open, it's not closing soon
+	if (!isConcessionOpen || !schedule) {
+		return false
+	}
+
+	const now = new Date()
+	const normalized = normalizeConcessionSchedule(schedule)
+	const currentTime = now.getHours() * 60 + now.getMinutes()
+	const dayIndex = now.getDay()
+
+	// Get today's schedule
+	const todayKey = CONCESSION_SCHEDULE_DAY_KEYS[(dayIndex + 6) % 7]
+	const todaySchedule = normalized[todayKey]
+
+	if (!todaySchedule.isOpen || !todaySchedule.open || !todaySchedule.close) {
+		return false
+	}
+
+	const [openHours, openMinutes] = todaySchedule.open
+		.split(':')
+		.map((part) => parseInt(part, 10))
+	const [closeHours, closeMinutes] = todaySchedule.close
+		.split(':')
+		.map((part) => parseInt(part, 10))
+
+	const openTime = openHours * 60 + openMinutes
+	let closeTime = closeHours * 60 + closeMinutes
+
+	// Check if overnight schedule
+	const isOvernight = closeTime <= openTime
+
+	if (isOvernight) {
+		// If it's overnight and current time is before midnight
+		// Check if we're within closing window
+		if (currentTime >= openTime) {
+			// We're after opening time, check against midnight + close time
+			const minutesUntilMidnight = 24 * 60 - currentTime
+			const minutesAfterMidnightToClose = closeTime
+			const totalMinutesUntilClose =
+				minutesUntilMidnight + minutesAfterMidnightToClose
+
+			return totalMinutesUntilClose <= minutesBeforeClose
+		} else {
+			// Current time is after midnight, check against close time
+			return closeTime - currentTime <= minutesBeforeClose
+		}
+	} else {
+		// Regular hours - check if within closing window
+		if (currentTime >= openTime && currentTime < closeTime) {
+			return closeTime - currentTime <= minutesBeforeClose
+		}
+	}
+
+	return false
+}

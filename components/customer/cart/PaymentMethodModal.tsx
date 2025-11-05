@@ -1,11 +1,18 @@
 import React from 'react'
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
+import {
+	View,
+	Text,
+	TouchableOpacity,
+	ScrollView,
+	TextInput,
+} from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import * as ImagePicker from 'expo-image-picker'
 import BaseModal from '../../modals/BaseModal'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createPaymentMethodModalStyles } from '../../../styles/customer'
-import type { PaymentMethodTuple } from '../../../types'
+import type { PaymentMethodTuple, PaymentProof } from '../../../types'
 
 interface PaymentMethodModalProps {
 	visible: boolean
@@ -14,7 +21,8 @@ interface PaymentMethodModalProps {
 		paymentMethod: string,
 		paymentDetails: string,
 		needsProof: boolean,
-		proofMode: 'text' | 'screenshot' | null
+		proofMode: 'text' | 'screenshot' | null,
+		proof: PaymentProof | null
 	) => void
 	selectedMethod: string | null
 	concessionPaymentMethods: PaymentMethodTuple[]
@@ -34,12 +42,48 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 	const [tempSelection, setTempSelection] = React.useState<string | null>(
 		selectedMethod
 	)
+	const [proofText, setProofText] = React.useState('')
+	const [proofImage, setProofImage] = React.useState<string | null>(null)
 
 	React.useEffect(() => {
 		if (visible) {
 			setTempSelection(selectedMethod)
+			setProofText('')
+			setProofImage(null)
 		}
 	}, [visible, selectedMethod])
+
+	const selectedMethodData = React.useMemo(() => {
+		if (!tempSelection) return null
+		return concessionPaymentMethods.find(([type]) => type === tempSelection)
+	}, [tempSelection, concessionPaymentMethods])
+
+	const needsProof = selectedMethodData?.[2] || false
+	const proofMode = selectedMethodData?.[3] || null
+
+	const handlePickImage = async () => {
+		const permissionResult =
+			await ImagePicker.requestMediaLibraryPermissionsAsync()
+
+		if (!permissionResult.granted) {
+			alert('Permission to access gallery is required!')
+			return
+		}
+
+		const result = await ImagePicker.launchImageLibraryAsync({
+			mediaTypes: ['images'],
+			allowsEditing: true,
+			quality: 0.7,
+		})
+
+		if (!result.canceled && result.assets[0]) {
+			setProofImage(result.assets[0].uri)
+		}
+	}
+
+	const handleRemoveImage = () => {
+		setProofImage(null)
+	}
 
 	const handleConfirm = () => {
 		if (!tempSelection) {
@@ -56,7 +100,24 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 		}
 
 		const [type, details, needsProof, proofMode] = selectedTuple
-		onConfirm(type, details, needsProof, proofMode)
+
+		// Build proof object if provided
+		let proof: PaymentProof | null = null
+		if (needsProof && proofMode) {
+			if (proofMode === 'text' && proofText.trim()) {
+				proof = {
+					mode: 'text',
+					value: proofText.trim(),
+				}
+			} else if (proofMode === 'screenshot' && proofImage) {
+				proof = {
+					mode: 'screenshot',
+					value: proofImage,
+				}
+			}
+		}
+
+		onConfirm(type, details, needsProof, proofMode, proof)
 	}
 
 	const getMethodIcon = (type: string): string => {
@@ -152,17 +213,75 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 				{tempSelection &&
 				concessionPaymentMethods.find(
 					([type]) => type === tempSelection
-				)?.[2] ? (
-					<View style={styles.proofNotice}>
-						<MaterialCommunityIcons
-							name="information-outline"
-							size={20}
-							color={colors.primary}
-						/>
-						<Text style={styles.proofNoticeText}>
-							You can submit payment proof now or later in the Orders screen.
-						</Text>
-					</View>
+				)?.[2] === true ? (
+					<>
+						<View style={styles.proofNotice}>
+							<MaterialCommunityIcons
+								name="information-outline"
+								size={20}
+								color={colors.primary}
+							/>
+							<Text style={styles.proofNoticeText}>
+								You can submit payment proof now or later in the Orders screen.
+							</Text>
+						</View>
+
+						{/* Payment Proof Input Section */}
+						{proofMode === 'text' && (
+							<View style={styles.proofInputContainer}>
+								<Text style={styles.proofInputLabel}>
+									Payment Proof (Optional)
+								</Text>
+								<TextInput
+									style={styles.proofTextInput}
+									placeholder="Enter transaction ID, reference number, etc."
+									placeholderTextColor={colors.placeholder}
+									value={proofText}
+									onChangeText={setProofText}
+									multiline
+									numberOfLines={3}
+								/>
+							</View>
+						)}
+
+						{proofMode === 'screenshot' && (
+							<View style={styles.proofInputContainer}>
+								<Text style={styles.proofInputLabel}>
+									Payment Proof (Optional)
+								</Text>
+								{!proofImage ? (
+									<TouchableOpacity
+										style={styles.imagePickerButton}
+										onPress={handlePickImage}>
+										<MaterialCommunityIcons
+											name="camera-plus"
+											size={32}
+											color={colors.primary}
+										/>
+										<Text style={styles.imagePickerText}>
+											Upload Screenshot
+										</Text>
+									</TouchableOpacity>
+								) : (
+									<View style={styles.imagePreviewContainer}>
+										<Text style={styles.imageSelectedText}>
+											Screenshot selected
+										</Text>
+										<TouchableOpacity
+											style={styles.removeImageButton}
+											onPress={handleRemoveImage}>
+											<MaterialCommunityIcons
+												name="close-circle"
+												size={20}
+												color={colors.error}
+											/>
+											<Text style={styles.removeImageText}>Remove</Text>
+										</TouchableOpacity>
+									</View>
+								)}
+							</View>
+						)}
+					</>
 				) : null}
 
 				<View style={styles.actionsRow}>

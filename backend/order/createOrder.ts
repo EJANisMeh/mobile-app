@@ -19,6 +19,7 @@ export const createOrder = async (
 			orderItems,
 			total,
 			payment_mode,
+			payment_proof,
 			concession_note,
 			orderMode,
 			scheduledFor,
@@ -136,6 +137,13 @@ export const createOrder = async (
 					concessionId,
 					total,
 					payment_mode: payment_mode || {},
+					payment_proof: payment_proof
+						? {
+								mode: payment_proof.mode,
+								value: payment_proof.value,
+								submittedAt: new Date().toISOString(),
+						  }
+						: undefined,
 					status_id: pendingStatus.id,
 					concession_note: concession_note || null,
 					orderMode: resolvedMode,

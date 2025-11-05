@@ -20,6 +20,7 @@ import {
 	CONCESSION_SCHEDULE_DAY_KEYS,
 	CONCESSION_SCHEDULE_DAY_LABELS,
 	formatTimeDisplay,
+	isConcessionClosingSoon,
 } from '../../../utils'
 
 interface OrderScheduleModalProps {
@@ -28,6 +29,7 @@ interface OrderScheduleModalProps {
 	onConfirm: (selection: ScheduleSelectionState) => void
 	schedule: MenuItemAvailabilitySchedule | undefined | null
 	concessionSchedule: ConcessionSchedule | undefined | null
+	isConcessionOpen: boolean
 	availabilityStatus: MenuItemAvailabilityStatus
 	itemName: string
 }
@@ -60,6 +62,7 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 	onConfirm,
 	schedule,
 	concessionSchedule,
+	isConcessionOpen,
 	availabilityStatus,
 	itemName,
 }) => {
@@ -124,7 +127,9 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 		return `${dateStr} at ${timeStr}`
 	}
 
-	const isOrderNowDisabled = availabilityStatus !== 'available'
+	const isOrderNowDisabled =
+		availabilityStatus !== 'available' ||
+		isConcessionClosingSoon(isConcessionOpen, concessionSchedule)
 
 	const availableDayKeys = useMemo(() => {
 		return CONCESSION_SCHEDULE_DAY_KEYS.filter((dayKey) => {
