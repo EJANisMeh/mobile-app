@@ -5,13 +5,15 @@ import {
 	ScrollView,
 	ActivityIndicator,
 	TouchableOpacity,
-	TextInput,
-	Image,
 } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import * as ImagePicker from 'expo-image-picker'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { DynamicKeyboardView } from '../../../components'
+import {
+	PaymentInformationSection,
+	PaymentProofInput,
+	OrderInformationSection,
+} from '../../../components/customer/orders/orderDetails'
 import { useThemeContext, useAuthContext } from '../../../context'
 import { useResponsiveDimensions, useCustomerNavigation } from '../../../hooks'
 import { createOrderDetailsStyles } from '../../../styles/customer'
@@ -51,25 +53,12 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 		setLoading(true)
 		setError(null)
 		try {
-			// TODO: Replace with actual API call when backend endpoint is ready
-			// const response = await orderApi.getOrderDetails(orderId)
-			// For now, using placeholder
-			setOrder({
-				id: orderId,
-				total: 150.0,
-				orderMode: 'now',
-				scheduledFor: null,
-				payment_mode: { type: 'GCash', details: '09XX XXX XXXX' },
-				payment_proof: null,
-				concession_note: null,
-				createdAt: new Date(),
-				order_statuses: {
-					code: ORDER_STATUS_CODES.PENDING,
-					description: 'Pending',
-				},
-				concession: { name: 'Sample Concession' },
-				orderItems: [],
-			})
+			const response = await orderApi.getOrderDetails(orderId)
+			if (response.success && response.order) {
+				setOrder(response.order)
+			} else {
+				setError(response.error || 'Failed to load order details')
+			}
 		} catch (err) {
 			console.error('Load order details error:', err)
 			setError('Failed to load order details. Please try again.')
@@ -84,7 +73,12 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 		}, [loadOrderDetails])
 	)
 
-	const formatCurrency = (value: number) => `₱${value.toFixed(2)}`
+	const formatCurrency = (value: number | string | undefined) => {
+		const numValue = typeof value === 'string' ? parseFloat(value) : value
+		return numValue !== undefined && !isNaN(numValue)
+			? `₱${numValue.toFixed(2)}`
+			: '₱0.00'
+	}
 
 	const formatDate = (date: Date) => {
 		return new Date(date).toLocaleDateString('en-US', {
@@ -161,6 +155,8 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 		order?.payment_mode?.type &&
 		order.payment_mode.type.toLowerCase() !== 'cash'
 
+	const showPaymentFirst = needsProof && !order?.payment_proof
+
 	if (loading) {
 		return (
 			<DynamicKeyboardView
@@ -212,176 +208,52 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 					</View>
 				</View>
 
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Order Information</Text>
-					<View style={styles.infoRow}>
-						<Text style={styles.infoLabel}>Concession:</Text>
-						<Text style={styles.infoValue}>{order.concession?.name}</Text>
-					</View>
-					<View style={styles.infoRow}>
-						<Text style={styles.infoLabel}>Total:</Text>
-						<Text style={[styles.infoValue, styles.totalValue]}>
-							{formatCurrency(order.total)}
-						</Text>
-					</View>
-					<View style={styles.infoRow}>
-						<Text style={styles.infoLabel}>Order Type:</Text>
-						<Text style={styles.infoValue}>
-							{order.orderMode === 'now' ? 'Order Now' : 'Scheduled'}
-						</Text>
-					</View>
-					{order.orderMode === 'scheduled' && order.scheduledFor && (
-						<View style={styles.infoRow}>
-							<Text style={styles.infoLabel}>Scheduled For:</Text>
-							<Text style={styles.infoValue}>
-								{formatDate(new Date(order.scheduledFor))}
-							</Text>
-						</View>
-					)}
-					<View style={styles.infoRow}>
-						<Text style={styles.infoLabel}>Placed On:</Text>
-						<Text style={styles.infoValue}>
-							{formatDate(new Date(order.createdAt))}
-						</Text>
-					</View>
-				</View>
+				{/* Show Payment Section First if proof is required but missing */}
+				{showPaymentFirst && (
+					<PaymentInformationSection
+						paymentMode={order.payment_mode}
+						paymentProof={null}
+						formatDate={formatDate}
+						styles={styles}
+						colors={colors}>
+						<PaymentProofInput
+							proofText={proofText}
+							proofImage={proofImage}
+							submittingProof={submittingProof}
+							onProofTextChange={setProofText}
+							onPickImage={handlePickImage}
+							onRemoveImage={handleRemoveImage}
+							onSubmit={handleSubmitProof}
+							styles={styles}
+							colors={colors}
+						/>
+					</PaymentInformationSection>
+				)}
 
-				<View style={styles.section}>
-					<Text style={styles.sectionTitle}>Payment Information</Text>
-					<View style={styles.infoRow}>
-						<Text style={styles.infoLabel}>Method:</Text>
-						<Text style={styles.infoValue}>
-							{order.payment_mode?.type || 'N/A'}
-						</Text>
-					</View>
-					{order.payment_mode?.details && (
-						<View style={styles.infoRow}>
-							<Text style={styles.infoLabel}>Details:</Text>
-							<Text style={styles.infoValue}>{order.payment_mode.details}</Text>
-						</View>
-					)}
-					{order.payment_proof ? (
-						<View style={styles.proofSection}>
-							<Text style={styles.proofLabel}>Payment Proof Submitted:</Text>
-							{order.payment_proof.mode === 'text' ? (
-								<View style={styles.proofTextContainer}>
-									<Text style={styles.proofText}>
-										{order.payment_proof.value}
-									</Text>
-								</View>
-							) : (
-								<Image
-									source={{ uri: order.payment_proof.value }}
-									style={styles.proofImage}
-									resizeMode="contain"
-								/>
-							)}
-							<Text style={styles.proofTimestamp}>
-								Submitted on:{' '}
-								{order.payment_proof.submittedAt
-									? formatDate(new Date(order.payment_proof.submittedAt))
-									: 'N/A'}
-							</Text>
-						</View>
-					) : needsProof && isProofEditable ? (
-						<View style={styles.proofInputSection}>
-							<View style={styles.proofNotice}>
-								<MaterialCommunityIcons
-									name="information-outline"
-									size={20}
-									color={colors.primary}
-								/>
-								<Text style={styles.proofNoticeText}>
-									Please submit payment proof to help the concessionaire verify
-									your payment.
-								</Text>
-							</View>
+				{/* Order Information */}
+				<OrderInformationSection
+					concessionName={order.concession?.name || 'N/A'}
+					orderMode={order.orderMode}
+					orderItems={order.orderItems}
+					total={order.total}
+					scheduledFor={order.scheduledFor}
+					createdAt={order.createdAt}
+					updatedAt={order.updatedAt}
+					formatCurrency={formatCurrency}
+					formatDate={formatDate}
+					styles={styles}
+				/>
 
-							<View style={styles.proofInputContainer}>
-								<Text style={styles.inputLabel}>
-									Transaction ID or Reference Number
-								</Text>
-								<TextInput
-									style={styles.proofTextInput}
-									placeholder="Enter transaction ID, reference number, etc."
-									placeholderTextColor={colors.placeholder}
-									value={proofText}
-									onChangeText={setProofText}
-									multiline
-									numberOfLines={3}
-									editable={!proofImage}
-								/>
-							</View>
-
-							<Text style={styles.orText}>OR</Text>
-
-							<View style={styles.proofInputContainer}>
-								<Text style={styles.inputLabel}>Upload Screenshot</Text>
-								{!proofImage ? (
-									<TouchableOpacity
-										style={styles.uploadButton}
-										onPress={handlePickImage}
-										disabled={Boolean(proofText.trim())}>
-										<MaterialCommunityIcons
-											name="image-plus"
-											size={24}
-											color={
-												proofText.trim() ? colors.textSecondary : colors.primary
-											}
-										/>
-										<Text
-											style={[
-												styles.uploadButtonText,
-												proofText.trim() && styles.uploadButtonTextDisabled,
-											]}>
-											Choose from gallery
-										</Text>
-									</TouchableOpacity>
-								) : (
-									<View style={styles.imagePreviewContainer}>
-										<Image
-											source={{ uri: proofImage }}
-											style={styles.imagePreview}
-											resizeMode="cover"
-										/>
-										<TouchableOpacity
-											style={styles.removeImageButton}
-											onPress={handleRemoveImage}>
-											<MaterialCommunityIcons
-												name="close-circle"
-												size={24}
-												color={colors.error}
-											/>
-										</TouchableOpacity>
-									</View>
-								)}
-							</View>
-
-							<TouchableOpacity
-								style={[
-									styles.submitButton,
-									!proofText.trim() &&
-										!proofImage &&
-										styles.submitButtonDisabled,
-								]}
-								onPress={handleSubmitProof}
-								disabled={
-									(!proofText.trim() && !proofImage) || submittingProof
-								}>
-								{submittingProof ? (
-									<ActivityIndicator
-										size="small"
-										color={colors.surface}
-									/>
-								) : (
-									<Text style={styles.submitButtonText}>
-										Submit Payment Proof
-									</Text>
-								)}
-							</TouchableOpacity>
-						</View>
-					) : null}
-				</View>
+				{/* Show Payment Section After if proof exists or not required */}
+				{!showPaymentFirst && (
+					<PaymentInformationSection
+						paymentMode={order.payment_mode}
+						paymentProof={order.payment_proof}
+						formatDate={formatDate}
+						styles={styles}
+						colors={colors}
+					/>
+				)}
 
 				{order.concession_note && (
 					<View style={styles.section}>

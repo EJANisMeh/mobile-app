@@ -124,6 +124,39 @@ export const createCustomerOrdersStyles = (
 			fontSize: 13,
 			color: colors.textSecondary,
 		},
+		proofStatusBadge: {
+			paddingHorizontal: 8,
+			paddingVertical: 3,
+			borderRadius: 10,
+			marginLeft: 'auto',
+		},
+		proofStatusText: {
+			fontSize: 11,
+			fontWeight: '600',
+		},
+		paginationContainer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+			alignItems: 'center',
+			paddingVertical: responsive.getHeightPercent(2),
+			gap: 16,
+			backgroundColor: colors.surface,
+			borderTopWidth: 1,
+			borderTopColor: colors.border,
+		},
+		paginationButton: {
+			padding: 8,
+			borderRadius: 8,
+			backgroundColor: colors.background,
+		},
+		paginationButtonDisabled: {
+			opacity: 0.4,
+		},
+		paginationText: {
+			fontSize: 14,
+			fontWeight: '600',
+			color: colors.text,
+		},
 		stateContainer: {
 			flex: 1,
 			justifyContent: 'center',

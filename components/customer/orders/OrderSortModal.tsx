@@ -15,6 +15,7 @@ interface OrderSortModalProps {
 }
 
 const SORT_FIELD_LABELS: Record<OrderSortField, string> = {
+	orderNumber: 'Order Number',
 	concessionName: 'Concession Name',
 	total: 'Total Amount',
 	status: 'Status',

@@ -4,6 +4,7 @@ import type {
 	CreateOrderResponse,
 	OrderBackendType,
 	OrderListResponse,
+	OrderDetailsResponse,
 	OrderStatusUpdateResponse,
 	OrderValidationErrorResponse,
 } from '../../types'
@@ -11,6 +12,7 @@ import {
 	createOrder,
 	getOrdersByConcession,
 	getOrdersByCustomer,
+	getOrderDetails,
 	updateOrderStatus,
 } from './useBackend_backend/order'
 
@@ -31,6 +33,11 @@ export const useOrderBackend = (): OrderBackendType => {
 	): Promise<OrderListResponse> =>
 		getOrdersByConcession(setProcessing, setError)(concessionId)
 
+	const getOrderDetailsHandler = (
+		orderId: number
+	): Promise<OrderDetailsResponse> =>
+		getOrderDetails(setProcessing, setError)(orderId)
+
 	const updateOrderStatusHandler = (
 		orderId: number,
 		statusPayload: Record<string, unknown>
@@ -43,6 +50,7 @@ export const useOrderBackend = (): OrderBackendType => {
 		createOrder: createOrderHandler,
 		getOrdersByCustomer: getCustomerOrders,
 		getOrdersByConcession: getConcessionOrders,
+		getOrderDetails: getOrderDetailsHandler,
 		updateOrderStatus: updateOrderStatusHandler,
 	}
 }

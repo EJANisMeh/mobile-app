@@ -42,9 +42,10 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 	const handleReset = () => {
 		const resetFilters: OrderFilters = {
 			searchQuery: '',
-			searchField: 'concessionName',
+			searchField: 'orderNumber',
 			statusFilters: [],
 			orderModeFilters: [],
+			paymentProofFilter: 'all',
 			dateFrom: null,
 			dateTo: null,
 		}
@@ -123,8 +124,8 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 					<Text style={styles.filterSectionTitle}>Search In</Text>
 					<View style={styles.filterOptions}>
 						{[
+							{ value: 'orderNumber', label: 'Order Number' },
 							{ value: 'concessionName', label: 'Concession Name' },
-							{ value: 'status', label: 'Status' },
 						].map((option) => (
 							<TouchableOpacity
 								key={option.value}
@@ -193,7 +194,6 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 						))}
 					</View>
 				</View>
-
 				{/* Order Mode Filter */}
 				<View style={styles.filterSection}>
 					<Text style={styles.filterSectionTitle}>Order Mode</Text>
@@ -230,6 +230,41 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 									style={[
 										styles.filterOptionText,
 										filters.orderModeFilters.includes(option.value) &&
+											styles.filterOptionTextSelected,
+									]}>
+									{option.label}
+								</Text>
+							</TouchableOpacity>
+						))}
+					</View>
+				</View>
+
+				{/* Payment Proof Filter */}
+				<View style={styles.filterSection}>
+					<Text style={styles.filterSectionTitle}>Payment Proof</Text>
+					<View style={styles.filterOptions}>
+						{[
+							{ value: 'all' as const, label: 'All Orders' },
+							{ value: 'provided' as const, label: 'Proof Submitted' },
+							{ value: 'missing' as const, label: 'Proof Missing' },
+						].map((option) => (
+							<TouchableOpacity
+								key={option.value}
+								style={[
+									styles.filterOption,
+									filters.paymentProofFilter === option.value &&
+										styles.filterOptionSelected,
+								]}
+								onPress={() =>
+									setFilters({
+										...filters,
+										paymentProofFilter: option.value,
+									})
+								}>
+								<Text
+									style={[
+										styles.filterOptionText,
+										filters.paymentProofFilter === option.value &&
 											styles.filterOptionTextSelected,
 									]}>
 									{option.label}

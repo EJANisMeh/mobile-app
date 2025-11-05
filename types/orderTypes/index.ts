@@ -14,6 +14,12 @@ export interface OrderListResponse {
 	error?: string
 }
 
+export interface OrderDetailsResponse {
+	success: boolean
+	order?: unknown
+	error?: string
+}
+
 export interface OrderStatusUpdateResponse {
 	success: boolean
 	message?: string
@@ -34,6 +40,7 @@ export interface OrderBackendType {
 	) => Promise<CreateOrderResponse | OrderValidationErrorResponse>
 	getOrdersByCustomer: (customerId: number) => Promise<OrderListResponse>
 	getOrdersByConcession: (concessionId: number) => Promise<OrderListResponse>
+	getOrderDetails: (orderId: number) => Promise<OrderDetailsResponse>
 	updateOrderStatus: (
 		orderId: number,
 		statusPayload: Record<string, unknown>

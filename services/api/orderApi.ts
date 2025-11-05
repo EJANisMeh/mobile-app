@@ -4,6 +4,7 @@ import type {
 	CreateOrderPayload,
 	CreateOrderResponse,
 	OrderListResponse,
+	OrderDetailsResponse,
 	OrderStatusUpdateResponse,
 } from '../../types'
 
@@ -43,6 +44,15 @@ export const orderApi = {
 				headers: token ? { Authorization: `Bearer ${token}` } : {},
 			}
 		)
+	},
+
+	getOrderDetails: async (orderId: number): Promise<OrderDetailsResponse> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall<OrderDetailsResponse>(`/orders/${orderId}`, {
+			method: 'GET',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+		})
 	},
 
 	updateOrderStatus: async (

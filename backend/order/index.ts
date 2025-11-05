@@ -1,4 +1,5 @@
 export { createOrder } from './createOrder'
 export { getOrdersByCustomer } from './getOrdersByCustomer'
 export { getOrdersByConcession } from './getOrdersByConcession'
+export { getOrderDetails } from './getOrderDetails'
 export { updateOrderStatus } from './updateOrderStatus'

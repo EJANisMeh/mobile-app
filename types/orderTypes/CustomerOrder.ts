@@ -40,6 +40,7 @@ export interface CustomerOrder {
 	concessionId: number | null
 	total: number
 	payment_mode: any
+	payment_proof: any
 	orderMode: 'now' | 'scheduled'
 	scheduledFor: Date | null
 	status_id: number
@@ -52,6 +53,7 @@ export interface CustomerOrder {
 }
 
 export type OrderSortField =
+	| 'orderNumber'
 	| 'concessionName'
 	| 'total'
 	| 'status'
@@ -68,9 +70,10 @@ export interface SortRule {
 
 export interface OrderFilters {
 	searchQuery: string
-	searchField: 'concessionName' | 'status'
+	searchField: 'orderNumber' | 'concessionName'
 	statusFilters: string[] // Multi-select: empty array means all statuses
 	orderModeFilters: Array<'now' | 'scheduled'> // Multi-select: empty array means all modes
+	paymentProofFilter: 'all' | 'provided' | 'missing' // Filter by payment proof status
 	dateFrom: Date | null
 	dateTo: Date | null
 }

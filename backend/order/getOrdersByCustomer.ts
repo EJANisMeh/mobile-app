@@ -62,9 +62,23 @@ export const getOrdersByCustomer = async (
 			})
 		}
 
+		// Convert Decimal types to numbers for JSON serialization
+		const orders = ordersResult.data || []
+		const ordersWithNumbers = Array.isArray(orders)
+			? orders.map((order: any) => ({
+					...order,
+					total: order.total ? Number(order.total) : 0,
+					orderItems: order.orderItems?.map((item: any) => ({
+						...item,
+						unitPrice: item.unitPrice ? Number(item.unitPrice) : 0,
+						item_total: item.item_total ? Number(item.item_total) : 0,
+					})),
+			  }))
+			: []
+
 		res.json({
 			success: true,
-			orders: ordersResult.data || [],
+			orders: ordersWithNumbers,
 			count: ordersResult.count || 0,
 		})
 	} catch (error) {

@@ -20,9 +20,12 @@ interface OrderCardProps {
 		orderFooter: ViewStyle
 		orderTotalText: TextStyle
 		orderDateText: TextStyle
+		proofStatusBadge: ViewStyle
+		proofStatusText: TextStyle
 	}
 	formatCurrency: (amount: number) => string
 	formatDate: (date: Date) => string
+	paymentProofStatus: string | null
 }
 
 const OrderCard: React.FC<OrderCardProps> = ({
@@ -31,6 +34,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 	styles,
 	formatCurrency,
 	formatDate,
+	paymentProofStatus,
 }) => {
 	const getStatusColor = (statusCode: string): string => {
 		switch (statusCode.toLowerCase()) {
@@ -87,6 +91,46 @@ const OrderCard: React.FC<OrderCardProps> = ({
 						/>
 						<Text style={styles.orderInfoLabel}>Concession:</Text>
 						<Text style={styles.orderInfoValue}>{order.concession.name}</Text>
+					</View>
+				)}
+
+				{paymentProofStatus && (
+					<View style={styles.orderInfoRow}>
+						<MaterialCommunityIcons
+							name={
+								paymentProofStatus === 'Proof Submitted'
+									? 'check-circle'
+									: 'alert-circle'
+							}
+							size={16}
+							color={
+								paymentProofStatus === 'Proof Submitted' ? '#4CAF50' : '#FF9800'
+							}
+						/>
+						<Text style={styles.orderInfoLabel}>Payment:</Text>
+						<View
+							style={[
+								styles.proofStatusBadge,
+								{
+									backgroundColor:
+										paymentProofStatus === 'Proof Submitted'
+											? '#4CAF5020'
+											: '#FF980020',
+								},
+							]}>
+							<Text
+								style={[
+									styles.proofStatusText,
+									{
+										color:
+											paymentProofStatus === 'Proof Submitted'
+												? '#4CAF50'
+												: '#FF9800',
+									},
+								]}>
+								{paymentProofStatus}
+							</Text>
+						</View>
 					</View>
 				)}
 

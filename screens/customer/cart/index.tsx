@@ -779,13 +779,24 @@ const CartScreen: React.FC = () => {
 				? selection.scheduledAt.toISOString()
 				: null
 
+		// Build payment_mode object from selected payment method
+		const paymentTuple = concessionPaymentMethods.find(
+			([type]) => type === selectedPaymentMethod
+		)
+		const payment_mode = paymentTuple
+			? {
+					type: paymentTuple[0],
+					details: paymentTuple[1],
+			  }
+			: {}
+
 		return {
 			orderMode: selection.mode,
 			scheduledFor: scheduledForIso,
 			customerId: user.id,
 			concessionId: group.concessionId,
 			total,
-			payment_mode: {},
+			payment_mode,
 			payment_proof: proof,
 			concession_note: null,
 			orderItems,
@@ -819,13 +830,24 @@ const CartScreen: React.FC = () => {
 				? selection.scheduledAt.toISOString()
 				: null
 
+		// Build payment_mode object from selected payment method
+		const paymentTuple = concessionPaymentMethods.find(
+			([type]) => type === selectedPaymentMethod
+		)
+		const payment_mode = paymentTuple
+			? {
+					type: paymentTuple[0],
+					details: paymentTuple[1],
+			  }
+			: {}
+
 		return {
 			orderMode: selection.mode,
 			scheduledFor: scheduledForIso,
 			customerId: user.id,
 			concessionId: group.concessionId,
 			total: roundCurrency(orderItem.item_total),
-			payment_mode: {},
+			payment_mode,
 			payment_proof: proof,
 			concession_note: null,
 			orderItems: [orderItem],

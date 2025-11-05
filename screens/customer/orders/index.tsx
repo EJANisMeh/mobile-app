@@ -1,6 +1,13 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
-import { View, Text, ActivityIndicator, FlatList } from 'react-native'
+import {
+	View,
+	Text,
+	ActivityIndicator,
+	FlatList,
+	TouchableOpacity,
+} from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useAuthContext, useThemeContext } from '../../../context'
 import { useResponsiveDimensions, useCustomerNavigation } from '../../../hooks'
 import { createCustomerOrdersStyles } from '../../../styles/customer'
@@ -34,9 +41,10 @@ const OrdersScreen: React.FC = () => {
 
 	const [filters, setFilters] = useState<OrderFilters>({
 		searchQuery: '',
-		searchField: 'concessionName',
+		searchField: 'orderNumber',
 		statusFilters: [],
 		orderModeFilters: [],
+		paymentProofFilter: 'all',
 		dateFrom: null,
 		dateTo: null,
 	})
@@ -44,6 +52,9 @@ const OrdersScreen: React.FC = () => {
 	const [sortRules, setSortRules] = useState<SortRule[]>([
 		{ field: 'createdAt', direction: 'desc' },
 	])
+
+	const [currentPage, setCurrentPage] = useState(1)
+	const itemsPerPage = 10
 
 	const loadOrders = useCallback(async () => {
 		if (!user?.id) {
@@ -92,14 +103,11 @@ const OrdersScreen: React.FC = () => {
 		if (filters.searchQuery.trim()) {
 			const query = filters.searchQuery.toLowerCase()
 			result = result.filter((order) => {
+				if (filters.searchField === 'orderNumber') {
+					return order.id.toString().includes(query)
+				}
 				if (filters.searchField === 'concessionName') {
 					return order.concession?.name.toLowerCase().includes(query)
-				}
-				if (filters.searchField === 'status') {
-					return (
-						order.order_statuses?.code.toLowerCase().includes(query) ||
-						order.order_statuses?.description?.toLowerCase().includes(query)
-					)
 				}
 				return false
 			})
@@ -121,6 +129,23 @@ const OrdersScreen: React.FC = () => {
 			)
 		}
 
+		// Apply payment proof filter
+		if (filters.paymentProofFilter !== 'all') {
+			result = result.filter((order) => {
+				const needsProof =
+					order.payment_mode?.type &&
+					order.payment_mode.type.toLowerCase() !== 'cash'
+				const hasProof = Boolean(order.payment_proof)
+
+				if (filters.paymentProofFilter === 'provided') {
+					return needsProof && hasProof
+				} else if (filters.paymentProofFilter === 'missing') {
+					return needsProof && !hasProof
+				}
+				return true
+			})
+		}
+
 		return result
 	}, [orders, filters])
 
@@ -132,6 +157,9 @@ const OrdersScreen: React.FC = () => {
 				let comparison = 0
 
 				switch (rule.field) {
+					case 'orderNumber':
+						comparison = a.id - b.id
+						break
 					case 'concessionName':
 						const nameA = a.concession?.name || ''
 						const nameB = b.concession?.name || ''
@@ -174,6 +202,19 @@ const OrdersScreen: React.FC = () => {
 		return result
 	}, [filteredOrders, sortRules])
 
+	// Pagination
+	const totalPages = Math.ceil(sortedOrders.length / itemsPerPage)
+	const paginatedOrders = useMemo(() => {
+		const startIndex = (currentPage - 1) * itemsPerPage
+		const endIndex = startIndex + itemsPerPage
+		return sortedOrders.slice(startIndex, endIndex)
+	}, [sortedOrders, currentPage])
+
+	// Reset to page 1 when filters change
+	useEffect(() => {
+		setCurrentPage(1)
+	}, [filters, sortRules])
+
 	const formatCurrency = useCallback(
 		(value: number) => `₱${value.toFixed(2)}`,
 		[]
@@ -199,6 +240,24 @@ const OrdersScreen: React.FC = () => {
 
 	const handleApplySort = (newSortRules: SortRule[]) => {
 		setSortRules(newSortRules)
+	}
+
+	const handlePageChange = (page: number) => {
+		if (page >= 1 && page <= totalPages) {
+			setCurrentPage(page)
+		}
+	}
+
+	const getPaymentProofStatus = (order: CustomerOrder): string | null => {
+		const needsProof =
+			order.payment_mode?.type &&
+			order.payment_mode.type.toLowerCase() !== 'cash'
+
+		if (!needsProof) {
+			return null
+		}
+
+		return order.payment_proof ? 'Proof Submitted' : 'Proof Missing'
 	}
 
 	let content: React.ReactNode
@@ -244,22 +303,64 @@ const OrdersScreen: React.FC = () => {
 		)
 	} else {
 		content = (
-			<FlatList
-				data={sortedOrders}
-				keyExtractor={(item) => item.id.toString()}
-				style={styles.ordersList}
-				contentContainerStyle={styles.ordersListContent}
-				renderItem={({ item }) => (
-					<OrderCard
-						order={item}
-						onPress={handleOrderPress}
-						styles={styles}
-						formatCurrency={formatCurrency}
-						formatDate={formatDate}
-					/>
+			<>
+				<FlatList
+					data={paginatedOrders}
+					keyExtractor={(item) => item.id.toString()}
+					style={styles.ordersList}
+					contentContainerStyle={styles.ordersListContent}
+					renderItem={({ item }) => (
+						<OrderCard
+							order={item}
+							onPress={handleOrderPress}
+							styles={styles}
+							formatCurrency={formatCurrency}
+							formatDate={formatDate}
+							paymentProofStatus={getPaymentProofStatus(item)}
+						/>
+					)}
+					showsVerticalScrollIndicator={true}
+				/>
+				{totalPages > 1 && (
+					<View style={styles.paginationContainer}>
+						<TouchableOpacity
+							style={[
+								styles.paginationButton,
+								currentPage === 1 && styles.paginationButtonDisabled,
+							]}
+							onPress={() => handlePageChange(currentPage - 1)}
+							disabled={currentPage === 1}>
+							<MaterialCommunityIcons
+								name="chevron-left"
+								size={24}
+								color={
+									currentPage === 1 ? colors.textSecondary : colors.primary
+								}
+							/>
+						</TouchableOpacity>
+						<Text style={styles.paginationText}>
+							Page {currentPage} of {totalPages}
+						</Text>
+						<TouchableOpacity
+							style={[
+								styles.paginationButton,
+								currentPage === totalPages && styles.paginationButtonDisabled,
+							]}
+							onPress={() => handlePageChange(currentPage + 1)}
+							disabled={currentPage === totalPages}>
+							<MaterialCommunityIcons
+								name="chevron-right"
+								size={24}
+								color={
+									currentPage === totalPages
+										? colors.textSecondary
+										: colors.primary
+								}
+							/>
+						</TouchableOpacity>
+					</View>
 				)}
-				showsVerticalScrollIndicator={true}
-			/>
+			</>
 		)
 	}
 

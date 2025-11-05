@@ -110,6 +110,66 @@ export const createOrderDetailsStyles = (
 			fontWeight: '700',
 			color: colors.primary,
 		},
+		itemListContainer: {
+			marginTop: 12,
+			paddingTop: 12,
+			borderTopWidth: 1,
+			borderTopColor: colors.border,
+		},
+		itemListTitle: {
+			fontSize: 14,
+			fontWeight: '600',
+			color: colors.text,
+			marginBottom: 8,
+		},
+		itemRow: {
+			flexDirection: 'row',
+			marginBottom: 12,
+			paddingBottom: 12,
+			borderBottomWidth: 1,
+			borderBottomColor: colors.border + '50',
+		},
+		itemNumber: {
+			fontSize: 14,
+			fontWeight: '600',
+			color: colors.textSecondary,
+			marginRight: 8,
+			marginTop: 2,
+		},
+		itemDetails: {
+			flex: 1,
+		},
+		itemName: {
+			fontSize: 15,
+			fontWeight: '600',
+			color: colors.text,
+			marginBottom: 4,
+		},
+		itemMeta: {
+			flexDirection: 'row',
+			gap: 12,
+			flexWrap: 'wrap',
+		},
+		itemQuantity: {
+			fontSize: 13,
+			color: colors.textSecondary,
+		},
+		itemPrice: {
+			fontSize: 13,
+			color: colors.textSecondary,
+		},
+		itemTotal: {
+			fontSize: 13,
+			fontWeight: '600',
+			color: colors.primary,
+			marginLeft: 'auto',
+		},
+		totalRow: {
+			marginTop: 8,
+			paddingTop: 12,
+			borderTopWidth: 2,
+			borderTopColor: colors.border,
+		},
 		proofSection: {
 			marginTop: 12,
 			paddingTop: 12,

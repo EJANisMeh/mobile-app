@@ -25,6 +25,7 @@ import {
 	MenuItemAvailabilityStatus,
 	ScheduleSelectionState,
 	MenuItemDayKey,
+	PaymentProof,
 } from '../../../types'
 import { menuApi } from '../../../services/api'
 import {
@@ -39,6 +40,7 @@ import { AlertModal, ConfirmationModal } from '../../../components/modals'
 import {
 	OrderScheduleModal,
 	PaymentMethodModal,
+	OrderConfirmationModal,
 } from '../../../components/customer/cart'
 import {
 	transformRawMenuItem,
@@ -82,11 +84,15 @@ const MenuItemViewScreen: React.FC = () => {
 	const [isAddingToCart, setIsAddingToCart] = useState(false)
 	const [isOrderModalVisible, setOrderModalVisible] = useState(false)
 	const [paymentModalVisible, setPaymentModalVisible] = useState(false)
+	const [orderConfirmationVisible, setOrderConfirmationVisible] =
+		useState(false)
 	const [pendingScheduleSelection, setPendingScheduleSelection] =
 		useState<ScheduleSelectionState | null>(null)
 	const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
 		string | null
 	>(null)
+	const [selectedPaymentProof, setSelectedPaymentProof] =
+		useState<PaymentProof | null>(null)
 	const [concessionPaymentMethods, setConcessionPaymentMethods] = useState<
 		PaymentMethodTuple[]
 	>([])
@@ -339,6 +345,45 @@ const MenuItemViewScreen: React.FC = () => {
 		)
 	}, [addonSelections, menuItem])
 
+	const orderSummary = useMemo(() => {
+		if (
+			!menuItem ||
+			!pendingScheduleSelection ||
+			!selectedPaymentMethod ||
+			!concessionPaymentMethods
+		) {
+			return null
+		}
+
+		const paymentTuple = concessionPaymentMethods.find(
+			([method]) => method === selectedPaymentMethod
+		)
+
+		if (!paymentTuple) {
+			return null
+		}
+
+		return {
+			itemName: menuItem.name,
+			quantity,
+			total: priceCalculation.totalPrice,
+			orderMode: pendingScheduleSelection.mode,
+			scheduledFor: pendingScheduleSelection.scheduledAt,
+			paymentMethod: paymentTuple[0],
+			paymentDetails: paymentTuple[1],
+			paymentProof: selectedPaymentProof,
+			concessionName: menuItem.concession?.concession_name || 'Unknown',
+		}
+	}, [
+		menuItem,
+		quantity,
+		priceCalculation.totalPrice,
+		pendingScheduleSelection,
+		selectedPaymentMethod,
+		selectedPaymentProof,
+		concessionPaymentMethods,
+	])
+
 	const isActionDisabled =
 		!areVariationRequirementsMet ||
 		!areAddonRequirementsMet ||
@@ -435,13 +480,24 @@ const MenuItemViewScreen: React.FC = () => {
 				? selection.scheduledAt.toISOString()
 				: null
 
+		// Build payment_mode object from selected payment method
+		const paymentTuple = concessionPaymentMethods.find(
+			([type]) => type === selectedPaymentMethod
+		)
+		const payment_mode = paymentTuple
+			? {
+					type: paymentTuple[0],
+					details: paymentTuple[1],
+			  }
+			: {}
+
 		return {
 			orderMode: selection.mode,
 			scheduledFor: scheduledForIso,
 			customerId: user.id,
 			concessionId,
 			total,
-			payment_mode: {},
+			payment_mode,
 			concession_note: null,
 			orderItems: [
 				{
@@ -675,9 +731,11 @@ const MenuItemViewScreen: React.FC = () => {
 		paymentMethod: string,
 		paymentDetails: string,
 		needsProof: boolean,
-		proofMode: 'text' | 'screenshot' | null
+		proofMode: 'text' | 'screenshot' | null,
+		proof: PaymentProof | null
 	) => {
 		setSelectedPaymentMethod(paymentMethod)
+		setSelectedPaymentProof(proof)
 		setPaymentModalVisible(false)
 
 		if (!pendingScheduleSelection) {
@@ -689,30 +747,27 @@ const MenuItemViewScreen: React.FC = () => {
 			return
 		}
 
-		const isScheduled = pendingScheduleSelection.mode === 'scheduled'
-		const scheduleDetail =
-			isScheduled && pendingScheduleSelection.scheduledAt
-				? `Scheduled for ${pendingScheduleSelection.scheduledAt.toLocaleString()}.`
-				: 'We will request this order for immediate preparation.'
+		// Show order confirmation modal
+		setOrderConfirmationVisible(true)
+	}
 
-		const proofInfo = needsProof
-			? proofMode === 'screenshot'
-				? '\n\nNote: You can submit a payment screenshot now or later in the Orders screen.'
-				: '\n\nNote: You can submit payment details now or later in the Orders screen.'
-			: ''
+	const handleConfirmOrder = () => {
+		if (!pendingScheduleSelection) {
+			alertModal.showAlert({
+				title: 'Unable to Continue',
+				message: 'Something went wrong. Please try again.',
+			})
+			handleResetOrderFlow()
+			return
+		}
 
-		orderConfirmation.showConfirmation({
-			title: isScheduled ? 'Confirm Scheduled Order' : 'Confirm Order',
-			message: `${scheduleDetail}\nPayment: ${paymentMethod}${proofInfo}\n\nDo you want to continue?`,
-			confirmText: 'Place Order',
-			cancelText: 'Back',
-			onConfirm: () => {
-				void placeOrder(pendingScheduleSelection)
-			},
-			onCancel: () => {
-				setPaymentModalVisible(true)
-			},
-		})
+		setOrderConfirmationVisible(false)
+		void placeOrder(pendingScheduleSelection)
+	}
+
+	const handleOrderConfirmationClose = () => {
+		setOrderConfirmationVisible(false)
+		setPaymentModalVisible(true)
 	}
 
 	if (loading) {
@@ -852,6 +907,14 @@ const MenuItemViewScreen: React.FC = () => {
 				selectedMethod={selectedPaymentMethod}
 				concessionPaymentMethods={concessionPaymentMethods}
 			/>
+			{orderSummary && (
+				<OrderConfirmationModal
+					visible={orderConfirmationVisible}
+					onClose={handleOrderConfirmationClose}
+					onConfirm={handleConfirmOrder}
+					orderSummary={orderSummary}
+				/>
+			)}
 		</DynamicKeyboardView>
 	)
 }
