@@ -34,28 +34,15 @@ export const createOrderScheduleModalStyles = (
 			gap: 8,
 			marginTop: 8,
 		},
-		scheduleDayChip: {
-			paddingVertical: 6,
-			paddingHorizontal: 12,
-			borderRadius: 16,
-			borderWidth: 1,
-		},
-		scheduleDayChipActive: {
-			backgroundColor: colors.primary + '15',
-			borderColor: colors.primary,
-		},
-		scheduleDayChipInactive: {
-			backgroundColor: colors.surface,
-			borderColor: colors.border,
-		},
-		scheduleDayChipText: {
-			fontSize: 13,
+		scheduleDayText: {
+			fontSize: 14,
 			fontWeight: '600',
+			marginRight: 8,
 		},
-		scheduleDayChipTextActive: {
+		scheduleDayTextActive: {
 			color: colors.primary,
 		},
-		scheduleDayChipTextInactive: {
+		scheduleDayTextInactive: {
 			color: colors.textSecondary,
 		},
 		modeRow: {

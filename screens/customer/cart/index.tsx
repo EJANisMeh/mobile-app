@@ -14,6 +14,7 @@ import {
 	CartGroupCard,
 	OrderScheduleModal,
 	PaymentMethodModal,
+	OrderConfirmationModal,
 } from '../../../components/customer/cart'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
 import {
@@ -67,6 +68,8 @@ const CartScreen: React.FC = () => {
 	const [metaError, setMetaError] = useState<string | null>(null)
 	const [scheduleModalVisible, setScheduleModalVisible] = useState(false)
 	const [paymentModalVisible, setPaymentModalVisible] = useState(false)
+	const [orderConfirmationVisible, setOrderConfirmationVisible] =
+		useState(false)
 	const [activeGroupId, setActiveGroupId] = useState<number | null>(null)
 	const [processingGroupId, setProcessingGroupId] = useState<number | null>(
 		null
@@ -1083,18 +1086,63 @@ const CartScreen: React.FC = () => {
 			return
 		}
 
-		const concessionLabel = activeGroup.concessionName ?? 'this concession'
-		const isScheduled = pendingScheduleSelection.mode === 'scheduled'
-		const scheduleDetail =
-			isScheduled && pendingScheduleSelection.scheduledAt
-				? `Scheduled for ${pendingScheduleSelection.scheduledAt.toLocaleString()}.`
-				: 'We will request this order for immediate preparation.'
+		// Show order confirmation modal instead of generic confirmation
+		setOrderConfirmationVisible(true)
+	}
 
-		const proofInfo = needsProof
-			? proofMode === 'screenshot'
-				? '\n\nNote: You can submit a payment screenshot now or later in the Orders screen.'
-				: '\n\nNote: You can submit payment details now or later in the Orders screen.'
-			: ''
+	const orderSummary = useMemo(() => {
+		if (!activeGroup || !pendingScheduleSelection || !selectedPaymentMethod) {
+			return null
+		}
+
+		const currentItem = scheduleContext === 'split' ? splitActiveItem : null
+		const itemName =
+			scheduleContext === 'split' && currentItem
+				? currentItem.name
+				: `${activeGroup.totalQuantity} ${
+						activeGroup.totalQuantity === 1 ? 'item' : 'items'
+				  }`
+		const quantity =
+			scheduleContext === 'split' && currentItem
+				? currentItem.quantity
+				: activeGroup.totalQuantity
+		const total =
+			scheduleContext === 'split' && currentItem
+				? currentItem.totalPrice
+				: activeGroup.items.reduce((sum, item) => sum + item.totalPrice, 0)
+
+		const paymentTuple = concessionPaymentMethods.find(
+			([type]) => type === selectedPaymentMethod
+		)
+		const paymentDetails = paymentTuple?.[1] || ''
+
+		return {
+			itemName,
+			quantity,
+			total,
+			orderMode: pendingScheduleSelection.mode,
+			scheduledFor: pendingScheduleSelection.scheduledAt,
+			paymentMethod: selectedPaymentMethod,
+			paymentDetails,
+			paymentProof: selectedPaymentProof,
+			concessionName: activeGroup.concessionName || 'Unknown Concession',
+		}
+	}, [
+		activeGroup,
+		pendingScheduleSelection,
+		selectedPaymentMethod,
+		selectedPaymentProof,
+		concessionPaymentMethods,
+		scheduleContext,
+		splitActiveItem,
+	])
+
+	const handleConfirmOrder = async () => {
+		if (!activeGroup || !pendingScheduleSelection) {
+			return
+		}
+
+		setOrderConfirmationVisible(false)
 
 		if (scheduleContext === 'split') {
 			const currentItem = splitActiveItem
@@ -1108,45 +1156,21 @@ const CartScreen: React.FC = () => {
 				return
 			}
 
-			orderConfirmation.showConfirmation({
-				title: isScheduled
-					? `Confirm Schedule for ${currentItem.name}`
-					: `Confirm Order for ${currentItem.name}`,
-				message: `${scheduleDetail}\nPayment: ${paymentMethod}${proofInfo}\n\nContinue with ${currentItem.quantity} x ${currentItem.name} from ${concessionLabel}?`,
-				confirmText: 'Place Order',
-				cancelText: 'Back',
-				onConfirm: () => {
-					void placeOrderForSplitItem(
-						activeGroup,
-						currentItem,
-						pendingScheduleSelection
-					)
-				},
-				onCancel: () => {
-					// Go back to payment selection
-					setPaymentModalVisible(true)
-				},
-			})
+			await placeOrderForSplitItem(
+				activeGroup,
+				currentItem,
+				pendingScheduleSelection
+			)
 			return
 		}
 
-		orderConfirmation.showConfirmation({
-			title: isScheduled ? 'Confirm Scheduled Order' : 'Confirm Order',
-			message: `${scheduleDetail}\nPayment: ${paymentMethod}${proofInfo}\n\nContinue with ${
-				activeGroup.totalQuantity
-			} ${
-				activeGroup.totalQuantity === 1 ? 'item' : 'items'
-			} from ${concessionLabel}?`,
-			confirmText: 'Place Order',
-			cancelText: 'Back',
-			onConfirm: () => {
-				void placeOrderForGroup(activeGroup, pendingScheduleSelection)
-			},
-			onCancel: () => {
-				// Go back to payment selection
-				setPaymentModalVisible(true)
-			},
-		})
+		await placeOrderForGroup(activeGroup, pendingScheduleSelection)
+	}
+
+	const handleOrderConfirmationClose = () => {
+		setOrderConfirmationVisible(false)
+		// Go back to payment selection
+		setPaymentModalVisible(true)
 	}
 
 	let content: React.ReactNode
@@ -1262,6 +1286,14 @@ const CartScreen: React.FC = () => {
 				selectedMethod={selectedPaymentMethod}
 				concessionPaymentMethods={concessionPaymentMethods}
 			/>
+			{orderSummary && (
+				<OrderConfirmationModal
+					visible={orderConfirmationVisible}
+					onClose={handleOrderConfirmationClose}
+					onConfirm={handleConfirmOrder}
+					orderSummary={orderSummary}
+				/>
+			)}
 		</DynamicKeyboardView>
 	)
 }

@@ -4,6 +4,7 @@ import {
 	isMenuItemScheduledOnDate,
 	normalizeMenuItemSchedule,
 } from '../../utils/menuItemSchedule'
+import { ORDER_STATUS_CODES } from '../../utils/orderStatusCodes'
 
 type OrderMode = 'now' | 'scheduled'
 
@@ -116,7 +117,7 @@ export const createOrder = async (
 		// Get pending status ID using simplified query
 		const pendingStatusResult = await selectOne(prisma, {
 			table: 'order_statuses',
-			where: { code: 'pending' },
+			where: { code: ORDER_STATUS_CODES.PENDING },
 		})
 
 		if (!pendingStatusResult.success || !pendingStatusResult.data) {

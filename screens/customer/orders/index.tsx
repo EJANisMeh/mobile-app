@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import { View, Text, ActivityIndicator, FlatList } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { useAuthContext, useThemeContext } from '../../../context'
-import { useResponsiveDimensions } from '../../../hooks'
+import { useResponsiveDimensions, useCustomerNavigation } from '../../../hooks'
 import { createCustomerOrdersStyles } from '../../../styles/customer'
 import { DynamicKeyboardView } from '../../../components'
 import {
@@ -23,6 +23,7 @@ const OrdersScreen: React.FC = () => {
 	const { colors } = useThemeContext()
 	const { user } = useAuthContext()
 	const responsive = useResponsiveDimensions()
+	const navigation = useCustomerNavigation()
 	const styles = createCustomerOrdersStyles(colors, responsive)
 
 	const [orders, setOrders] = useState<CustomerOrder[]>([])
@@ -189,8 +190,7 @@ const OrdersScreen: React.FC = () => {
 	}, [])
 
 	const handleOrderPress = (order: CustomerOrder) => {
-		// TODO: Navigate to order details screen
-		console.log('Order pressed:', order.id)
+		navigation.navigate('OrderDetails', { orderId: order.id })
 	}
 
 	const handleApplyFilters = (newFilters: OrderFilters) => {

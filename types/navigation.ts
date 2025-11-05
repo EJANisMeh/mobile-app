@@ -27,6 +27,7 @@ export type CustomerStackParamList = {
 	Profile: undefined
 	MenuItemView: { menuItemId: number }
 	FullMenuList: { concessionId: number; concessionName: string }
+	OrderDetails: { orderId: number }
 }
 
 export type ConcessionaireStackParamList = {

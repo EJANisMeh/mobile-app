@@ -12,6 +12,7 @@ import NotificationsScreen from '../screens/customer/notification'
 import ProfileScreen from '../screens/customer/profile'
 import MenuItemViewScreen from '../screens/customer/menu/menuItemView'
 import FullMenuListScreen from '../screens/customer/menu/fullMenuList'
+import OrderDetailsScreen from '../screens/customer/orders/orderDetails'
 
 const Tab = createBottomTabNavigator()
 const Stack = createStackNavigator<CustomerStackParamList>()
@@ -126,6 +127,11 @@ const CustomerStack: React.FC = () => {
 				options={({ route }) => ({
 					title: route.params?.concessionName || 'Menu Items',
 				})}
+			/>
+			<Stack.Screen
+				name="OrderDetails"
+				component={OrderDetailsScreen}
+				options={{ title: 'Order Details', headerShown: true }}
 			/>
 		</Stack.Navigator>
 	)

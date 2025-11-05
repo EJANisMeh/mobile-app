@@ -375,24 +375,16 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 								{CONCESSION_SCHEDULE_DAY_KEYS.map((dayKey) => {
 									const isActive = Boolean(normalizedSchedule[dayKey])
 									return (
-										<View
+										<Text
 											key={dayKey}
 											style={[
-												styles.scheduleDayChip,
+												styles.scheduleDayText,
 												isActive
-													? styles.scheduleDayChipActive
-													: styles.scheduleDayChipInactive,
+													? styles.scheduleDayTextActive
+													: styles.scheduleDayTextInactive,
 											]}>
-											<Text
-												style={[
-													styles.scheduleDayChipText,
-													isActive
-														? styles.scheduleDayChipTextActive
-														: styles.scheduleDayChipTextInactive,
-												]}>
-												{CONCESSION_SCHEDULE_DAY_LABELS[dayKey].slice(0, 3)}
-											</Text>
-										</View>
+											{CONCESSION_SCHEDULE_DAY_LABELS[dayKey].slice(0, 3)}
+										</Text>
 									)
 								})}
 							</View>
