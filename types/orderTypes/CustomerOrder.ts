@@ -6,7 +6,9 @@ export interface OrderStatus {
 export interface OrderConcession {
 	id: number
 	name: string
+	cafeteriaId: number
 	cafeteria: {
+		id: number
 		name: string
 		location: string | null
 	} | null
@@ -38,6 +40,7 @@ export interface CustomerOrder {
 	id: number
 	customerId: number | null
 	concessionId: number | null
+	concession_order_number: number | null
 	total: number
 	payment_mode: any
 	payment_proof: any
@@ -69,8 +72,9 @@ export interface SortRule {
 }
 
 export interface OrderFilters {
-	searchQuery: string
-	searchField: 'orderNumber' | 'concessionName'
+	searchQuery: string // Search by order number only
+	cafeteriaFilter: number | null // Single cafeteria selection (null = all)
+	concessionFilters: number[] // Multi-select concessions (empty = all under selected cafeteria)
 	statusFilters: string[] // Multi-select: empty array means all statuses
 	orderModeFilters: Array<'now' | 'scheduled'> // Multi-select: empty array means all modes
 	paymentProofFilter: 'all' | 'provided' | 'missing' // Filter by payment proof status

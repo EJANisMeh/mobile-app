@@ -488,6 +488,8 @@ const MenuItemViewScreen: React.FC = () => {
 			? {
 					type: paymentTuple[0],
 					details: paymentTuple[1],
+					needsProof: paymentTuple[2],
+					proofMode: paymentTuple[3],
 			  }
 			: {}
 

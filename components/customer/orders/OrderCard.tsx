@@ -72,7 +72,12 @@ const OrderCard: React.FC<OrderCardProps> = ({
 			style={styles.orderCard}
 			onPress={() => onPress(order)}>
 			<View style={styles.orderHeader}>
-				<Text style={styles.orderIdText}>Order #{order.id}</Text>
+				<Text style={styles.orderIdText}>
+					Order #
+					{order.concession_order_number
+						? `${order.concession?.name?.substring(0, 1) || 'C'}-${order.concession_order_number}`
+						: order.id}
+				</Text>
 				<View
 					style={[styles.orderStatusBadge, { backgroundColor: statusColor }]}>
 					<Text style={styles.orderStatusText}>

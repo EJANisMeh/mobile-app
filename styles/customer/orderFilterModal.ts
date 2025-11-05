@@ -23,6 +23,16 @@ export const createOrderFilterModalStyles = (
 			color: colors.text,
 			marginBottom: 12,
 		},
+		pickerContainer: {
+			borderWidth: 1,
+			borderColor: colors.border,
+			borderRadius: 8,
+			backgroundColor: colors.surface,
+			overflow: 'hidden',
+		},
+		picker: {
+			color: colors.text,
+		},
 		filterOptions: {
 			gap: 8,
 		},

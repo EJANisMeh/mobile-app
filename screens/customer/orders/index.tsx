@@ -41,7 +41,8 @@ const OrdersScreen: React.FC = () => {
 
 	const [filters, setFilters] = useState<OrderFilters>({
 		searchQuery: '',
-		searchField: 'orderNumber',
+		cafeteriaFilter: null,
+		concessionFilters: [],
 		statusFilters: [],
 		orderModeFilters: [],
 		paymentProofFilter: 'all',
@@ -99,18 +100,30 @@ const OrdersScreen: React.FC = () => {
 	const filteredOrders = useMemo(() => {
 		let result = [...orders]
 
-		// Apply search
+		// Apply search by order number (concession order number or ID)
 		if (filters.searchQuery.trim()) {
 			const query = filters.searchQuery.toLowerCase()
 			result = result.filter((order) => {
-				if (filters.searchField === 'orderNumber') {
-					return order.id.toString().includes(query)
-				}
-				if (filters.searchField === 'concessionName') {
-					return order.concession?.name.toLowerCase().includes(query)
-				}
-				return false
+				const orderNum = order.concession_order_number?.toString() || order.id.toString()
+				return orderNum.includes(query)
 			})
+		}
+
+		// Apply cafeteria filter
+		if (filters.cafeteriaFilter !== null) {
+			result = result.filter(
+				(order) =>
+					order.concession?.cafeteria?.id === filters.cafeteriaFilter ||
+					order.concession?.cafeteriaId === filters.cafeteriaFilter
+			)
+		}
+
+		// Apply concession filter
+		// Empty array means all concessions (no filter applied)
+		if (filters.concessionFilters.length > 0) {
+			result = result.filter((order) =>
+				filters.concessionFilters.includes(order.concessionId || 0)
+			)
 		}
 
 		// Apply status filter
@@ -132,9 +145,7 @@ const OrdersScreen: React.FC = () => {
 		// Apply payment proof filter
 		if (filters.paymentProofFilter !== 'all') {
 			result = result.filter((order) => {
-				const needsProof =
-					order.payment_mode?.type &&
-					order.payment_mode.type.toLowerCase() !== 'cash'
+				const needsProof = order.payment_mode?.needsProof === true
 				const hasProof = Boolean(order.payment_proof)
 
 				if (filters.paymentProofFilter === 'provided') {
@@ -249,9 +260,7 @@ const OrdersScreen: React.FC = () => {
 	}
 
 	const getPaymentProofStatus = (order: CustomerOrder): string | null => {
-		const needsProof =
-			order.payment_mode?.type &&
-			order.payment_mode.type.toLowerCase() !== 'cash'
+		const needsProof = order.payment_mode?.needsProof === true
 
 		if (!needsProof) {
 			return null

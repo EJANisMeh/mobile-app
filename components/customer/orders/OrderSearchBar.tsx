@@ -39,7 +39,7 @@ const OrderSearchBar: React.FC<OrderSearchBarProps> = ({
 				/>
 				<TextInput
 					style={styles.searchInput}
-					placeholder="Search orders..."
+					placeholder="Search by order number..."
 					placeholderTextColor={colors.textSecondary}
 					value={searchQuery}
 					onChangeText={onSearchChange}

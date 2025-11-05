@@ -92,23 +92,25 @@ model MenuItem {
 }
 
 model Order {
-  id              Int            @id @default(autoincrement())
-  customerId      Int?           @map("customer_id")
-  concessionId    Int?           @map("concession_id")
-  total           Decimal        @db.Decimal(12, 2)
-  payment_mode    Json?          @default("{}")
-  payment_proof   Json?
-  orderMode       String         @default("now") @map("order_mode") @db.VarChar(20)
-  scheduledFor    DateTime?      @map("scheduled_for") @db.Timestamptz(6)
-  status_id       Int
-  concession_note String?
-  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  orderItems      OrderItem[]
-  concession      Concession?    @relation(fields: [concessionId], references: [id], onUpdate: NoAction)
-  customer        User?          @relation(fields: [customerId], references: [id], onUpdate: NoAction)
-  order_statuses  order_statuses @relation(fields: [status_id], references: [id], onUpdate: NoAction)
+  id                    Int            @id @default(autoincrement())
+  customerId            Int?           @map("customer_id")
+  concessionId          Int?           @map("concession_id")
+  concession_order_number Int?         @map("concession_order_number")
+  total                 Decimal        @db.Decimal(12, 2)
+  payment_mode          Json?          @default("{}")
+  payment_proof         Json?
+  orderMode             String         @default("now") @map("order_mode") @db.VarChar(20)
+  scheduledFor          DateTime?      @map("scheduled_for") @db.Timestamptz(6)
+  status_id             Int
+  concession_note       String?
+  createdAt             DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  orderItems            OrderItem[]
+  concession            Concession?    @relation(fields: [concessionId], references: [id], onUpdate: NoAction)
+  customer              User?          @relation(fields: [customerId], references: [id], onUpdate: NoAction)
+  order_statuses        order_statuses @relation(fields: [status_id], references: [id], onUpdate: NoAction)
 
+  @@index([concessionId, concession_order_number])
   @@map("orders")
 }
 

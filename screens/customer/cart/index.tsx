@@ -787,6 +787,8 @@ const CartScreen: React.FC = () => {
 			? {
 					type: paymentTuple[0],
 					details: paymentTuple[1],
+					needsProof: paymentTuple[2],
+					proofMode: paymentTuple[3],
 			  }
 			: {}
 
@@ -838,6 +840,8 @@ const CartScreen: React.FC = () => {
 			? {
 					type: paymentTuple[0],
 					details: paymentTuple[1],
+					needsProof: paymentTuple[2],
+					proofMode: paymentTuple[3],
 			  }
 			: {}
 

@@ -23,6 +23,17 @@ export interface PaymentMethod {
 }
 
 /**
+ * Payment mode structure stored in orders table
+ * Built from selected payment method tuple
+ */
+export interface PaymentMode {
+	type: string // Payment method name (e.g., "Cash", "GCash", "Bank Transfer")
+	details: string // Payment instructions/details
+	needsProof?: boolean // Whether payment proof is required
+	proofMode?: 'text' | 'screenshot' | null // Type of proof required
+}
+
+/**
  * Props for PaymentMethodsList component
  */
 export interface PaymentMethodsListProps {

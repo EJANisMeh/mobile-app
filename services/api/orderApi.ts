@@ -6,7 +6,15 @@ import type {
 	OrderListResponse,
 	OrderDetailsResponse,
 	OrderStatusUpdateResponse,
+	PaymentProof,
 } from '../../types'
+
+interface PaymentProofUpdateResponse {
+	success: boolean
+	message?: string
+	error?: string
+	paymentProof?: PaymentProof
+}
 
 export const orderApi = {
 	createOrder: async (
@@ -67,6 +75,34 @@ export const orderApi = {
 				method: 'PUT',
 				headers: token ? { Authorization: `Bearer ${token}` } : {},
 				body: JSON.stringify(statusPayload),
+			}
+		)
+	},
+
+	updatePaymentProof: async (
+		orderId: number,
+		paymentProof: PaymentProof
+	): Promise<PaymentProofUpdateResponse> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall<PaymentProofUpdateResponse>(
+			`/orders/payment-proof/${orderId}`,
+			{
+				method: 'PUT',
+				headers: token ? { Authorization: `Bearer ${token}` } : {},
+				body: JSON.stringify({ paymentProof }),
+			}
+		)
+	},
+
+	cancelOrder: async (orderId: number): Promise<{ success: boolean; message?: string; error?: string }> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall<{ success: boolean; message?: string; error?: string }>(
+			`/orders/cancel/${orderId}`,
+			{
+				method: 'PUT',
+				headers: token ? { Authorization: `Bearer ${token}` } : {},
 			}
 		)
 	},

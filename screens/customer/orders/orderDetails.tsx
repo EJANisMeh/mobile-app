@@ -36,6 +36,8 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 	const [proofText, setProofText] = useState('')
 	const [proofImage, setProofImage] = useState<string | null>(null)
 	const [submittingProof, setSubmittingProof] = useState(false)
+	const [editingProof, setEditingProof] = useState(false)
+	const [cancelling, setCancelling] = useState(false)
 
 	const orderId = (
 		navigation.getState().routes[navigation.getState().index]?.params as
@@ -125,19 +127,20 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 				? { mode: 'screenshot', value: proofImage }
 				: { mode: 'text', value: proofText.trim() }
 
-			// TODO: Replace with actual API call when backend endpoint is ready
-			// await orderApi.updateOrderPaymentProof(order.id, proofData)
+			const response = await orderApi.updatePaymentProof(order.id, proofData)
 
-			// Update local state
-			setOrder({
-				...order,
-				payment_proof: {
-					...proofData,
-					submittedAt: new Date().toISOString(),
-				},
-			})
-			setProofText('')
-			setProofImage(null)
+			if (response.success && response.paymentProof) {
+				// Update local state with server response
+				setOrder({
+					...order,
+					payment_proof: response.paymentProof,
+				})
+				setProofText('')
+				setProofImage(null)
+				setEditingProof(false)
+			} else {
+				throw new Error(response.error || 'Failed to submit payment proof')
+			}
 		} catch (err) {
 			console.error('Submit proof error:', err)
 			alert('Failed to submit payment proof. Please try again.')
@@ -146,16 +149,74 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 		}
 	}
 
+	const handleCancelOrder = async () => {
+		if (!order) {
+			return
+		}
+
+		if (order.order_statuses?.code !== ORDER_STATUS_CODES.PENDING) {
+			alert('Only pending orders can be cancelled')
+			return
+		}
+
+		// Ask for confirmation
+		if (!confirm('Are you sure you want to cancel this order?')) {
+			return
+		}
+
+		setCancelling(true)
+		try {
+			const response = await orderApi.cancelOrder(order.id)
+
+			if (response.success) {
+				// Reload order details to show updated status
+				await loadOrderDetails()
+				alert('Order cancelled successfully')
+			} else {
+				throw new Error(response.error || 'Failed to cancel order')
+			}
+		} catch (err) {
+			console.error('Cancel order error:', err)
+			alert('Failed to cancel order. Please try again.')
+		} finally {
+			setCancelling(false)
+		}
+	}
+
+	const handleEditProof = () => {
+		// Load existing proof into edit fields
+		if (order?.payment_proof) {
+			if (order.payment_proof.mode === 'text') {
+				setProofText(order.payment_proof.value || '')
+				setProofImage(null)
+			} else if (order.payment_proof.mode === 'screenshot') {
+				setProofImage(order.payment_proof.value || null)
+				setProofText('')
+			}
+		}
+		setEditingProof(true)
+	}
+
+	const handleCancelEdit = () => {
+		setProofText('')
+		setProofImage(null)
+		setEditingProof(false)
+	}
+
 	const isProofEditable =
 		order &&
 		order.order_statuses?.code !== ORDER_STATUS_CODES.COMPLETED &&
 		order.order_statuses?.code !== ORDER_STATUS_CODES.CANCELLED
 
-	const needsProof =
-		order?.payment_mode?.type &&
-		order.payment_mode.type.toLowerCase() !== 'cash'
+	// Check if payment proof is required based on payment_mode.needsProof
+	const needsProof = order?.payment_mode?.needsProof === true
 
-	const showPaymentFirst = needsProof && !order?.payment_proof
+	// Get proof mode from payment_mode (text or screenshot)
+	const proofMode = order?.payment_mode?.proofMode || null
+
+	const showPaymentFirst = needsProof && (!order?.payment_proof || editingProof)
+
+	const canCancelOrder = order?.order_statuses?.code === ORDER_STATUS_CODES.PENDING
 
 	if (loading) {
 		return (
@@ -200,7 +261,12 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 				contentContainerStyle={styles.scrollContent}
 				showsVerticalScrollIndicator={true}>
 				<View style={styles.header}>
-					<Text style={styles.headerTitle}>Order #{order.id}</Text>
+					<Text style={styles.headerTitle}>
+						Order #
+						{order.concession_order_number
+							? `${order.concession?.name?.substring(0, 1) || 'C'}-${order.concession_order_number}`
+							: order.id}
+					</Text>
 					<View style={styles.statusBadge}>
 						<Text style={styles.statusText}>
 							{order.order_statuses?.description || 'Unknown'}
@@ -220,6 +286,7 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 							proofText={proofText}
 							proofImage={proofImage}
 							submittingProof={submittingProof}
+							proofMode={proofMode}
 							onProofTextChange={setProofText}
 							onPickImage={handlePickImage}
 							onRemoveImage={handleRemoveImage}
@@ -251,8 +318,26 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 						paymentProof={order.payment_proof}
 						formatDate={formatDate}
 						styles={styles}
-						colors={colors}
-					/>
+						colors={colors}>
+						{/* Show edit button if proof exists and order is editable */}
+						{order.payment_proof && isProofEditable && !editingProof && (
+							<TouchableOpacity
+								style={styles.editProofButton}
+								onPress={handleEditProof}>
+								<Text style={styles.editProofButtonText}>
+									Edit Payment Proof
+								</Text>
+							</TouchableOpacity>
+						)}
+						{/* Show cancel edit button if editing */}
+						{editingProof && (
+							<TouchableOpacity
+								style={styles.cancelEditButton}
+								onPress={handleCancelEdit}>
+								<Text style={styles.cancelEditButtonText}>Cancel Edit</Text>
+							</TouchableOpacity>
+						)}
+					</PaymentInformationSection>
 				)}
 
 				{order.concession_note && (
@@ -260,6 +345,23 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 						<Text style={styles.sectionTitle}>Concession Note</Text>
 						<Text style={styles.noteText}>{order.concession_note}</Text>
 					</View>
+				)}
+
+				{/* Cancel Order Button */}
+				{canCancelOrder && (
+					<TouchableOpacity
+						style={[styles.cancelOrderButton, cancelling && styles.disabledButton]}
+						onPress={handleCancelOrder}
+						disabled={cancelling}>
+						{cancelling ? (
+							<ActivityIndicator
+								size="small"
+								color={colors.surface}
+							/>
+						) : (
+							<Text style={styles.cancelOrderButtonText}>Cancel Order</Text>
+						)}
+					</TouchableOpacity>
 				)}
 			</ScrollView>
 		</DynamicKeyboardView>

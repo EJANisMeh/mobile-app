@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
+import { Picker } from '@react-native-picker/picker'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import BaseModal from '../../modals/BaseModal'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createOrderFilterModalStyles } from '../../../styles/customer'
-import type { OrderFilters } from '../../../types'
+import { customerApi } from '../../../services/api'
+import type { OrderFilters, CafeteriasWithMenuResponse } from '../../../types'
 
 interface OrderFilterModalProps {
 	visible: boolean
@@ -27,6 +29,56 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 	const styles = createOrderFilterModalStyles(colors, responsive)
 
 	const [filters, setFilters] = useState<OrderFilters>(currentFilters)
+	const [cafeterias, setCafeterias] = useState<
+		CafeteriasWithMenuResponse['cafeterias']
+	>([])
+	const [loadingCafeterias, setLoadingCafeterias] = useState(false)
+
+	// Load cafeterias for dropdown
+	useEffect(() => {
+		if (visible) {
+			loadCafeterias()
+		}
+	}, [visible])
+
+	const loadCafeterias = async () => {
+		setLoadingCafeterias(true)
+		try {
+			const response = await customerApi.getCafeteriasWithMenu()
+			setCafeterias(response.cafeterias || [])
+		} catch (error) {
+			console.error('Error loading cafeterias:', error)
+			setCafeterias([])
+		} finally {
+			setLoadingCafeterias(false)
+		}
+	}
+
+	// Get concessions filtered by selected cafeteria
+	const getAvailableConcessions = () => {
+		if (filters.cafeteriaFilter === null) {
+			// Show all concessions from all cafeterias
+			return cafeterias.flatMap((cafeteria) =>
+				cafeteria.concessions.map((concession) => ({
+					id: concession.id,
+					name: concession.name,
+					cafeteriaName: cafeteria.name,
+				}))
+			)
+		} else {
+			// Show only concessions from selected cafeteria
+			const selectedCafeteria = cafeterias.find(
+				(c) => c.id === filters.cafeteriaFilter
+			)
+			if (!selectedCafeteria) return []
+
+			return selectedCafeteria.concessions.map((concession) => ({
+				id: concession.id,
+				name: concession.name,
+				cafeteriaName: selectedCafeteria.name,
+			}))
+		}
+	}
 
 	useEffect(() => {
 		if (visible) {
@@ -42,7 +94,8 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 	const handleReset = () => {
 		const resetFilters: OrderFilters = {
 			searchQuery: '',
-			searchField: 'orderNumber',
+			cafeteriaFilter: null,
+			concessionFilters: [],
 			statusFilters: [],
 			orderModeFilters: [],
 			paymentProofFilter: 'all',
@@ -110,6 +163,34 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 		}
 	}
 
+	const handleConcessionToggle = (concessionId: number) => {
+		const currentConcessions = filters.concessionFilters
+		const isSelected = currentConcessions.includes(concessionId)
+
+		if (isSelected) {
+			// Deselect the concession
+			const newConcessions = currentConcessions.filter(
+				(id) => id !== concessionId
+			)
+			setFilters({ ...filters, concessionFilters: newConcessions })
+		} else {
+			// Add the concession
+			setFilters({
+				...filters,
+				concessionFilters: [...currentConcessions, concessionId],
+			})
+		}
+	}
+
+	const handleCafeteriaChange = (cafeteriaId: number | null) => {
+		// When cafeteria changes, reset concession filters
+		setFilters({
+			...filters,
+			cafeteriaFilter: cafeteriaId,
+			concessionFilters: [],
+		})
+	}
+
 	return (
 		<BaseModal
 			visible={visible}
@@ -119,34 +200,67 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 				style={styles.scrollArea}
 				contentContainerStyle={styles.scrollContent}
 				showsVerticalScrollIndicator={true}>
-				{/* Search Field */}
+				{/* Cafeteria Filter */}
 				<View style={styles.filterSection}>
-					<Text style={styles.filterSectionTitle}>Search In</Text>
+					<Text style={styles.filterSectionTitle}>Cafeteria</Text>
+					<View style={styles.pickerContainer}>
+						<Picker
+							selectedValue={filters.cafeteriaFilter}
+							onValueChange={handleCafeteriaChange}
+							style={styles.picker}
+							dropdownIconColor={colors.text}>
+							<Picker.Item label="All Cafeterias" value={null} />
+							{cafeterias.map((cafeteria) => (
+								<Picker.Item
+									key={cafeteria.id}
+									label={cafeteria.name}
+									value={cafeteria.id}
+								/>
+							))}
+						</Picker>
+					</View>
+				</View>
+
+				{/* Concession Filter */}
+				<View style={styles.filterSection}>
+					<Text style={styles.filterSectionTitle}>Concessions</Text>
 					<View style={styles.filterOptions}>
-						{[
-							{ value: 'orderNumber', label: 'Order Number' },
-							{ value: 'concessionName', label: 'Concession Name' },
-						].map((option) => (
+						<TouchableOpacity
+							style={[
+								styles.filterOption,
+								filters.concessionFilters.length === 0 &&
+									styles.filterOptionSelected,
+							]}
+							onPress={() =>
+								setFilters({ ...filters, concessionFilters: [] })
+							}>
+							<Text
+								style={[
+									styles.filterOptionText,
+									filters.concessionFilters.length === 0 &&
+										styles.filterOptionTextSelected,
+								]}>
+								All Concessions
+							</Text>
+						</TouchableOpacity>
+						{getAvailableConcessions().map((concession) => (
 							<TouchableOpacity
-								key={option.value}
+								key={concession.id}
 								style={[
 									styles.filterOption,
-									filters.searchField === option.value &&
+									filters.concessionFilters.includes(concession.id) &&
 										styles.filterOptionSelected,
 								]}
-								onPress={() =>
-									setFilters({
-										...filters,
-										searchField: option.value as any,
-									})
-								}>
+								onPress={() => handleConcessionToggle(concession.id)}>
 								<Text
 									style={[
 										styles.filterOptionText,
-										filters.searchField === option.value &&
+										filters.concessionFilters.includes(concession.id) &&
 											styles.filterOptionTextSelected,
 									]}>
-									{option.label}
+									{concession.name}
+									{filters.cafeteriaFilter === null &&
+										` (${concession.cafeteriaName})`}
 								</Text>
 							</TouchableOpacity>
 						))}

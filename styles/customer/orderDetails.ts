@@ -308,5 +308,48 @@ export const createOrderDetailsStyles = (
 			color: colors.text,
 			lineHeight: 20,
 		},
+		editProofButton: {
+			marginTop: 12,
+			paddingVertical: 10,
+			paddingHorizontal: 16,
+			borderRadius: 8,
+			borderWidth: 1,
+			borderColor: colors.primary,
+			backgroundColor: 'transparent',
+			alignItems: 'center',
+		},
+		editProofButtonText: {
+			fontSize: 14,
+			fontWeight: '600',
+			color: colors.primary,
+		},
+		cancelEditButton: {
+			marginTop: 8,
+			paddingVertical: 10,
+			paddingHorizontal: 16,
+			borderRadius: 8,
+			backgroundColor: colors.textSecondary + '20',
+			alignItems: 'center',
+		},
+		cancelEditButtonText: {
+			fontSize: 14,
+			fontWeight: '600',
+			color: colors.textSecondary,
+		},
+		cancelOrderButton: {
+			marginTop: 24,
+			paddingVertical: 14,
+			borderRadius: 8,
+			backgroundColor: colors.error,
+			alignItems: 'center',
+		},
+		cancelOrderButtonText: {
+			fontSize: 15,
+			fontWeight: '600',
+			color: colors.surface,
+		},
+		disabledButton: {
+			opacity: 0.5,
+		},
 	})
 }

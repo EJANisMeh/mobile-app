@@ -5,6 +5,7 @@ import {
 	normalizeMenuItemSchedule,
 } from '../../utils/menuItemSchedule'
 import { ORDER_STATUS_CODES } from '../../utils/orderStatusCodes'
+import { generateConcessionOrderNumber } from './generateConcessionOrderNumber'
 
 type OrderMode = 'now' | 'scheduled'
 
@@ -128,6 +129,11 @@ export const createOrder = async (
 		}
 		const pendingStatus = pendingStatusResult.data
 
+		// Generate concession order number
+		const concessionOrderNumber = await generateConcessionOrderNumber(
+			concessionId
+		)
+
 		// Create order with items in a transaction
 		const result = await prisma.$transaction(async (tx) => {
 			// Create the order directly with tx
@@ -135,6 +141,7 @@ export const createOrder = async (
 				data: {
 					customerId,
 					concessionId,
+					concession_order_number: concessionOrderNumber,
 					total,
 					payment_mode: payment_mode || {},
 					payment_proof: payment_proof
