@@ -63,6 +63,17 @@ const OrderInformationSection: React.FC<OrderInformationSectionProps> = ({
 									{formatCurrency(Number(item.item_total))}
 								</Text>
 							</View>
+							{item.customer_request && (
+								<View style={styles.customerRequestContainer}>
+									<Text style={styles.customerRequestLabel}>Request:</Text>
+									<Text style={styles.customerRequestText}>
+										{item.customer_request}
+									</Text>
+								</View>
+							)}
+							{!item.customer_request && (
+								<Text style={styles.noRequestText}>No special requests</Text>
+							)}
 						</View>
 					</View>
 				))}

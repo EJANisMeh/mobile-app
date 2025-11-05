@@ -32,6 +32,7 @@ export interface OrderItem {
 	options_snapshot: any
 	addons_snapshot: any
 	item_total: number
+	customer_request: string | null
 	createdAt: Date
 	menuItem: OrderMenuItem
 }

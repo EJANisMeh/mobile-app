@@ -768,6 +768,7 @@ const CartScreen: React.FC = () => {
 			options_snapshot: item.variationOptions,
 			addons_snapshot: item.addons,
 			item_total: roundCurrency(item.totalPrice),
+			customer_request: item.customer_request || null,
 		}))
 
 		const total = roundCurrency(
@@ -825,6 +826,7 @@ const CartScreen: React.FC = () => {
 			options_snapshot: item.variationOptions,
 			addons_snapshot: item.addons,
 			item_total: roundCurrency(item.totalPrice),
+			customer_request: item.customer_request || null,
 		}
 
 		const scheduledForIso =

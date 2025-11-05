@@ -78,6 +78,10 @@ const sanitizeStoredCartItem = (entry: unknown): CartItem | null => {
 		variationGroups: asArray(record.variationGroups),
 		variationOptions: asArray(record.variationOptions),
 		addons: asArray(record.addons),
+		customer_request:
+			typeof record.customer_request === 'string'
+				? record.customer_request
+				: null,
 		addedAt:
 			typeof record.addedAt === 'string'
 				? record.addedAt
@@ -139,6 +143,7 @@ const createCartItem = (userId: number, input: CartItemInput): CartItem => {
 		variationGroups: input.variationGroups,
 		variationOptions: input.variationOptions,
 		addons: input.addons,
+		customer_request: input.customer_request,
 		addedAt: new Date().toISOString(),
 	}
 }

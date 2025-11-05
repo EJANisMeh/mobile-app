@@ -25,6 +25,7 @@ export interface CartItemInput {
 	variationGroups: VariationGroupSnapshot[]
 	variationOptions: VariationOptionSnapshot[]
 	addons: AddonSnapshot[]
+	customer_request: string | null
 }
 
 export interface CartItem extends CartItemInput {

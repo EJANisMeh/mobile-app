@@ -423,6 +423,44 @@ export const createCustomerMenuItemViewStyles = (
 			marginLeft: spacing.sm,
 		},
 
+		// Customer Request Section
+		customerRequestSection: {
+			marginBottom: spacing.lg,
+			backgroundColor: colors.surface,
+			borderRadius: 12,
+			padding: padding.md,
+			borderWidth: 1,
+			borderColor: colors.border,
+		},
+		sectionHeaderRow: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: spacing.xs,
+			marginBottom: spacing.xs,
+		},
+		customerRequestHint: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.textSecondary,
+			marginBottom: spacing.sm,
+			fontStyle: 'italic',
+		},
+		customerRequestInput: {
+			backgroundColor: colors.surfaceSecondary,
+			borderWidth: 1,
+			borderColor: colors.border,
+			borderRadius: 8,
+			padding: spacing.sm,
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.text,
+			minHeight: 80,
+		},
+		characterCount: {
+			fontSize: responsive.getResponsiveFontSize(11),
+			color: colors.textSecondary,
+			textAlign: 'right',
+			marginTop: spacing.xs,
+		},
+
 		// Actions Section
 		actionsContainer: {
 			flexDirection: 'row',

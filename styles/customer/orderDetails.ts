@@ -164,6 +164,32 @@ export const createOrderDetailsStyles = (
 			color: colors.primary,
 			marginLeft: 'auto',
 		},
+		customerRequestContainer: {
+			marginTop: 8,
+			padding: 8,
+			backgroundColor: colors.background,
+			borderRadius: 6,
+			borderLeftWidth: 3,
+			borderLeftColor: colors.primary,
+		},
+		customerRequestLabel: {
+			fontSize: 12,
+			fontWeight: '600',
+			color: colors.textSecondary,
+			marginBottom: 4,
+		},
+		customerRequestText: {
+			fontSize: 13,
+			color: colors.text,
+			lineHeight: 18,
+			fontStyle: 'italic',
+		},
+		noRequestText: {
+			fontSize: 12,
+			color: colors.textSecondary,
+			marginTop: 4,
+			fontStyle: 'italic',
+		},
 		totalRow: {
 			marginTop: 8,
 			paddingTop: 12,

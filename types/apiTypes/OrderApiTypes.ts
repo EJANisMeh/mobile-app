@@ -36,6 +36,7 @@ export interface OrderItemPayload {
 	options_snapshot: VariationOptionSnapshot[]
 	addons_snapshot: AddonSnapshot[]
 	item_total: number
+	customer_request?: string | null
 }
 
 export interface CreateOrderPayload {

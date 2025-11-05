@@ -173,6 +173,7 @@ export const createOrder = async (
 						options_snapshot: item.options_snapshot || null,
 						addons_snapshot: item.addons_snapshot || null,
 						item_total: item.item_total,
+						customer_request: item.customer_request || null,
 					},
 				})
 

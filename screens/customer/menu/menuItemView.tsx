@@ -35,6 +35,7 @@ import {
 	MenuItemVariations,
 	MenuItemAddons,
 	MenuItemActions,
+	CustomerRequestInput,
 } from '../../../components/customer/menu/menuItemView'
 import { AlertModal, ConfirmationModal } from '../../../components/modals'
 import {
@@ -81,6 +82,7 @@ const MenuItemViewScreen: React.FC = () => {
 		Map<number, AddonSelection>
 	>(new Map())
 	const [quantity, setQuantity] = useState(1)
+	const [customerRequest, setCustomerRequest] = useState('')
 	const [isAddingToCart, setIsAddingToCart] = useState(false)
 	const [isOrderModalVisible, setOrderModalVisible] = useState(false)
 	const [paymentModalVisible, setPaymentModalVisible] = useState(false)
@@ -512,6 +514,7 @@ const MenuItemViewScreen: React.FC = () => {
 					options_snapshot: optionsSnapshot,
 					addons_snapshot: addonsSnapshot,
 					item_total: itemTotal,
+					customer_request: customerRequest.trim() || null,
 				},
 			],
 		}
@@ -564,6 +567,7 @@ const MenuItemViewScreen: React.FC = () => {
 			variationGroups: variationGroupsSnapshot,
 			variationOptions: optionsSnapshot,
 			addons: addonsSnapshot,
+			customer_request: customerRequest.trim() || null,
 		}
 
 		try {
@@ -853,6 +857,12 @@ const MenuItemViewScreen: React.FC = () => {
 							setAddonSelections={setAddonSelections}
 						/>
 					)}
+
+				{/* Customer Request Section */}
+				<CustomerRequestInput
+					customerRequest={customerRequest}
+					onChangeRequest={setCustomerRequest}
+				/>
 
 				{/* Bottom Actions: Add to Cart / Order Flow */}
 				<MenuItemActions
