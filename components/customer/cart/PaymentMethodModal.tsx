@@ -93,62 +93,66 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 				</Text>
 
 				<View style={styles.methodsContainer}>
-					{concessionPaymentMethods.map(([type, details, needsProof, proofMode]) => {
-						const isSelected = tempSelection === type
-						const proofLabel = getProofLabel(needsProof, proofMode)
+					{concessionPaymentMethods.map(
+						([type, details, needsProof, proofMode]) => {
+							const isSelected = tempSelection === type
+							const proofLabel = getProofLabel(needsProof, proofMode)
 
-						return (
-							<TouchableOpacity
-								key={type}
-								style={[
-									styles.methodCard,
-									isSelected && styles.methodCardSelected,
-								]}
-								onPress={() => setTempSelection(type)}>
-								<MaterialCommunityIcons
-									name={getMethodIcon(type) as any}
-									size={32}
-									color={isSelected ? colors.primary : colors.textSecondary}
-									style={styles.methodIcon}
-								/>
-								<View style={styles.methodInfo}>
-									<Text
-										style={[
-											styles.methodName,
-											isSelected && styles.methodNameSelected,
-										]}>
-										{type}
-									</Text>
-									<Text style={styles.methodDescription}>{details}</Text>
-									{needsProof && proofLabel ? (
-										<View style={styles.proofBadge}>
-											<MaterialCommunityIcons
-												name={
-													proofMode === 'screenshot'
-														? 'camera-outline'
-														: 'text-box-outline'
-												}
-												size={14}
-												color={colors.textSecondary}
-											/>
-											<Text style={styles.proofBadgeText}>{proofLabel}</Text>
-										</View>
-									) : null}
-								</View>
-								{isSelected && (
+							return (
+								<TouchableOpacity
+									key={type}
+									style={[
+										styles.methodCard,
+										isSelected && styles.methodCardSelected,
+									]}
+									onPress={() => setTempSelection(type)}>
 									<MaterialCommunityIcons
-										name="check-circle"
-										size={24}
-										color={colors.primary}
+										name={getMethodIcon(type) as any}
+										size={32}
+										color={isSelected ? colors.primary : colors.textSecondary}
+										style={styles.methodIcon}
 									/>
-								)}
-							</TouchableOpacity>
-						)
-					})}
+									<View style={styles.methodInfo}>
+										<Text
+											style={[
+												styles.methodName,
+												isSelected && styles.methodNameSelected,
+											]}>
+											{type}
+										</Text>
+										<Text style={styles.methodDescription}>{details}</Text>
+										{needsProof && proofLabel ? (
+											<View style={styles.proofBadge}>
+												<MaterialCommunityIcons
+													name={
+														proofMode === 'screenshot'
+															? 'camera-outline'
+															: 'text-box-outline'
+													}
+													size={14}
+													color={colors.textSecondary}
+												/>
+												<Text style={styles.proofBadgeText}>{proofLabel}</Text>
+											</View>
+										) : null}
+									</View>
+									{isSelected && (
+										<MaterialCommunityIcons
+											name="check-circle"
+											size={24}
+											color={colors.primary}
+										/>
+									)}
+								</TouchableOpacity>
+							)
+						}
+					)}
 				</View>
 
 				{tempSelection &&
-				concessionPaymentMethods.find(([type]) => type === tempSelection)?.[2] ? (
+				concessionPaymentMethods.find(
+					([type]) => type === tempSelection
+				)?.[2] ? (
 					<View style={styles.proofNotice}>
 						<MaterialCommunityIcons
 							name="information-outline"

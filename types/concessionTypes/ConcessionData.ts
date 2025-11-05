@@ -34,7 +34,9 @@ export interface ConcessionData {
 	image_url?: string | null
 	cafeteriaId: number | null
 	is_open: boolean
-	payment_methods: Array<[string, string, boolean, 'text' | 'screenshot' | null]> // Payment method tuples
+	payment_methods: Array<
+		[string, string, boolean, 'text' | 'screenshot' | null]
+	> // Payment method tuples
 	schedule?: ConcessionSchedule | null
 	createdAt: Date
 	updatedAt: Date
@@ -45,6 +47,8 @@ export interface UpdateConcessionData {
 	description?: string | null
 	image_url?: string | null
 	is_open?: boolean
-	payment_methods?: Array<[string, string, boolean, 'text' | 'screenshot' | null]>
+	payment_methods?: Array<
+		[string, string, boolean, 'text' | 'screenshot' | null]
+	>
 	schedule?: ConcessionSchedule | null
 }
