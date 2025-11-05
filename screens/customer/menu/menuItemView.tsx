@@ -807,14 +807,12 @@ const MenuItemViewScreen: React.FC = () => {
 					orderRestrictionMessage={orderRestrictionMessage}
 				/>
 			</DynamicScrollView>
-
 			<AlertModal
 				visible={alertModal.visible}
 				onClose={alertModal.handleClose}
 				title={alertModal.title}
 				message={alertModal.message}
 			/>
-
 			<ConfirmationModal
 				visible={addToCartConfirmation.visible}
 				onClose={addToCartConfirmation.hideConfirmation}
@@ -826,7 +824,6 @@ const MenuItemViewScreen: React.FC = () => {
 				onCancel={addToCartConfirmation.props.onCancel}
 				confirmStyle={addToCartConfirmation.props.confirmStyle || 'default'}
 			/>
-
 			<ConfirmationModal
 				visible={orderConfirmation.visible}
 				onClose={orderConfirmation.hideConfirmation}
@@ -838,17 +835,17 @@ const MenuItemViewScreen: React.FC = () => {
 				onCancel={orderConfirmation.props.onCancel}
 				confirmStyle={orderConfirmation.props.confirmStyle || 'default'}
 			/>
-
-		<OrderScheduleModal
-			visible={isOrderModalVisible}
-			onClose={handleOrderModalClose}
-			onConfirm={handleScheduleSelectionConfirm}
-			schedule={menuItem.availabilitySchedule}
-			concessionSchedule={normalizedConcessionSchedule}
-			availabilityStatus={availabilityStatus ?? 'not_served_today'}
-			isConcessionOpen={Boolean(menuItem.concession?.is_open)}
-			itemName={menuItem.name ?? 'this item'}
-		/>			<PaymentMethodModal
+			<OrderScheduleModal
+				visible={isOrderModalVisible}
+				onClose={handleOrderModalClose}
+				onConfirm={handleScheduleSelectionConfirm}
+				schedule={menuItem.availabilitySchedule}
+				concessionSchedule={normalizedConcessionSchedule}
+				availabilityStatus={availabilityStatus ?? 'not_served_today'}
+				isConcessionOpen={Boolean(menuItem.concession?.is_open)}
+				itemName={menuItem.name ?? 'this item'}
+			/>{' '}
+			<PaymentMethodModal
 				visible={paymentModalVisible}
 				onClose={handlePaymentModalClose}
 				onConfirm={handlePaymentMethodConfirm}

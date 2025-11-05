@@ -80,9 +80,8 @@ const CartScreen: React.FC = () => {
 	const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
 		string | null
 	>(null)
-	const [selectedPaymentProof, setSelectedPaymentProof] = useState<
-		PaymentProof | null
-	>(null)
+	const [selectedPaymentProof, setSelectedPaymentProof] =
+		useState<PaymentProof | null>(null)
 	const [concessionPaymentMethods, setConcessionPaymentMethods] = useState<
 		PaymentMethodTuple[]
 	>([])
@@ -400,7 +399,8 @@ const CartScreen: React.FC = () => {
 					null,
 				availabilityStatus: itemMeta?.availabilityStatus ?? 'not_served_today',
 				itemName: `${splitActiveItem.name} from ${concessionLabel}`,
-				isConcessionOpen: itemMeta?.concessionIsOpen ?? activeGroup.concessionIsOpen,
+				isConcessionOpen:
+					itemMeta?.concessionIsOpen ?? activeGroup.concessionIsOpen,
 			}
 		}
 
@@ -1228,14 +1228,12 @@ const CartScreen: React.FC = () => {
 
 				{content}
 			</DynamicScrollView>
-
 			<AlertModal
 				visible={alertModal.visible}
 				onClose={alertModal.handleClose}
 				title={alertModal.title}
 				message={alertModal.message}
 			/>
-
 			<ConfirmationModal
 				visible={orderConfirmation.visible}
 				onClose={orderConfirmation.hideConfirmation}
@@ -1247,17 +1245,17 @@ const CartScreen: React.FC = () => {
 				onCancel={orderConfirmation.props.onCancel}
 				confirmStyle={orderConfirmation.props.confirmStyle || 'default'}
 			/>
-
-		<OrderScheduleModal
-			visible={scheduleModalVisible}
-			onClose={handleScheduleModalClose}
-			onConfirm={handleScheduleSelectionConfirm}
-			schedule={scheduleModalState.schedule}
-			concessionSchedule={scheduleModalState.concessionSchedule}
-			availabilityStatus={scheduleModalState.availabilityStatus}
-			isConcessionOpen={scheduleModalState.isConcessionOpen}
-			itemName={scheduleModalState.itemName}
-		/>			<PaymentMethodModal
+			<OrderScheduleModal
+				visible={scheduleModalVisible}
+				onClose={handleScheduleModalClose}
+				onConfirm={handleScheduleSelectionConfirm}
+				schedule={scheduleModalState.schedule}
+				concessionSchedule={scheduleModalState.concessionSchedule}
+				availabilityStatus={scheduleModalState.availabilityStatus}
+				isConcessionOpen={scheduleModalState.isConcessionOpen}
+				itemName={scheduleModalState.itemName}
+			/>
+			<PaymentMethodModal
 				visible={paymentModalVisible}
 				onClose={handlePaymentModalClose}
 				onConfirm={handlePaymentMethodConfirm}
