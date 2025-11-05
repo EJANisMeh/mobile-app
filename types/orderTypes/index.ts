@@ -3,6 +3,8 @@ import type {
 	CreateOrderResponse,
 } from '../apiTypes/OrderApiTypes'
 
+export * from './CustomerOrder'
+
 export type OrderMode = CreateOrderPayload['orderMode']
 
 export interface OrderListResponse {
