@@ -55,6 +55,32 @@ export const createPaymentMethodModalStyles = (
 			fontSize: 13,
 			color: colors.textSecondary,
 		},
+		proofBadge: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			marginTop: 6,
+			gap: 4,
+		},
+		proofBadgeText: {
+			fontSize: 12,
+			color: colors.textSecondary,
+			fontStyle: 'italic',
+		},
+		proofNotice: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: 8,
+			marginTop: 16,
+			padding: 12,
+			borderRadius: 8,
+			backgroundColor: colors.primary + '10',
+		},
+		proofNoticeText: {
+			flex: 1,
+			fontSize: 13,
+			color: colors.text,
+			lineHeight: 18,
+		},
 		actionsRow: {
 			flexDirection: 'row',
 			justifyContent: 'flex-end',

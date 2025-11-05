@@ -50,6 +50,8 @@ import {
 	CONCESSION_SCHEDULE_DAY_KEYS,
 	CONCESSION_SCHEDULE_DAY_LABELS,
 } from '../../../utils'
+import { concessionApi } from '../../../services/api'
+import type { PaymentMethodTuple } from '../../../types'
 
 type MenuItemViewRouteProp = RouteProp<CustomerStackParamList, 'MenuItemView'>
 
@@ -85,6 +87,10 @@ const MenuItemViewScreen: React.FC = () => {
 	const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
 		string | null
 	>(null)
+	const [concessionPaymentMethods, setConcessionPaymentMethods] = useState<
+		PaymentMethodTuple[]
+	>([])
+	const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(false)
 
 	const menuItemId = route.params.menuItemId
 
@@ -620,17 +626,57 @@ const MenuItemViewScreen: React.FC = () => {
 		setPaymentModalVisible(false)
 		setPendingScheduleSelection(null)
 		setSelectedPaymentMethod(null)
+		setConcessionPaymentMethods([])
+		setPaymentMethodsLoading(false)
 	}
 
-	const handleScheduleSelectionConfirm = (
+	const handleScheduleSelectionConfirm = async (
 		selection: ScheduleSelectionState
 	) => {
 		setPendingScheduleSelection(selection)
 		setOrderModalVisible(false)
-		setPaymentModalVisible(true)
+
+		// Fetch concession payment methods
+		if (!menuItem?.concession?.id) {
+			alertModal.showAlert({
+				title: 'Unable to Continue',
+				message: 'Concession information is missing. Please try again.',
+			})
+			handleResetOrderFlow()
+			return
+		}
+
+		setPaymentMethodsLoading(true)
+		try {
+			const response = await concessionApi.getConcession(menuItem.concession.id)
+			const concessionData = response.concession_data || response.concession
+			if (response.success && concessionData?.payment_methods) {
+				const methods = Array.isArray(concessionData.payment_methods)
+					? concessionData.payment_methods
+					: []
+				setConcessionPaymentMethods(methods as PaymentMethodTuple[])
+				setPaymentModalVisible(true)
+			} else {
+				throw new Error('Unable to load payment methods')
+			}
+		} catch (err) {
+			alertModal.showAlert({
+				title: 'Unable to Continue',
+				message:
+					'Could not load payment methods for this concession. Please try again.',
+			})
+			handleResetOrderFlow()
+		} finally {
+			setPaymentMethodsLoading(false)
+		}
 	}
 
-	const handlePaymentMethodConfirm = (paymentMethod: string) => {
+	const handlePaymentMethodConfirm = (
+		paymentMethod: string,
+		paymentDetails: string,
+		needsProof: boolean,
+		proofMode: 'text' | 'screenshot' | null
+	) => {
 		setSelectedPaymentMethod(paymentMethod)
 		setPaymentModalVisible(false)
 
@@ -649,18 +695,15 @@ const MenuItemViewScreen: React.FC = () => {
 				? `Scheduled for ${pendingScheduleSelection.scheduledAt.toLocaleString()}.`
 				: 'We will request this order for immediate preparation.'
 
-		const paymentMethodLabel =
-			paymentMethod === 'cash'
-				? 'Cash'
-				: paymentMethod === 'gcash'
-				? 'GCash'
-				: paymentMethod === 'maya'
-				? 'Maya (PayMaya)'
-				: paymentMethod
+		const proofInfo = needsProof
+			? proofMode === 'screenshot'
+				? '\n\nNote: You can submit a payment screenshot now or later in the Orders screen.'
+				: '\n\nNote: You can submit payment details now or later in the Orders screen.'
+			: ''
 
 		orderConfirmation.showConfirmation({
 			title: isScheduled ? 'Confirm Scheduled Order' : 'Confirm Order',
-			message: `${scheduleDetail}\nPayment: ${paymentMethodLabel}\n\nDo you want to continue?`,
+			message: `${scheduleDetail}\nPayment: ${paymentMethod}${proofInfo}\n\nDo you want to continue?`,
 			confirmText: 'Place Order',
 			cancelText: 'Back',
 			onConfirm: () => {
@@ -811,6 +854,7 @@ const MenuItemViewScreen: React.FC = () => {
 				onClose={handlePaymentModalClose}
 				onConfirm={handlePaymentMethodConfirm}
 				selectedMethod={selectedPaymentMethod}
+				concessionPaymentMethods={concessionPaymentMethods}
 			/>
 		</DynamicKeyboardView>
 	)

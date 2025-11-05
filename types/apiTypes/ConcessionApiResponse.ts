@@ -8,5 +8,6 @@ export interface ConcessionApiResponse<T = any> {
 	message?: string
 	error?: string
 	concessionId?: number
+	concession?: ConcessionData
 	concession_data?: ConcessionData
 }

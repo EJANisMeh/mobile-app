@@ -33,7 +33,9 @@ export const concessionApi = {
 			description?: string | null
 			image_url?: string | null
 			is_open?: boolean
-			payment_methods?: string[]
+			payment_methods?: Array<
+				[string, string, boolean, 'text' | 'screenshot' | null]
+			>
 			schedule?: any
 		}
 	): Promise<ConcessionApiResponse> => {

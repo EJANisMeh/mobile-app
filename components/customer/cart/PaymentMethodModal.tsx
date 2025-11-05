@@ -5,40 +5,27 @@ import BaseModal from '../../modals/BaseModal'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createPaymentMethodModalStyles } from '../../../styles/customer'
+import type { PaymentMethodTuple } from '../../../types'
 
 interface PaymentMethodModalProps {
 	visible: boolean
 	onClose: () => void
-	onConfirm: (paymentMethod: string) => void
+	onConfirm: (
+		paymentMethod: string,
+		paymentDetails: string,
+		needsProof: boolean,
+		proofMode: 'text' | 'screenshot' | null
+	) => void
 	selectedMethod: string | null
+	concessionPaymentMethods: PaymentMethodTuple[]
 }
-
-const PAYMENT_METHODS = [
-	{
-		id: 'cash',
-		name: 'Cash',
-		icon: 'cash',
-		description: 'Pay with cash on pickup',
-	},
-	{
-		id: 'gcash',
-		name: 'GCash',
-		icon: 'wallet',
-		description: 'Pay via GCash',
-	},
-	{
-		id: 'maya',
-		name: 'Maya (PayMaya)',
-		icon: 'wallet-outline',
-		description: 'Pay via Maya',
-	},
-] as const
 
 const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 	visible,
 	onClose,
 	onConfirm,
 	selectedMethod,
+	concessionPaymentMethods,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
@@ -55,9 +42,41 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 	}, [visible, selectedMethod])
 
 	const handleConfirm = () => {
-		if (tempSelection) {
-			onConfirm(tempSelection)
+		if (!tempSelection) {
+			return
 		}
+
+		// Find the selected payment method tuple
+		const selectedTuple = concessionPaymentMethods.find(
+			([type]) => type === tempSelection
+		)
+
+		if (!selectedTuple) {
+			return
+		}
+
+		const [type, details, needsProof, proofMode] = selectedTuple
+		onConfirm(type, details, needsProof, proofMode)
+	}
+
+	const getMethodIcon = (type: string): string => {
+		const lowerType = type.toLowerCase()
+		if (lowerType === 'cash') return 'cash'
+		if (lowerType.includes('gcash')) return 'wallet'
+		if (lowerType.includes('maya') || lowerType.includes('paymaya'))
+			return 'wallet-outline'
+		if (lowerType.includes('bank')) return 'bank'
+		return 'credit-card'
+	}
+
+	const getProofLabel = (
+		needsProof: boolean,
+		proofMode: 'text' | 'screenshot' | null
+	): string => {
+		if (!needsProof) return ''
+		if (proofMode === 'text') return 'Text proof required'
+		if (proofMode === 'screenshot') return 'Screenshot required'
+		return ''
 	}
 
 	return (
@@ -74,18 +93,20 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 				</Text>
 
 				<View style={styles.methodsContainer}>
-					{PAYMENT_METHODS.map((method) => {
-						const isSelected = tempSelection === method.id
+					{concessionPaymentMethods.map(([type, details, needsProof, proofMode]) => {
+						const isSelected = tempSelection === type
+						const proofLabel = getProofLabel(needsProof, proofMode)
+
 						return (
 							<TouchableOpacity
-								key={method.id}
+								key={type}
 								style={[
 									styles.methodCard,
 									isSelected && styles.methodCardSelected,
 								]}
-								onPress={() => setTempSelection(method.id)}>
+								onPress={() => setTempSelection(type)}>
 								<MaterialCommunityIcons
-									name={method.icon as any}
+									name={getMethodIcon(type) as any}
 									size={32}
 									color={isSelected ? colors.primary : colors.textSecondary}
 									style={styles.methodIcon}
@@ -96,11 +117,23 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 											styles.methodName,
 											isSelected && styles.methodNameSelected,
 										]}>
-										{method.name}
+										{type}
 									</Text>
-									<Text style={styles.methodDescription}>
-										{method.description}
-									</Text>
+									<Text style={styles.methodDescription}>{details}</Text>
+									{needsProof && proofLabel ? (
+										<View style={styles.proofBadge}>
+											<MaterialCommunityIcons
+												name={
+													proofMode === 'screenshot'
+														? 'camera-outline'
+														: 'text-box-outline'
+												}
+												size={14}
+												color={colors.textSecondary}
+											/>
+											<Text style={styles.proofBadgeText}>{proofLabel}</Text>
+										</View>
+									) : null}
 								</View>
 								{isSelected && (
 									<MaterialCommunityIcons
@@ -113,6 +146,20 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 						)
 					})}
 				</View>
+
+				{tempSelection &&
+				concessionPaymentMethods.find(([type]) => type === tempSelection)?.[2] ? (
+					<View style={styles.proofNotice}>
+						<MaterialCommunityIcons
+							name="information-outline"
+							size={20}
+							color={colors.primary}
+						/>
+						<Text style={styles.proofNoticeText}>
+							You can submit payment proof now or later in the Orders screen.
+						</Text>
+					</View>
+				) : null}
 
 				<View style={styles.actionsRow}>
 					<TouchableOpacity
