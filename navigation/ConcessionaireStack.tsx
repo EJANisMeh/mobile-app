@@ -7,6 +7,7 @@ import { useAuthContext, useConcessionContext } from '../context'
 // Import screen components
 import MenuScreen from '../screens/concessionaire/menu'
 import OrdersScreen from '../screens/concessionaire/orders'
+import OrderDetailsScreen from '../screens/concessionaire/orders/orderDetails'
 import ConcessionScreen from '../screens/concessionaire/concession'
 import EditConcessionDetailsScreen from '../screens/concessionaire/concession/editDetails'
 import ManagePaymentMethodsScreen from '../screens/concessionaire/concession/managePaymentMethods'
@@ -28,7 +29,7 @@ const MainTabs: React.FC = () => {
 			screenOptions={{
 				tabBarActiveTintColor: '#28a745',
 				tabBarInactiveTintColor: '#6c757d',
-				headerShown: true,
+				headerShown: false,
 				headerLeft: () => null,
 			}}>
 			<Tab.Screen
@@ -175,6 +176,16 @@ const ConcessionaireStack: React.FC = () => {
 				options={{
 					headerShown: true,
 					title: 'Edit Menu Item',
+					presentation: 'modal',
+					headerLeft: () => null,
+				}}
+			/>
+			<Stack.Screen
+				name="OrderDetails"
+				component={OrderDetailsScreen}
+				options={{
+					headerShown: true,
+					title: 'Order Details',
 					presentation: 'modal',
 					headerLeft: () => null,
 				}}

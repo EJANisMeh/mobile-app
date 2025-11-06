@@ -4,6 +4,7 @@ import type {
 } from '../apiTypes/OrderApiTypes'
 
 export * from './CustomerOrder'
+export * from './ConcessionOrder'
 
 export type OrderMode = CreateOrderPayload['orderMode']
 
@@ -43,7 +44,8 @@ export interface OrderBackendType {
 	getOrderDetails: (orderId: number) => Promise<OrderDetailsResponse>
 	updateOrderStatus: (
 		orderId: number,
-		statusPayload: Record<string, unknown>
+		statusCode: string,
+		feedback?: string
 	) => Promise<OrderStatusUpdateResponse>
 }
 

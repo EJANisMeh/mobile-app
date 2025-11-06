@@ -8,9 +8,9 @@ export const updateOrderStatus = async (
 ) => {
 	try {
 		const { orderId } = req.params
-		const { status_code, note } = req.body
+		const { statusCode, feedback } = req.body
 
-		if (!status_code) {
+		if (!statusCode) {
 			return res.status(400).json({
 				success: false,
 				error: 'Status code is required',
@@ -20,7 +20,7 @@ export const updateOrderStatus = async (
 		// Get status ID using simplified query
 		const statusResult = await selectOne(prisma, {
 			table: 'order_statuses',
-			where: { code: status_code },
+			where: { code: statusCode },
 		})
 
 		if (!statusResult.success || !statusResult.data) {
@@ -38,7 +38,7 @@ export const updateOrderStatus = async (
 			where: { id: parseInt(orderId) },
 			data: {
 				status_id: status.id,
-				...(note && { concession_note: note }),
+				...(feedback && { concession_note: feedback }),
 			},
 			include: {
 				concession: {

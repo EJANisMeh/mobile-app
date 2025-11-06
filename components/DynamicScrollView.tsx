@@ -98,7 +98,6 @@ const DynamicScrollView = ({
 	// Layout styles (for ScrollView contentContainerStyle prop)
 	const contentContainerStyle: StyleProp<ViewStyle> = [
 		{
-			paddingHorizontal: responsive.getResponsivePadding().horizontal,
 			paddingTop: responsive.getResponsiveSpacing().sm,
 		},
 		autoCenter

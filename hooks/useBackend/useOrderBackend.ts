@@ -40,9 +40,10 @@ export const useOrderBackend = (): OrderBackendType => {
 
 	const updateOrderStatusHandler = (
 		orderId: number,
-		statusPayload: Record<string, unknown>
+		statusCode: string,
+		feedback?: string
 	): Promise<OrderStatusUpdateResponse> =>
-		updateOrderStatus(setProcessing, setError)(orderId, statusPayload)
+		updateOrderStatus(setProcessing, setError)(orderId, statusCode, feedback)
 
 	return {
 		isProcessing,

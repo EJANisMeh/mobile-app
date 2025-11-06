@@ -1,6 +1,8 @@
+import type { PaymentMode } from '../paymentTypes'
+
 export interface OrderStatus {
 	code: string
-	description: string | null
+	description: string
 }
 
 export interface OrderConcession {
@@ -43,7 +45,7 @@ export interface CustomerOrder {
 	concessionId: number | null
 	concession_order_number: number | null
 	total: number
-	payment_mode: any
+	payment_mode: PaymentMode | null
 	payment_proof: any
 	orderMode: 'now' | 'scheduled'
 	scheduledFor: Date | null

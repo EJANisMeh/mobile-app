@@ -43,6 +43,7 @@ export type ConcessionaireStackParamList = {
 	Profile: undefined
 	AddMenuItem: undefined
 	EditMenuItem: { itemId: string }
+	OrderDetails: { orderId: number }
 }
 
 export type NavigationProps = {

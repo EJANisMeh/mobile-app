@@ -65,7 +65,8 @@ export const orderApi = {
 
 	updateOrderStatus: async (
 		orderId: number,
-		statusPayload: Record<string, unknown>
+		statusCode: string,
+		feedback?: string
 	): Promise<OrderStatusUpdateResponse> => {
 		const token = await AsyncStorage.getItem('authToken')
 
@@ -74,9 +75,27 @@ export const orderApi = {
 			{
 				method: 'PUT',
 				headers: token ? { Authorization: `Bearer ${token}` } : {},
-				body: JSON.stringify(statusPayload),
+				body: JSON.stringify({ statusCode, feedback }),
 			}
 		)
+	},
+
+	rescheduleOrder: async (
+		orderId: number,
+		newScheduledDate: Date,
+		feedback: string
+	): Promise<{ success: boolean; message?: string; error?: string }> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall<{
+			success: boolean
+			message?: string
+			error?: string
+		}>(`/orders/reschedule/${orderId}`, {
+			method: 'PUT',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+			body: JSON.stringify({ newScheduledDate, feedback }),
+		})
 	},
 
 	updatePaymentProof: async (

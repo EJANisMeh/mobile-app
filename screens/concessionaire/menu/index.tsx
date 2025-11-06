@@ -87,7 +87,7 @@ const MenuScreen: React.FC = () => {
 	}
 
 	return (
-		<DynamicKeyboardView>
+		<DynamicKeyboardView useSafeArea={true}>
 			<DynamicScrollView
 				styles={styles.container}
 				autoCenter={false}

@@ -9,13 +9,18 @@ export const updateOrderStatus =
 	) =>
 	async (
 		orderId: number,
-		statusPayload: Record<string, unknown>
+		statusCode: string,
+		feedback?: string
 	): Promise<OrderStatusUpdateResponse> => {
 		setProcessing(true)
 		setError(null)
 
 		try {
-			const response = await orderApi.updateOrderStatus(orderId, statusPayload)
+			const response = await orderApi.updateOrderStatus(
+				orderId,
+				statusCode,
+				feedback
+			)
 
 			if (!response.success) {
 				setError(response.error ?? 'Failed to update order status.')
