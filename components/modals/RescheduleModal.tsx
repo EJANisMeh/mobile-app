@@ -201,7 +201,7 @@ const RescheduleModal: React.FC<RescheduleModalProps> = ({
 						style={styles.input}
 						value={feedback}
 						onChangeText={setFeedback}
-						placeholder="Explain why you're rescheduling this order..."
+						placeholder="Explanation of the rescheduling"
 						placeholderTextColor={colors.placeholder}
 						multiline
 						numberOfLines={4}
