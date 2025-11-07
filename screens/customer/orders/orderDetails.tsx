@@ -307,6 +307,13 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 					</View>
 				</View>
 
+				{order.concession_note && (
+					<View style={styles.section}>
+						<Text style={styles.sectionTitle}>Concession Note</Text>
+						<Text style={styles.noteText}>{order.concession_note}</Text>
+					</View>
+				)}
+
 				{/* Show Payment Section First if proof is required but missing */}
 				{showPaymentFirst && (
 					<PaymentInformationSection
@@ -371,13 +378,6 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 							</TouchableOpacity>
 						)}
 					</PaymentInformationSection>
-				)}
-
-				{order.concession_note && (
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Concession Note</Text>
-						<Text style={styles.noteText}>{order.concession_note}</Text>
-					</View>
 				)}
 
 				{/* Cancel Order Button */}

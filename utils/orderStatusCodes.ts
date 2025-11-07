@@ -6,13 +6,12 @@
 
 export const ORDER_STATUS_CODES = {
 	PENDING: 'pending',
-	ACCEPTED: 'accepted',
+	CONFIRMED: 'confirmed',
 	DECLINED: 'declined',
-	PREPARING: 'preparing',
+	READY: 'ready',
 	COMPLETED: 'completed',
 	CANCELLED: 'cancelled',
-	CONFIRMED: 'confirmed',
-	READY: 'ready',
+	ACCEPTED: 'accepted',
 } as const
 
 // Type for order status code values

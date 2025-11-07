@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { getOrderStatusColor } from '../../../utils'
 import type { CustomerOrder } from '../../../types'
 import type { ViewStyle, TextStyle } from 'react-native'
 
@@ -36,25 +37,6 @@ const OrderCard: React.FC<OrderCardProps> = ({
 	formatDate,
 	paymentProofStatus,
 }) => {
-	const getStatusColor = (statusCode: string): string => {
-		switch (statusCode.toLowerCase()) {
-			case 'pending':
-				return '#FFA500'
-			case 'confirmed':
-			case 'preparing':
-				return '#2196F3'
-			case 'ready':
-				return '#4CAF50'
-			case 'completed':
-				return '#8BC34A'
-			case 'cancelled':
-			case 'declined':
-				return '#F44336'
-			default:
-				return '#9E9E9E'
-		}
-	}
-
 	const getOrderModeLabel = (mode: string): string => {
 		return mode === 'now' ? 'Order Now' : 'Scheduled'
 	}
@@ -65,7 +47,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 		return mode === 'now' ? 'clock-fast' : 'calendar-clock'
 	}
 
-	const statusColor = getStatusColor(order.order_statuses.code)
+	const statusColor = getOrderStatusColor(order.order_statuses.code)
 	const isCancelled = order.order_statuses.code.toLowerCase() === 'cancelled'
 
 	// If cancelled, show minimal view

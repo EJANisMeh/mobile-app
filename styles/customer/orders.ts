@@ -52,6 +52,49 @@ export const createCustomerOrdersStyles = (
 		searchIconButton: {
 			padding: 8,
 		},
+		statusFiltersContainer: {
+			backgroundColor: colors.surface,
+			borderBottomWidth: 1,
+			borderBottomColor: colors.border,
+			paddingVertical: responsive.getHeightPercent(1.5),
+		},
+		statusFilterButton: {
+			paddingHorizontal: 16,
+			paddingVertical: 8,
+			borderRadius: 20,
+			backgroundColor: colors.background,
+			borderWidth: 2,
+			borderColor: colors.border,
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: 6,
+		},
+		statusFilterButtonActive: {
+			backgroundColor: colors.surface,
+			borderWidth: 2,
+		},
+		statusFilterText: {
+			fontSize: 14,
+			fontWeight: '600',
+			color: colors.textSecondary,
+		},
+		statusFilterTextActive: {
+			color: colors.text,
+		},
+		statusFilterCount: {
+			fontSize: 12,
+			fontWeight: '600',
+			color: colors.textSecondary,
+			backgroundColor: colors.border,
+			paddingHorizontal: 6,
+			paddingVertical: 2,
+			borderRadius: 10,
+			minWidth: 20,
+			textAlign: 'center',
+		},
+		statusFilterCountActive: {
+			backgroundColor: colors.background,
+		},
 		ordersList: {
 			flex: 1,
 			paddingHorizontal: responsive.getWidthPercent(4),

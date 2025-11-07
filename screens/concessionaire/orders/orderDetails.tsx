@@ -278,7 +278,7 @@ const OrderDetailsScreen: React.FC = () => {
 					</Text>
 					<View style={styles.statusBadge}>
 						<Text style={styles.statusText}>
-							{order.order_statuses?.description || 'Unknown'}
+							{order.order_statuses?.code || 'Unknown'}
 						</Text>
 					</View>
 				</View>
