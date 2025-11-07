@@ -22,9 +22,9 @@ const STATUS_ORDER = [
 	{ code: null, label: 'All' },
 	{ code: 'pending', label: 'Pending' },
 	{ code: 'confirmed', label: 'Confirmed' },
-	{ code: 'declined', label: 'Declined' },
 	{ code: 'ready', label: 'Ready' },
 	{ code: 'completed', label: 'Completed' },
+	{ code: 'declined', label: 'Declined' },
 	{ code: 'cancelled', label: 'Cancelled' },
 ]
 

@@ -10,6 +10,7 @@ import { useFocusEffect, useRoute, RouteProp } from '@react-navigation/native'
 import { DynamicKeyboardView } from '../../../components'
 import {
 	OrderActionButtons,
+	ConfirmedOrderActionButtons,
 	OrderInformationSection,
 	PaymentInformationSection,
 } from '../../../components/concessionaire/orders/orderDetails'
@@ -45,6 +46,8 @@ const OrderDetailsScreen: React.FC = () => {
 	const [acceptModalVisible, setAcceptModalVisible] = useState(false)
 	const [declineModalVisible, setDeclineModalVisible] = useState(false)
 	const [rescheduleModalVisible, setRescheduleModalVisible] = useState(false)
+	const [markReadyModalVisible, setMarkReadyModalVisible] = useState(false)
+	const [cancelOrderModalVisible, setCancelOrderModalVisible] = useState(false)
 
 	const orderId = route.params?.orderId
 
@@ -224,8 +227,97 @@ const OrderDetailsScreen: React.FC = () => {
 		}
 	}
 
+	const handleMarkAsReady = async () => {
+		if (!order) {
+			return
+		}
+		setMarkReadyModalVisible(true)
+	}
+
+	const handleMarkReadyConfirm = async (feedback: string) => {
+		if (!order) {
+			return
+		}
+
+		setProcessing(true)
+		try {
+			const response = await orderApi.updateOrderStatus(
+				order.id,
+				ORDER_STATUS_CODES.READY,
+				feedback
+			)
+
+			if (response.success) {
+				setMarkReadyModalVisible(false)
+				alertModal.showAlert({
+					title: 'Success',
+					message: 'Order marked as ready',
+				})
+				setTimeout(() => {
+					void loadOrderDetails()
+				}, 1500)
+			} else {
+				throw new Error(response.error || 'Failed to mark order as ready')
+			}
+		} catch (err) {
+			console.error('Mark ready error:', err)
+			alertModal.showAlert({
+				title: 'Error',
+				message: 'Failed to mark order as ready. Please try again.',
+			})
+		} finally {
+			setProcessing(false)
+		}
+	}
+
+	const handleCancelOrder = async () => {
+		if (!order) {
+			return
+		}
+		setCancelOrderModalVisible(true)
+	}
+
+	const handleCancelOrderConfirm = async (feedback: string) => {
+		if (!order) {
+			return
+		}
+
+		setProcessing(true)
+		try {
+			const response = await orderApi.updateOrderStatus(
+				order.id,
+				ORDER_STATUS_CODES.CANCELLED,
+				feedback
+			)
+
+			if (response.success) {
+				setCancelOrderModalVisible(false)
+				alertModal.showAlert({
+					title: 'Success',
+					message: 'Order cancelled',
+				})
+				setTimeout(() => {
+					void loadOrderDetails()
+				}, 1500)
+			} else {
+				throw new Error(response.error || 'Failed to cancel order')
+			}
+		} catch (err) {
+			console.error('Cancel order error:', err)
+			alertModal.showAlert({
+				title: 'Error',
+				message: 'Failed to cancel order. Please try again.',
+			})
+		} finally {
+			setProcessing(false)
+		}
+	}
+
 	const canManageOrder =
 		order?.order_statuses?.code === ORDER_STATUS_CODES.PENDING
+
+	const canMarkReady =
+		order?.order_statuses?.code === ORDER_STATUS_CODES.CONFIRMED
 
 	if (loading) {
 		return (
@@ -262,8 +354,7 @@ const OrderDetailsScreen: React.FC = () => {
 	}
 
 	return (
-		<DynamicKeyboardView
-			style={styles.container}>
+		<DynamicKeyboardView style={styles.container}>
 			<ScrollView
 				style={styles.scrollView}
 				contentContainerStyle={styles.scrollContent}
@@ -288,6 +379,17 @@ const OrderDetailsScreen: React.FC = () => {
 						onAcceptOrder={handleAcceptOrder}
 						onDeclineOrder={handleDeclineOrder}
 						onRescheduleOrder={handleRescheduleOrder}
+						isProcessing={processing}
+						colors={colors}
+						styles={styles}
+					/>
+				)}
+
+				{/* Action Buttons for confirmed orders */}
+				{canMarkReady && (
+					<ConfirmedOrderActionButtons
+						onMarkAsReady={handleMarkAsReady}
+						onCancelOrder={handleCancelOrder}
 						isProcessing={processing}
 						colors={colors}
 						styles={styles}
@@ -377,6 +479,34 @@ const OrderDetailsScreen: React.FC = () => {
 				onClose={() => setRescheduleModalVisible(false)}
 				onConfirm={handleRescheduleConfirm}
 				currentScheduledDate={order?.scheduledFor || null}
+				isProcessing={processing}
+			/>
+
+			<FeedbackInputModal
+				visible={markReadyModalVisible}
+				onClose={() => setMarkReadyModalVisible(false)}
+				onConfirm={handleMarkReadyConfirm}
+				title="Mark Order as Ready"
+				message="Optionally provide a note to the customer about their order being ready."
+				confirmText="Mark as Ready"
+				cancelText="Cancel"
+				confirmStyle="default"
+				placeholder="Optionally provide a comment"
+				required={false}
+				isProcessing={processing}
+			/>
+
+			<FeedbackInputModal
+				visible={cancelOrderModalVisible}
+				onClose={() => setCancelOrderModalVisible(false)}
+				onConfirm={handleCancelOrderConfirm}
+				title="Cancel Order"
+				message="Optionally provide a reason for cancelling this order."
+				confirmText="Cancel Order"
+				cancelText="Go Back"
+				confirmStyle="destructive"
+				placeholder="e.g., Unable to fulfill this order..."
+				required={false}
 				isProcessing={processing}
 			/>
 		</DynamicKeyboardView>

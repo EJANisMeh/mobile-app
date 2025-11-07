@@ -109,6 +109,12 @@ export const createConcessionaireOrderDetailsStyles = (
 		rescheduleButton: {
 			backgroundColor: '#f59e0b',
 		},
+		readyButton: {
+			backgroundColor: '#10b981',
+		},
+		cancelButton: {
+			backgroundColor: '#ef4444',
+		},
 		actionButtonText: {
 			fontSize: responsive.getResponsiveFontSize(14),
 			fontWeight: '600' as const,
