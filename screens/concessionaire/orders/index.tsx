@@ -20,6 +20,7 @@ import {
 	OrderSearchBar,
 	OrderFilterModal,
 	OrderSortModal,
+	OrderStatusFilters,
 } from '../../../components/concessionaire/orders'
 import { orderApi } from '../../../services/api'
 import type {
@@ -40,6 +41,9 @@ const OrdersScreen: React.FC = () => {
 	const [error, setError] = useState<string | null>(null)
 	const [filterModalVisible, setFilterModalVisible] = useState(false)
 	const [sortModalVisible, setSortModalVisible] = useState(false)
+	const [selectedStatusFilter, setSelectedStatusFilter] = useState<
+		string | null
+	>('pending')
 
 	const [filters, setFilters] = useState<ConcessionOrderFilters>({
 		searchQuery: '',
@@ -91,6 +95,21 @@ const OrdersScreen: React.FC = () => {
 		}, [loadOrders])
 	)
 
+	const orderCounts = useMemo(() => {
+		const counts: Record<string, number> = {
+			all: orders.length,
+		}
+
+		orders.forEach((order) => {
+			const statusCode = order.order_statuses?.code?.toLowerCase()
+			if (statusCode) {
+				counts[statusCode] = (counts[statusCode] || 0) + 1
+			}
+		})
+
+		return counts
+	}, [orders])
+
 	const availableStatuses = useMemo(() => {
 		const statusSet = new Set<string>()
 		orders.forEach((order) => {
@@ -104,6 +123,15 @@ const OrdersScreen: React.FC = () => {
 	const filteredOrders = useMemo(() => {
 		let result = [...orders]
 
+		// Apply status filter from top filter buttons (takes precedence)
+		if (selectedStatusFilter) {
+			result = result.filter(
+				(order) =>
+					order.order_statuses?.code?.toLowerCase() ===
+					selectedStatusFilter.toLowerCase()
+			)
+		}
+
 		// Apply search by order number or customer email
 		if (filters.searchQuery.trim()) {
 			const query = filters.searchQuery.toLowerCase()
@@ -115,8 +143,8 @@ const OrdersScreen: React.FC = () => {
 			})
 		}
 
-		// Apply status filter
-		if (filters.statusFilters.length > 0) {
+		// Apply status filter from modal (only if no top filter is selected)
+		if (filters.statusFilters.length > 0 && !selectedStatusFilter) {
 			result = result.filter((order) =>
 				filters.statusFilters.includes(order.order_statuses?.code || '')
 			)
@@ -162,7 +190,7 @@ const OrdersScreen: React.FC = () => {
 		}
 
 		return result
-	}, [orders, filters])
+	}, [orders, filters, selectedStatusFilter])
 
 	const sortedOrders = useMemo(() => {
 		const result = [...filteredOrders]
@@ -230,7 +258,7 @@ const OrdersScreen: React.FC = () => {
 	// Reset to page 1 when filters change
 	useEffect(() => {
 		setCurrentPage(1)
-	}, [filters, sortRules])
+	}, [filters, sortRules, selectedStatusFilter])
 
 	const formatCurrency = useCallback(
 		(value: number) => `₱${value.toFixed(2)}`,
@@ -388,16 +416,24 @@ const OrdersScreen: React.FC = () => {
 			</View>
 
 			{user?.concession_id && (
-				<OrderSearchBar
-					searchQuery={filters.searchQuery}
-					onSearchChange={(query) =>
-						setFilters({ ...filters, searchQuery: query })
-					}
-					onFilterPress={() => setFilterModalVisible(true)}
-					onSortPress={() => setSortModalVisible(true)}
-					styles={styles}
-					colors={colors}
-				/>
+				<>
+					<OrderSearchBar
+						searchQuery={filters.searchQuery}
+						onSearchChange={(query) =>
+							setFilters({ ...filters, searchQuery: query })
+						}
+						onFilterPress={() => setFilterModalVisible(true)}
+						onSortPress={() => setSortModalVisible(true)}
+						styles={styles}
+						colors={colors}
+					/>
+					<OrderStatusFilters
+						selectedStatus={selectedStatusFilter}
+						onStatusChange={setSelectedStatusFilter}
+						orderCounts={orderCounts}
+						styles={styles}
+					/>
+				</>
 			)}
 
 			{content}

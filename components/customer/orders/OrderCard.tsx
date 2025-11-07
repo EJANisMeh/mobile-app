@@ -70,7 +70,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 								{ backgroundColor: statusColor, marginTop: 4 },
 							]}>
 							<Text style={styles.orderStatusText}>
-								{order.order_statuses.description || order.order_statuses.code}
+								{order.order_statuses.code}
 							</Text>
 						</View>
 					</View>
@@ -113,7 +113,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 							{ backgroundColor: statusColor, marginTop: 4 },
 						]}>
 						<Text style={styles.orderStatusText}>
-							{order.order_statuses.description || order.order_statuses.code}
+							{order.order_statuses.code}
 						</Text>
 					</View>
 				</View>

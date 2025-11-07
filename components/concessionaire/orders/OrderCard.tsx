@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { getOrderStatusColor } from '../../../utils'
 import type { ConcessionOrder } from '../../../types'
 
 interface OrderCardProps {
@@ -22,27 +23,6 @@ const OrderCard: React.FC<OrderCardProps> = ({
 }) => {
 	const isCancelled = order.order_statuses?.code === 'CANCELLED'
 
-	const getStatusColor = (statusCode: string) => {
-		switch (statusCode) {
-			case 'PENDING':
-				return '#FFA500'
-			case 'CONFIRMED':
-				return '#4CAF50'
-			case 'PREPARING':
-				return '#2196F3'
-			case 'READY':
-				return '#9C27B0'
-			case 'COMPLETED':
-				return '#4CAF50'
-			case 'CANCELLED':
-				return '#F44336'
-			case 'DECLINED':
-				return '#F44336'
-			default:
-				return '#757575'
-		}
-	}
-
 	// Don't show cancelled orders
 	if (isCancelled) {
 		return null
@@ -50,6 +30,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
 	const itemCount = order.orderItems?.length || 0
 	const customerEmail = order.customer?.email || 'Unknown'
+	const statusColor = getOrderStatusColor(order.order_statuses?.code || '')
 
 	return (
 		<TouchableOpacity
@@ -66,7 +47,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 				<View
 					style={[
 						styles.statusBadge,
-						{ backgroundColor: getStatusColor(order.order_statuses?.code) },
+						{ backgroundColor: statusColor },
 					]}>
 					<Text style={styles.statusText}>{order.order_statuses?.code}</Text>
 				</View>

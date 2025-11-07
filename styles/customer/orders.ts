@@ -124,6 +124,7 @@ export const createCustomerOrdersStyles = (
 		orderStatusBadge: {
 			paddingHorizontal: 10,
 			paddingVertical: 4,
+			alignItems: 'center',
 			borderRadius: 12,
 		},
 		orderStatusText: {

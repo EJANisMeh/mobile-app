@@ -23,7 +23,5 @@ export type OrderStatusColorKey = keyof typeof ORDER_STATUS_COLORS
  */
 export const getOrderStatusColor = (statusCode: string): string => {
 	const normalizedCode = statusCode.toUpperCase()
-	return (
-		ORDER_STATUS_COLORS[normalizedCode as OrderStatusColorKey] || '#9E9E9E'
-	)
+	return ORDER_STATUS_COLORS[normalizedCode as OrderStatusColorKey] || '#9E9E9E'
 }
