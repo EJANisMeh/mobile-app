@@ -6,6 +6,7 @@ import {
 } from '../../utils/menuItemSchedule'
 import { ORDER_STATUS_CODES } from '../../utils/orderStatusCodes'
 import { generateConcessionOrderNumber } from './generateConcessionOrderNumber'
+import { createNotification } from '../notification/createNotification'
 
 type OrderMode = 'now' | 'scheduled'
 
@@ -22,7 +23,6 @@ export const createOrder = async (
 			total,
 			payment_mode,
 			payment_proof,
-			concession_note,
 			orderMode,
 			scheduledFor,
 		} = req.body
@@ -152,13 +152,10 @@ export const createOrder = async (
 						  }
 						: undefined,
 					status_id: pendingStatus.id,
-					concession_note: concession_note || null,
 					orderMode: resolvedMode,
 					scheduledFor: scheduledDate,
 				},
-			})
-
-			// Create order items
+			}) // Create order items
 			const createdOrderItems = []
 			for (const item of orderItems) {
 				const orderItem = await tx.orderItem.create({
@@ -182,6 +179,29 @@ export const createOrder = async (
 
 			return { order, orderItems: createdOrderItems }
 		})
+
+		// Create notification for concessionaire
+		const concession = await prisma.concession.findUnique({
+			where: { id: concessionId },
+			include: {
+				users: true, // Get concessionaire users
+			},
+		})
+
+		if (concession && concession.users.length > 0) {
+			// Notify all users associated with this concession
+			for (const user of concession.users) {
+				await createNotification(
+					user.id,
+					'new_order',
+					'New Order Received',
+					`You have a new order #${
+						result.order.concession_order_number || result.order.id
+					}`,
+					result.order.id
+				)
+			}
+		}
 
 		res.status(201).json({
 			success: true,

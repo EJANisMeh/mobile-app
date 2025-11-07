@@ -8,6 +8,7 @@ import customerRoutes from './routes/customerRouter'
 import categoryRoutes from './routes/categoryRouter'
 import menuRoutes from './routes/menuRouter'
 import orderRoutes from './routes/orderRouter'
+import notificationRoutes from './routes/notificationRouter'
 import profileRoutes from './backend/profile/index'
 
 // Load environment variables
@@ -29,6 +30,7 @@ app.use('/api/customer', customerRoutes)
 app.use('/api/category', categoryRoutes)
 app.use('/api/menu', menuRoutes)
 app.use('/api/orders', orderRoutes)
+app.use('/api/notifications', notificationRoutes)
 app.use('/api/profile', profileRoutes)
 
 // Health check endpoint

@@ -1,6 +1,7 @@
 import express from 'express'
 import { prisma, selectOne, deleteQuery } from '../db'
 import { ORDER_STATUS_CODES } from '../../utils/orderStatusCodes'
+import { createNotification } from '../notification/createNotification'
 
 // Cancel an order (only allowed when status is PENDING)
 // For customers: deletes the order completely
@@ -57,6 +58,30 @@ export const cancelOrder = async (
 				success: false,
 				error: 'Failed to cancel order',
 			})
+		}
+
+		// Create notification for concessionaire about customer cancellation
+		if (order.concessionId) {
+			const concession = await prisma.concession.findUnique({
+				where: { id: order.concessionId },
+				include: {
+					users: true,
+				},
+			})
+
+			if (concession && concession.users.length > 0) {
+				for (const user of concession.users) {
+					await createNotification(
+						user.id,
+						'order_cancelled',
+						'Order Cancelled by Customer',
+						`Order #${
+							order.concession_order_number || orderIdInt
+						} was cancelled by the customer`,
+						orderIdInt
+					)
+				}
+			}
 		}
 
 		res.json({
