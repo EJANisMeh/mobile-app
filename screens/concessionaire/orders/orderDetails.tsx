@@ -11,6 +11,7 @@ import { DynamicKeyboardView } from '../../../components'
 import {
 	OrderActionButtons,
 	ConfirmedOrderActionButtons,
+	ReadyOrderActionButtons,
 	OrderInformationSection,
 	PaymentInformationSection,
 } from '../../../components/concessionaire/orders/orderDetails'
@@ -48,6 +49,8 @@ const OrderDetailsScreen: React.FC = () => {
 	const [rescheduleModalVisible, setRescheduleModalVisible] = useState(false)
 	const [markReadyModalVisible, setMarkReadyModalVisible] = useState(false)
 	const [cancelOrderModalVisible, setCancelOrderModalVisible] = useState(false)
+	const [markCompleteModalVisible, setMarkCompleteModalVisible] =
+		useState(false)
 
 	const orderId = route.params?.orderId
 
@@ -313,11 +316,57 @@ const OrderDetailsScreen: React.FC = () => {
 		}
 	}
 
+	const handleMarkAsComplete = async () => {
+		if (!order) {
+			return
+		}
+		setMarkCompleteModalVisible(true)
+	}
+
+	const handleMarkCompleteConfirm = async (feedback: string) => {
+		if (!order) {
+			return
+		}
+
+		setProcessing(true)
+		try {
+			const response = await orderApi.updateOrderStatus(
+				order.id,
+				ORDER_STATUS_CODES.COMPLETED,
+				feedback
+			)
+
+			if (response.success) {
+				setMarkCompleteModalVisible(false)
+				alertModal.showAlert({
+					title: 'Success',
+					message: 'Order marked as complete',
+				})
+				setTimeout(() => {
+					void loadOrderDetails()
+				}, 1500)
+			} else {
+				throw new Error(response.error || 'Failed to mark order as complete')
+			}
+		} catch (err) {
+			console.error('Mark complete error:', err)
+			alertModal.showAlert({
+				title: 'Error',
+				message: 'Failed to mark order as complete. Please try again.',
+			})
+		} finally {
+			setProcessing(false)
+		}
+	}
+
 	const canManageOrder =
 		order?.order_statuses?.code === ORDER_STATUS_CODES.PENDING
 
 	const canMarkReady =
 		order?.order_statuses?.code === ORDER_STATUS_CODES.CONFIRMED
+
+	const canMarkComplete =
+		order?.order_statuses?.code === ORDER_STATUS_CODES.READY
 
 	if (loading) {
 		return (
@@ -389,6 +438,17 @@ const OrderDetailsScreen: React.FC = () => {
 				{canMarkReady && (
 					<ConfirmedOrderActionButtons
 						onMarkAsReady={handleMarkAsReady}
+						onCancelOrder={handleCancelOrder}
+						isProcessing={processing}
+						colors={colors}
+						styles={styles}
+					/>
+				)}
+
+				{/* Action Buttons for ready orders */}
+				{canMarkComplete && (
+					<ReadyOrderActionButtons
+						onMarkAsComplete={handleMarkAsComplete}
 						onCancelOrder={handleCancelOrder}
 						isProcessing={processing}
 						colors={colors}
@@ -506,6 +566,20 @@ const OrderDetailsScreen: React.FC = () => {
 				cancelText="Go Back"
 				confirmStyle="destructive"
 				placeholder="e.g., Unable to fulfill this order..."
+				required={false}
+				isProcessing={processing}
+			/>
+
+			<FeedbackInputModal
+				visible={markCompleteModalVisible}
+				onClose={() => setMarkCompleteModalVisible(false)}
+				onConfirm={handleMarkCompleteConfirm}
+				title="Mark Order as Complete"
+				message="Optionally provide a note to the customer about their completed order."
+				confirmText="Mark as Complete"
+				cancelText="Cancel"
+				confirmStyle="default"
+				placeholder="e.g., Thank you for your order!"
 				required={false}
 				isProcessing={processing}
 			/>

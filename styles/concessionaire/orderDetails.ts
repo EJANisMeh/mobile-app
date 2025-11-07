@@ -112,6 +112,9 @@ export const createConcessionaireOrderDetailsStyles = (
 		readyButton: {
 			backgroundColor: '#10b981',
 		},
+		completeButton: {
+			backgroundColor: '#0ea5e9',
+		},
 		cancelButton: {
 			backgroundColor: '#ef4444',
 		},
