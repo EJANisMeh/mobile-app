@@ -44,11 +44,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 						{order.concession_order_number || order.id}
 					</Text>
 				</View>
-				<View
-					style={[
-						styles.statusBadge,
-						{ backgroundColor: statusColor },
-					]}>
+				<View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
 					<Text style={styles.statusText}>{order.order_statuses?.code}</Text>
 				</View>
 			</View>

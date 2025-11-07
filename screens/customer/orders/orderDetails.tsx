@@ -166,17 +166,18 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 
 		if (order.order_statuses?.code !== ORDER_STATUS_CODES.PENDING) {
 			alertModal.showAlert({
-				title: 'Cannot Cancel',
-				message: 'Only pending orders can be cancelled',
+				title: 'Cannot Delete',
+				message: 'Only pending orders can be deleted',
 			})
 			return
 		}
 
 		// Show confirmation modal
 		confirmationModal.showConfirmation({
-			title: 'Cancel Order',
-			message: 'Are you sure you want to cancel this order?',
-			confirmText: 'Yes, Cancel',
+			title: 'Delete Order',
+			message:
+				'Are you sure you want to delete this order? This action cannot be undone.',
+			confirmText: 'Yes, Delete',
 			cancelText: 'No, Keep Order',
 			confirmStyle: 'destructive',
 			onConfirm: async () => {
@@ -188,20 +189,20 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 					if (response.success) {
 						alertModal.showAlert({
 							title: 'Success',
-							message: 'Order cancelled successfully',
+							message: 'Order deleted successfully',
 						})
 						// Navigate back to orders list
 						setTimeout(() => {
 							navigation.goBack()
 						}, 1500)
 					} else {
-						throw new Error(response.error || 'Failed to cancel order')
+						throw new Error(response.error || 'Failed to delete order')
 					}
 				} catch (err) {
-					console.error('Cancel order error:', err)
+					console.error('Delete order error:', err)
 					alertModal.showAlert({
 						title: 'Error',
-						message: 'Failed to cancel order. Please try again.',
+						message: 'Failed to delete order. Please try again.',
 					})
 				} finally {
 					setCancelling(false)
@@ -380,7 +381,7 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 					</PaymentInformationSection>
 				)}
 
-				{/* Cancel Order Button */}
+				{/* Delete Order Button */}
 				{canCancelOrder && (
 					<TouchableOpacity
 						style={[
@@ -395,7 +396,7 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 								color={colors.surface}
 							/>
 						) : (
-							<Text style={styles.cancelOrderButtonText}>Cancel Order</Text>
+							<Text style={styles.cancelOrderButtonText}>Delete Order</Text>
 						)}
 					</TouchableOpacity>
 				)}

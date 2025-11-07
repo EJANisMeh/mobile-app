@@ -14,81 +14,61 @@ export const createOrderSortModalStyles = (
 		scrollContent: {
 			paddingBottom: 8,
 		},
-		helperText: {
-			fontSize: 14,
+		section: {
+			marginBottom: 24,
+		},
+		sectionTitle: {
+			fontSize: 16,
+			fontWeight: '600',
+			color: colors.text,
+			marginBottom: 8,
+		},
+		sectionHint: {
+			fontSize: 13,
 			color: colors.textSecondary,
-			marginBottom: 16,
-			lineHeight: 20,
+			marginBottom: 12,
 		},
 		sortRuleCard: {
-			backgroundColor: colors.card,
-			borderRadius: 12,
-			padding: 16,
-			marginBottom: 12,
+			backgroundColor: colors.surface,
+			borderRadius: 8,
 			borderWidth: 1,
 			borderColor: colors.border,
+			marginBottom: 12,
+			overflow: 'hidden',
 		},
 		sortRuleHeader: {
 			flexDirection: 'row',
 			justifyContent: 'space-between',
 			alignItems: 'center',
-			marginBottom: 12,
+			padding: 12,
+			backgroundColor: colors.background,
+		},
+		sortRuleInfo: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: 8,
+			flex: 1,
 		},
 		sortRulePriority: {
 			fontSize: 14,
-			fontWeight: '600',
+			fontWeight: '700',
 			color: colors.primary,
-		},
-		sortRuleMoveButtons: {
-			flexDirection: 'row',
-			gap: 8,
-		},
-		sortRuleMoveButton: {
-			padding: 4,
-		},
-		sortRuleMoveButtonDisabled: {
-			opacity: 0.3,
-		},
-		sortRuleRemoveButton: {
-			padding: 4,
-		},
-		sortRuleBody: {
-			gap: 12,
+			width: 20,
 		},
 		sortRuleLabel: {
-			fontSize: 13,
-			color: colors.textSecondary,
-			marginBottom: 4,
-		},
-		sortFieldOptions: {
-			flexDirection: 'row',
-		},
-		sortFieldOption: {
-			paddingVertical: 8,
-			paddingHorizontal: 14,
-			borderRadius: 8,
-			borderWidth: 1,
-			borderColor: colors.border,
-			backgroundColor: colors.surface,
-			marginRight: 8,
-		},
-		sortFieldOptionSelected: {
-			borderColor: colors.primary,
-			backgroundColor: colors.primary + '10',
-		},
-		sortFieldOptionText: {
-			fontSize: 13,
+			fontSize: 14,
+			fontWeight: '500',
 			color: colors.text,
 		},
-		sortFieldOptionTextSelected: {
-			color: colors.primary,
-			fontWeight: '600',
+		removeButton: {
+			padding: 4,
 		},
-		sortDirectionContainer: {
+		sortRuleActions: {
 			flexDirection: 'row',
 			gap: 8,
+			padding: 12,
 		},
-		sortDirectionButton: {
+		directionButton: {
 			flex: 1,
 			flexDirection: 'row',
 			alignItems: 'center',
@@ -96,39 +76,61 @@ export const createOrderSortModalStyles = (
 			gap: 6,
 			paddingVertical: 10,
 			paddingHorizontal: 12,
+			borderRadius: 6,
+			borderWidth: 1,
+			borderColor: colors.border,
+			backgroundColor: colors.surface,
+		},
+		directionButtonActive: {
+			backgroundColor: colors.primary,
+			borderColor: colors.primary,
+		},
+		directionButtonText: {
+			fontSize: 13,
+			fontWeight: '500',
+			color: colors.text,
+		},
+		directionButtonTextActive: {
+			color: colors.surface,
+		},
+		moveButtons: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+			gap: 8,
+			paddingHorizontal: 12,
+			paddingBottom: 12,
+		},
+		moveButton: {
+			width: 36,
+			height: 36,
+			justifyContent: 'center',
+			alignItems: 'center',
+			borderRadius: 6,
+			borderWidth: 1,
+			borderColor: colors.border,
+			backgroundColor: colors.surface,
+		},
+		moveButtonDisabled: {
+			opacity: 0.3,
+		},
+		availableFields: {
+			gap: 8,
+		},
+		availableFieldButton: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: 8,
+			paddingVertical: 12,
+			paddingHorizontal: 16,
 			borderRadius: 8,
 			borderWidth: 1,
 			borderColor: colors.border,
 			backgroundColor: colors.surface,
 		},
-		sortDirectionButtonSelected: {
-			borderColor: colors.primary,
-			backgroundColor: colors.primary,
-		},
-		sortDirectionButtonText: {
-			fontSize: 13,
-			color: colors.textSecondary,
-		},
-		sortDirectionButtonTextSelected: {
-			color: colors.surface,
-			fontWeight: '600',
-		},
-		addSortRuleButton: {
-			flexDirection: 'row',
-			alignItems: 'center',
-			justifyContent: 'center',
-			gap: 8,
-			paddingVertical: 14,
-			borderRadius: 8,
-			borderWidth: 1,
-			borderColor: colors.primary,
-			borderStyle: 'dashed',
-			marginBottom: 16,
-		},
-		addSortRuleButtonText: {
+		availableFieldText: {
+			flex: 1,
 			fontSize: 14,
-			color: colors.primary,
-			fontWeight: '600',
+			color: colors.text,
 		},
 		actionsRow: {
 			flexDirection: 'row',

@@ -42,8 +42,12 @@ const OrderStatusFilters: React.FC<OrderStatusFiltersProps> = ({
 				contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
 				{STATUS_ORDER.map((status) => {
 					const isActive = selectedStatus === status.code
-					const count = status.code ? orderCounts[status.code] || 0 : orderCounts.all || 0
-					const statusColor = status.code ? getOrderStatusColor(status.code) : '#666'
+					const count = status.code
+						? orderCounts[status.code] || 0
+						: orderCounts.all || 0
+					const statusColor = status.code
+						? getOrderStatusColor(status.code)
+						: '#666'
 
 					return (
 						<TouchableOpacity

@@ -5,23 +5,13 @@ import BaseModal from '../../modals/BaseModal'
 import { useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { createOrderSortModalStyles } from '../../../styles/customer'
-import type { SortRule, OrderSortField, SortDirection } from '../../../types'
+import type { SortRule, OrderSortField } from '../../../types'
 
 interface OrderSortModalProps {
 	visible: boolean
 	onClose: () => void
 	onApply: (sortRules: SortRule[]) => void
 	currentSortRules: SortRule[]
-}
-
-const SORT_FIELD_LABELS: Record<OrderSortField, string> = {
-	orderNumber: 'Order Number',
-	concessionName: 'Concession Name',
-	total: 'Total Amount',
-	status: 'Status',
-	orderMode: 'Order Mode',
-	createdAt: 'Order Date',
-	scheduledFor: 'Scheduled Date',
 }
 
 const OrderSortModal: React.FC<OrderSortModalProps> = ({
@@ -38,13 +28,23 @@ const OrderSortModal: React.FC<OrderSortModalProps> = ({
 
 	useEffect(() => {
 		if (visible) {
-			setSortRules(
-				currentSortRules.length > 0
-					? currentSortRules
-					: [{ field: 'createdAt', direction: 'desc' }]
-			)
+			setSortRules(currentSortRules)
 		}
 	}, [visible, currentSortRules])
+
+	const sortFields: Array<{
+		field: OrderSortField
+		label: string
+		icon: keyof typeof MaterialCommunityIcons.glyphMap
+	}> = [
+		{ field: 'orderNumber', label: 'Order Number', icon: 'numeric' },
+		{ field: 'concessionName', label: 'Concession Name', icon: 'store' },
+		{ field: 'total', label: 'Total Price', icon: 'currency-php' },
+		{ field: 'status', label: 'Status', icon: 'flag' },
+		{ field: 'orderMode', label: 'Order Mode', icon: 'flash' },
+		{ field: 'createdAt', label: 'Order Date', icon: 'calendar' },
+		{ field: 'scheduledFor', label: 'Scheduled For', icon: 'clock-outline' },
+	]
 
 	const handleApply = () => {
 		onApply(sortRules)
@@ -55,45 +55,40 @@ const OrderSortModal: React.FC<OrderSortModalProps> = ({
 		setSortRules([{ field: 'createdAt', direction: 'desc' }])
 	}
 
-	const addSortRule = () => {
-		const availableFields = Object.keys(SORT_FIELD_LABELS).filter(
-			(field) => !sortRules.some((rule) => rule.field === field)
-		) as OrderSortField[]
+	const handleAddSortField = (field: OrderSortField) => {
+		const existingIndex = sortRules.findIndex((rule) => rule.field === field)
 
-		if (availableFields.length > 0) {
-			setSortRules([
-				...sortRules,
-				{ field: availableFields[0], direction: 'asc' },
-			])
-		}
-	}
-
-	const removeSortRule = (index: number) => {
-		if (sortRules.length > 1) {
-			setSortRules(sortRules.filter((_, i) => i !== index))
-		}
-	}
-
-	const updateSortRule = (
-		index: number,
-		field: OrderSortField,
-		direction: SortDirection
-	) => {
-		const newRules = [...sortRules]
-		newRules[index] = { field, direction }
-		setSortRules(newRules)
-	}
-
-	const moveSortRule = (index: number, direction: 'up' | 'down') => {
-		if (
-			(direction === 'up' && index === 0) ||
-			(direction === 'down' && index === sortRules.length - 1)
-		) {
+		if (existingIndex !== -1) {
 			return
 		}
 
+		setSortRules([...sortRules, { field, direction: 'asc' }])
+	}
+
+	const handleRemoveSortField = (index: number) => {
+		const newRules = sortRules.filter((_, i) => i !== index)
+		if (newRules.length === 0) {
+			setSortRules([{ field: 'createdAt', direction: 'desc' }])
+		} else {
+			setSortRules(newRules)
+		}
+	}
+
+	const handleToggleDirection = (index: number) => {
+		const newRules = [...sortRules]
+		newRules[index].direction =
+			newRules[index].direction === 'asc' ? 'desc' : 'asc'
+		setSortRules(newRules)
+	}
+
+	const handleMoveSortField = (index: number, direction: 'up' | 'down') => {
 		const newRules = [...sortRules]
 		const targetIndex = direction === 'up' ? index - 1 : index + 1
+
+		if (targetIndex < 0 || targetIndex >= newRules.length) {
+			return
+		}
+
 		;[newRules[index], newRules[targetIndex]] = [
 			newRules[targetIndex],
 			newRules[index],
@@ -101,14 +96,17 @@ const OrderSortModal: React.FC<OrderSortModalProps> = ({
 		setSortRules(newRules)
 	}
 
-	const getAvailableFields = (currentIndex: number): OrderSortField[] => {
-		return Object.keys(SORT_FIELD_LABELS).filter(
-			(field) =>
-				!sortRules.some(
-					(rule, idx) => rule.field === field && idx !== currentIndex
-				)
-		) as OrderSortField[]
+	const getFieldLabel = (field: OrderSortField) => {
+		return sortFields.find((f) => f.field === field)?.label || field
 	}
+
+	const getFieldIcon = (field: OrderSortField) => {
+		return sortFields.find((f) => f.field === field)?.icon || 'sort'
+	}
+
+	const availableFields = sortFields.filter(
+		(field) => !sortRules.find((rule) => rule.field === field.field)
+	)
 
 	return (
 		<BaseModal
@@ -119,174 +117,153 @@ const OrderSortModal: React.FC<OrderSortModalProps> = ({
 				style={styles.scrollArea}
 				contentContainerStyle={styles.scrollContent}
 				showsVerticalScrollIndicator={true}>
-				<Text style={styles.helperText}>
-					Set sort priority by dragging rules up or down. First rule has highest
-					priority.
-				</Text>
-
-				{sortRules.map((rule, index) => {
-					const availableFields = getAvailableFields(index)
-
-					return (
+				{/* Active Sort Rules */}
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Sort Priority</Text>
+					<Text style={styles.sectionHint}>
+						Orders are sorted by the first rule, then by the second, and so on.
+					</Text>
+					{sortRules.map((rule, index) => (
 						<View
-							key={index}
+							key={`${rule.field}-${index}`}
 							style={styles.sortRuleCard}>
 							<View style={styles.sortRuleHeader}>
-								<Text style={styles.sortRulePriority}>
-									{index + 1}
-									{index === 0
-										? 'st'
-										: index === 1
-										? 'nd'
-										: index === 2
-										? 'rd'
-										: 'th'}{' '}
-									Priority
-								</Text>
-								<View style={styles.sortRuleMoveButtons}>
+								<View style={styles.sortRuleInfo}>
+									<Text style={styles.sortRulePriority}>{index + 1}.</Text>
+									<MaterialCommunityIcons
+										name={getFieldIcon(rule.field)}
+										size={20}
+										color={colors.primary}
+									/>
+									<Text style={styles.sortRuleLabel}>
+										{getFieldLabel(rule.field)}
+									</Text>
+								</View>
+								<TouchableOpacity
+									style={styles.removeButton}
+									onPress={() => handleRemoveSortField(index)}>
+									<MaterialCommunityIcons
+										name="close"
+										size={20}
+										color={colors.error}
+									/>
+								</TouchableOpacity>
+							</View>
+							<View style={styles.sortRuleActions}>
+								<TouchableOpacity
+									style={[
+										styles.directionButton,
+										rule.direction === 'asc' && styles.directionButtonActive,
+									]}
+									onPress={() => handleToggleDirection(index)}>
+									<MaterialCommunityIcons
+										name="arrow-up"
+										size={16}
+										color={
+											rule.direction === 'asc' ? colors.surface : colors.text
+										}
+									/>
+									<Text
+										style={[
+											styles.directionButtonText,
+											rule.direction === 'asc' &&
+												styles.directionButtonTextActive,
+										]}>
+										Ascending
+									</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									style={[
+										styles.directionButton,
+										rule.direction === 'desc' && styles.directionButtonActive,
+									]}
+									onPress={() => handleToggleDirection(index)}>
+									<MaterialCommunityIcons
+										name="arrow-down"
+										size={16}
+										color={
+											rule.direction === 'desc' ? colors.surface : colors.text
+										}
+									/>
+									<Text
+										style={[
+											styles.directionButtonText,
+											rule.direction === 'desc' &&
+												styles.directionButtonTextActive,
+										]}>
+										Descending
+									</Text>
+								</TouchableOpacity>
+							</View>
+							{sortRules.length > 1 && (
+								<View style={styles.moveButtons}>
 									<TouchableOpacity
 										style={[
-											styles.sortRuleMoveButton,
-											index === 0 && styles.sortRuleMoveButtonDisabled,
+											styles.moveButton,
+											index === 0 && styles.moveButtonDisabled,
 										]}
-										onPress={() => moveSortRule(index, 'up')}
+										onPress={() => handleMoveSortField(index, 'up')}
 										disabled={index === 0}>
 										<MaterialCommunityIcons
 											name="chevron-up"
 											size={20}
-											color={index === 0 ? colors.border : colors.primary}
+											color={
+												index === 0 ? colors.textSecondary : colors.primary
+											}
 										/>
 									</TouchableOpacity>
 									<TouchableOpacity
 										style={[
-											styles.sortRuleMoveButton,
+											styles.moveButton,
 											index === sortRules.length - 1 &&
-												styles.sortRuleMoveButtonDisabled,
+												styles.moveButtonDisabled,
 										]}
-										onPress={() => moveSortRule(index, 'down')}
+										onPress={() => handleMoveSortField(index, 'down')}
 										disabled={index === sortRules.length - 1}>
 										<MaterialCommunityIcons
 											name="chevron-down"
 											size={20}
 											color={
 												index === sortRules.length - 1
-													? colors.border
+													? colors.textSecondary
 													: colors.primary
 											}
 										/>
 									</TouchableOpacity>
-									{sortRules.length > 1 && (
-										<TouchableOpacity
-											style={styles.sortRuleRemoveButton}
-											onPress={() => removeSortRule(index)}>
-											<MaterialCommunityIcons
-												name="close"
-												size={20}
-												color={colors.error}
-											/>
-										</TouchableOpacity>
-									)}
 								</View>
-							</View>
-
-							<View style={styles.sortRuleBody}>
-								<Text style={styles.sortRuleLabel}>Sort by</Text>
-								<ScrollView
-									horizontal
-									style={styles.sortFieldOptions}
-									showsHorizontalScrollIndicator={false}>
-									{availableFields.map((field) => (
-										<TouchableOpacity
-											key={field}
-											style={[
-												styles.sortFieldOption,
-												rule.field === field && styles.sortFieldOptionSelected,
-											]}
-											onPress={() =>
-												updateSortRule(index, field, rule.direction)
-											}>
-											<Text
-												style={[
-													styles.sortFieldOptionText,
-													rule.field === field &&
-														styles.sortFieldOptionTextSelected,
-												]}>
-												{SORT_FIELD_LABELS[field]}
-											</Text>
-										</TouchableOpacity>
-									))}
-								</ScrollView>
-
-								<View style={styles.sortDirectionContainer}>
-									<TouchableOpacity
-										style={[
-											styles.sortDirectionButton,
-											rule.direction === 'asc' &&
-												styles.sortDirectionButtonSelected,
-										]}
-										onPress={() => updateSortRule(index, rule.field, 'asc')}>
-										<MaterialCommunityIcons
-											name="sort-ascending"
-											size={20}
-											color={
-												rule.direction === 'asc'
-													? colors.surface
-													: colors.textSecondary
-											}
-										/>
-										<Text
-											style={[
-												styles.sortDirectionButtonText,
-												rule.direction === 'asc' &&
-													styles.sortDirectionButtonTextSelected,
-											]}>
-											Ascending
-										</Text>
-									</TouchableOpacity>
-									<TouchableOpacity
-										style={[
-											styles.sortDirectionButton,
-											rule.direction === 'desc' &&
-												styles.sortDirectionButtonSelected,
-										]}
-										onPress={() => updateSortRule(index, rule.field, 'desc')}>
-										<MaterialCommunityIcons
-											name="sort-descending"
-											size={20}
-											color={
-												rule.direction === 'desc'
-													? colors.surface
-													: colors.textSecondary
-											}
-										/>
-										<Text
-											style={[
-												styles.sortDirectionButtonText,
-												rule.direction === 'desc' &&
-													styles.sortDirectionButtonTextSelected,
-											]}>
-											Descending
-										</Text>
-									</TouchableOpacity>
-								</View>
-							</View>
+							)}
 						</View>
-					)
-				})}
+					))}
+				</View>
 
-				{sortRules.length < Object.keys(SORT_FIELD_LABELS).length && (
-					<TouchableOpacity
-						style={styles.addSortRuleButton}
-						onPress={addSortRule}>
-						<MaterialCommunityIcons
-							name="plus-circle"
-							size={24}
-							color={colors.primary}
-						/>
-						<Text style={styles.addSortRuleButtonText}>Add Sort Rule</Text>
-					</TouchableOpacity>
+				{/* Available Fields */}
+				{availableFields.length > 0 && (
+					<View style={styles.section}>
+						<Text style={styles.sectionTitle}>Add Sort Field</Text>
+						<View style={styles.availableFields}>
+							{availableFields.map((field) => (
+								<TouchableOpacity
+									key={field.field}
+									style={styles.availableFieldButton}
+									onPress={() => handleAddSortField(field.field)}>
+									<MaterialCommunityIcons
+										name={field.icon}
+										size={18}
+										color={colors.primary}
+									/>
+									<Text style={styles.availableFieldText}>{field.label}</Text>
+									<MaterialCommunityIcons
+										name="plus"
+										size={18}
+										color={colors.primary}
+									/>
+								</TouchableOpacity>
+							))}
+						</View>
+					</View>
 				)}
 
+				{/* Action Buttons */}
 				<View style={styles.actionsRow}>
 					<TouchableOpacity
 						style={[styles.actionButton, styles.resetButton]}

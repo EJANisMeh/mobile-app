@@ -258,35 +258,6 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 		setDatePreset('all')
 	}
 
-	const handleStatusToggle = (status: string) => {
-		const currentStatuses = filters.statusFilters
-
-		if (status === 'all') {
-			// If "All Statuses" is pressed, clear all selections
-			setFilters({ ...filters, statusFilters: [] })
-		} else {
-			// Check if status is already selected
-			const isSelected = currentStatuses.includes(status)
-
-			if (isSelected) {
-				// Deselect the status
-				const newStatuses = currentStatuses.filter((s) => s !== status)
-				setFilters({ ...filters, statusFilters: newStatuses })
-			} else {
-				// Add the status
-				const newStatuses = [...currentStatuses, status]
-
-				// Check if all available statuses are now selected
-				if (newStatuses.length === availableStatuses.length) {
-					// All statuses selected = All Statuses behavior, so clear all
-					setFilters({ ...filters, statusFilters: [] })
-				} else {
-					setFilters({ ...filters, statusFilters: newStatuses })
-				}
-			}
-		}
-	}
-
 	const handleModeToggle = (mode: 'now' | 'scheduled') => {
 		const currentModes = filters.orderModeFilters
 
@@ -421,47 +392,6 @@ const OrderFilterModal: React.FC<OrderFilterModalProps> = ({
 					</View>
 				</View>
 
-				{/* Status Filter */}
-				<View style={styles.filterSection}>
-					<Text style={styles.filterSectionTitle}>Order Status</Text>
-					<View style={styles.filterOptions}>
-						<TouchableOpacity
-							style={[
-								styles.filterOption,
-								filters.statusFilters.length === 0 &&
-									styles.filterOptionSelected,
-							]}
-							onPress={() => handleStatusToggle('all')}>
-							<Text
-								style={[
-									styles.filterOptionText,
-									filters.statusFilters.length === 0 &&
-										styles.filterOptionTextSelected,
-								]}>
-								All Statuses
-							</Text>
-						</TouchableOpacity>
-						{availableStatuses.map((status) => (
-							<TouchableOpacity
-								key={status}
-								style={[
-									styles.filterOption,
-									filters.statusFilters.includes(status) &&
-										styles.filterOptionSelected,
-								]}
-								onPress={() => handleStatusToggle(status)}>
-								<Text
-									style={[
-										styles.filterOptionText,
-										filters.statusFilters.includes(status) &&
-											styles.filterOptionTextSelected,
-									]}>
-									{status}
-								</Text>
-							</TouchableOpacity>
-						))}
-					</View>
-				</View>
 				{/* Order Mode Filter */}
 				<View style={styles.filterSection}>
 					<Text style={styles.filterSectionTitle}>Order Mode</Text>

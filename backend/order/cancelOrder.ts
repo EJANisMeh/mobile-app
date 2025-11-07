@@ -1,8 +1,9 @@
 import express from 'express'
-import { prisma, selectOne, updateQuery } from '../db'
+import { prisma, selectOne, deleteQuery } from '../db'
 import { ORDER_STATUS_CODES } from '../../utils/orderStatusCodes'
 
 // Cancel an order (only allowed when status is PENDING)
+// For customers: deletes the order completely
 export const cancelOrder = async (
 	req: express.Request,
 	res: express.Response
@@ -45,31 +46,13 @@ export const cancelOrder = async (
 			})
 		}
 
-		// Get cancelled status ID
-		const cancelledStatusResult = await selectOne(prisma, {
-			table: 'order_statuses',
-			where: { code: ORDER_STATUS_CODES.CANCELLED },
-		})
-
-		if (!cancelledStatusResult.success || !cancelledStatusResult.data) {
-			return res.status(500).json({
-				success: false,
-				error: 'Order status configuration error',
-			})
-		}
-
-		const cancelledStatus = cancelledStatusResult.data
-
-		// Update order status to cancelled
-		const updateResult = await updateQuery(prisma, {
+		// Delete the order (cascade will delete order items)
+		const deleteResult = await deleteQuery(prisma, {
 			table: 'order',
 			where: { id: orderIdInt },
-			data: {
-				status_id: cancelledStatus.id,
-			},
 		})
 
-		if (!updateResult.success) {
+		if (!deleteResult.success) {
 			return res.status(500).json({
 				success: false,
 				error: 'Failed to cancel order',
