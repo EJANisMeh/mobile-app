@@ -102,7 +102,6 @@ const MenuItemViewScreen: React.FC = () => {
 
 	const menuItemId = route.params.menuItemId
 
-	useHideNavBar()
 
 	// Load menu item data
 	useEffect(() => {
@@ -806,7 +805,7 @@ const MenuItemViewScreen: React.FC = () => {
 	}
 
 	return (
-		<DynamicKeyboardView>
+		<DynamicKeyboardView useSafeArea={true}>
 			<DynamicScrollView showsVerticalScrollIndicator={false}>
 				{/* Header: Name and Categories */}
 				<MenuItemHeader menuItem={menuItem} />

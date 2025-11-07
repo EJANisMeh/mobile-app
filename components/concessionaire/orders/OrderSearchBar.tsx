@@ -30,7 +30,7 @@ const OrderSearchBar: React.FC<OrderSearchBarProps> = ({
 				/>
 				<TextInput
 					style={styles.searchInput}
-					placeholder="Search by order # or customer email..."
+					placeholder="Search by order# or email"
 					placeholderTextColor={colors.textSecondary}
 					value={searchQuery}
 					onChangeText={onSearchChange}

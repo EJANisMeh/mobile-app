@@ -66,7 +66,7 @@ const ConcessionScreen: React.FC = () => {
 	}
 
 	return (
-		<DynamicKeyboardView>
+		<DynamicKeyboardView useSafeArea={true}>
 			<DynamicScrollView
 				styles={concessionStyles.container}
 				autoCenter={false}

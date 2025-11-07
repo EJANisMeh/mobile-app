@@ -174,7 +174,7 @@ const MenuScreen: React.FC = () => {
 	}
 
 	return (
-		<DynamicKeyboardView useSafeArea={false}>
+		<DynamicKeyboardView useSafeArea={true}>
 			<DynamicScrollView
 				styles={customerMenuStyles.container}
 				showsVerticalScrollIndicator={true}>

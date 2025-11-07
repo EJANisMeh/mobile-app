@@ -286,8 +286,7 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 
 	return (
 		<DynamicKeyboardView
-			style={styles.container}
-			useSafeArea={true}>
+			style={styles.container}>
 			<ScrollView
 				style={styles.scrollView}
 				contentContainerStyle={styles.scrollContent}

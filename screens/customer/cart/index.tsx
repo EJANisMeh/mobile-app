@@ -1264,7 +1264,7 @@ const CartScreen: React.FC = () => {
 	}
 
 	return (
-		<DynamicKeyboardView>
+		<DynamicKeyboardView useSafeArea={true}>
 			<DynamicScrollView
 				style={styles.container}
 				showsVerticalScrollIndicator>
