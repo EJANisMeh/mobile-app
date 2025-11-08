@@ -37,14 +37,16 @@ const VariationModeSelection: React.FC<VariationModeSelectionProps> = ({
 						showAlert({
 							title: 'Mode Help',
 							message:
-								'Custom: options specific to this menu item.\n\nCategory: include all menu items in a specified category.\n\nExisting Items: include individual existing items as options.',
+								'Custom: options specific to this menu item.\n\nSingle Category: include all menu items from one category.\n\nMulti Category: include menu items from multiple categories with a category selector.\n\nExisting Items: include individual existing items as options.',
 						})
 					}>
 					<Text style={styles.helpButtonText}>?</Text>
 				</TouchableOpacity>
 			</View>
 			<View style={styles.modeButtonsContainer}>
-				{(['custom', 'category', 'existing'] as const).map((mode) => (
+				{(
+					['custom', 'single-category', 'multi-category', 'existing'] as const
+				).map((mode) => (
 					<TouchableOpacity
 						key={mode}
 						onPress={() => handleUpdateVariationGroup(groupIndex, 'mode', mode)}
@@ -63,8 +65,10 @@ const VariationModeSelection: React.FC<VariationModeSelectionProps> = ({
 							]}>
 							{mode === 'custom'
 								? 'Custom'
-								: mode === 'category'
-								? 'Category'
+								: mode === 'single-category'
+								? 'Single Category'
+								: mode === 'multi-category'
+								? 'Multi Category'
 								: 'Existing Items'}
 						</Text>
 					</TouchableOpacity>

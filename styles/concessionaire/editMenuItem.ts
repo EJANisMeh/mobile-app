@@ -93,6 +93,10 @@ export const createConcessionaireEditMenuItemStyles = (
 			backgroundColor: colors.primary,
 			borderColor: colors.primary,
 		},
+		scheduleDayButtonDisabled: {
+			opacity: 0.4,
+			backgroundColor: colors.background,
+		},
 		scheduleDayText: {
 			fontSize: responsive.getResponsiveFontSize(13),
 			fontWeight: '600' as const,
@@ -100,6 +104,9 @@ export const createConcessionaireEditMenuItemStyles = (
 		},
 		scheduleDayTextActive: {
 			color: colors.textOnPrimary,
+		},
+		scheduleDayTextDisabled: {
+			color: colors.textSecondary,
 		},
 		scheduleHintText: {
 			fontSize: responsive.getResponsiveFontSize(12),
@@ -520,6 +527,47 @@ export const createConcessionaireEditMenuItemStyles = (
 		// Multi Limit Container
 		multiLimitContainer: {
 			marginBottom: spacing.xs,
+		},
+		multiLimitInputRow: {
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			gap: spacing.xs,
+		},
+		multiLimitButton: {
+			width: 40,
+			height: 40,
+			borderRadius: 8,
+			borderWidth: 1,
+			borderColor: colors.border,
+			backgroundColor: colors.surface,
+			alignItems: 'center' as const,
+			justifyContent: 'center' as const,
+		},
+		multiLimitButtonDisabled: {
+			opacity: 0.4,
+			backgroundColor: colors.background,
+		},
+		multiLimitButtonText: {
+			fontSize: responsive.getResponsiveFontSize(18),
+			fontWeight: '600' as const,
+			color: colors.primary,
+		},
+		multiLimitValueContainer: {
+			flex: 1,
+			paddingVertical: spacing.xs,
+			paddingHorizontal: spacing.sm,
+			borderRadius: 8,
+			borderWidth: 1,
+			borderColor: colors.border,
+			backgroundColor: colors.background,
+			alignItems: 'center' as const,
+			justifyContent: 'center' as const,
+			minHeight: 40,
+		},
+		multiLimitValue: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			fontWeight: '500' as const,
+			color: colors.text,
 		},
 
 		// Variation Add Button Inline

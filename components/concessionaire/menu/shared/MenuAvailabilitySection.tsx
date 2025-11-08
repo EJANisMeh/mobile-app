@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { View, Text, TouchableOpacity } from 'react-native'
-import { useThemeContext } from '../../../../context'
+import { useThemeContext, useConcessionContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import {
 	createConcessionaireAddMenuItemStyles,
@@ -12,10 +12,12 @@ import {
 	getMenuItemScheduleSummary,
 	normalizeMenuItemSchedule,
 	hasAnyMenuItemScheduleDay,
+	normalizeConcessionSchedule,
 } from '../../../../utils'
 import type {
 	MenuItemAvailabilitySchedule,
 	MenuItemDayKey,
+	ConcessionSchedule,
 } from '../../../../types'
 
 export type MenuAvailabilitySectionVariant = 'add' | 'edit'
@@ -35,6 +37,7 @@ const MenuAvailabilitySection: React.FC<MenuAvailabilitySectionProps> = ({
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
+	const { concession } = useConcessionContext()
 
 	const styles = useMemo(() => {
 		return variant === 'edit'
@@ -47,12 +50,31 @@ const MenuAvailabilitySection: React.FC<MenuAvailabilitySectionProps> = ({
 		[schedule]
 	)
 
+	// Get concession's working days
+	const concessionSchedule = useMemo(
+		() => normalizeConcessionSchedule(concession?.schedule ?? undefined),
+		[concession?.schedule]
+	)
+
+	// Get available days based on concession schedule
+	const availableDays = useMemo(() => {
+		return CONCESSION_SCHEDULE_DAY_KEYS.filter((dayKey) => {
+			const daySchedule = concessionSchedule[dayKey]
+			return daySchedule?.isOpen === true
+		})
+	}, [concessionSchedule])
+
 	const summary = useMemo(
 		() => getMenuItemScheduleSummary(normalized),
 		[normalized]
 	)
 
 	const handleToggleDay = (dayKey: MenuItemDayKey) => {
+		// Only allow toggling if day is available in concession schedule
+		if (!availableDays.includes(dayKey)) {
+			return
+		}
+
 		onChange({
 			...normalized,
 			[dayKey]: !normalized[dayKey],
@@ -60,16 +82,12 @@ const MenuAvailabilitySection: React.FC<MenuAvailabilitySectionProps> = ({
 	}
 
 	const handleSelectAll = () => {
-		onChange({
-			...normalized,
-			monday: true,
-			tuesday: true,
-			wednesday: true,
-			thursday: true,
-			friday: true,
-			saturday: true,
-			sunday: true,
+		// Only select days that are available in concession schedule
+		const updatedSchedule = { ...normalized }
+		availableDays.forEach((dayKey) => {
+			updatedSchedule[dayKey as MenuItemDayKey] = true
 		})
+		onChange(updatedSchedule)
 	}
 
 	const handleClearAll = () => {
@@ -107,18 +125,22 @@ const MenuAvailabilitySection: React.FC<MenuAvailabilitySectionProps> = ({
 			<View style={styles.scheduleDayGrid}>
 				{CONCESSION_SCHEDULE_DAY_KEYS.map((dayKey) => {
 					const isActive = Boolean(normalized[dayKey as MenuItemDayKey])
+					const isAvailable = availableDays.includes(dayKey)
 					return (
 						<TouchableOpacity
 							key={dayKey}
 							style={[
 								styles.scheduleDayButton,
 								isActive && styles.scheduleDayButtonActive,
+								!isAvailable && styles.scheduleDayButtonDisabled,
 							]}
-							onPress={() => handleToggleDay(dayKey as MenuItemDayKey)}>
+							onPress={() => handleToggleDay(dayKey as MenuItemDayKey)}
+							disabled={!isAvailable}>
 							<Text
 								style={[
 									styles.scheduleDayText,
 									isActive && styles.scheduleDayTextActive,
+									!isAvailable && styles.scheduleDayTextDisabled,
 								]}>
 								{CONCESSION_SCHEDULE_DAY_LABELS[dayKey].slice(0, 3)}
 							</Text>

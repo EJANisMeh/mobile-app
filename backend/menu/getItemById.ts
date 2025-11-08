@@ -68,10 +68,14 @@ export const getItemById = async (
 			})
 		}
 
-		// For variation groups with kind 'category_filter', fetch menu items from the category
+		// For variation groups with kind 'single_category_filter' or 'category_filter' (legacy), fetch menu items from the category
 		if (menuItem.menu_item_variation_groups) {
 			for (const group of menuItem.menu_item_variation_groups) {
-				if (group.kind === 'category_filter' && group.category_filter_id) {
+				if (
+					(group.kind === 'single_category_filter' ||
+						group.kind === 'category_filter') &&
+					group.category_filter_id
+				) {
 					// Fetch menu items that belong to this category from the same concession
 					const categoryMenuItems = await prisma.menuItem.findMany({
 						where: {

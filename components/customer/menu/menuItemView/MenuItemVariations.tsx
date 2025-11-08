@@ -42,8 +42,11 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 							setVariationSelections={setVariationSelections}
 						/>
 					)
-				} else if (group.kind === 'category_filter') {
-					// Category mode uses menu items from category
+				} else if (
+					group.kind === 'single_category_filter' ||
+					group.kind === 'category_filter'
+				) {
+					// Single category mode uses menu items from one category
 					return (
 						<VariationGroupCategory
 							key={group.id}
@@ -51,6 +54,18 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 							selection={selection}
 							setVariationSelections={setVariationSelections}
 						/>
+					)
+				} else if (group.kind === 'multi_category_filter') {
+					// Multi category mode - coming soon
+					return (
+						<View
+							key={group.id}
+							style={styles.variationGroup}>
+							<Text style={styles.variationGroupName}>{group.name}</Text>
+							<Text style={styles.variationGroupName}>
+								Multi-category variation (Coming soon)
+							</Text>
+						</View>
 					)
 				}
 

@@ -130,8 +130,8 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 						handleUpdateVariationGroup={handleUpdateVariationGroup}
 					/>
 
-					{/* Category Filter (for category mode) */}
-					{group.mode === 'category' && (
+					{/* Category Filter (for single-category mode) */}
+					{group.mode === 'single-category' && (
 						<VariationCategory
 							group={group}
 							groupIndex={groupIndex}
@@ -143,6 +143,21 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 					{errors[`variation-${groupIndex}-categoryFilterId`] && (
 						<Text style={styles.errorText}>
 							{errors[`variation-${groupIndex}-categoryFilterId`]}
+						</Text>
+					)}
+
+					{/* Multi Category Filter (for multi-category mode) */}
+					{group.mode === 'multi-category' && (
+						<>
+							<Text style={styles.sectionTitle}>Select Categories:</Text>
+							<Text style={styles.variationGroupName}>
+								Coming soon: Multi-category selection
+							</Text>
+						</>
+					)}
+					{errors[`variation-${groupIndex}-categoryFilterIds`] && (
+						<Text style={styles.errorText}>
+							{errors[`variation-${groupIndex}-categoryFilterIds`]}
 						</Text>
 					)}
 

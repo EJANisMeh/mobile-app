@@ -196,14 +196,6 @@ const AddMenuItemScreen: React.FC = () => {
 			if (!group.name.trim()) {
 				newErrors[`${prefix}-name`] = 'Group name is required'
 			}
-			const selType = selectionTypes.find((t) => t.id === group.selectionTypeId)
-			const isMulti = selType?.code?.startsWith('multi')
-			if (isMulti) {
-				if (!group.multiLimit && group.multiLimit !== 0) {
-					newErrors[`${prefix}-multiLimit`] =
-						'Limit is required for multi selection types'
-				}
-			}
 			if (group.mode === 'custom') {
 				if (!group.options || group.options.length < 2) {
 					newErrors[`${prefix}-options`] =
@@ -215,10 +207,15 @@ const AddMenuItemScreen: React.FC = () => {
 						newErrors[`${prefix}-option-${j}`] = 'Option name required'
 					}
 				})
-			} else if (group.mode === 'category') {
+			} else if (group.mode === 'single-category') {
 				if (!group.categoryFilterId) {
 					newErrors[`${prefix}-categoryFilterId`] =
 						'Select a category for this mode'
+				}
+			} else if (group.mode === 'multi-category') {
+				if (!group.categoryFilterIds || group.categoryFilterIds.length === 0) {
+					newErrors[`${prefix}-categoryFilterIds`] =
+						'Select at least one category for this mode'
 				}
 			} else if (group.mode === 'existing') {
 				const ids = (group as any).existingMenuItemIds || []

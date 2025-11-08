@@ -155,8 +155,12 @@ const EditMenuItemScreen: React.FC = () => {
 					[]) as RawMenuItemVariationGroup[]
 				const transformedGroups = rawGroups.map((group) => {
 					const fallbackMode: VariationGroupMode =
-						group.kind === 'category_filter'
-							? 'category'
+						group.kind === 'single_category_filter'
+							? 'single-category'
+							: group.kind === 'multi_category_filter'
+							? 'multi-category'
+							: group.kind === 'category_filter'
+							? 'single-category'
 							: group.kind === 'existing_items'
 							? 'existing'
 							: 'custom'
@@ -344,15 +348,6 @@ const EditMenuItemScreen: React.FC = () => {
 			if (!group.name.trim()) {
 				newErrors[`${prefix}-name`] = 'Group name is required'
 			}
-			const selType =
-				selectionTypes.length > 0
-					? selectionTypes.find((t) => t.id === group.selectionTypeId)
-					: undefined
-			const isMulti = selType?.code?.startsWith('multi')
-			if (isMulti && (group.multiLimit === null || group.multiLimit < 1)) {
-				newErrors[`${prefix}-multiLimit`] =
-					'Max choices is required for multi selection types'
-			}
 			if (group.mode === 'custom') {
 				if (!group.options || group.options.length < 1) {
 					newErrors[`${prefix}-options`] =
@@ -364,15 +359,22 @@ const EditMenuItemScreen: React.FC = () => {
 						newErrors[`${prefix}-option-${j}`] = 'Option name required'
 					}
 				})
-			} else if (group.mode === 'category') {
+			} else if (group.mode === 'single-category') {
 				if (!group.categoryFilterId) {
 					newErrors[`${prefix}-categoryFilterId`] =
 						'Select a category for this mode'
 				}
+			} else if (group.mode === 'multi-category') {
+				if (!group.categoryFilterIds || group.categoryFilterIds.length === 0) {
+					newErrors[`${prefix}-categoryFilterIds`] =
+						'Select at least one category for this mode'
+				}
+			} else if (group.mode === 'existing') {
+				const ids = (group as any).existingMenuItemIds || []
 			} else if (group.mode === 'existing') {
 				const ids = (group as any).existingMenuItemIds || []
 				if (!ids || ids.length < 2) {
-					newErrors[`${prefix}-existing`] = 'Select at least two existing items'
+					newErrors[`${prefix}-existing`] = 'Select at least 2 existing items'
 				}
 			}
 		})
@@ -525,8 +527,7 @@ const EditMenuItemScreen: React.FC = () => {
 	}
 
 	return (
-		<DynamicKeyboardView
-			style={styles.editItemContainer}>
+		<DynamicKeyboardView style={styles.editItemContainer}>
 			<DynamicScrollView showsVerticalScrollIndicator={false}>
 				<NameInput
 					formData={formData}

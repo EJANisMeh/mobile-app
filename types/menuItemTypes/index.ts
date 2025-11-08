@@ -36,8 +36,9 @@ export interface VariationGroupInput {
 	name: string
 	selectionTypeId: number
 	multiLimit: number | null
-	mode: 'custom' | 'category' | 'existing' // Mode selection
-	categoryFilterId: number | null // For category mode
+	mode: 'custom' | 'single-category' | 'multi-category' | 'existing' // Mode selection
+	categoryFilterId: number | null // For single-category mode
+	categoryFilterIds?: number[] // For multi-category mode
 	options: VariationOptionInput[] // For custom mode
 	existingMenuItemIds?: number[] // For existing-items mode: selected menu item ids
 	position: number
@@ -61,16 +62,25 @@ export interface AddonInput {
 	position: number
 }
 
-export type VariationGroupMode = 'custom' | 'category' | 'existing'
+export type VariationGroupMode =
+	| 'custom'
+	| 'single-category'
+	| 'multi-category'
+	| 'existing'
 
 /**
  * Variation group kind (database column value)
  * Maps to the 'kind' column in menu_item_variation_groups table
  * - group: Custom variation group with manually defined options
- * - category_filter: Filter options by category
+ * - single_category_filter: Filter options by a single category
+ * - multi_category_filter: Filter options by multiple categories
  * - existing_items: Use existing menu items as options
  */
-export type VariationGroupKind = 'group' | 'category_filter' | 'existing_items'
+export type VariationGroupKind =
+	| 'group'
+	| 'single_category_filter'
+	| 'multi_category_filter'
+	| 'existing_items'
 
 /**
  * Maps variation group mode to database kind value
@@ -80,7 +90,8 @@ export const VARIATION_GROUP_MODE_TO_KIND: Record<
 	VariationGroupKind
 > = {
 	custom: 'group',
-	category: 'category_filter',
+	'single-category': 'single_category_filter',
+	'multi-category': 'multi_category_filter',
 	existing: 'existing_items',
 }
 
@@ -92,7 +103,8 @@ export const VARIATION_GROUP_KIND_TO_MODE: Record<
 	VariationGroupMode
 > = {
 	group: 'custom',
-	category_filter: 'category',
+	single_category_filter: 'single-category',
+	multi_category_filter: 'multi-category',
 	existing_items: 'existing',
 }
 
