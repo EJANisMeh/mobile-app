@@ -121,7 +121,7 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 						position: group.position,
 					},
 				})
-				
+
 				// Add custom options if mode is custom
 				if (group.mode === 'custom' && group.options) {
 					for (const option of group.options) {

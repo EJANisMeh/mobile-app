@@ -102,7 +102,6 @@ const MenuItemViewScreen: React.FC = () => {
 
 	const menuItemId = route.params.menuItemId
 
-
 	// Load menu item data
 	useEffect(() => {
 		loadMenuItem()

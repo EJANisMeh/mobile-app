@@ -38,8 +38,8 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 	const multiLimit = selection.multiLimit || 0
 
 	// Get the category menu items from the group
-	const categoryMenuItems: CategoryMenuItem[] = (group as any)
-		.categoryMenuItems || []
+	const categoryMenuItems: CategoryMenuItem[] =
+		(group as any).categoryMenuItems || []
 
 	const formatPrice = (price: number | string) => {
 		const numPrice = typeof price === 'string' ? parseFloat(price) : price
