@@ -42,6 +42,7 @@ interface DynamicKeyboardViewProps {
 	 * For screens WITHOUT headers: use true or ['top', 'left', 'right', 'bottom']
 	 */
 	useSafeArea?: boolean | Edge[]
+	safeAreas?: Edge[]
 }
 
 const DynamicKeyboardView = ({
@@ -51,6 +52,7 @@ const DynamicKeyboardView = ({
 	behavior = 'padding',
 	keyboardVerticalOffset,
 	useSafeArea = false,
+	safeAreas=['top'],
 }: DynamicKeyboardViewProps) => {
 	const responsive = useResponsiveDimensions()
 
@@ -70,7 +72,7 @@ const DynamicKeyboardView = ({
 		useSafeArea === false
 			? undefined
 			: useSafeArea === true
-			? ['top', 'bottom']
+			? safeAreas
 			: useSafeArea
 
 	// SafeAreaView should be the outermost container
