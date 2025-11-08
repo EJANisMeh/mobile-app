@@ -252,7 +252,7 @@ model order_statuses {
 model selection_types {
   id                         Int                          @id @default(autoincrement())
   code                       String
-  text                       String                       @map("description")
+  description                String?
   menu_item_variation_groups menu_item_variation_groups[]
 
   @@map("selection_types")
