@@ -23,8 +23,8 @@ import { Platform } from 'react-native'
 // For React Native development:
 // - Web and iOS simulator can use localhost
 // - Android emulator (AVD) should use 10.0.2.2
-// - Physical devices should use your machine IP (phoneIp)
-const phoneIp: string = '192.168.100.35'
+// - Physical devices should use your machine IP (localIp)
+const localIp: string = '192.168.100.35'
 const getApiBaseUrl = () => {
 	// Development mode helpers
 	if (__DEV__) {
@@ -43,11 +43,11 @@ const getApiBaseUrl = () => {
 			// For physical Android device, use your computer's IP address
 			// For Android emulator (AVD), use 10.0.2.2
 			// return `http://10.0.2.2:3000/api` // uncomment this if using emulator
-			return `http://${phoneIp}:3000/api` // uncomment this if using physical android device
+			return `http://${localIp}:3000/api` // uncomment this if using physical android device
 		}
 
 		// Fallback to local network IP for any other platform
-		return `http://${phoneIp}:3000/api`
+		return `http://${localIp}:3000/api`
 	}
 
 	// Production API URL (replace with your actual production URL)
