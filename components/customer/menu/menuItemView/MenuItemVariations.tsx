@@ -5,6 +5,7 @@ import { useResponsiveDimensions } from '../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../styles/customer'
 import { VariationSelection } from '../../../../types'
 import VariationGroupCustom from './variationGroup/VariationGroupCustom'
+import VariationGroupCategory from './variationGroup/VariationGroupCategory'
 
 interface MenuItemVariationsProps {
 	variationGroups: any[]
@@ -42,17 +43,14 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 						/>
 					)
 				} else if (group.kind === 'category_filter') {
-					// Category mode uses dropdown modal
-					// TODO: Implement VariationGroupCategory component
+					// Category mode uses menu items from category
 					return (
-						<View
+						<VariationGroupCategory
 							key={group.id}
-							style={styles.variationGroup}>
-							<Text style={styles.variationGroupName}>{group.name}</Text>
-							<Text style={styles.description}>
-								Category filter mode - Coming soon
-							</Text>
-						</View>
+							group={group}
+							selection={selection}
+							setVariationSelections={setVariationSelections}
+						/>
 					)
 				}
 

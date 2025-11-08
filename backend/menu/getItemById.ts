@@ -35,9 +35,6 @@ export const getItemById = async (
 					},
 				},
 				menu_item_variation_groups: {
-					where: {
-						kind: 'group',
-					},
 					include: {
 						menu_item_variation_option_choices: {
 							orderBy: {
@@ -69,6 +66,37 @@ export const getItemById = async (
 				success: false,
 				error: 'Menu item not found',
 			})
+		}
+
+		// For variation groups with kind 'category_filter', fetch menu items from the category
+		if (menuItem.menu_item_variation_groups) {
+			for (const group of menuItem.menu_item_variation_groups) {
+				if (group.kind === 'category_filter' && group.category_filter_id) {
+					// Fetch menu items that belong to this category from the same concession
+					const categoryMenuItems = await prisma.menuItem.findMany({
+						where: {
+							concessionId: menuItem.concessionId,
+							menu_item_category_links: {
+								some: {
+									category_id: group.category_filter_id,
+								},
+							},
+						},
+						select: {
+							id: true,
+							name: true,
+							basePrice: true,
+							availability: true,
+						},
+						orderBy: {
+							name: 'asc',
+						},
+					})
+
+					// Attach the menu items as a custom property
+					;(group as any).categoryMenuItems = categoryMenuItems
+				}
+			}
 		}
 
 		res.json({

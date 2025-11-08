@@ -526,8 +526,7 @@ const EditMenuItemScreen: React.FC = () => {
 
 	return (
 		<DynamicKeyboardView
-			style={styles.editItemContainer}
-			useSafeArea={true}>
+			style={styles.editItemContainer}>
 			<DynamicScrollView showsVerticalScrollIndicator={false}>
 				<NameInput
 					formData={formData}

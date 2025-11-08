@@ -4,6 +4,7 @@ import {
 	normalizeMenuItemSchedule,
 	hasAnyMenuItemScheduleDay,
 } from '../../utils/menuItemSchedule'
+import { VariationGroupMode, getKindFromMode } from '../../types'
 
 // Edit menu item endpoint
 export const editItem = async (req: express.Request, res: express.Response) => {
@@ -95,20 +96,23 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 			}
 		}
 		if (variationGroups !== undefined) {
-			// Delete existing variation groups for this item
+			// Delete ALL existing variation groups for this item (all kinds)
 			await prisma.menu_item_variation_groups.deleteMany({
 				where: {
 					menu_item_id: menuItemId,
-					kind: 'group',
 				},
 			})
 
 			// Create new variation groups
 			for (const group of variationGroups) {
+				// Determine kind based on mode
+				const mode = group.mode as VariationGroupMode
+				const kind = getKindFromMode(mode || 'custom')
+
 				const createdGroup = await prisma.menu_item_variation_groups.create({
 					data: {
 						menu_item_id: menuItemId,
-						kind: 'group',
+						kind: kind,
 						code: group.mode, // Store mode in code field
 						name: group.name,
 						selection_type_id: group.selectionTypeId,
@@ -116,7 +120,9 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 						category_filter_id: group.categoryFilterId,
 						position: group.position,
 					},
-				}) // Add custom options if mode is custom
+				})
+				
+				// Add custom options if mode is custom
 				if (group.mode === 'custom' && group.options) {
 					for (const option of group.options) {
 						await prisma.menu_item_variation_option_choices.create({
@@ -156,28 +162,8 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 					}
 				}
 
-				// Add category items as options if mode is category
-				if (group.mode === 'category' && group.categoryFilterId) {
-					const categoryItems = await prisma.menuItem.findMany({
-						where: { categoryId: group.categoryFilterId },
-						orderBy: { position: 'asc' },
-					})
-
-					for (let i = 0; i < categoryItems.length; i++) {
-						const item = categoryItems[i]
-						await prisma.menu_item_variation_option_choices.create({
-							data: {
-								group_id: createdGroup.id,
-								code: `item_${item.id}`,
-								name: item.name,
-								price_adjustment: item.basePrice,
-								availability: item.availability,
-								is_default: false,
-								position: i,
-							},
-						})
-					}
-				}
+				// Note: Category mode does NOT create option choices here
+				// Options are dynamically fetched based on category_filter_id when viewing the item
 			}
 		}
 

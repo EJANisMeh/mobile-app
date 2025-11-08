@@ -21,18 +21,19 @@ interface VariationCategoryProps {
 }
 
 const VariationCategory: React.FC<VariationCategoryProps> = ({
-  group,
-  groupIndex,
-  categories,
-  showMenuModal,
-  handleUpdateVariationGroup,
- }) => {
+	group,
+	groupIndex,
+	categories,
+	showMenuModal,
+	handleUpdateVariationGroup,
+}) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
-  const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
-  
+	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
+
 	return (
 		<>
+			<Text style={styles.variationCategoryLabel}>Category:</Text>
 			<TouchableOpacity
 				style={styles.variationCategoryInputContainer}
 				onPress={() => {

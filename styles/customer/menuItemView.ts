@@ -309,6 +309,12 @@ export const createCustomerMenuItemViewStyles = (
 		optionNameDisabled: {
 			color: colors.textSecondary,
 		},
+		outOfStockText: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.error,
+			fontStyle: 'italic',
+			marginTop: 2,
+		},
 		optionPrice: {
 			fontSize: responsive.getResponsiveFontSize(14),
 			fontWeight: '600',
@@ -324,6 +330,10 @@ export const createCustomerMenuItemViewStyles = (
 			borderColor: colors.primary,
 			alignItems: 'center',
 			justifyContent: 'center',
+		},
+		radioButtonDisabled: {
+			borderColor: colors.border,
+			backgroundColor: colors.surfaceSecondary,
 		},
 		radioButtonInner: {
 			width: 10,

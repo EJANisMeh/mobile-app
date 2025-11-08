@@ -260,6 +260,11 @@ export const createConcessionaireAddMenuItemStyles = (
 			borderWidth: 1,
 			borderColor: colors.border,
 		},
+		variationCategoryLabel: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.text,
+			flex: 1,
+		},
 		variationCategoryInputContainer: {
 			flexDirection: 'row' as const,
 			alignItems: 'center' as const,

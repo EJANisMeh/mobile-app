@@ -70,7 +70,7 @@ const DynamicKeyboardView = ({
 		useSafeArea === false
 			? undefined
 			: useSafeArea === true
-			? ['top']
+			? ['top', 'bottom']
 			: useSafeArea
 
 	// SafeAreaView should be the outermost container

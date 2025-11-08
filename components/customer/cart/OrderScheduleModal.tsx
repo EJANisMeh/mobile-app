@@ -32,6 +32,7 @@ interface OrderScheduleModalProps {
 	isConcessionOpen: boolean
 	availabilityStatus: MenuItemAvailabilityStatus
 	itemName: string
+	hasOutOfStockVariationSelection?: boolean
 }
 const DEFAULT_SCHEDULED_HOUR = 11
 const DEFAULT_SCHEDULED_MINUTE = 0
@@ -65,6 +66,7 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 	isConcessionOpen,
 	availabilityStatus,
 	itemName,
+	hasOutOfStockVariationSelection = false,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
@@ -129,6 +131,7 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 
 	const isOrderNowDisabled =
 		availabilityStatus !== 'available' ||
+		hasOutOfStockVariationSelection ||
 		isConcessionClosingSoon(isConcessionOpen, concessionSchedule)
 
 	const availableDayKeys = useMemo(() => {
