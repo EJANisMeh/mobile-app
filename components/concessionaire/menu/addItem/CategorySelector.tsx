@@ -58,7 +58,10 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 							}
 						} else if (group.mode === 'multi-category') {
 							// Remove any categoryFilterIds that are in the newly selected categories
-							if (group.categoryFilterIds && group.categoryFilterIds.length > 0) {
+							if (
+								group.categoryFilterIds &&
+								group.categoryFilterIds.length > 0
+							) {
 								const filteredIds = group.categoryFilterIds.filter(
 									(id) => !selectedCategoryIds.includes(id)
 								)
