@@ -872,17 +872,16 @@ const MenuItemViewScreen: React.FC = () => {
 					showPrice={true}
 				/>
 
-				{/* Variations Section */}
-				{menuItem.menu_item_variation_groups &&
-					menuItem.menu_item_variation_groups.length > 0 && (
-						<MenuItemVariations
-							variationGroups={menuItem.menu_item_variation_groups}
-							variationSelections={variationSelections}
-							setVariationSelections={setVariationSelections}
-						/>
-					)}
-
-				{/* Add-ons Section */}
+			{/* Variations Section */}
+			{menuItem.menu_item_variation_groups &&
+				menuItem.menu_item_variation_groups.length > 0 && (
+					<MenuItemVariations
+						variationGroups={menuItem.menu_item_variation_groups}
+						variationSelections={variationSelections}
+						setVariationSelections={setVariationSelections}
+						concessionId={menuItem.concessionId}
+					/>
+				)}				{/* Add-ons Section */}
 				{menuItem.menu_item_addons_menu_item_addons_menu_item_idTomenu_items &&
 					menuItem.menu_item_addons_menu_item_addons_menu_item_idTomenu_items
 						.length > 0 && (

@@ -68,9 +68,10 @@ export const getItemById = async (
 			})
 		}
 
-		// For variation groups with kind 'single_category_filter' or 'category_filter' (legacy), fetch menu items from the category
+		// For variation groups with kind 'single_category_filter', 'multi_category_filter', or 'category_filter' (legacy), fetch menu items from the category
 		if (menuItem.menu_item_variation_groups) {
 			for (const group of menuItem.menu_item_variation_groups) {
+				// Handle single category filter
 				if (
 					(group.kind === 'single_category_filter' ||
 						group.kind === 'category_filter') &&
@@ -91,6 +92,49 @@ export const getItemById = async (
 							name: true,
 							basePrice: true,
 							availability: true,
+							menu_item_category_links: {
+								include: {
+									category: true,
+								},
+							},
+						},
+						orderBy: {
+							name: 'asc',
+						},
+					})
+
+					// Attach the menu items as a custom property
+					;(group as any).categoryMenuItems = categoryMenuItems
+				}
+				// Handle multi-category filter
+				else if (
+					group.kind === 'multi_category_filter' &&
+					group.category_filter_ids &&
+					Array.isArray(group.category_filter_ids) &&
+					group.category_filter_ids.length > 0
+				) {
+					// Fetch menu items that belong to any of these categories from the same concession
+					const categoryMenuItems = await prisma.menuItem.findMany({
+						where: {
+							concessionId: menuItem.concessionId,
+							menu_item_category_links: {
+								some: {
+									category_id: {
+										in: group.category_filter_ids,
+									},
+								},
+							},
+						},
+						select: {
+							id: true,
+							name: true,
+							basePrice: true,
+							availability: true,
+							menu_item_category_links: {
+								include: {
+									category: true,
+								},
+							},
 						},
 						orderBy: {
 							name: 'asc',

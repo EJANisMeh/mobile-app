@@ -39,6 +39,7 @@ import {
 	createDefaultMenuItemSchedule,
 	hasAnyMenuItemScheduleDay,
 	isMenuItemScheduleAllDays,
+	validateCategoryPriceAdjustment,
 } from '../../../utils'
 
 const AddMenuItemScreen: React.FC = () => {
@@ -47,7 +48,7 @@ const AddMenuItemScreen: React.FC = () => {
 	const styles = createConcessionaireAddMenuItemStyles(colors, responsive)
 	const navigation = useConcessionaireNavigation()
 	const { concession } = useConcessionContext()
-	const { categories, getMenuItems, getCategories, addMenuItem } =
+	const { categories, getMenuItems, getCategories, addMenuItem, menuItems } =
 		useMenuContext()
 
 	const {
@@ -247,6 +248,51 @@ const AddMenuItemScreen: React.FC = () => {
 			return
 		}
 
+		// Check for price adjustment issues in multi-category variation groups
+		const priceIssues: Array<{ groupName: string; message: string }> = []
+
+		formData.variationGroups.forEach((group) => {
+			if (group.mode === 'multi-category' && group.categoryPriceAdjustment) {
+				// Get all menu items from the selected categories
+				const categoryMenuItems = menuItems.filter((item: any) =>
+					group.categoryFilterIds?.some((catId) =>
+						item.category_ids?.includes(catId)
+					)
+				)
+
+				const validation = validateCategoryPriceAdjustment(
+					categoryMenuItems,
+					group.categoryPriceAdjustment
+				)
+
+				if (validation.hasIssue && validation.message) {
+					priceIssues.push({
+						groupName: group.name,
+						message: validation.message,
+					})
+				}
+			}
+		})
+
+		// If there are price issues, show warning confirmation
+		if (priceIssues.length > 0) {
+			const issueMessages = priceIssues
+				.map((issue) => `${issue.groupName}:\n${issue.message}`)
+				.join('\n\n')
+
+			showConfirmation({
+				title: 'Price Adjustment Warning',
+				message: issueMessages,
+				confirmText: 'Continue',
+				cancelText: 'Cancel',
+				onConfirm: () => proceedWithSave(),
+			})
+		} else {
+			proceedWithSave()
+		}
+	}
+
+	const proceedWithSave = () => {
 		showConfirmation({
 			title: 'Add Item',
 			message: 'Add this item to your menu?',
@@ -353,6 +399,7 @@ const AddMenuItemScreen: React.FC = () => {
 					errors={errors}
 					setErrors={setErrors}
 					showMenuModal={showMenuModal}
+					showCheckboxMenu={showCheckboxMenuModal}
 					showAlert={showAlert}
 					showConfirmation={showConfirmation}
 				/>

@@ -39,6 +39,7 @@ export interface VariationGroupInput {
 	mode: 'custom' | 'single-category' | 'multi-category' | 'existing' // Mode selection
 	categoryFilterId: number | null // For single-category mode
 	categoryFilterIds?: number[] // For multi-category mode
+	categoryPriceAdjustment?: string | null // Price adjustment for category items (can be negative)
 	options: VariationOptionInput[] // For custom mode
 	existingMenuItemIds?: number[] // For existing-items mode: selected menu item ids
 	position: number

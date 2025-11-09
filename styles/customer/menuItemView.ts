@@ -265,6 +265,20 @@ export const createCustomerMenuItemViewStyles = (
 			color: colors.textSecondary,
 			fontStyle: 'italic',
 		},
+		categoryBackButton: {
+			backgroundColor: colors.surfaceSecondary,
+			paddingVertical: spacing.sm,
+			paddingHorizontal: spacing.md,
+			borderRadius: 8,
+			marginBottom: spacing.sm,
+			borderWidth: 1,
+			borderColor: colors.border,
+		},
+		categoryBackButtonText: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			color: colors.primary,
+			fontWeight: '500',
+		},
 		optionsList: {
 			gap: spacing.xs,
 		},
@@ -304,6 +318,9 @@ export const createCustomerMenuItemViewStyles = (
 		optionName: {
 			fontSize: responsive.getResponsiveFontSize(14),
 			color: colors.text,
+			flex: 1,
+		},
+		optionNameWrapper: {
 			flex: 1,
 		},
 		optionNameDisabled: {

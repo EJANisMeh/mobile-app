@@ -41,7 +41,35 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 			options: categoryOptions,
 			selectedValues: formData.categoryIds,
 			onSave: (selectedCategoryIds: number[]) => {
-				setFormData((prev) => ({ ...prev, categoryIds: selectedCategoryIds }))
+				setFormData((prev) => {
+					// Update categoryIds
+					const newFormData = { ...prev, categoryIds: selectedCategoryIds }
+
+					// Remove newly selected categories from variation groups if present
+					const updatedVariationGroups = prev.variationGroups.map((group) => {
+						if (group.mode === 'single-category') {
+							// If the categoryFilterId is in the newly selected categories, clear it
+							if (
+								group.categoryFilterId &&
+								selectedCategoryIds.includes(group.categoryFilterId)
+							) {
+								return { ...group, categoryFilterId: null }
+							}
+						} else if (group.mode === 'multi-category') {
+							// Remove any categoryFilterIds that are in the newly selected categories
+							if (group.categoryFilterIds && group.categoryFilterIds.length > 0) {
+								const filteredIds = group.categoryFilterIds.filter(
+									(id) => !selectedCategoryIds.includes(id)
+								)
+								return { ...group, categoryFilterIds: filteredIds }
+							}
+						}
+						return group
+					})
+
+					newFormData.variationGroups = updatedVariationGroups
+					return newFormData
+				})
 			},
 			footer: (
 				<TouchableOpacity

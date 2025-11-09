@@ -124,16 +124,30 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 					const mode = group.mode as VariationGroupMode
 					const kind = getKindFromMode(mode || 'custom')
 
-					// Create variation group
-					const createdGroup = await tx.menu_item_variation_groups.create({
-						data: {
-							menu_item_id: newItem.id,
-							kind: kind,
-							name: group.name.trim(),
-							selection_type_id: group.selectionTypeId,
-							multi_limit: group.multiLimit || null,
-							category_filter_id: group.categoryFilterId || null,
-							position: group.position || 0,
+					// Parse price adjustment for category modes
+					let categoryPriceAdjustment = null
+					if (
+						(mode === 'single-category' || mode === 'multi-category') &&
+						group.categoryPriceAdjustment
+					) {
+						const adj = parseFloat(group.categoryPriceAdjustment)
+						if (!isNaN(adj)) {
+							categoryPriceAdjustment = adj
+						}
+					}
+
+				// Create variation group
+				const createdGroup = await tx.menu_item_variation_groups.create({
+					data: {
+						menu_item_id: newItem.id,
+						kind: kind,
+						name: group.name.trim(),
+						selection_type_id: group.selectionTypeId,
+						multi_limit: group.multiLimit || null,
+						category_filter_id: group.categoryFilterId || null,
+						category_filter_ids: group.categoryFilterIds || [],
+						category_price_adjustment: categoryPriceAdjustment,
+						position: group.position || 0,
 						},
 					})
 

@@ -4,16 +4,15 @@ import { Ionicons } from '@expo/vector-icons'
 import { useThemeContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
 import { createConcessionaireAddMenuItemStyles } from '../../../../../styles/concessionaire/addMenuItem'
-import { Category } from '../../../../../types/categoryTypes'
 import { VariationGroupInput } from '../../../../../types/menuItemTypes'
-import { UseMenuModalType } from '../../../../../hooks/useModals/useMenuModal'
+import { UseCheckboxMenuModalType } from '../../../../../hooks/useModals/useCheckboxMenuModal'
 
-interface VariationCategoryProps {
+interface VariationMultiCategoryProps {
 	group: VariationGroupInput
 	groupIndex: number
-	categories: Category[]
+	categories: any[]
 	itemCategoryIds: number[]
-	showMenuModal: UseMenuModalType['showMenu']
+	showCheckboxMenu: UseCheckboxMenuModalType['showMenu']
 	handleUpdateVariationGroup: (
 		index: number,
 		field: keyof VariationGroupInput,
@@ -21,12 +20,12 @@ interface VariationCategoryProps {
 	) => void
 }
 
-const VariationCategory: React.FC<VariationCategoryProps> = ({
+const VariationMultiCategory: React.FC<VariationMultiCategoryProps> = ({
 	group,
 	groupIndex,
 	categories,
 	itemCategoryIds,
-	showMenuModal,
+	showCheckboxMenu,
 	handleUpdateVariationGroup,
 }) => {
 	const { colors } = useThemeContext()
@@ -39,35 +38,43 @@ const VariationCategory: React.FC<VariationCategoryProps> = ({
 			? categories.filter((cat) => !itemCategoryIds.includes(cat.id))
 			: categories
 
+	const selectedCategoryNames =
+		group.categoryFilterIds && group.categoryFilterIds.length > 0
+			? availableCategories
+					.filter((cat) => group.categoryFilterIds?.includes(cat.id))
+					.map((cat) => cat.name)
+					.join(', ')
+			: 'Select categories'
+
+	const handleCategorySelection = () => {
+		showCheckboxMenu({
+			title: 'Select Categories',
+			message: 'Choose categories for this variation group',
+			options: availableCategories.map((cat) => ({
+				label: cat.name,
+				value: cat.id,
+			})),
+			selectedValues: group.categoryFilterIds || [],
+			onSave: (selectedIds: number[]) => {
+				handleUpdateVariationGroup(groupIndex, 'categoryFilterIds', selectedIds)
+			},
+		})
+	}
+
 	return (
 		<>
-			<Text style={styles.variationCategoryLabel}>Category:</Text>
+			<Text style={styles.variationCategoryLabel}>Categories:</Text>
 			<TouchableOpacity
 				style={styles.variationCategoryInputContainer}
-				onPress={() => {
-					const categoryOptions = availableCategories.map((cat) => ({
-						label: cat.name,
-						value: cat.id,
-					}))
-					showMenuModal({
-						title: 'Filter by Category',
-						options: categoryOptions,
-						onSelect: (value: number) => {
-							handleUpdateVariationGroup(groupIndex, 'categoryFilterId', value)
-						},
-					})
-				}}>
+				onPress={handleCategorySelection}>
 				<Text
 					style={[
 						styles.variationCategoryText,
-						!group.categoryFilterId && {
-							color: colors.textSecondary,
-						},
+						!group.categoryFilterIds || group.categoryFilterIds.length === 0
+							? styles.categoryPlaceholder
+							: undefined,
 					]}>
-					{group.categoryFilterId
-						? availableCategories.find((c) => c.id === group.categoryFilterId)
-								?.name
-						: 'Select category'}
+					{selectedCategoryNames}
 				</Text>
 				<Ionicons
 					name="chevron-down"
@@ -79,4 +86,4 @@ const VariationCategory: React.FC<VariationCategoryProps> = ({
 	)
 }
 
-export default VariationCategory
+export default VariationMultiCategory

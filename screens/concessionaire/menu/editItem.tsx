@@ -51,6 +51,7 @@ import {
 	createDefaultMenuItemSchedule,
 	normalizeMenuItemSchedule,
 	hasAnyMenuItemScheduleDay,
+	validateCategoryPriceAdjustment,
 } from '../../../utils'
 
 type EditMenuItemScreenNavigationProp = StackNavigationProp<
@@ -80,6 +81,7 @@ const EditMenuItemScreen: React.FC = () => {
 		getCategories,
 		editMenuItem,
 		getMenuItemById,
+		menuItems,
 	} = useMenuContext()
 
 	useHideNavBar()
@@ -433,6 +435,51 @@ const EditMenuItemScreen: React.FC = () => {
 			return
 		}
 
+		// Check for price adjustment issues in multi-category variation groups
+		const priceIssues: Array<{ groupName: string; message: string }> = []
+
+		formData.variationGroups.forEach((group) => {
+			if (group.mode === 'multi-category' && group.categoryPriceAdjustment) {
+				// Get all menu items from the selected categories
+				const categoryMenuItems = menuItems.filter((item: any) =>
+					group.categoryFilterIds?.some((catId) =>
+						item.category_ids?.includes(catId)
+					)
+				)
+
+				const validation = validateCategoryPriceAdjustment(
+					categoryMenuItems,
+					group.categoryPriceAdjustment
+				)
+
+				if (validation.hasIssue && validation.message) {
+					priceIssues.push({
+						groupName: group.name,
+						message: validation.message,
+					})
+				}
+			}
+		})
+
+		// If there are price issues, show warning confirmation
+		if (priceIssues.length > 0) {
+			const issueMessages = priceIssues
+				.map((issue) => `${issue.groupName}:\n${issue.message}`)
+				.join('\n\n')
+
+			confirmationModal.showConfirmation({
+				title: 'Price Adjustment Warning',
+				message: issueMessages,
+				confirmText: 'Continue',
+				cancelText: 'Cancel',
+				onConfirm: () => proceedWithSave(),
+			})
+		} else {
+			proceedWithSave()
+		}
+	}
+
+	const proceedWithSave = () => {
 		confirmationModal.showConfirmation({
 			title: 'Save Changes',
 			message: 'Save changes to this menu item?',
@@ -450,22 +497,24 @@ const EditMenuItemScreen: React.FC = () => {
 						categoryIds: formData.categoryIds,
 						availability: formData.availability,
 						availabilitySchedule: formData.availabilitySchedule,
-						variationGroups: formData.variationGroups.map((group) => ({
-							name: group.name.trim(),
-							selectionTypeId: group.selectionTypeId,
-							multiLimit: group.multiLimit,
-							mode: group.mode,
-							categoryFilterId: group.categoryFilterId,
-							options: group.options.map((opt) => ({
-								name: opt.name.trim(),
-								priceAdjustment: opt.priceAdjustment,
-								isDefault: opt.isDefault,
-								availability: opt.availability,
-								position: opt.position,
-							})),
-							existingMenuItemIds: (group as any).existingMenuItemIds || [],
-							position: group.position,
+					variationGroups: formData.variationGroups.map((group) => ({
+						name: group.name.trim(),
+						selectionTypeId: group.selectionTypeId,
+						multiLimit: group.multiLimit,
+						mode: group.mode,
+						categoryFilterId: group.categoryFilterId,
+						categoryFilterIds: group.categoryFilterIds,
+						categoryPriceAdjustment: group.categoryPriceAdjustment,
+						options: group.options.map((opt) => ({
+							name: opt.name.trim(),
+							priceAdjustment: opt.priceAdjustment,
+							isDefault: opt.isDefault,
+							availability: opt.availability,
+							position: opt.position,
 						})),
+						existingMenuItemIds: (group as any).existingMenuItemIds || [],
+						position: group.position,
+					})),
 						addons: formData.addons.map((addon) => ({
 							menuItemId: addon.menuItemId,
 							label: addon.label?.trim() || null,
@@ -584,6 +633,7 @@ const EditMenuItemScreen: React.FC = () => {
 					errors={errors}
 					setErrors={setErrors}
 					showMenuModal={menuModal.showMenu}
+					showCheckboxMenu={checkboxMenuModal.showMenu}
 					showAlert={alertModal.showAlert}
 					showConfirmation={confirmationModal.showConfirmation}
 					itemId={itemId}

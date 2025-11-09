@@ -24,7 +24,10 @@ import {
 	VariationCustomOptions,
 	VariationExistingItems,
 } from './variationGroup'
+import VariationMultiCategory from './variationGroup/VariationMultiCategory'
+import VariationCategoryPriceAdjustment from './variationGroup/VariationCategoryPriceAdjustment'
 import { UseMenuModalType } from '../../../../hooks/useModals/useMenuModal'
+import { UseCheckboxMenuModalType } from '../../../../hooks/useModals/useCheckboxMenuModal'
 
 interface VariationGroupsSectionProps {
 	formData: AddMenuItemFormData
@@ -34,6 +37,7 @@ interface VariationGroupsSectionProps {
 	errors: Record<string, string>
 	setErrors: React.Dispatch<React.SetStateAction<Record<string, string>>>
 	showMenuModal: UseMenuModalType['showMenu']
+	showCheckboxMenu: UseCheckboxMenuModalType['showMenu']
 	showAlert: UseAlertModalType['showAlert']
 	showConfirmation: UseConfirmationModalType['showConfirmation']
 }
@@ -46,6 +50,7 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 	errors,
 	setErrors,
 	showMenuModal,
+	showCheckboxMenu,
 	showAlert,
 	showConfirmation,
 }) => {
@@ -132,33 +137,52 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 
 					{/* Category Filter (for single-category mode) */}
 					{group.mode === 'single-category' && (
-						<VariationCategory
-							group={group}
-							groupIndex={groupIndex}
-							categories={categories}
-							showMenuModal={showMenuModal}
-							handleUpdateVariationGroup={handleUpdateVariationGroup}
-						/>
-					)}
-					{errors[`variation-${groupIndex}-categoryFilterId`] && (
-						<Text style={styles.errorText}>
-							{errors[`variation-${groupIndex}-categoryFilterId`]}
-						</Text>
+						<>
+							<VariationCategory
+								group={group}
+								groupIndex={groupIndex}
+								categories={categories}
+								itemCategoryIds={formData.categoryIds}
+								showMenuModal={showMenuModal}
+								handleUpdateVariationGroup={handleUpdateVariationGroup}
+							/>
+							{errors[`variation-${groupIndex}-categoryFilterId`] && (
+								<Text style={styles.errorText}>
+									{errors[`variation-${groupIndex}-categoryFilterId`]}
+								</Text>
+							)}
+							<VariationCategoryPriceAdjustment
+								group={group}
+								groupIndex={groupIndex}
+								showAlert={showAlert}
+								handleUpdateVariationGroup={handleUpdateVariationGroup}
+							/>
+						</>
 					)}
 
 					{/* Multi Category Filter (for multi-category mode) */}
 					{group.mode === 'multi-category' && (
 						<>
-							<Text style={styles.sectionTitle}>Select Categories:</Text>
-							<Text style={styles.variationGroupName}>
-								Coming soon: Multi-category selection
-							</Text>
+							<VariationMultiCategory
+								group={group}
+								groupIndex={groupIndex}
+								categories={categories}
+								itemCategoryIds={formData.categoryIds}
+								showCheckboxMenu={showCheckboxMenu}
+								handleUpdateVariationGroup={handleUpdateVariationGroup}
+							/>
+							{errors[`variation-${groupIndex}-categoryFilterIds`] && (
+								<Text style={styles.errorText}>
+									{errors[`variation-${groupIndex}-categoryFilterIds`]}
+								</Text>
+							)}
+							<VariationCategoryPriceAdjustment
+								group={group}
+								groupIndex={groupIndex}
+								showAlert={showAlert}
+								handleUpdateVariationGroup={handleUpdateVariationGroup}
+							/>
 						</>
-					)}
-					{errors[`variation-${groupIndex}-categoryFilterIds`] && (
-						<Text style={styles.errorText}>
-							{errors[`variation-${groupIndex}-categoryFilterIds`]}
-						</Text>
 					)}
 
 					{/* Selection Type */}

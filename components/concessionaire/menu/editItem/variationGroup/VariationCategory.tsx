@@ -12,6 +12,7 @@ interface VariationCategoryProps {
 	group: VariationGroupInput
 	groupIndex: number
 	categories: Category[]
+	itemCategoryIds: number[]
 	showMenuModal: UseMenuModalType['showMenu']
 	handleUpdateVariationGroup: (
 		index: number,
@@ -24,6 +25,7 @@ const VariationCategory: React.FC<VariationCategoryProps> = ({
 	group,
 	groupIndex,
 	categories,
+	itemCategoryIds,
 	showMenuModal,
 	handleUpdateVariationGroup,
 }) => {
@@ -31,12 +33,18 @@ const VariationCategory: React.FC<VariationCategoryProps> = ({
 	const responsive = useResponsiveDimensions()
 	const styles = createConcessionaireEditMenuItemStyles(colors, responsive)
 
+	// Filter out item's selected categories unless there are no categories selected yet
+	const availableCategories =
+		itemCategoryIds.length > 0
+			? categories.filter((cat) => !itemCategoryIds.includes(cat.id))
+			: categories
+
 	return (
 		<>
 			<TouchableOpacity
 				style={[styles.categoryInputContainer, styles.categoryFilterMargin]}
 				onPress={() => {
-					const categoryOptions = categories.map((cat) => ({
+					const categoryOptions = availableCategories.map((cat) => ({
 						label: cat.name,
 						value: cat.id,
 					}))
@@ -56,7 +64,8 @@ const VariationCategory: React.FC<VariationCategoryProps> = ({
 						},
 					]}>
 					{group.categoryFilterId
-						? categories.find((c) => c.id === group.categoryFilterId)?.name
+						? availableCategories.find((c) => c.id === group.categoryFilterId)
+								?.name
 						: 'Select category'}
 				</Text>
 				<Ionicons

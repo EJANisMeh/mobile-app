@@ -14,17 +14,53 @@ export interface UpdateCategoriesReturn {
 	error?: string
 }
 
+// Module-level cache that persists across hook calls
+let categoriesCache: {
+	data: Category[]
+	timestamp: number
+	concessionId: number
+} | null = null
+
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+// Function to invalidate cache
+export const invalidateCategoriesCache = () => {
+	categoriesCache = null
+}
+
 export const useGetCategories = (
 	setCategories: (categories: Category[]) => void,
 	setLoading: (loading: boolean) => void,
 	setError: (error: string) => void
 ) => {
-	return async (concessionId: number): Promise<GetCategoriesReturn> => {
+	return async (
+		concessionId: number,
+		forceRefresh: boolean = false
+	): Promise<GetCategoriesReturn> => {
 		try {
+			// Check cache validity
+			const now = Date.now()
+			if (
+				!forceRefresh &&
+				categoriesCache &&
+				categoriesCache.concessionId === concessionId &&
+				now - categoriesCache.timestamp < CACHE_DURATION
+			) {
+				// Return cached data without loading state
+				setCategories(categoriesCache.data)
+				return { success: true, categories: categoriesCache.data }
+			}
+
 			setLoading(true)
 			const response = await categoryApi.getCategories(concessionId)
 
 			if (response.success) {
+				// Update cache
+				categoriesCache = {
+					data: response.categories || [],
+					timestamp: now,
+					concessionId,
+				}
 				setCategories(response.categories || [])
 				setLoading(false)
 				return { success: true, categories: response.categories }
@@ -60,6 +96,8 @@ export const useUpdateCategories = (
 			)
 
 			if (response.success) {
+				// Invalidate cache on update
+				invalidateCategoriesCache()
 				setCategories(response.categories || [])
 				setLoading(false)
 				return { success: true, categories: response.categories }

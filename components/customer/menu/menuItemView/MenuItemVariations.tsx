@@ -1,11 +1,14 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import React, { Dispatch, SetStateAction, useState, useEffect } from 'react'
 import { View, Text } from 'react-native'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../styles/customer'
 import { VariationSelection } from '../../../../types'
+import { Category } from '../../../../types/categoryTypes'
+import { apiCall } from '../../../../services/api/api'
 import VariationGroupCustom from './variationGroup/VariationGroupCustom'
 import VariationGroupCategory from './variationGroup/VariationGroupCategory'
+import VariationGroupMultiCategory from './variationGroup/VariationGroupMultiCategory'
 
 interface MenuItemVariationsProps {
 	variationGroups: any[]
@@ -13,16 +16,44 @@ interface MenuItemVariationsProps {
 	setVariationSelections: Dispatch<
 		SetStateAction<Map<number, VariationSelection>>
 	>
+	concessionId: number
 }
 
 const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 	variationGroups,
 	variationSelections,
 	setVariationSelections,
+	concessionId,
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
 	const styles = createCustomerMenuItemViewStyles(colors, responsive)
+
+	const [categories, setCategories] = useState<Category[]>([])
+	const [loadingCategories, setLoadingCategories] = useState(false)
+
+	// Load categories if any variation group needs them
+	useEffect(() => {
+		const needsCategories = variationGroups.some(
+			(group) => group.kind === 'multi_category_filter'
+		)
+
+		if (needsCategories && concessionId) {
+			setLoadingCategories(true)
+			apiCall(`/category/get?concessionId=${concessionId}`)
+				.then((data: any) => {
+					if (data.success && data.categories) {
+						setCategories(data.categories)
+					}
+				})
+				.catch((error) => {
+					console.error('Failed to load categories:', error)
+				})
+				.finally(() => {
+					setLoadingCategories(false)
+				})
+		}
+	}, [variationGroups, concessionId])
 
 	return (
 		<View style={styles.variationsContainer}>
@@ -56,16 +87,25 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 						/>
 					)
 				} else if (group.kind === 'multi_category_filter') {
-					// Multi category mode - coming soon
+					// Multi category mode - now implemented!
+					if (loadingCategories) {
+						return (
+							<View
+								key={group.id}
+								style={styles.variationGroup}>
+								<Text style={styles.variationGroupName}>{group.name}</Text>
+								<Text style={styles.description}>Loading categories...</Text>
+							</View>
+						)
+					}
 					return (
-						<View
+						<VariationGroupMultiCategory
 							key={group.id}
-							style={styles.variationGroup}>
-							<Text style={styles.variationGroupName}>{group.name}</Text>
-							<Text style={styles.variationGroupName}>
-								Multi-category variation (Coming soon)
-							</Text>
-						</View>
+							group={group}
+							selection={selection}
+							setVariationSelections={setVariationSelections}
+							categories={categories}
+						/>
 					)
 				}
 
