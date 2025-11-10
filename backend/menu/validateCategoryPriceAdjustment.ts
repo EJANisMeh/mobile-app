@@ -31,7 +31,8 @@ export const validateCategoryPriceAdjustment = async (
 		// Step 1: Check if at least one variation group uses single/multi category mode
 		const categoryGroups = variationGroups.filter(
 			(group: any) =>
-				(group.mode === 'single-category' || group.mode === 'multi-category') &&
+				(group.mode === 'single-category' ||
+					group.mode === 'multi-category') &&
 				group.categoryPriceAdjustment != null
 		)
 
@@ -155,12 +156,14 @@ export const validateCategoryPriceAdjustment = async (
 			}
 		})
 
-		const affectedItems = Array.from(affectedItemsMap.values()).map((item) => ({
-			id: item.id,
-			name: item.name,
-			originalPrice: item.originalPrice,
-			adjustedPrice: item.minAdjustedPrice,
-		}))
+		const affectedItems = Array.from(affectedItemsMap.values()).map(
+			(item) => ({
+				id: item.id,
+				name: item.name,
+				originalPrice: item.originalPrice,
+				adjustedPrice: item.minAdjustedPrice,
+			})
+		)
 
 		if (affectedItems.length === 0) {
 			return res.json({
@@ -173,7 +176,7 @@ export const validateCategoryPriceAdjustment = async (
 
 		// Step 6: Return warning message
 		const itemNames = affectedItems.map((item) => item.name).join(', ')
-		const message = `One or more items within the concession will have a base price of ₱0 because of the price adjustment value\n\nAre you sure this is the intended purpose?`
+		const message = `One or more items within the concession will have a base price of ₱0 because of the price adjustment value: ${itemNames}\n\nAre you sure this is the intended purpose?`
 
 		return res.json({
 			success: true,
