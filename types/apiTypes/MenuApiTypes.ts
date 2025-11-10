@@ -48,6 +48,8 @@ export interface RawMenuItemVariationGroup {
 	multi_limit?: number | null
 	kind?: string | null
 	category_filter_id?: number | null
+	category_filter_ids?: number[] | null
+	category_price_adjustment?: number | string | null
 	position?: number | null
 	menu_item_variation_option_choices?: RawMenuItemVariationOptionChoice[]
 }
@@ -76,6 +78,7 @@ export interface RawMenuItemAddon {
 }
 
 export interface RawMenuItemCategoryLink {
+	category_id: number
 	category?: {
 		id: number
 		name: string
@@ -97,6 +100,7 @@ export interface ConcessionMenuItemListItem
 	imageToDisplay: string | null
 	priceDisplay: string
 	category: MenuItemForCustomer['category']
+	categoryIds: number[] // All category IDs this item belongs to
 }
 
 export interface MenuSearchParams {

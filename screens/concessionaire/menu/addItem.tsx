@@ -255,8 +255,8 @@ const AddMenuItemScreen: React.FC = () => {
 			if (group.mode === 'multi-category' && group.categoryPriceAdjustment) {
 				// Get all menu items from the selected categories
 				const categoryMenuItems = menuItems.filter((item: any) =>
-					group.categoryFilterIds?.some((catId) =>
-						item.category_ids?.includes(catId)
+					group.categoryFilterIds?.some((catId: number) =>
+						item.categoryIds?.includes(catId)
 					)
 				)
 

@@ -206,6 +206,11 @@ const EditMenuItemScreen: React.FC = () => {
 						multiLimit: group.multi_limit ?? null,
 						mode: groupMode,
 						categoryFilterId: group.category_filter_id ?? null,
+						categoryFilterIds: group.category_filter_ids ?? [],
+						categoryPriceAdjustment:
+							group.category_price_adjustment != null
+								? group.category_price_adjustment.toString()
+								: null,
 						options,
 						existingMenuItemIds,
 						position: group.position ?? 0,
@@ -442,8 +447,8 @@ const EditMenuItemScreen: React.FC = () => {
 			if (group.mode === 'multi-category' && group.categoryPriceAdjustment) {
 				// Get all menu items from the selected categories
 				const categoryMenuItems = menuItems.filter((item: any) =>
-					group.categoryFilterIds?.some((catId) =>
-						item.category_ids?.includes(catId)
+					group.categoryFilterIds?.some((catId: number) =>
+						item.categoryIds?.includes(catId)
 					)
 				)
 

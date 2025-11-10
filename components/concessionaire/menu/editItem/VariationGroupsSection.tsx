@@ -168,6 +168,11 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 								showCheckboxMenu={showCheckboxMenu}
 								handleUpdateVariationGroup={handleUpdateVariationGroup}
 							/>
+							{errors[`variation-${groupIndex}-categoryFilterIds`] && (
+								<Text style={styles.errorText}>
+									{errors[`variation-${groupIndex}-categoryFilterIds`]}
+								</Text>
+							)}
 							<VariationCategoryPriceAdjustment
 								group={group}
 								groupIndex={groupIndex}

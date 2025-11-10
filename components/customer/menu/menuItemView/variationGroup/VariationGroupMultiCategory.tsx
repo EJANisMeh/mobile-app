@@ -68,19 +68,19 @@ const VariationGroupMultiCategory: React.FC<
 		const grouped = new Map<number, CategoryMenuItem[]>()
 
 		allCategoryMenuItems.forEach((item) => {
-			// Find which category this item belongs to (from the filter list)
+			// Find which categories this item belongs to (from the filter list)
 			const itemCategoryIds =
 				item.menu_item_category_links?.map((link) => link.category_id) || []
-			const matchingCategoryId = itemCategoryIds.find((catId) =>
-				categoryFilterIds.includes(catId)
-			)
-
-			if (matchingCategoryId) {
-				if (!grouped.has(matchingCategoryId)) {
-					grouped.set(matchingCategoryId, [])
+			
+			// Add item to ALL matching categories, not just the first one
+			itemCategoryIds.forEach((catId) => {
+				if (categoryFilterIds.includes(catId)) {
+					if (!grouped.has(catId)) {
+						grouped.set(catId, [])
+					}
+					grouped.get(catId)!.push(item)
 				}
-				grouped.get(matchingCategoryId)!.push(item)
-			}
+			})
 		})
 
 		return grouped

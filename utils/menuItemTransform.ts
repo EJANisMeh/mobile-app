@@ -41,7 +41,7 @@ export const transformRawMenuItem = (
 	raw: RawMenuItem
 ): ConcessionMenuItemListItem => {
 	const basePrice = toNumber(raw.basePrice)
-	const { imageToDisplay, displayImageIndex } = getDisplayImage(
+	const { imageToDisplay, displayImageIndex} = getDisplayImage(
 		raw.images,
 		raw.display_image_index
 	)
@@ -49,6 +49,10 @@ export const transformRawMenuItem = (
 		raw.menu_item_category_links?.find((link) => link?.category != null)
 			?.category ?? null
 	const resolvedCategory = raw.category ?? linkedCategory ?? null
+	
+	// Extract all category IDs from category links
+	const categoryIds = 
+		raw.menu_item_category_links?.map((link) => link.category_id) || []
 
 	return {
 		id: raw.id,
@@ -61,6 +65,7 @@ export const transformRawMenuItem = (
 		imageToDisplay,
 		priceDisplay: `₱${basePrice.toFixed(2)}`,
 		category: resolvedCategory,
+		categoryIds, // Add category IDs for multi-category validation
 		availabilitySchedule: normalizeMenuItemSchedule(
 			raw.availability_schedule ?? undefined
 		),
