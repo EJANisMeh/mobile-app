@@ -387,8 +387,6 @@ const EditMenuItemScreen: React.FC = () => {
 				}
 			} else if (group.mode === 'existing') {
 				const ids = (group as any).existingMenuItemIds || []
-			} else if (group.mode === 'existing') {
-				const ids = (group as any).existingMenuItemIds || []
 				if (!ids || ids.length < 2) {
 					newErrors[`${prefix}-existing`] = 'Select at least 2 existing items'
 				}

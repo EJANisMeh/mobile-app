@@ -84,7 +84,6 @@ export const validatePriceAdjustment = async (
 								},
 							},
 						},
-						columns: ['id', 'name', 'basePrice'],
 						include: {
 							menu_item_category_links: {
 								select: {
@@ -121,8 +120,8 @@ export const validatePriceAdjustment = async (
 									? item.basePrice
 									: parseFloat(String(item.basePrice))
 
-							if (isNaN(basePrice) || basePrice <= 0) {
-								return // Skip items already at 0 or invalid prices
+							if (isNaN(basePrice) || basePrice < 0) {
+								return // Skip invalid prices
 							}
 
 							// Get category IDs for this item
@@ -243,8 +242,8 @@ export const validatePriceAdjustment = async (
 										? item.basePrice
 										: parseFloat(String(item.basePrice))
 
-								if (isNaN(basePrice) || basePrice <= 0) {
-									return // Skip items already at 0 or invalid prices
+								if (isNaN(basePrice) || basePrice < 0) {
+									return // Skip invalid prices
 								}
 
 								// Get the option at the same index as this item
@@ -252,11 +251,17 @@ export const validatePriceAdjustment = async (
 								if (!option || !option.priceAdjustment) return
 
 								const adjustment = parseFloat(option.priceAdjustment)
-								if (isNaN(adjustment) || adjustment >= 0) return // Only check negative adjustments
+								if (isNaN(adjustment) || adjustment >= 0) return
+								
+								if (basePrice + adjustment > 0)
+								{ 
+									return // Only check negative adjustments that make price 0
+								}
 
 								const adjustedPrice = Math.max(0, basePrice + adjustment)
+								console.log(item, adjustedPrice)
 
-								// If adjustment makes it 0 or negative, add to affected items
+								// If adjustment makes it 0, add to affected items
 								if (adjustedPrice === 0) {
 									// Check if not already added
 									const alreadyAdded = allAffectedItems.some(
