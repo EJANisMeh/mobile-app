@@ -31,8 +31,7 @@ export const validateCategoryPriceAdjustment = async (
 		// Step 1: Check if at least one variation group uses single/multi category mode
 		const categoryGroups = variationGroups.filter(
 			(group: any) =>
-				(group.mode === 'single-category' ||
-					group.mode === 'multi-category') &&
+				(group.mode === 'single-category' || group.mode === 'multi-category') &&
 				group.categoryPriceAdjustment != null
 		)
 
@@ -156,14 +155,12 @@ export const validateCategoryPriceAdjustment = async (
 			}
 		})
 
-		const affectedItems = Array.from(affectedItemsMap.values()).map(
-			(item) => ({
-				id: item.id,
-				name: item.name,
-				originalPrice: item.originalPrice,
-				adjustedPrice: item.minAdjustedPrice,
-			})
-		)
+		const affectedItems = Array.from(affectedItemsMap.values()).map((item) => ({
+			id: item.id,
+			name: item.name,
+			originalPrice: item.originalPrice,
+			adjustedPrice: item.minAdjustedPrice,
+		}))
 
 		if (affectedItems.length === 0) {
 			return res.json({
