@@ -127,20 +127,20 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 					}
 				}
 
-			const createdGroup = await prisma.menu_item_variation_groups.create({
-				data: {
-					menu_item_id: menuItemId,
-					kind: kind,
-					code: group.mode, // Store mode in code field
-					name: group.name,
-					selection_type_id: group.selectionTypeId,
-					multi_limit: group.multiLimit,
-					category_filter_id: group.categoryFilterId,
-					category_filter_ids: group.categoryFilterIds || [],
-					category_price_adjustment: categoryPriceAdjustment,
-					position: group.position,
-				},
-			})				// Add custom options if mode is custom
+				const createdGroup = await prisma.menu_item_variation_groups.create({
+					data: {
+						menu_item_id: menuItemId,
+						kind: kind,
+						code: group.mode, // Store mode in code field
+						name: group.name,
+						selection_type_id: group.selectionTypeId,
+						multi_limit: group.multiLimit,
+						category_filter_id: group.categoryFilterId,
+						category_filter_ids: group.categoryFilterIds || [],
+						category_price_adjustment: categoryPriceAdjustment,
+						position: group.position,
+					},
+				}) // Add custom options if mode is custom
 				if (group.mode === 'custom' && group.options) {
 					for (const option of group.options) {
 						await prisma.menu_item_variation_option_choices.create({
