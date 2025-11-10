@@ -523,6 +523,31 @@ export const createConcessionaireAddMenuItemStyles = (
 		existingItemText: {
 			color: colors.text,
 		},
+		existingItemContainer: {
+			backgroundColor: colors.surface,
+			borderRadius: 8,
+			padding: spacing.xs,
+			marginBottom: spacing.xs,
+			borderWidth: 1,
+			borderColor: colors.border,
+		},
+		priceAdjustmentContainer: {
+			marginTop: spacing.xs,
+		},
+		priceAdjustmentLabel: {
+			fontSize: responsive.getResponsiveFontSize(12),
+			color: colors.textSecondary,
+			marginBottom: spacing.xs / 2,
+		},
+		priceAdjustmentInput: {
+			borderWidth: 1,
+			borderColor: colors.border,
+			borderRadius: 8,
+			padding: spacing.xs,
+			color: colors.text,
+			fontSize: responsive.getResponsiveFontSize(14),
+			backgroundColor: colors.background,
+		},
 
 		// NameInput styles
 		nameInputError: {

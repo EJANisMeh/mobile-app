@@ -48,7 +48,16 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 		if (name !== undefined) updateData.name = name.trim()
 		if (description !== undefined)
 			updateData.description = description ? description.trim() : null
-		if (basePrice !== undefined) updateData.basePrice = parseFloat(basePrice)
+		if (basePrice !== undefined) {
+			const parsedPrice = parseFloat(basePrice)
+			if (isNaN(parsedPrice) || parsedPrice < 0) {
+				return res.status(400).json({
+					success: false,
+					error: 'Invalid base price',
+				})
+			}
+			updateData.basePrice = parsedPrice
+		}
 		if (availability !== undefined) updateData.availability = availability
 		if (images !== undefined) updateData.images = images
 		if (displayImageIndex !== undefined)

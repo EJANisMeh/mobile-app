@@ -2,8 +2,8 @@ import express from 'express'
 import { prisma, selectQuery } from '../db'
 
 /**
- * Validates category price adjustments to check if any items will become free
- * Also validates existing items mode to check if price adjustments make items free/negative
+ * Validates price adjustments to check if any items will become free
+ * Validates both category mode and existing items mode price adjustments
  * POST /menu/validate-price-adjustment
  * Body: {
  *   concessionId: number,
@@ -19,7 +19,7 @@ import { prisma, selectQuery } from '../db'
  *   }>
  * }
  */
-export const validateCategoryPriceAdjustment = async (
+export const validatePriceAdjustment = async (
 	req: express.Request,
 	res: express.Response
 ) => {
@@ -43,8 +43,7 @@ export const validateCategoryPriceAdjustment = async (
 		// ===== PART 1: Validate Category Mode Groups =====
 		const categoryGroups = variationGroups.filter(
 			(group: any) =>
-				(group.mode === 'single-category' ||
-					group.mode === 'multi-category') &&
+				(group.mode === 'single-category' || group.mode === 'multi-category') &&
 				group.categoryPriceAdjustment != null
 		)
 
@@ -72,7 +71,7 @@ export const validateCategoryPriceAdjustment = async (
 				const uniqueCategoryIds = Array.from(categoryIds)
 
 				if (uniqueCategoryIds.length > 0) {
-					// Query menu items from those categories
+					// Query menu items from those categories WITH their category links
 					const menuItemsResult = await selectQuery(prisma, {
 						table: 'menuItem',
 						where: {
@@ -86,6 +85,13 @@ export const validateCategoryPriceAdjustment = async (
 							},
 						},
 						columns: ['id', 'name', 'basePrice'],
+						include: {
+							menu_item_category_links: {
+								select: {
+									category_id: true,
+								},
+							},
+						},
 					})
 
 					if (menuItemsResult.success && menuItemsResult.data) {
@@ -93,6 +99,7 @@ export const validateCategoryPriceAdjustment = async (
 							id: number
 							name: string
 							basePrice: any
+							menu_item_category_links: Array<{ category_id: number }>
 						}>
 
 						// Calculate if any item will hit 0 or negative
@@ -118,15 +125,39 @@ export const validateCategoryPriceAdjustment = async (
 								return // Skip items already at 0 or invalid prices
 							}
 
+							// Get category IDs for this item
+							const itemCategoryIds = item.menu_item_category_links.map(
+								(link) => link.category_id
+							)
+
 							// Find the most negative adjustment that affects this item
+							// Only apply adjustments from groups that include this item's categories
 							let minAdjustedPrice = basePrice
 							negativeAdjustmentGroups.forEach((group: any) => {
 								const adjustment = parseFloat(
 									group.categoryPriceAdjustment || '0'
 								)
-								const adjustedPrice = Math.max(0, basePrice + adjustment)
-								if (adjustedPrice < minAdjustedPrice) {
-									minAdjustedPrice = adjustedPrice
+
+								// Check if this group's categories overlap with item's categories
+								let groupAppliesToItem = false
+								if (group.mode === 'single-category' && group.categoryFilterId) {
+									groupAppliesToItem = itemCategoryIds.includes(
+										group.categoryFilterId
+									)
+								} else if (
+									group.mode === 'multi-category' &&
+									group.categoryFilterIds
+								) {
+									groupAppliesToItem = group.categoryFilterIds.some(
+										(catId: number) => itemCategoryIds.includes(catId)
+									)
+								}
+
+								if (groupAppliesToItem) {
+									const adjustedPrice = Math.max(0, basePrice + adjustment)
+									if (adjustedPrice < minAdjustedPrice) {
+										minAdjustedPrice = adjustedPrice
+									}
 								}
 							})
 
@@ -194,54 +225,49 @@ export const validateCategoryPriceAdjustment = async (
 						basePrice: any
 					}>
 
-					// Check each existing item with all options to see if any go to 0 or negative
-					existingItems.forEach((item) => {
-						const basePrice =
-							typeof item.basePrice === 'string'
-								? parseFloat(item.basePrice)
-								: typeof item.basePrice === 'number'
-								? item.basePrice
-								: parseFloat(String(item.basePrice))
+					// Check each group and each item-option pair
+					existingItemsGroups.forEach((group: any) => {
+						// Each option corresponds to an item at the same index
+						group.existingMenuItemIds.forEach((itemId: number, index: number) => {
+							const item = existingItems.find((i) => i.id === itemId)
+							if (!item) return
 
-						if (isNaN(basePrice) || basePrice <= 0) {
-							return // Skip items already at 0 or invalid prices
-						}
+							const basePrice =
+								typeof item.basePrice === 'string'
+									? parseFloat(item.basePrice)
+									: typeof item.basePrice === 'number'
+									? item.basePrice
+									: parseFloat(String(item.basePrice))
 
-						// Find the most negative price adjustment across all groups
-						let minAdjustedPrice = basePrice
-						existingItemsGroups.forEach((group: any) => {
-							// Check if this item is in this group
-							if (group.existingMenuItemIds.includes(item.id)) {
-								// Check all options in this group
-								group.options.forEach((option: any) => {
-									if (option.priceAdjustment) {
-										const adjustment = parseFloat(option.priceAdjustment)
-										if (!isNaN(adjustment)) {
-											const adjustedPrice = Math.max(0, basePrice + adjustment)
-											if (adjustedPrice < minAdjustedPrice) {
-												minAdjustedPrice = adjustedPrice
-											}
-										}
-									}
-								})
+							if (isNaN(basePrice) || basePrice <= 0) {
+								return // Skip items already at 0 or invalid prices
+							}
+
+							// Get the option at the same index as this item
+							const option = group.options[index]
+							if (!option || !option.priceAdjustment) return
+
+							const adjustment = parseFloat(option.priceAdjustment)
+							if (isNaN(adjustment) || adjustment >= 0) return // Only check negative adjustments
+
+							const adjustedPrice = Math.max(0, basePrice + adjustment)
+
+							// If adjustment makes it 0 or negative, add to affected items
+							if (adjustedPrice === 0) {
+								// Check if not already added
+								const alreadyAdded = allAffectedItems.some(
+									(affectedItem) => affectedItem.id === item.id
+								)
+								if (!alreadyAdded) {
+									allAffectedItems.push({
+										id: item.id,
+										name: item.name,
+										originalPrice: basePrice,
+										adjustedPrice: adjustedPrice,
+									})
+								}
 							}
 						})
-
-						// If any option makes it 0 or negative, add to affected items
-						if (minAdjustedPrice === 0) {
-							// Check if not already added from category validation
-							const alreadyAdded = allAffectedItems.some(
-								(affectedItem) => affectedItem.id === item.id
-							)
-							if (!alreadyAdded) {
-								allAffectedItems.push({
-									id: item.id,
-									name: item.name,
-									originalPrice: basePrice,
-									adjustedPrice: minAdjustedPrice,
-								})
-							}
-						}
 					})
 				}
 			}
@@ -268,7 +294,7 @@ export const validateCategoryPriceAdjustment = async (
 			message,
 		})
 	} catch (error) {
-		console.error('Validate category price adjustment error:', error)
+		console.error('Validate price adjustment error:', error)
 		return res.status(500).json({
 			success: false,
 			error: 'Internal server error while validating price adjustment',

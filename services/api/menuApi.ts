@@ -190,10 +190,10 @@ export const menuApi = {
 	},
 
 	/**
-	 * Validate category price adjustment
+	 * Validate price adjustment
 	 * Backend handles: checking if price adjustments will make items free
 	 */
-	validateCategoryPriceAdjustment: async (
+	validatePriceAdjustment: async (
 		concessionId: number,
 		variationGroups: Array<{
 			mode: string

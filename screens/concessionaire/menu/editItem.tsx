@@ -27,6 +27,7 @@ import {
 	ConfirmationModal,
 	MenuModal,
 	CheckboxMenuModal,
+	PriceAdjustmentWarningModal,
 } from '../../../components/modals'
 import {
 	AddMenuItemFormData,
@@ -52,6 +53,13 @@ import {
 	normalizeMenuItemSchedule,
 	hasAnyMenuItemScheduleDay,
 } from '../../../utils'
+
+interface AffectedItem {
+	id: number
+	name: string
+	originalPrice: number
+	adjustedPrice: number
+}
 
 type EditMenuItemScreenNavigationProp = StackNavigationProp<
 	ConcessionaireStackParamList,
@@ -118,6 +126,8 @@ const EditMenuItemScreen: React.FC = () => {
 	const [selectionTypes, setSelectionTypes] = useState<SelectionType[]>([])
 	const [loadingSelectionTypes, setLoadingSelectionTypes] = useState(false)
 	const [categoriesLoading, setCategoriesLoading] = useState(false)
+	const [priceWarningVisible, setPriceWarningVisible] = useState(false)
+	const [affectedItems, setAffectedItems] = useState<AffectedItem[]>([])
 
 	// Load item data on mount
 	useEffect(() => {
@@ -516,7 +526,7 @@ const EditMenuItemScreen: React.FC = () => {
 		try {
 			const { menuApi } = await import('../../../services/api')
 
-			const validation = await menuApi.validateCategoryPriceAdjustment(
+			const validation = await menuApi.validatePriceAdjustment(
 				concession.id,
 				formData.variationGroups
 			)
@@ -530,17 +540,9 @@ const EditMenuItemScreen: React.FC = () => {
 			}
 
 			if (validation.hasIssue && validation.message) {
-				// Show warning confirmation
-				confirmationModal.showConfirmation({
-					title: 'Price Adjustment Warning',
-					message: validation.message,
-					confirmText: 'Continue',
-					cancelText: 'Cancel',
-					onConfirm: () => {
-						// Wait a bit before showing next modal to avoid conflicts
-						setTimeout(() => proceedWithSave(), 350)
-					},
-				})
+				// Show warning with affected items
+				setAffectedItems(validation.affectedItems || [])
+				setPriceWarningVisible(true)
 			} else {
 				proceedWithSave()
 			}
@@ -689,6 +691,16 @@ const EditMenuItemScreen: React.FC = () => {
 				selectedValues={checkboxMenuModal.props.selectedValues}
 				onSave={checkboxMenuModal.props.onSave}
 				footer={checkboxMenuModal.props.footer}
+			/>
+
+			<PriceAdjustmentWarningModal
+				visible={priceWarningVisible}
+				onClose={() => setPriceWarningVisible(false)}
+				affectedItems={affectedItems}
+				onConfirm={() => {
+					// Wait a bit before showing next modal to avoid conflicts
+					setTimeout(() => proceedWithSave(), 350)
+				}}
 			/>
 		</DynamicKeyboardView>
 	)

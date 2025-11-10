@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useThemeContext, useMenuContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
@@ -34,18 +34,35 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 	const styles = createConcessionaireEditMenuItemStyles(colors, responsive)
 	const { menuItems } = useMenuContext()
 
+	const handlePriceAdjustmentChange = (index: number, value: string) => {
+		setFormData((prev) => ({
+			...prev,
+			variationGroups: prev.variationGroups.map((g, gi) =>
+				gi === groupIndex
+					? {
+							...g,
+							options: g.options.map((opt, oi) =>
+								oi === index ? { ...opt, priceAdjustment: value } : opt
+							),
+					  }
+					: g
+			),
+		}))
+	}
+
 	return (
 		<>
 			<Text style={styles.modeSelectionLabel}>Options (Existing Items):</Text>
-			{(group as any).existingMenuItemIds?.map(
-				(itemIdInGroup: number, idx: number) => {
-					const mi = menuItems.find((m: any) => m.id === itemIdInGroup)
-					return (
-						<View
-							key={idx}
-							style={styles.existingItemRow}>
+			{group.options.map((option, idx) => {
+				const itemIdInGroup = (group as any).existingMenuItemIds?.[idx]
+				const mi = menuItems.find((m: any) => m.id === itemIdInGroup)
+				return (
+					<View
+						key={idx}
+						style={styles.existingItemContainer}>
+						<View style={styles.existingItemRow}>
 							<Text style={styles.existingItemName}>
-								{mi?.name || 'Unknown'}
+								{mi?.name || 'Unknown'} (₱{mi?.basePrice || '0'})
 							</Text>
 							<TouchableOpacity
 								onPress={() => {
@@ -55,10 +72,11 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 											gi === groupIndex
 												? {
 														...g,
+														options: g.options.filter((_, oi) => oi !== idx),
 														existingMenuItemIds: (
 															g as any
 														).existingMenuItemIds?.filter(
-															(id: number) => id !== itemIdInGroup
+															(_: number, i: number) => i !== idx
 														),
 												  }
 												: g
@@ -72,9 +90,22 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 								/>
 							</TouchableOpacity>
 						</View>
-					)
-				}
-			)}
+						<View style={styles.priceAdjustmentContainer}>
+							<Text style={styles.priceAdjustmentLabel}>
+								Price Adjustment (₱):
+							</Text>
+							<TextInput
+								style={styles.priceAdjustmentInput}
+								value={option.priceAdjustment}
+								onChangeText={(value) => handlePriceAdjustmentChange(idx, value)}
+								placeholder="0"
+								keyboardType="numeric"
+								placeholderTextColor={colors.textSecondary}
+							/>
+						</View>
+					</View>
+				)
+			})}
 
 			<TouchableOpacity
 				style={[styles.addCategoryButton, styles.variationAddButtonInline]}
@@ -105,12 +136,23 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 						title: 'Select Menu Item',
 						options: menuItemOptions,
 						onSelect: (menuItemId: number) => {
+							const selectedItem = menuItems.find((m: any) => m.id === menuItemId)
 							setFormData((prev) => ({
 								...prev,
 								variationGroups: prev.variationGroups.map((g, gi) =>
 									gi === groupIndex
 										? {
 												...g,
+												options: [
+													...g.options,
+													{
+														name: selectedItem?.name || '',
+														priceAdjustment: '0',
+														isDefault: false,
+														availability: true,
+														position: g.options.length,
+													},
+												],
 												existingMenuItemIds: [
 													...((g as any).existingMenuItemIds || []),
 													menuItemId,
