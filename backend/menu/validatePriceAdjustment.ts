@@ -140,7 +140,10 @@ export const validatePriceAdjustment = async (
 
 								// Check if this group's categories overlap with item's categories
 								let groupAppliesToItem = false
-								if (group.mode === 'single-category' && group.categoryFilterId) {
+								if (
+									group.mode === 'single-category' &&
+									group.categoryFilterId
+								) {
 									groupAppliesToItem = itemCategoryIds.includes(
 										group.categoryFilterId
 									)
@@ -228,46 +231,48 @@ export const validatePriceAdjustment = async (
 					// Check each group and each item-option pair
 					existingItemsGroups.forEach((group: any) => {
 						// Each option corresponds to an item at the same index
-						group.existingMenuItemIds.forEach((itemId: number, index: number) => {
-							const item = existingItems.find((i) => i.id === itemId)
-							if (!item) return
+						group.existingMenuItemIds.forEach(
+							(itemId: number, index: number) => {
+								const item = existingItems.find((i) => i.id === itemId)
+								if (!item) return
 
-							const basePrice =
-								typeof item.basePrice === 'string'
-									? parseFloat(item.basePrice)
-									: typeof item.basePrice === 'number'
-									? item.basePrice
-									: parseFloat(String(item.basePrice))
+								const basePrice =
+									typeof item.basePrice === 'string'
+										? parseFloat(item.basePrice)
+										: typeof item.basePrice === 'number'
+										? item.basePrice
+										: parseFloat(String(item.basePrice))
 
-							if (isNaN(basePrice) || basePrice <= 0) {
-								return // Skip items already at 0 or invalid prices
-							}
+								if (isNaN(basePrice) || basePrice <= 0) {
+									return // Skip items already at 0 or invalid prices
+								}
 
-							// Get the option at the same index as this item
-							const option = group.options[index]
-							if (!option || !option.priceAdjustment) return
+								// Get the option at the same index as this item
+								const option = group.options[index]
+								if (!option || !option.priceAdjustment) return
 
-							const adjustment = parseFloat(option.priceAdjustment)
-							if (isNaN(adjustment) || adjustment >= 0) return // Only check negative adjustments
+								const adjustment = parseFloat(option.priceAdjustment)
+								if (isNaN(adjustment) || adjustment >= 0) return // Only check negative adjustments
 
-							const adjustedPrice = Math.max(0, basePrice + adjustment)
+								const adjustedPrice = Math.max(0, basePrice + adjustment)
 
-							// If adjustment makes it 0 or negative, add to affected items
-							if (adjustedPrice === 0) {
-								// Check if not already added
-								const alreadyAdded = allAffectedItems.some(
-									(affectedItem) => affectedItem.id === item.id
-								)
-								if (!alreadyAdded) {
-									allAffectedItems.push({
-										id: item.id,
-										name: item.name,
-										originalPrice: basePrice,
-										adjustedPrice: adjustedPrice,
-									})
+								// If adjustment makes it 0 or negative, add to affected items
+								if (adjustedPrice === 0) {
+									// Check if not already added
+									const alreadyAdded = allAffectedItems.some(
+										(affectedItem) => affectedItem.id === item.id
+									)
+									if (!alreadyAdded) {
+										allAffectedItems.push({
+											id: item.id,
+											name: item.name,
+											originalPrice: basePrice,
+											adjustedPrice: adjustedPrice,
+										})
+									}
 								}
 							}
-						})
+						)
 					})
 				}
 			}

@@ -97,7 +97,9 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 							<TextInput
 								style={styles.priceAdjustmentInput}
 								value={option.priceAdjustment}
-								onChangeText={(value) => handlePriceAdjustmentChange(idx, value)}
+								onChangeText={(value) =>
+									handlePriceAdjustmentChange(idx, value)
+								}
 								placeholder="0"
 								keyboardType="numeric"
 								placeholderTextColor={colors.textSecondary}
@@ -136,7 +138,9 @@ const VariationExistingItems: React.FC<VariationExistingItemsProps> = ({
 						title: 'Select Menu Item',
 						options: menuItemOptions,
 						onSelect: (menuItemId: number) => {
-							const selectedItem = menuItems.find((m: any) => m.id === menuItemId)
+							const selectedItem = menuItems.find(
+								(m: any) => m.id === menuItemId
+							)
 							setFormData((prev) => ({
 								...prev,
 								variationGroups: prev.variationGroups.map((g, gi) =>
