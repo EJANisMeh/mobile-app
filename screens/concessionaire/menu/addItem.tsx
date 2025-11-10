@@ -236,6 +236,44 @@ const AddMenuItemScreen: React.FC = () => {
 
 	const isFormValid = validateForm(false)
 
+	const proceedWithSave = () => {
+		showConfirmation({
+			title: 'Add Item',
+			message: 'Add this item to your menu?',
+			confirmText: 'Add',
+			cancelText: 'Cancel',
+			onConfirm: async () => {
+				if (!concession?.id) {
+					showAlert({
+						title: 'Error',
+						message: 'Concession not found',
+					})
+					return
+				}
+
+				try {
+					const response = await addMenuItem(concession.id, formData)
+
+					if (response.success) {
+						await getMenuItems(concession.id)
+						navigation.goBack()
+					} else {
+						showAlert({
+							title: 'Error',
+							message: response.error || 'Failed to add menu item',
+						})
+					}
+				} catch (error) {
+					console.error('Add item error:', error)
+					showAlert({
+						title: 'Error',
+						message: 'Failed to add menu item',
+					})
+				}
+			},
+		})
+	}
+
 	const handleSave = async () => {
 		const valid = validateForm(true)
 		if (!valid) {
@@ -279,7 +317,10 @@ const AddMenuItemScreen: React.FC = () => {
 					message: validation.message,
 					confirmText: 'Continue',
 					cancelText: 'Cancel',
-					onConfirm: () => proceedWithSave(),
+					onConfirm: () => {
+						// Wait a bit before showing next modal to avoid conflicts
+						setTimeout(() => proceedWithSave(), 350)
+					},
 				})
 			} else {
 				proceedWithSave()
@@ -289,39 +330,6 @@ const AddMenuItemScreen: React.FC = () => {
 			// Proceed anyway if validation fails
 			proceedWithSave()
 		}
-	}
-
-	const proceedWithSave = () => {
-		showConfirmation({
-			title: 'Add Item',
-			message: 'Add this item to your menu?',
-			confirmText: 'Add',
-			cancelText: 'Cancel',
-			onConfirm: async () => {
-				if (!concession?.id) {
-					showAlert({
-						title: 'Error',
-						message: 'Concession not found',
-					})
-					return
-				}
-
-				const response = await addMenuItem(concession.id, formData)
-
-				if (response.success) {
-					showAlert({
-						title: 'Success',
-						message: 'Item added successfully!',
-					})
-					navigation.goBack()
-				} else {
-					showAlert({
-						title: 'Error',
-						message: response.error || 'Failed to add item',
-					})
-				}
-			},
-		})
 	}
 
 	if (categoriesLoading && categories.length === 0) {

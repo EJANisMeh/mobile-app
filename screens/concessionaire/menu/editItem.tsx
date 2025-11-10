@@ -420,6 +420,71 @@ const EditMenuItemScreen: React.FC = () => {
 		return true
 	}, [formData, initialFormData])
 
+	const proceedWithSave = () => {
+		confirmationModal.showConfirmation({
+			title: 'Save Changes',
+			message: 'Save changes to this menu item?',
+			confirmText: 'Save',
+			cancelText: 'Cancel',
+			onConfirm: async () => {
+				try {
+					const response = await editMenuItem(itemId, {
+						concessionId: concession?.id,
+						name: formData.name.trim(),
+						description: formData.description.trim() || null,
+						basePrice: formData.basePrice || '0',
+						images: formData.images,
+						displayImageIndex: formData.displayImageIndex,
+						categoryIds: formData.categoryIds,
+						availability: formData.availability,
+						availabilitySchedule: formData.availabilitySchedule,
+						variationGroups: formData.variationGroups.map((group) => ({
+							name: group.name.trim(),
+							selectionTypeId: group.selectionTypeId,
+							multiLimit: group.multiLimit,
+							mode: group.mode,
+							categoryFilterId: group.categoryFilterId,
+							categoryFilterIds: group.categoryFilterIds,
+							categoryPriceAdjustment: group.categoryPriceAdjustment,
+							options: group.options.map((opt) => ({
+								name: opt.name.trim(),
+								priceAdjustment: opt.priceAdjustment,
+								isDefault: opt.isDefault,
+								availability: opt.availability,
+								position: opt.position,
+							})),
+							existingMenuItemIds: (group as any).existingMenuItemIds || [],
+							position: group.position,
+						})),
+						addons: formData.addons.map((addon) => ({
+							menuItemId: addon.menuItemId,
+							label: addon.label?.trim() || null,
+							priceOverride: addon.priceOverride,
+							required: addon.required,
+							position: addon.position,
+						})),
+					})
+
+					if (response.success) {
+						await getMenuItems(concession?.id ?? 0)
+						goBackToMenu()
+					} else {
+						alertModal.showAlert({
+							title: 'Error',
+							message: response.error || 'Failed to save changes',
+						})
+					}
+				} catch (error) {
+					console.error('Save error:', error)
+					alertModal.showAlert({
+						title: 'Error',
+						message: 'Failed to save changes',
+					})
+				}
+			},
+		})
+	}
+
 	const handleSave = async () => {
 		const valid = validateForm(true)
 		if (!valid) {
@@ -471,7 +536,10 @@ const EditMenuItemScreen: React.FC = () => {
 					message: validation.message,
 					confirmText: 'Continue',
 					cancelText: 'Cancel',
-					onConfirm: () => proceedWithSave(),
+					onConfirm: () => {
+						// Wait a bit before showing next modal to avoid conflicts
+						setTimeout(() => proceedWithSave(), 350)
+					},
 				})
 			} else {
 				proceedWithSave()
@@ -481,74 +549,6 @@ const EditMenuItemScreen: React.FC = () => {
 			// Proceed anyway if validation fails
 			proceedWithSave()
 		}
-	}
-
-	const proceedWithSave = () => {
-		confirmationModal.showConfirmation({
-			title: 'Save Changes',
-			message: 'Save changes to this menu item?',
-			confirmText: 'Save',
-			cancelText: 'Cancel',
-			onConfirm: async () => {
-				try {
-					const response = await editMenuItem(itemId, {
-						concessionId: concession?.id,
-						name: formData.name.trim(),
-						description: formData.description.trim() || null,
-						basePrice: formData.basePrice || '0',
-						images: formData.images,
-						displayImageIndex: formData.displayImageIndex,
-						categoryIds: formData.categoryIds,
-						availability: formData.availability,
-						availabilitySchedule: formData.availabilitySchedule,
-						variationGroups: formData.variationGroups.map((group) => ({
-							name: group.name.trim(),
-							selectionTypeId: group.selectionTypeId,
-							multiLimit: group.multiLimit,
-							mode: group.mode,
-							categoryFilterId: group.categoryFilterId,
-							categoryFilterIds: group.categoryFilterIds,
-							categoryPriceAdjustment: group.categoryPriceAdjustment,
-							options: group.options.map((opt) => ({
-								name: opt.name.trim(),
-								priceAdjustment: opt.priceAdjustment,
-								isDefault: opt.isDefault,
-								availability: opt.availability,
-								position: opt.position,
-							})),
-							existingMenuItemIds: (group as any).existingMenuItemIds || [],
-							position: group.position,
-						})),
-						addons: formData.addons.map((addon) => ({
-							menuItemId: addon.menuItemId,
-							label: addon.label?.trim() || null,
-							priceOverride: addon.priceOverride,
-							required: addon.required,
-							position: addon.position,
-						})),
-					})
-
-					if (response.success) {
-						alertModal.showAlert({
-							title: 'Success',
-							message: 'Changes saved successfully!',
-						})
-						navigation.goBack()
-					} else {
-						alertModal.showAlert({
-							title: 'Error',
-							message: response.error || 'Failed to save changes',
-						})
-					}
-				} catch (error) {
-					console.error('Error saving changes:', error)
-					alertModal.showAlert({
-						title: 'Error',
-						message: 'Failed to save changes. Please try again.',
-					})
-				}
-			},
-		})
 	}
 
 	if (categoriesLoading && categories.length === 0) {
