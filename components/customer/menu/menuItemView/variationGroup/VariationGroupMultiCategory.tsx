@@ -71,7 +71,7 @@ const VariationGroupMultiCategory: React.FC<
 			// Find which categories this item belongs to (from the filter list)
 			const itemCategoryIds =
 				item.menu_item_category_links?.map((link) => link.category_id) || []
-			
+
 			// Add item to ALL matching categories, not just the first one
 			itemCategoryIds.forEach((catId) => {
 				if (categoryFilterIds.includes(catId)) {
