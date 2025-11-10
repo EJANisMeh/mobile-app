@@ -188,4 +188,26 @@ export const menuApi = {
 			body: JSON.stringify({ availability }),
 		})
 	},
+
+	/**
+	 * Validate category price adjustment
+	 * Backend handles: checking if price adjustments will make items free
+	 */
+	validateCategoryPriceAdjustment: async (
+		concessionId: number,
+		variationGroups: Array<{
+			mode: string
+			categoryFilterId?: number | null
+			categoryFilterIds?: number[]
+			categoryPriceAdjustment?: string | null
+		}>
+	): Promise<any> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall('/menu/validate-price-adjustment', {
+			method: 'POST',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+			body: JSON.stringify({ concessionId, variationGroups }),
+		})
+	},
 }

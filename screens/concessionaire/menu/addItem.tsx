@@ -39,7 +39,6 @@ import {
 	createDefaultMenuItemSchedule,
 	hasAnyMenuItemScheduleDay,
 	isMenuItemScheduleAllDays,
-	validateCategoryPriceAdjustment,
 } from '../../../utils'
 
 const AddMenuItemScreen: React.FC = () => {
@@ -237,7 +236,7 @@ const AddMenuItemScreen: React.FC = () => {
 
 	const isFormValid = validateForm(false)
 
-	const handleSave = () => {
+	const handleSave = async () => {
 		const valid = validateForm(true)
 		if (!valid) {
 			// focus/notify by modal briefly
@@ -248,46 +247,46 @@ const AddMenuItemScreen: React.FC = () => {
 			return
 		}
 
-		// Check for price adjustment issues in multi-category variation groups
-		const priceIssues: Array<{ groupName: string; message: string }> = []
-
-		formData.variationGroups.forEach((group) => {
-			if (group.mode === 'multi-category' && group.categoryPriceAdjustment) {
-				// Get all menu items from the selected categories
-				const categoryMenuItems = menuItems.filter((item: any) =>
-					group.categoryFilterIds?.some((catId: number) =>
-						item.categoryIds?.includes(catId)
-					)
-				)
-
-				const validation = validateCategoryPriceAdjustment(
-					categoryMenuItems,
-					group.categoryPriceAdjustment
-				)
-
-				if (validation.hasIssue && validation.message) {
-					priceIssues.push({
-						groupName: group.name,
-						message: validation.message,
-					})
-				}
-			}
-		})
-
-		// If there are price issues, show warning confirmation
-		if (priceIssues.length > 0) {
-			const issueMessages = priceIssues
-				.map((issue) => `${issue.groupName}:\n${issue.message}`)
-				.join('\n\n')
-
-			showConfirmation({
-				title: 'Price Adjustment Warning',
-				message: issueMessages,
-				confirmText: 'Continue',
-				cancelText: 'Cancel',
-				onConfirm: () => proceedWithSave(),
+		// Validate category price adjustments via API
+		if (!concession?.id) {
+			showAlert({
+				title: 'Error',
+				message: 'Concession ID not found',
 			})
-		} else {
+			return
+		}
+
+		try {
+			const { menuApi } = await import('../../../services/api')
+
+			const validation = await menuApi.validateCategoryPriceAdjustment(
+				concession.id,
+				formData.variationGroups
+			)
+
+			if (!validation.success) {
+				showAlert({
+					title: 'Error',
+					message: validation.message || 'Failed to validate price adjustments',
+				})
+				return
+			}
+
+			if (validation.hasIssue && validation.message) {
+				// Show warning confirmation
+				showConfirmation({
+					title: 'Price Adjustment Warning',
+					message: validation.message,
+					confirmText: 'Continue',
+					cancelText: 'Cancel',
+					onConfirm: () => proceedWithSave(),
+				})
+			} else {
+				proceedWithSave()
+			}
+		} catch (error) {
+			console.error('Error validating price adjustment:', error)
+			// Proceed anyway if validation fails
 			proceedWithSave()
 		}
 	}

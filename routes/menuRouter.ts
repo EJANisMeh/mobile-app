@@ -7,6 +7,7 @@ import {
 	getItemById,
 	getSelectionTypes,
 	toggleVariationOptionAvailability,
+	validateCategoryPriceAdjustment,
 } from '../backend/menu'
 
 const router = express.Router()
@@ -34,5 +35,8 @@ router.put(
 	'/variation-option/:optionId/availability',
 	toggleVariationOptionAvailability
 )
+
+// Validate category price adjustment
+router.post('/validate-price-adjustment', validateCategoryPriceAdjustment)
 
 export default router
