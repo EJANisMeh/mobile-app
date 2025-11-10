@@ -252,9 +252,8 @@ export const validatePriceAdjustment = async (
 
 								const adjustment = parseFloat(option.priceAdjustment)
 								if (isNaN(adjustment) || adjustment >= 0) return
-								
-								if (basePrice + adjustment > 0)
-								{ 
+
+								if (basePrice + adjustment > 0) {
 									return // Only check negative adjustments that make price 0
 								}
 
