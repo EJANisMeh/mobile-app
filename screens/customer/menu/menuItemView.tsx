@@ -847,12 +847,10 @@ const MenuItemViewScreen: React.FC = () => {
 			<DynamicScrollView showsVerticalScrollIndicator={false}>
 				{/* Header: Name and Categories */}
 				<MenuItemHeader menuItem={menuItem} />
-
 				{/* Images Carousel */}
 				{menuItem.images && menuItem.images.length > 0 && (
 					<MenuItemImages images={menuItem.images} />
 				)}
-
 				{/* Description and schedule */}
 				{(menuItem.description || scheduleDayDetails.length > 0) && (
 					<MenuItemInfo
@@ -862,7 +860,6 @@ const MenuItemViewScreen: React.FC = () => {
 						availabilityStatus={availabilityStatus}
 					/>
 				)}
-
 				{/* Price and Quantity */}
 				<MenuItemInfo
 					menuItem={menuItem}
@@ -871,17 +868,17 @@ const MenuItemViewScreen: React.FC = () => {
 					setQuantity={setQuantity}
 					showPrice={true}
 				/>
-
-			{/* Variations Section */}
-			{menuItem.menu_item_variation_groups &&
-				menuItem.menu_item_variation_groups.length > 0 && (
-					<MenuItemVariations
-						variationGroups={menuItem.menu_item_variation_groups}
-						variationSelections={variationSelections}
-						setVariationSelections={setVariationSelections}
-						concessionId={menuItem.concessionId}
-					/>
-				)}				{/* Add-ons Section */}
+				{/* Variations Section */}
+				{menuItem.menu_item_variation_groups &&
+					menuItem.menu_item_variation_groups.length > 0 && (
+						<MenuItemVariations
+							variationGroups={menuItem.menu_item_variation_groups}
+							variationSelections={variationSelections}
+							setVariationSelections={setVariationSelections}
+							concessionId={menuItem.concessionId}
+						/>
+					)}
+				{/* Add-ons Section */}
 				{menuItem.menu_item_addons_menu_item_addons_menu_item_idTomenu_items &&
 					menuItem.menu_item_addons_menu_item_addons_menu_item_idTomenu_items
 						.length > 0 && (
@@ -893,13 +890,11 @@ const MenuItemViewScreen: React.FC = () => {
 							setAddonSelections={setAddonSelections}
 						/>
 					)}
-
 				{/* Customer Request Section */}
 				<CustomerRequestInput
 					customerRequest={customerRequest}
 					onChangeRequest={setCustomerRequest}
 				/>
-
 				{/* Bottom Actions: Add to Cart / Order Flow */}
 				<MenuItemActions
 					disabled={isActionDisabled}
