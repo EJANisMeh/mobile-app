@@ -200,6 +200,10 @@ export const menuApi = {
 			categoryFilterId?: number | null
 			categoryFilterIds?: number[]
 			categoryPriceAdjustment?: string | null
+			options?: Array<{
+				priceAdjustment?: string | null
+			}>
+			existingMenuItemIds?: number[]
 		}>
 	): Promise<any> => {
 		const token = await AsyncStorage.getItem('authToken')

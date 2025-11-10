@@ -318,8 +318,10 @@ const MenuItemViewScreen: React.FC = () => {
 			}
 		})
 
-		const unitPrice = roundCurrency(
-			basePrice + variationAdjustments + addonsTotal
+		// Ensure unit price never goes below 0
+		const unitPrice = Math.max(
+			0,
+			roundCurrency(basePrice + variationAdjustments + addonsTotal)
 		)
 		const totalPrice = roundCurrency(unitPrice * Math.max(quantity, 1))
 
