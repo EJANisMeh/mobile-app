@@ -24,6 +24,7 @@ import {
 } from '../../../components/modals'
 import { useThemeContext, useAuthContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
+import { useConcessionaireNavigation } from '../../../hooks/useNavigation'
 import { useAlertModal, useConfirmationModal } from '../../../hooks/useModals'
 import { createConcessionaireOrderDetailsStyles } from '../../../styles/concessionaire'
 import { orderApi } from '../../../services/api'
@@ -35,6 +36,7 @@ const OrderDetailsScreen: React.FC = () => {
 	const { colors } = useThemeContext()
 	const { user } = useAuthContext()
 	const responsive = useResponsiveDimensions()
+	const navigation = useConcessionaireNavigation()
 	const route =
 		useRoute<RouteProp<ConcessionaireStackParamList, 'OrderDetails'>>()
 	const styles = createConcessionaireOrderDetailsStyles(colors, responsive)
@@ -72,6 +74,14 @@ const OrderDetailsScreen: React.FC = () => {
 				setOrder(response.order as ConcessionOrder)
 			} else {
 				setError(response.error || 'Failed to load order details')
+				// If order doesn't exist, show alert and go back
+				if (!response.order) {
+					alertModal.showAlert({
+						title: 'Order Not Found',
+						message: 'This order no longer exists',
+						onClose: () => navigation.goBack(),
+					})
+				}
 			}
 		} catch (err) {
 			console.error('Load order details error:', err)
@@ -79,7 +89,7 @@ const OrderDetailsScreen: React.FC = () => {
 		} finally {
 			setLoading(false)
 		}
-	}, [orderId])
+	}, [orderId, navigation, alertModal])
 
 	useFocusEffect(
 		useCallback(() => {
@@ -104,10 +114,40 @@ const OrderDetailsScreen: React.FC = () => {
 		})
 	}
 
+	const checkOrderExists = async (): Promise<boolean> => {
+		if (!orderId) return false
+
+		try {
+			const response = await orderApi.getOrderDetails(orderId)
+			if (!response.success || !response.order) {
+				alertModal.showAlert({
+					title: 'Order Not Found',
+					message: 'This order no longer exists',
+				})
+				return false
+			}
+			return true
+		} catch (err) {
+			console.error('Check order existence error:', err)
+			alertModal.showAlert({
+				title: 'Error',
+				message: 'Unable to verify order. Please try again.',
+			})
+			return false
+		}
+	}
+
 	const handleAcceptOrder = async () => {
 		if (!order) {
 			return
 		}
+
+		const exists = await checkOrderExists()
+		if (!exists) {
+			await loadOrderDetails()
+			return
+		}
+
 		setAcceptModalVisible(true)
 	}
 
@@ -151,6 +191,13 @@ const OrderDetailsScreen: React.FC = () => {
 		if (!order) {
 			return
 		}
+
+		const exists = await checkOrderExists()
+		if (!exists) {
+			await loadOrderDetails()
+			return
+		}
+
 		setDeclineModalVisible(true)
 	}
 
@@ -194,6 +241,13 @@ const OrderDetailsScreen: React.FC = () => {
 		if (!order) {
 			return
 		}
+
+		const exists = await checkOrderExists()
+		if (!exists) {
+			await loadOrderDetails()
+			return
+		}
+
 		setRescheduleModalVisible(true)
 	}
 
@@ -237,6 +291,13 @@ const OrderDetailsScreen: React.FC = () => {
 		if (!order) {
 			return
 		}
+
+		const exists = await checkOrderExists()
+		if (!exists) {
+			await loadOrderDetails()
+			return
+		}
+
 		setMarkReadyModalVisible(true)
 	}
 
@@ -280,6 +341,13 @@ const OrderDetailsScreen: React.FC = () => {
 		if (!order) {
 			return
 		}
+
+		const exists = await checkOrderExists()
+		if (!exists) {
+			await loadOrderDetails()
+			return
+		}
+
 		setCancelOrderModalVisible(true)
 	}
 
@@ -323,6 +391,13 @@ const OrderDetailsScreen: React.FC = () => {
 		if (!order) {
 			return
 		}
+
+		const exists = await checkOrderExists()
+		if (!exists) {
+			await loadOrderDetails()
+			return
+		}
+
 		setMarkCompleteModalVisible(true)
 	}
 
@@ -362,10 +437,17 @@ const OrderDetailsScreen: React.FC = () => {
 		}
 	}
 
-	const handlePriceAdjustment = () => {
+	const handlePriceAdjustment = async () => {
 		if (!order) {
 			return
 		}
+
+		const exists = await checkOrderExists()
+		if (!exists) {
+			await loadOrderDetails()
+			return
+		}
+
 		setPriceAdjustmentModalVisible(true)
 	}
 

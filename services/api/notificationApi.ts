@@ -22,6 +22,7 @@ interface NotificationsResponse {
 interface MarkAsReadResponse {
 	success: boolean
 	message?: string
+	deletedCount?: number
 	error?: string
 }
 
@@ -61,6 +62,34 @@ export const notificationApi = {
 			`/notifications/read-all/${userId}`,
 			{
 				method: 'PUT',
+				headers: token ? { Authorization: `Bearer ${token}` } : {},
+			}
+		)
+	},
+
+	deleteNotification: async (
+		notificationId: number
+	): Promise<MarkAsReadResponse> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall<MarkAsReadResponse>(
+			`/notifications/${notificationId}`,
+			{
+				method: 'DELETE',
+				headers: token ? { Authorization: `Bearer ${token}` } : {},
+			}
+		)
+	},
+
+	deleteReadNotifications: async (
+		userId: number
+	): Promise<MarkAsReadResponse> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall<MarkAsReadResponse>(
+			`/notifications/read-all/${userId}`,
+			{
+				method: 'DELETE',
 				headers: token ? { Authorization: `Bearer ${token}` } : {},
 			}
 		)
