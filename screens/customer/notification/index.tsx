@@ -224,7 +224,10 @@ const NotificationsScreen: React.FC = () => {
 				}}
 				disabled={deletingNotificationId === item.id}>
 				{deletingNotificationId === item.id ? (
-					<ActivityIndicator size="small" color={colors.error} />
+					<ActivityIndicator
+						size="small"
+						color={colors.error}
+					/>
 				) : (
 					<MaterialCommunityIcons
 						name="delete-outline"
@@ -240,7 +243,10 @@ const NotificationsScreen: React.FC = () => {
 		return (
 			<DynamicKeyboardView style={styles.container}>
 				<View style={styles.centerContainer}>
-					<ActivityIndicator size="large" color={colors.primary} />
+					<ActivityIndicator
+						size="large"
+						color={colors.primary}
+					/>
 					<Text style={styles.loadingText}>Loading notifications...</Text>
 				</View>
 			</DynamicKeyboardView>
@@ -292,9 +298,7 @@ const NotificationsScreen: React.FC = () => {
 						color={colors.textSecondary}
 					/>
 					<Text style={styles.emptyText}>No notifications yet</Text>
-					<Text style={styles.emptySubtext}>
-						You'll see order updates here
-					</Text>
+					<Text style={styles.emptySubtext}>You'll see order updates here</Text>
 				</View>
 			) : (
 				<FlatList
