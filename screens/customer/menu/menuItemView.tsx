@@ -540,7 +540,10 @@ const MenuItemViewScreen: React.FC = () => {
 				}
 
 				// Include subvariation data if present
-				if (option.subVariationSelections && option.subVariationSelections.size > 0) {
+				if (
+					option.subVariationSelections &&
+					option.subVariationSelections.size > 0
+				) {
 					optionSnapshot.subVariationGroups = Array.from(
 						option.subVariationSelections.values()
 					).map((subSelection) => ({

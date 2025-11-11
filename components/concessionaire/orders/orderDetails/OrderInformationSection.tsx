@@ -62,95 +62,97 @@ const OrderInformationSection: React.FC<OrderInformationSectionProps> = ({
 						</Text>
 					</View>
 
-				{/* Variation/Options snapshot if present */}
-				{item.variation_snapshot &&
-					Array.isArray(item.variation_snapshot) &&
-					item.variation_snapshot.length > 0 && (
-						<View style={styles.orderItemOptions}>
-							{item.variation_snapshot.map((group: any, groupIdx: number) => (
-								<View key={groupIdx}>
-									<Text style={styles.orderItemDetails}>
-										{group.groupName}:{' '}
-										{group.selectedOptions
-											.map((opt: any) => opt.optionName)
-											.join(', ')}
-										{group.selectedOptions.some(
-											(opt: any) => opt.priceAdjustment !== 0
-										) &&
+					{/* Variation/Options snapshot if present */}
+					{item.variation_snapshot &&
+						Array.isArray(item.variation_snapshot) &&
+						item.variation_snapshot.length > 0 && (
+							<View style={styles.orderItemOptions}>
+								{item.variation_snapshot.map((group: any, groupIdx: number) => (
+									<View key={groupIdx}>
+										<Text style={styles.orderItemDetails}>
+											{group.groupName}:{' '}
+											{group.selectedOptions
+												.map((opt: any) => opt.optionName)
+												.join(', ')}
+											{group.selectedOptions.some(
+												(opt: any) => opt.priceAdjustment !== 0
+											) &&
+												` (+${formatCurrency(
+													group.selectedOptions.reduce(
+														(sum: number, opt: any) =>
+															sum + Number(opt.priceAdjustment || 0),
+														0
+													)
+												)})`}
+										</Text>
+										{/* Show subvariations if present */}
+										{group.selectedOptions.map((option: any, optIdx: number) =>
+											option.subVariationGroups &&
+											option.subVariationGroups.length > 0 ? (
+												<View
+													key={optIdx}
+													style={{ marginLeft: 16 }}>
+													{option.subVariationGroups.map(
+														(subGroup: any, subIdx: number) => (
+															<Text
+																key={subIdx}
+																style={[
+																	styles.orderItemDetails,
+																	{ fontSize: 12, color: '#666' },
+																]}>
+																• {subGroup.groupName}:{' '}
+																{subGroup.selectedOptions
+																	.map((subOpt: any) => subOpt.optionName)
+																	.join(', ')}
+															</Text>
+														)
+													)}
+												</View>
+											) : null
+										)}
+									</View>
+								))}
+							</View>
+						)}
+
+					{/* Options snapshot - legacy support */}
+					{item.options_snapshot &&
+						Array.isArray(item.options_snapshot) &&
+						item.options_snapshot.length > 0 &&
+						(!item.variation_snapshot ||
+							!Array.isArray(item.variation_snapshot)) && (
+							<View style={styles.orderItemOptions}>
+								{item.options_snapshot.map((option: any, optIdx: number) => (
+									<Text
+										key={optIdx}
+										style={styles.orderItemDetails}>
+										• {option.optionName || option.name}
+										{option.priceAdjustment &&
+											Number(option.priceAdjustment) !== 0 &&
+											` (+${formatCurrency(Number(option.priceAdjustment))})`}
+									</Text>
+								))}
+							</View>
+						)}
+
+					{/* Addons snapshot */}
+					{item.addons_snapshot &&
+						Array.isArray(item.addons_snapshot) &&
+						item.addons_snapshot.length > 0 && (
+							<View style={styles.orderItemAddons}>
+								{item.addons_snapshot.map((addon: any, addonIdx: number) => (
+									<Text
+										key={addonIdx}
+										style={styles.orderItemDetails}>
+										+ {addon.addonName || addon.name}
+										{(addon.price || addon.price_adjustment) &&
 											` (+${formatCurrency(
-												group.selectedOptions.reduce(
-													(sum: number, opt: any) =>
-														sum + Number(opt.priceAdjustment || 0),
-													0
-												)
+												Number(addon.price || addon.price_adjustment)
 											)})`}
 									</Text>
-									{/* Show subvariations if present */}
-									{group.selectedOptions.map((option: any, optIdx: number) =>
-										option.subVariationGroups &&
-										option.subVariationGroups.length > 0 ? (
-											<View
-												key={optIdx}
-												style={{ marginLeft: 16 }}>
-												{option.subVariationGroups.map(
-													(subGroup: any, subIdx: number) => (
-														<Text
-															key={subIdx}
-															style={[
-																styles.orderItemDetails,
-																{ fontSize: 12, color: '#666' },
-															]}>
-															• {subGroup.groupName}:{' '}
-															{subGroup.selectedOptions
-																.map((subOpt: any) => subOpt.optionName)
-																.join(', ')}
-														</Text>
-													)
-												)}
-											</View>
-										) : null
-									)}
-								</View>
-							))}
-						</View>
-					)}
-
-				{/* Options snapshot - legacy support */}
-				{item.options_snapshot &&
-					Array.isArray(item.options_snapshot) &&
-					item.options_snapshot.length > 0 &&
-					(!item.variation_snapshot ||
-						!Array.isArray(item.variation_snapshot)) && (
-						<View style={styles.orderItemOptions}>
-							{item.options_snapshot.map((option: any, optIdx: number) => (
-								<Text
-									key={optIdx}
-									style={styles.orderItemDetails}>
-									• {option.optionName || option.name}
-									{option.priceAdjustment &&
-										Number(option.priceAdjustment) !== 0 &&
-										` (+${formatCurrency(Number(option.priceAdjustment))})`}
-								</Text>
-							))}
-						</View>
-					)}
-
-				{/* Addons snapshot */}
-				{item.addons_snapshot &&
-					Array.isArray(item.addons_snapshot) &&
-					item.addons_snapshot.length > 0 && (
-						<View style={styles.orderItemAddons}>
-							{item.addons_snapshot.map((addon: any, addonIdx: number) => (
-								<Text
-									key={addonIdx}
-									style={styles.orderItemDetails}>
-									+ {addon.addonName || addon.name}
-									{(addon.price || addon.price_adjustment) &&
-										` (+${formatCurrency(Number(addon.price || addon.price_adjustment))})`}
-								</Text>
-							))}
-						</View>
-					)}
+								))}
+							</View>
+						)}
 
 					{/* Unit Price */}
 					<Text style={styles.orderItemUnitPrice}>
