@@ -138,6 +138,7 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 						categoryPriceAdjustment = adj
 					}
 				}
+					console.log('📊group', group)
 
 				const createdGroup = await prisma.menu_item_variation_groups.create({
 					data: {
@@ -150,7 +151,7 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 						category_filter_id: group.categoryFilterId,
 						category_filter_ids: group.categoryFilterIds || [],
 						category_price_adjustment: categoryPriceAdjustment,
-						specificity: group.specificity || true,
+						specificity: group.specificity,
 						position: group.position,
 					},
 				}) // Add custom options if mode is custom
@@ -259,6 +260,7 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 				},
 			},
 		})
+		console.log('✅Menu item updated:', updatedMenuItem)
 		res.json({
 			success: true,
 			message: 'Menu item updated successfully',

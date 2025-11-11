@@ -475,6 +475,7 @@ const EditMenuItemScreen: React.FC = () => {
 								position: opt.position,
 							})),
 							existingMenuItemIds: (group as any).existingMenuItemIds || [],
+							specificity: group.specificity,
 							position: group.position,
 						})),
 						addons: formData.addons.map((addon) => ({

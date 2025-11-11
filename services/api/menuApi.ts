@@ -42,6 +42,7 @@ export const menuApi = {
 					categoryFilterId: group.categoryFilterId,
 					categoryFilterIds: group.categoryFilterIds,
 					categoryPriceAdjustment: group.categoryPriceAdjustment,
+					specificity: group.specificity,
 					options: group.options.map((opt) => ({
 						name: opt.name.trim(),
 						priceAdjustment: opt.priceAdjustment,

@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from 'react'
 import { menuApi } from '../../../../services/api'
+import { AddMenuItemFormData } from '../../../../types'
 
 export const editMenuItem =
 	(
@@ -7,7 +8,7 @@ export const editMenuItem =
 		setError: Dispatch<SetStateAction<string | null>>,
 		setMenuItems: Dispatch<SetStateAction<any[]>>
 	) =>
-	async (itemId: number, formData: any) => {
+	async (itemId: number, formData: AddMenuItemFormData) => {
 		setLoading(true)
 		setError(null)
 
