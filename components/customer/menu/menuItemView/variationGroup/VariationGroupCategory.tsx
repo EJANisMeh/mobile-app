@@ -4,12 +4,14 @@ import { useThemeContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../../styles/customer'
 import { VariationSelection } from '../../../../../types'
+import SubVariationGroups from './SubVariationGroups'
 
 interface CategoryMenuItem {
 	id: number
 	name: string
 	basePrice: number | string
 	availability: boolean
+	variationGroups?: any[]
 }
 
 interface VariationGroupCategoryProps {
@@ -68,6 +70,26 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 					// Clear selection for optional single
 					currentSelection.selectedOptions = []
 				} else {
+					// Initialize subvariation selections if menu item has variation groups with specificity: false
+					const subVariationSelections = new Map<number, VariationSelection>()
+					if (menuItem.variationGroups && menuItem.variationGroups.length > 0) {
+						// Filter only variation groups with specificity === false
+						const subVariationGroupsToShow = menuItem.variationGroups.filter(
+							(subGroup: any) => subGroup.specificity === false
+						)
+						
+						subVariationGroupsToShow.forEach((subGroup: any) => {
+							const selectionTypeCode = subGroup.selection_types?.code || 'single_required'
+							subVariationSelections.set(subGroup.id, {
+								groupId: subGroup.id,
+								groupName: subGroup.name,
+								selectionTypeCode: selectionTypeCode,
+								multiLimit: subGroup.multi_limit || 0,
+								selectedOptions: [],
+							})
+						})
+					}
+
 					// Set new selection
 					currentSelection.selectedOptions = [
 						{
@@ -79,6 +101,7 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 								typeof menuItem.basePrice === 'string'
 									? parseFloat(menuItem.basePrice)
 									: menuItem.basePrice,
+							subVariationSelections: subVariationSelections.size > 0 ? subVariationSelections : undefined,
 						},
 					]
 				}
@@ -99,6 +122,27 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 						// Limit reached, don't add
 						return prev
 					}
+
+					// Initialize subvariation selections if menu item has variation groups with specificity: false
+					const subVariationSelections = new Map<number, VariationSelection>()
+					if (menuItem.variationGroups && menuItem.variationGroups.length > 0) {
+						// Filter only variation groups with specificity === false
+						const subVariationGroupsToShow = menuItem.variationGroups.filter(
+							(subGroup: any) => subGroup.specificity === false
+						)
+						
+						subVariationGroupsToShow.forEach((subGroup: any) => {
+							const selectionTypeCode = subGroup.selection_types?.code || 'single_required'
+							subVariationSelections.set(subGroup.id, {
+								groupId: subGroup.id,
+								groupName: subGroup.name,
+								selectionTypeCode: selectionTypeCode,
+								multiLimit: subGroup.multi_limit || 0,
+								selectedOptions: [],
+							})
+						})
+					}
+
 					// Add option
 					currentSelection.selectedOptions = [
 						...currentSelection.selectedOptions,
@@ -111,6 +155,7 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 								typeof menuItem.basePrice === 'string'
 									? parseFloat(menuItem.basePrice)
 									: menuItem.basePrice,
+							subVariationSelections: subVariationSelections.size > 0 ? subVariationSelections : undefined,
 						},
 					]
 				}
@@ -174,35 +219,80 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 						const isOutOfStock = !menuItem.availability
 						const isDisabled = !isSingleType && !isSelected && !canSelectMore()
 
+						// Find the selected option to get subvariation selections
+						const selectedOption = selection.selectedOptions.find(
+							(opt) => opt.menuItemId === menuItem.id
+						)
+
 						return (
-							<TouchableOpacity
-								key={menuItem.id}
-								style={[
-									styles.optionItemButton,
-									isSelected && styles.optionItemSelected,
-									isDisabled && styles.optionItemDisabled,
-								]}
-								onPress={() => handleOptionToggle(menuItem)}
-								disabled={isDisabled}>
-								{renderSelectionIndicator(menuItem)}
-								<View style={styles.optionContent}>
-									<View style={styles.optionNameWrapper}>
-										<Text
-											style={[
-												styles.optionName,
-												isOutOfStock && styles.optionNameDisabled,
-											]}>
-											{menuItem.name}
+							<View key={menuItem.id}>
+								<TouchableOpacity
+									style={[
+										styles.optionItemButton,
+										isSelected && styles.optionItemSelected,
+										isDisabled && styles.optionItemDisabled,
+									]}
+									onPress={() => handleOptionToggle(menuItem)}
+									disabled={isDisabled}>
+									{renderSelectionIndicator(menuItem)}
+									<View style={styles.optionContent}>
+										<View style={styles.optionNameWrapper}>
+											<Text
+												style={[
+													styles.optionName,
+													isOutOfStock && styles.optionNameDisabled,
+												]}>
+												{menuItem.name}
+											</Text>
+											{isOutOfStock && (
+												<Text style={styles.outOfStockText}>Out of stock</Text>
+											)}
+										</View>
+										<Text style={styles.optionPrice}>
+											{formatPrice(menuItem.basePrice)}
 										</Text>
-										{isOutOfStock && (
-											<Text style={styles.outOfStockText}>Out of stock</Text>
-										)}
 									</View>
-									<Text style={styles.optionPrice}>
-										{formatPrice(menuItem.basePrice)}
-									</Text>
-								</View>
-							</TouchableOpacity>
+								</TouchableOpacity>
+
+								{/* Show subvariations if option is selected and has variation groups with specificity: false */}
+								{isSelected &&
+									selectedOption?.subVariationSelections &&
+									menuItem.variationGroups &&
+									menuItem.variationGroups.filter((g: any) => g.specificity === false).length > 0 && (
+										<SubVariationGroups
+											menuItemId={menuItem.id}
+											menuItemName={menuItem.name}
+											subVariationGroups={menuItem.variationGroups.filter((g: any) => g.specificity === false)}
+											subVariationSelections={selectedOption.subVariationSelections}
+											setSubVariationSelections={(updater) => {
+												setVariationSelections((prev) => {
+													const newMap = new Map(prev)
+													const currentSelection = newMap.get(group.id)
+													if (!currentSelection) return prev
+
+													currentSelection.selectedOptions =
+														currentSelection.selectedOptions.map((opt) =>
+															opt.menuItemId === menuItem.id
+																? {
+																		...opt,
+																		subVariationSelections:
+																			typeof updater === 'function'
+																				? updater(
+																						opt.subVariationSelections ||
+																							new Map()
+																				  )
+																				: updater,
+																  }
+																: opt
+														)
+
+													newMap.set(group.id, currentSelection)
+													return newMap
+												})
+											}}
+										/>
+									)}
+							</View>
 						)
 					})
 				)}

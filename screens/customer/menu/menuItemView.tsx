@@ -316,6 +316,15 @@ const MenuItemViewScreen: React.FC = () => {
 				} else {
 					variationAdjustments += option.priceAdjustment
 				}
+
+				// Add subvariation prices if present
+				if (option.subVariationSelections) {
+					option.subVariationSelections.forEach((subSelection) => {
+						subSelection.selectedOptions.forEach((subOption) => {
+							variationAdjustments += subOption.priceAdjustment
+						})
+					})
+				}
 			})
 		})
 
@@ -363,16 +372,84 @@ const MenuItemViewScreen: React.FC = () => {
 			}
 
 			if (selectionTypeCode.startsWith('single')) {
-				return selectedCount === 1
+				if (selectedCount !== 1) {
+					return false
+				}
+			} else {
+				// For multi required selections, ensure at least one option is chosen
+				if (selectedCount === 0) {
+					return false
+				}
+
+				if (multiLimit > 0 && selectedCount > multiLimit) {
+					return false
+				}
 			}
 
-			// For multi required selections, ensure at least one option is chosen
-			if (selectedCount === 0) {
-				return false
-			}
+			// Check subvariation requirements for selected options
+			if (selection && selection.selectedOptions.length > 0) {
+				for (const option of selection.selectedOptions) {
+					if (option.subVariationSelections) {
+						// Get the menu item reference to check its variation groups
+						let menuItemRef: any = null
 
-			if (multiLimit > 0 && selectedCount > multiLimit) {
-				return false
+						if (group.kind === 'existing_items') {
+							// Find the menu item in existingMenuItems
+							menuItemRef = (group as any).existingMenuItems?.find(
+								(item: any) => item.id === option.menuItemId
+							)
+						} else if (
+							group.kind === 'single_category_filter' ||
+							group.kind === 'category_filter'
+						) {
+							// Find the menu item in categoryMenuItems
+							menuItemRef = (group as any).categoryMenuItems?.find(
+								(item: any) => item.id === option.menuItemId
+							)
+						} else if (group.kind === 'multi_category_filter') {
+							// Find the menu item in categoryMenuItems
+							menuItemRef = (group as any).categoryMenuItems?.find(
+								(item: any) => item.id === option.menuItemId
+							)
+						}
+
+						// Check if subvariations are satisfied
+						if (menuItemRef && menuItemRef.variationGroups) {
+							for (const subGroup of menuItemRef.variationGroups) {
+								const subSelection = option.subVariationSelections.get(
+									subGroup.id
+								)
+								const subSelectionTypeCode =
+									subSelection?.selectionTypeCode ??
+									subGroup?.selection_types?.code ??
+									''
+								const subSelectedCount =
+									subSelection?.selectedOptions.length ?? 0
+								const subIsRequired = subSelectionTypeCode.includes('required')
+
+								if (!subIsRequired) {
+									continue
+								}
+
+								if (subSelectionTypeCode.startsWith('single')) {
+									if (subSelectedCount !== 1) {
+										return false
+									}
+								} else {
+									// Multi required
+									if (subSelectedCount === 0) {
+										return false
+									}
+
+									const subMultiLimit = subSelection?.multiLimit ?? 0
+									if (subMultiLimit > 0 && subSelectedCount > subMultiLimit) {
+										return false
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 
 			return true

@@ -17,6 +17,8 @@ export interface VariationOptionSelection {
 	menuItemBasePrice?: number // Base price of the menu item when used as variation option
 	// For category mode
 	categoryFilterId?: number
+	// For subvariations (1 level deep only)
+	subVariationSelections?: Map<number, VariationSelection>
 }
 
 export interface AddonSelection {
