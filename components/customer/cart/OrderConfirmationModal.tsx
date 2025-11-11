@@ -92,7 +92,7 @@ const OrderConfirmationModal: React.FC<OrderConfirmationModalProps> = ({
 					Please review your order details before confirming.
 				</Text>
 
-					<View style={styles.section}>
+				<View style={styles.section}>
 					<Text style={styles.sectionTitle}>Order Details</Text>
 					<View style={styles.detailRow}>
 						<Text style={styles.detailLabel}>Concession:</Text>
@@ -135,10 +135,20 @@ const OrderConfirmationModal: React.FC<OrderConfirmationModalProps> = ({
 												alignItems: 'center',
 											}}>
 											<View style={{ flex: 1 }}>
-												<Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>
+												<Text
+													style={{
+														fontSize: 14,
+														fontWeight: '600',
+														color: colors.text,
+													}}>
 													{item.quantity}x {item.name}
 												</Text>
-												<Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 2 }}>
+												<Text
+													style={{
+														fontSize: 13,
+														color: colors.textSecondary,
+														marginTop: 2,
+													}}>
 													{formatCurrency(item.totalPrice)}
 												</Text>
 											</View>
@@ -153,55 +163,119 @@ const OrderConfirmationModal: React.FC<OrderConfirmationModalProps> = ({
 
 										{/* Expanded Details */}
 										{isExpanded && hasDetails && (
-											<View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.border }}>
+											<View
+												style={{
+													marginTop: 12,
+													paddingTop: 12,
+													borderTopWidth: 1,
+													borderTopColor: colors.border,
+												}}>
 												{/* Variations */}
-												{item.variationGroups && item.variationGroups.length > 0 && (
-													<View style={{ marginBottom: 8 }}>
-														{item.variationGroups.map((group, gIdx) => (
-															<View key={gIdx} style={{ marginBottom: 8 }}>
-																<Text style={{ fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 4 }}>
-																	{group.groupName}:
-																</Text>
-																{group.selectedOptions.map((option, oIdx) => (
-																	<View key={oIdx} style={{ marginLeft: 12 }}>
-																		<Text style={{ fontSize: 12, color: colors.textSecondary }}>
-																			• {option.optionName}
-																			{option.priceAdjustment !== 0 && ` (+${formatCurrency(option.priceAdjustment)})`}
-																		</Text>
-																		{/* Subvariations */}
-																		{option.subVariationGroups && option.subVariationGroups.length > 0 && (
-																			<View style={{ marginLeft: 16, marginTop: 4 }}>
-																				{option.subVariationGroups.map((subGroup, sIdx) => (
-																					<View key={sIdx} style={{ marginBottom: 4 }}>
-																						<Text style={{ fontSize: 11, fontWeight: '500', color: '#666' }}>
-																							{subGroup.groupName}:
-																						</Text>
-																						{subGroup.selectedOptions.map((subOpt, soIdx) => (
-																							<Text key={soIdx} style={{ fontSize: 11, color: '#888', marginLeft: 8 }}>
-																								• {subOpt.optionName}
-																								{subOpt.priceAdjustment !== 0 && ` (+${formatCurrency(subOpt.priceAdjustment)})`}
-																							</Text>
-																						))}
+												{item.variationGroups &&
+													item.variationGroups.length > 0 && (
+														<View style={{ marginBottom: 8 }}>
+															{item.variationGroups.map((group, gIdx) => (
+																<View
+																	key={gIdx}
+																	style={{ marginBottom: 8 }}>
+																	<Text
+																		style={{
+																			fontSize: 13,
+																			fontWeight: '600',
+																			color: colors.text,
+																			marginBottom: 4,
+																		}}>
+																		{group.groupName}:
+																	</Text>
+																	{group.selectedOptions.map((option, oIdx) => (
+																		<View
+																			key={oIdx}
+																			style={{ marginLeft: 12 }}>
+																			<Text
+																				style={{
+																					fontSize: 12,
+																					color: colors.textSecondary,
+																				}}>
+																				• {option.optionName}
+																				{option.priceAdjustment !== 0 &&
+																					` (+${formatCurrency(
+																						option.priceAdjustment
+																					)})`}
+																			</Text>
+																			{/* Subvariations */}
+																			{option.subVariationGroups &&
+																				option.subVariationGroups.length >
+																					0 && (
+																					<View
+																						style={{
+																							marginLeft: 16,
+																							marginTop: 4,
+																						}}>
+																						{option.subVariationGroups.map(
+																							(subGroup, sIdx) => (
+																								<View
+																									key={sIdx}
+																									style={{ marginBottom: 4 }}>
+																									<Text
+																										style={{
+																											fontSize: 11,
+																											fontWeight: '500',
+																											color: '#666',
+																										}}>
+																										{subGroup.groupName}:
+																									</Text>
+																									{subGroup.selectedOptions.map(
+																										(subOpt, soIdx) => (
+																											<Text
+																												key={soIdx}
+																												style={{
+																													fontSize: 11,
+																													color: '#888',
+																													marginLeft: 8,
+																												}}>
+																												• {subOpt.optionName}
+																												{subOpt.priceAdjustment !==
+																													0 &&
+																													` (+${formatCurrency(
+																														subOpt.priceAdjustment
+																													)})`}
+																											</Text>
+																										)
+																									)}
+																								</View>
+																							)
+																						)}
 																					</View>
-																				))}
-																			</View>
-																		)}
-																	</View>
-																))}
-															</View>
-														))}
-													</View>
-												)}
+																				)}
+																		</View>
+																	))}
+																</View>
+															))}
+														</View>
+													)}
 
 												{/* Addons */}
 												{item.addons && item.addons.length > 0 && (
 													<View style={{ marginBottom: 8 }}>
-														<Text style={{ fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 4 }}>
+														<Text
+															style={{
+																fontSize: 13,
+																fontWeight: '600',
+																color: colors.text,
+																marginBottom: 4,
+															}}>
 															Add-ons:
 														</Text>
 														{item.addons.map((addon, aIdx) => (
-															<Text key={aIdx} style={{ fontSize: 12, color: colors.textSecondary, marginLeft: 12 }}>
-																+ {addon.addonName} (+{formatCurrency(addon.price)})
+															<Text
+																key={aIdx}
+																style={{
+																	fontSize: 12,
+																	color: colors.textSecondary,
+																	marginLeft: 12,
+																}}>
+																+ {addon.addonName} (+
+																{formatCurrency(addon.price)})
 															</Text>
 														))}
 													</View>
@@ -210,10 +284,22 @@ const OrderConfirmationModal: React.FC<OrderConfirmationModalProps> = ({
 												{/* Customer Request */}
 												{item.customer_request && (
 													<View>
-														<Text style={{ fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 4 }}>
+														<Text
+															style={{
+																fontSize: 13,
+																fontWeight: '600',
+																color: colors.text,
+																marginBottom: 4,
+															}}>
 															Note:
 														</Text>
-														<Text style={{ fontSize: 12, color: colors.textSecondary, fontStyle: 'italic', marginLeft: 12 }}>
+														<Text
+															style={{
+																fontSize: 12,
+																color: colors.textSecondary,
+																fontStyle: 'italic',
+																marginLeft: 12,
+															}}>
 															"{item.customer_request}"
 														</Text>
 													</View>
@@ -238,7 +324,16 @@ const OrderConfirmationModal: React.FC<OrderConfirmationModalProps> = ({
 						</>
 					)}
 
-					<View style={[styles.detailRow, { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.border }]}>
+					<View
+						style={[
+							styles.detailRow,
+							{
+								marginTop: 12,
+								paddingTop: 12,
+								borderTopWidth: 1,
+								borderTopColor: colors.border,
+							},
+						]}>
 						<Text style={styles.detailLabel}>Total:</Text>
 						<Text style={[styles.detailValue, styles.totalValue]}>
 							{formatCurrency(orderSummary.total)}

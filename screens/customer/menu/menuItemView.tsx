@@ -512,7 +512,10 @@ const MenuItemViewScreen: React.FC = () => {
 			paymentMethod: paymentTuple[0],
 			paymentDetails: paymentTuple[1],
 			paymentProof: selectedPaymentProof,
-			concessionName: menuItem.concession?.name || menuItem.concession?.concession_name || 'Unknown',
+			concessionName:
+				menuItem.concession?.name ||
+				menuItem.concession?.concession_name ||
+				'Unknown',
 		}
 	}, [
 		menuItem,
