@@ -1,5 +1,6 @@
 import express from 'express'
 import { prisma, selectOne, updateQuery } from '../db'
+import { createNotification } from '../notification/createNotification'
 
 // Adjust order price (for discounts or surcharges)
 export const adjustOrderPrice = async (
@@ -92,6 +93,19 @@ export const adjustOrderPrice = async (
 				error: 'Failed to adjust order price',
 			})
 		}
+
+		// Create notification for customer
+		const adjustmentAmount = newTotal - currentTotal
+		const adjustmentType = adjustmentAmount > 0 ? 'increased' : 'decreased'
+		const absoluteAmount = Math.abs(adjustmentAmount).toFixed(2)
+
+		await createNotification(
+			order.customerId,
+			'price_adjusted',
+			'Order Price Adjusted',
+			`Your order price has been ${adjustmentType} by ₱${absoluteAmount}. Reason: ${reason.trim()}`,
+			orderIdInt
+		)
 
 		res.json({
 			success: true,

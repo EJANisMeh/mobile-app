@@ -1,5 +1,6 @@
 import express from 'express'
 import { prisma, selectOne, updateQuery } from '../db'
+import { createNotification } from '../notification/createNotification'
 
 export const rescheduleOrder = async (
 	req: express.Request,
@@ -60,6 +61,28 @@ export const rescheduleOrder = async (
 				error: 'Failed to reschedule order',
 			})
 		}
+
+		// Create notification for customer
+		const newDate = new Date(newScheduledDate)
+		const formattedDate = newDate.toLocaleDateString('en-US', {
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+		})
+
+		const notificationMessage = feedback
+			? `Your order has been rescheduled to ${formattedDate}. Note: ${feedback}`
+			: `Your order has been rescheduled to ${formattedDate}.`
+
+		await createNotification(
+			orderResult.data.customerId,
+			'order_rescheduled',
+			'Order Rescheduled',
+			notificationMessage,
+			parseInt(orderId)
+		)
 
 		res.json({
 			success: true,

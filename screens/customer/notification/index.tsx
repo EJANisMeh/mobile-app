@@ -13,7 +13,7 @@ import { useThemeContext, useAuthContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
 import { useCustomerNavigation } from '../../../hooks/useNavigation'
 import { createCustomerNotificationsStyles } from '../../../styles/customer'
-import { DynamicKeyboardView } from '../../../components'
+import { DynamicKeyboardView, DynamicScrollView } from '../../../components'
 import {
 	notificationApi,
 	orderApi,
@@ -181,6 +181,10 @@ const NotificationsScreen: React.FC = () => {
 				return 'close-circle'
 			case 'order_cancelled':
 				return 'cancel'
+			case 'price_adjusted':
+				return 'cash-edit'
+			case 'order_rescheduled':
+				return 'calendar-clock'
 			default:
 				return 'bell'
 		}
@@ -241,7 +245,9 @@ const NotificationsScreen: React.FC = () => {
 
 	if (loading) {
 		return (
-			<DynamicKeyboardView style={styles.container}>
+			<DynamicKeyboardView
+				useSafeArea={true}
+				style={styles.container}>
 				<View style={styles.centerContainer}>
 					<ActivityIndicator
 						size="large"
@@ -257,7 +263,9 @@ const NotificationsScreen: React.FC = () => {
 	const readCount = notifications.filter((n) => n.isRead).length
 
 	return (
-		<DynamicKeyboardView style={styles.container}>
+		<DynamicKeyboardView
+			useSafeArea={true}
+			style={styles.container}>
 			{/* Custom Header */}
 			<View style={styles.screenHeader}>
 				<Text style={styles.screenTitle}>Notifications</Text>
@@ -284,7 +292,6 @@ const NotificationsScreen: React.FC = () => {
 					</TouchableOpacity>
 				</View>
 			)}
-
 			{/* Notifications List */}
 			{error ? (
 				<View style={styles.centerContainer}>
@@ -301,19 +308,21 @@ const NotificationsScreen: React.FC = () => {
 					<Text style={styles.emptySubtext}>You'll see order updates here</Text>
 				</View>
 			) : (
-				<FlatList
-					data={notifications}
-					renderItem={renderNotification}
-					keyExtractor={(item) => item.id.toString()}
-					contentContainerStyle={styles.listContent}
-					refreshControl={
-						<RefreshControl
-							refreshing={refreshing}
-							onRefresh={handleRefresh}
-							colors={[colors.primary]}
-						/>
-					}
-				/>
+				<DynamicScrollView>
+					<FlatList
+						data={notifications}
+						renderItem={renderNotification}
+						keyExtractor={(item) => item.id.toString()}
+						contentContainerStyle={styles.listContent}
+						refreshControl={
+							<RefreshControl
+								refreshing={refreshing}
+								onRefresh={handleRefresh}
+								colors={[colors.primary]}
+							/>
+						}
+					/>
+				</DynamicScrollView>
 			)}
 
 			{/* Modals */}
