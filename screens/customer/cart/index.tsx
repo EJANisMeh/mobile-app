@@ -1123,30 +1123,42 @@ const CartScreen: React.FC = () => {
 			return null
 		}
 
-		const currentItem = scheduleContext === 'split' ? splitActiveItem : null
-		const itemName =
-			scheduleContext === 'split' && currentItem
-				? currentItem.name
-				: `${activeGroup.totalQuantity} ${
-						activeGroup.totalQuantity === 1 ? 'item' : 'items'
-				  }`
-		const quantity =
-			scheduleContext === 'split' && currentItem
-				? currentItem.quantity
-				: activeGroup.totalQuantity
-		const total =
-			scheduleContext === 'split' && currentItem
-				? currentItem.totalPrice
-				: activeGroup.items.reduce((sum, item) => sum + item.totalPrice, 0)
-
 		const paymentTuple = concessionPaymentMethods.find(
 			([type]) => type === selectedPaymentMethod
 		)
 		const paymentDetails = paymentTuple?.[1] || ''
 
+		// Build items array based on context
+		const items =
+			scheduleContext === 'split' && splitActiveItem
+				? [
+						{
+							name: splitActiveItem.name,
+							quantity: splitActiveItem.quantity,
+							unitPrice: splitActiveItem.unitPrice,
+							totalPrice: splitActiveItem.totalPrice,
+							variationGroups: splitActiveItem.variationGroups,
+							addons: splitActiveItem.addons,
+							customer_request: splitActiveItem.customer_request,
+						},
+				  ]
+				: activeGroup.items.map((item) => ({
+						name: item.name,
+						quantity: item.quantity,
+						unitPrice: item.unitPrice,
+						totalPrice: item.totalPrice,
+						variationGroups: item.variationGroups,
+						addons: item.addons,
+						customer_request: item.customer_request,
+				  }))
+
+		const total =
+			scheduleContext === 'split' && splitActiveItem
+				? splitActiveItem.totalPrice
+				: activeGroup.items.reduce((sum, item) => sum + item.totalPrice, 0)
+
 		return {
-			itemName,
-			quantity,
+			items,
 			total,
 			orderMode: pendingScheduleSelection.mode,
 			scheduledFor: pendingScheduleSelection.scheduledAt,

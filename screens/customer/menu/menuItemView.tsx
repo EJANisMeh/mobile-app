@@ -490,25 +490,42 @@ const MenuItemViewScreen: React.FC = () => {
 			return null
 		}
 
+		// Build item details with variations and addons
+		const { variationGroupsSnapshot, optionsSnapshot, addonsSnapshot } =
+			buildSelectionSnapshots()
+
 		return {
-			itemName: menuItem.name,
-			quantity,
+			items: [
+				{
+					name: menuItem.name,
+					quantity,
+					unitPrice: priceCalculation.unitPrice,
+					totalPrice: priceCalculation.totalPrice,
+					variationGroups: variationGroupsSnapshot,
+					addons: addonsSnapshot,
+					customer_request: customerRequest.trim() || null,
+				},
+			],
 			total: priceCalculation.totalPrice,
 			orderMode: pendingScheduleSelection.mode,
 			scheduledFor: pendingScheduleSelection.scheduledAt,
 			paymentMethod: paymentTuple[0],
 			paymentDetails: paymentTuple[1],
 			paymentProof: selectedPaymentProof,
-			concessionName: menuItem.concession?.concession_name || 'Unknown',
+			concessionName: menuItem.concession?.name || menuItem.concession?.concession_name || 'Unknown',
 		}
 	}, [
 		menuItem,
 		quantity,
 		priceCalculation.totalPrice,
+		priceCalculation.unitPrice,
 		pendingScheduleSelection,
 		selectedPaymentMethod,
 		selectedPaymentProof,
 		concessionPaymentMethods,
+		customerRequest,
+		variationSelections,
+		addonSelections,
 	])
 
 	const isActionDisabled =
@@ -518,11 +535,11 @@ const MenuItemViewScreen: React.FC = () => {
 		isAddingToCart ||
 		isOrdering
 
-	const buildSelectionSnapshots = (): {
+	function buildSelectionSnapshots(): {
 		variationGroupsSnapshot: VariationGroupSnapshot[]
 		optionsSnapshot: VariationOptionSnapshot[]
 		addonsSnapshot: AddonSnapshot[]
-	} => {
+	} {
 		const variationGroupsSnapshot = Array.from(
 			variationSelections.values()
 		).map((selection) => ({
