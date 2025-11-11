@@ -42,6 +42,7 @@ export interface VariationGroupInput {
 	categoryPriceAdjustment?: string | null // Price adjustment for category items (can be negative)
 	options: VariationOptionInput[] // For custom mode
 	existingMenuItemIds?: number[] // For existing-items mode: selected menu item ids
+	specificity: boolean // When true, this variation group won't be shown when parent item is used as variation option
 	position: number
 }
 

@@ -222,6 +222,7 @@ const EditMenuItemScreen: React.FC = () => {
 								: null,
 						options,
 						existingMenuItemIds,
+						specificity: group.specificity ?? false,
 						position: group.position ?? 0,
 					}
 				})

@@ -147,6 +147,7 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 							category_filter_id: group.categoryFilterId || null,
 							category_filter_ids: group.categoryFilterIds || [],
 							category_price_adjustment: categoryPriceAdjustment,
+							specificity: group.specificity || false,
 							position: group.position || 0,
 						},
 					})

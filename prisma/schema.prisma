@@ -218,6 +218,7 @@ model menu_item_variation_groups {
   category_filter_id                 Int?
   category_filter_ids                Int[]                                @default([])
   category_price_adjustment          Decimal?                             @db.Decimal(10, 2)
+  specificity                        Boolean                              @default(false)
   created_at                         DateTime                             @default(now()) @db.Timestamptz(6)
   updated_at                         DateTime                             @default(now()) @updatedAt @db.Timestamptz(6)
   menu_item_addons                   menu_item_addons[]

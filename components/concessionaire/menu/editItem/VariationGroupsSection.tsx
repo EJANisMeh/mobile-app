@@ -25,6 +25,7 @@ import {
 	VariationMultiLimit,
 	VariationCustomOptions,
 	VariationExistingItems,
+	VariationSpecificity,
 } from './variationGroup'
 import VariationMultiCategory from './variationGroup/VariationMultiCategory'
 import VariationCategoryPriceAdjustment from './variationGroup/VariationCategoryPriceAdjustment'
@@ -74,6 +75,7 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 			categoryFilterId: null,
 			options: [],
 			existingMenuItemIds: [],
+			specificity: false,
 			position: formData.variationGroups.length,
 		}
 		setFormData((prev) => ({
@@ -205,6 +207,14 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 								handleUpdateVariationGroup={handleUpdateVariationGroup}
 							/>
 						)}
+
+					{/* Specificity Toggle */}
+					<VariationSpecificity
+						groupIndex={groupIndex}
+						group={group}
+						showAlert={showAlert}
+						handleUpdateVariationGroup={handleUpdateVariationGroup}
+					/>
 
 					{group.mode === 'custom' && (
 						<VariationCustomOptions

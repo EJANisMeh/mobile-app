@@ -919,5 +919,37 @@ export const createConcessionaireAddMenuItemStyles = (
 		availabilityToggleTextActive: {
 			color: '#22c55e',
 		},
+		// Specificity Styles
+		specificityContainer: {
+			marginBottom: spacing.sm,
+		},
+		specificityLabel: {
+			fontSize: responsive.getResponsiveFontSize(13),
+			color: colors.textSecondary,
+			fontWeight: '500' as const,
+			marginBottom: spacing.xs / 2,
+		},
+		specificityRow: {
+			flexDirection: 'row' as const,
+			alignItems: 'center' as const,
+			gap: spacing.xs,
+		},
+		specificityToggle: {
+			paddingHorizontal: spacing.sm,
+			paddingVertical: spacing.xs / 2,
+			borderRadius: 12,
+			backgroundColor: 'rgba(107, 114, 128, 0.1)',
+		},
+		specificityToggleActive: {
+			backgroundColor: 'rgba(59, 130, 246, 0.1)',
+		},
+		specificityToggleText: {
+			fontSize: responsive.getResponsiveFontSize(11),
+			fontWeight: '600' as const,
+			color: '#6b7280',
+		},
+		specificityToggleTextActive: {
+			color: '#3b82f6',
+		},
 	})
 }

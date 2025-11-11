@@ -50,6 +50,7 @@ export interface RawMenuItemVariationGroup {
 	category_filter_id?: number | null
 	category_filter_ids?: number[] | null
 	category_price_adjustment?: number | string | null
+	specificity?: boolean | null
 	position?: number | null
 	menu_item_variation_option_choices?: RawMenuItemVariationOptionChoice[]
 }
