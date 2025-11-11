@@ -122,8 +122,8 @@ const PriceAdjustmentModal: React.FC<PriceAdjustmentModalProps> = ({
 								styles.differenceText,
 								isDiscount ? styles.discountText : styles.surchargeText,
 							]}>
-							{isDiscount ? 'Discount: ' : 'Surcharge: '}
-							₱{Math.abs(difference).toFixed(2)}
+							{isDiscount ? 'Discount: ' : 'Surcharge: '}₱
+							{Math.abs(difference).toFixed(2)}
 						</Text>
 					</View>
 				)}

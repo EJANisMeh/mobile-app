@@ -536,7 +536,8 @@ const OrderDetailsScreen: React.FC = () => {
 						</View>
 						<View style={styles.detailRow}>
 							<Text style={styles.detailLabel}>Reason:</Text>
-							<Text style={[styles.detailValue, { flex: 1, textAlign: 'right' }]}>
+							<Text
+								style={[styles.detailValue, { flex: 1, textAlign: 'right' }]}>
 								{order.price_adjustment_reason}
 							</Text>
 						</View>
@@ -550,9 +551,7 @@ const OrderDetailsScreen: React.FC = () => {
 						style={styles.priceAdjustmentButton}
 						onPress={handlePriceAdjustment}
 						disabled={processing}>
-						<Text style={styles.priceAdjustmentButtonText}>
-							Adjust Price
-						</Text>
+						<Text style={styles.priceAdjustmentButtonText}>Adjust Price</Text>
 					</TouchableOpacity>
 				)}
 
