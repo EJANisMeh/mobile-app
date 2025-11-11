@@ -530,13 +530,36 @@ const MenuItemViewScreen: React.FC = () => {
 			groupName: selection.groupName,
 			selectionTypeCode: selection.selectionTypeCode,
 			multiLimit: selection.multiLimit,
-			selectedOptions: selection.selectedOptions.map((option) => ({
-				groupId: selection.groupId,
-				optionId: option.optionId,
-				optionName: option.optionName,
-				priceAdjustment: option.priceAdjustment,
-				menuItemId: option.menuItemId ?? null,
-			})),
+			selectedOptions: selection.selectedOptions.map((option) => {
+				const optionSnapshot: VariationOptionSnapshot = {
+					groupId: selection.groupId,
+					optionId: option.optionId,
+					optionName: option.optionName,
+					priceAdjustment: option.priceAdjustment,
+					menuItemId: option.menuItemId ?? null,
+				}
+
+				// Include subvariation data if present
+				if (option.subVariationSelections && option.subVariationSelections.size > 0) {
+					optionSnapshot.subVariationGroups = Array.from(
+						option.subVariationSelections.values()
+					).map((subSelection) => ({
+						groupId: subSelection.groupId,
+						groupName: subSelection.groupName,
+						selectionTypeCode: subSelection.selectionTypeCode,
+						multiLimit: subSelection.multiLimit,
+						selectedOptions: subSelection.selectedOptions.map((subOption) => ({
+							groupId: subSelection.groupId,
+							optionId: subOption.optionId,
+							optionName: subOption.optionName,
+							priceAdjustment: subOption.priceAdjustment,
+							menuItemId: subOption.menuItemId ?? null,
+						})),
+					}))
+				}
+
+				return optionSnapshot
+			}),
 		}))
 
 		const optionsSnapshot = variationGroupsSnapshot.flatMap((group) =>
@@ -546,6 +569,7 @@ const MenuItemViewScreen: React.FC = () => {
 				optionName: option.optionName,
 				priceAdjustment: option.priceAdjustment,
 				menuItemId: option.menuItemId ?? null,
+				subVariationGroups: option.subVariationGroups, // Include subvariations in flat list too
 			}))
 		)
 

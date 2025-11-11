@@ -191,7 +191,7 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 				onPress={() => setIsModalVisible(true)}>
 				<Text style={[styles.modalButtonText, { color: colors.text }]}>
 					{selection.selectedOptions.length > 0
-						? `${selection.selectedOptions.length} item(s) selected`
+						? `${selection.selectedOptions.length} item(s) selected. \nPress again to Reselect Items`
 						: 'Select items'}
 				</Text>
 			</TouchableOpacity>

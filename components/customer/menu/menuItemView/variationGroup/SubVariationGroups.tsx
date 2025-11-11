@@ -48,8 +48,6 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 	const responsive = useResponsiveDimensions()
 	const styles = createCustomerMenuItemViewStyles(colors, responsive)
 
-	const [expanded, setExpanded] = useState(false)
-
 	console.log(
 		`🎨 [SubVariationGroups] Component rendered for menu item ${menuItemId} (${menuItemName}):`
 	)
@@ -59,7 +57,6 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 	console.log(
 		`  - subVariationSelections Map size: ${subVariationSelections?.size || 0}`
 	)
-	console.log(`  - expanded: ${expanded}`)
 
 	if (subVariationGroups && subVariationGroups.length > 0) {
 		console.log(
@@ -287,41 +284,14 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 	}
 
 	console.log(
-		`  🎯 [SubVariationGroups] About to render toggle header (expanded: ${expanded})`
+		`  🎯 [SubVariationGroups] Rendering ${subVariationGroups.length} subvariation groups directly (no dropdown)`
 	)
 
 	return (
 		<View style={styles.variationsContainer}>
-			<TouchableOpacity
-				style={styles.variationGroupHeader}
-				onPress={() => {
-					const newExpanded = !expanded
-					console.log(
-						`  🔄 [SubVariationGroups] Toggling expanded state: ${expanded} → ${newExpanded}`
-					)
-					setExpanded(newExpanded)
-				}}>
-				<Ionicons
-					name={expanded ? 'chevron-down' : 'chevron-forward'}
-					size={responsive.getResponsiveValue(20, 24)}
-					color={colors.text}
-				/>
-				<Text style={styles.variationGroupName}>
-					Customize {menuItemName} ({subVariationGroups.length}{' '}
-					{subVariationGroups.length === 1 ? 'option' : 'options'})
-				</Text>
-			</TouchableOpacity>
-
-			{expanded ? (
-				<>
-					{console.log(
-						`  📋 [SubVariationGroups] Expanded view - rendering ${subVariationGroups.length} groups`
-					)}
-					<View style={styles.optionsList}>
-						{subVariationGroups.map(renderSubVariationGroup)}
-					</View>
-				</>
-			) : null}
+			<View style={styles.optionsList}>
+				{subVariationGroups.map(renderSubVariationGroup)}
+			</View>
 		</View>
 	)
 }

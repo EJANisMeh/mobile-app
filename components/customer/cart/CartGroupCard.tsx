@@ -160,20 +160,42 @@ const CartGroupCard: React.FC<CartGroupCardProps> = ({
 											{item.categoryName}
 										</Text>
 									) : null}
-									{item.variationGroups
-										.filter(
-											(groupEntry) => groupEntry.selectedOptions.length > 0
-										)
-										.map((groupEntry) => (
-											<Text
-												key={`${item.id}-variation-${groupEntry.groupId}`}
-												style={styles.cartGroupItemMeta}>
+								{item.variationGroups
+									.filter(
+										(groupEntry) => groupEntry.selectedOptions.length > 0
+									)
+									.map((groupEntry) => (
+										<View key={`${item.id}-variation-${groupEntry.groupId}`}>
+											<Text style={styles.cartGroupItemMeta}>
 												{groupEntry.groupName}:{' '}
 												{groupEntry.selectedOptions
 													.map((option) => option.optionName)
 													.join(', ')}
 											</Text>
-										))}
+											{/* Show subvariations if present */}
+											{groupEntry.selectedOptions.map((option) =>
+												option.subVariationGroups && option.subVariationGroups.length > 0 ? (
+													<View
+														key={`${item.id}-subvar-${option.optionId}`}
+														style={{ marginLeft: 16 }}>
+														{option.subVariationGroups.map((subGroup) => (
+															<Text
+																key={`${item.id}-subvar-${subGroup.groupId}`}
+																style={[
+																	styles.cartGroupItemMeta,
+																	{ fontSize: 12, color: '#666' },
+																]}>
+																• {subGroup.groupName}:{' '}
+																{subGroup.selectedOptions
+																	.map((subOpt) => subOpt.optionName)
+																	.join(', ')}
+															</Text>
+														))}
+													</View>
+												) : null
+											)}
+										</View>
+									))}
 									{item.addons.length > 0 ? (
 										<Text style={styles.cartGroupItemMeta}>
 											Add-ons:{' '}

@@ -4,6 +4,7 @@ export interface VariationOptionSnapshot {
 	optionName: string
 	priceAdjustment: number
 	menuItemId?: number | null
+	subVariationGroups?: VariationGroupSnapshot[] // Nested subvariations (1 level deep)
 }
 
 export interface VariationGroupSnapshot {
