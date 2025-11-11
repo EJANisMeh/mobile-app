@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
 import { ConcessionaireStackParamList } from '../types/navigation'
 import { useAuthContext, useConcessionContext } from '../context'
+import { useFocusEffect } from '@react-navigation/native'
+import { notificationApi } from '../services/api'
 
 // Import screen components
 import MenuScreen from '../screens/concessionaire/menu'
@@ -23,6 +25,29 @@ const Stack = createStackNavigator<ConcessionaireStackParamList>()
 
 // Main tab navigator
 const MainTabs: React.FC = () => {
+	const { user } = useAuthContext()
+	const [unreadCount, setUnreadCount] = useState(0)
+
+	const loadUnreadCount = useCallback(async () => {
+		if (!user?.id) return
+
+		try {
+			const response = await notificationApi.getNotifications(user.id)
+			if (response.success && response.notifications) {
+				const unread = response.notifications.filter((n) => !n.isRead).length
+				setUnreadCount(unread)
+			}
+		} catch (err) {
+			console.error('Load unread count error:', err)
+		}
+	}, [user?.id])
+
+	useFocusEffect(
+		useCallback(() => {
+			void loadUnreadCount()
+		}, [loadUnreadCount])
+	)
+
 	return (
 		<Tab.Navigator
 			initialRouteName="Orders"
@@ -83,6 +108,7 @@ const MainTabs: React.FC = () => {
 				options={{
 					title: 'Notifications',
 					tabBarLabel: 'Alerts',
+					tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
 					tabBarIcon: ({ color, size }) => (
 						<MaterialCommunityIcons
 							name="bell"
