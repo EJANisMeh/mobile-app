@@ -150,7 +150,7 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 						category_filter_id: group.categoryFilterId,
 						category_filter_ids: group.categoryFilterIds || [],
 						category_price_adjustment: categoryPriceAdjustment,
-						specificity: group.specificity || false,
+						specificity: group.specificity || true,
 						position: group.position,
 					},
 				}) // Add custom options if mode is custom

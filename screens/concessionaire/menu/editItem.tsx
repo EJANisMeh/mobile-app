@@ -128,6 +128,7 @@ const EditMenuItemScreen: React.FC = () => {
 	const [categoriesLoading, setCategoriesLoading] = useState(false)
 	const [priceWarningVisible, setPriceWarningVisible] = useState(false)
 	const [affectedItems, setAffectedItems] = useState<AffectedItem[]>([])
+	const [isValidating, setIsValidating] = useState(false)
 
 	// Load item data on mount
 	useEffect(() => {
@@ -222,7 +223,7 @@ const EditMenuItemScreen: React.FC = () => {
 								: null,
 						options,
 						existingMenuItemIds,
-						specificity: group.specificity ?? false,
+						specificity: group.specificity ?? true,
 						position: group.position ?? 0,
 					}
 				})
@@ -522,6 +523,7 @@ const EditMenuItemScreen: React.FC = () => {
 			return
 		}
 
+		setIsValidating(true)
 		try {
 			const { menuApi } = await import('../../../services/api')
 
@@ -549,6 +551,8 @@ const EditMenuItemScreen: React.FC = () => {
 			console.error('Error validating price adjustment:', error)
 			// Proceed anyway if validation fails
 			proceedWithSave()
+		} finally {
+			setIsValidating(false)
 		}
 	}
 
@@ -656,6 +660,7 @@ const EditMenuItemScreen: React.FC = () => {
 			<FormActions
 				isFormValid={isFormValid}
 				hasChanges={hasChanges}
+				isValidating={isValidating}
 				handleSave={handleSave}
 				handleCancel={handleCancel}
 			/>

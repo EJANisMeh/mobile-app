@@ -106,6 +106,7 @@ const AddMenuItemScreen: React.FC = () => {
 	const [categoriesLoading, setCategoriesLoading] = useState(false)
 	const [priceWarningVisible, setPriceWarningVisible] = useState(false)
 	const [affectedItems, setAffectedItems] = useState<AffectedItem[]>([])
+	const [isValidating, setIsValidating] = useState(false)
 
 	// Load categories on mount and when returning from category management
 	useFocusEffect(
@@ -304,6 +305,7 @@ const AddMenuItemScreen: React.FC = () => {
 			return
 		}
 
+		setIsValidating(true)
 		try {
 			const { menuApi } = await import('../../../services/api')
 
@@ -331,6 +333,8 @@ const AddMenuItemScreen: React.FC = () => {
 			console.error('Error validating price adjustment:', error)
 			// Proceed anyway if validation fails
 			proceedWithSave()
+		} finally {
+			setIsValidating(false)
 		}
 	}
 
@@ -426,6 +430,7 @@ const AddMenuItemScreen: React.FC = () => {
 			<View style={styles.bottomActions}>
 				<FormActions
 					isFormValid={isFormValid}
+					isValidating={isValidating}
 					handleSave={handleSave}
 					handleCancel={handleCancel}
 				/>

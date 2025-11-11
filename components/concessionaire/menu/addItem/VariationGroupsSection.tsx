@@ -70,7 +70,7 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 			categoryFilterId: null,
 			options: [],
 			existingMenuItemIds: [],
-			specificity: false,
+			specificity: true,
 			position: formData.variationGroups.length,
 		}
 		setFormData((prev) => ({
@@ -86,9 +86,21 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 	) => {
 		setFormData((prev) => ({
 			...prev,
-			variationGroups: prev.variationGroups.map((group, i) =>
-				i === index ? { ...group, [field]: value } : group
-			),
+			variationGroups: prev.variationGroups.map((group, i) => {
+				if (i !== index) return group
+
+				const updated = { ...group, [field]: value }
+
+				// Force specificity to true for category modes
+				if (
+					field === 'mode' &&
+					(value === 'single-category' || value === 'multi-category')
+				) {
+					updated.specificity = true
+				}
+
+				return updated
+			}),
 		}))
 	}
 
@@ -210,19 +222,22 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 							showAlert={showAlert}
 							handleUpdateVariationGroup={handleUpdateVariationGroup}
 						/>
+				)}
+
+				{/* Specificity Toggle - Hidden for category modes */}
+				{group.mode !== 'single-category' &&
+					group.mode !== 'multi-category' && (
+						<VariationSpecificity
+							groupIndex={groupIndex}
+							group={group}
+							showAlert={showAlert}
+							handleUpdateVariationGroup={handleUpdateVariationGroup}
+						/>
 					)}
 
-					{/* Specificity Toggle */}
-					<VariationSpecificity
-						groupIndex={groupIndex}
-						group={group}
-						showAlert={showAlert}
-						handleUpdateVariationGroup={handleUpdateVariationGroup}
-					/>
-
-					{/* Custom Options (for custom mode only) */}
-					{group.mode === 'custom' && (
-						<VariationCustomOptions
+				{/* Custom Options (for custom mode only) */}
+				{group.mode === 'custom' && (
+					<VariationCustomOptions
 							formData={formData}
 							setFormData={setFormData}
 							groupIndex={groupIndex}

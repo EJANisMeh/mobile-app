@@ -14,6 +14,7 @@ export interface VariationOptionSelection {
 	priceAdjustment: number
 	// For existing mode
 	menuItemId?: number
+	menuItemBasePrice?: number // Base price of the menu item when used as variation option
 	// For category mode
 	categoryFilterId?: number
 }

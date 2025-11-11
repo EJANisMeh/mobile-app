@@ -129,8 +129,9 @@ const VariationGroupMultiCategory: React.FC<
 						{
 							optionId: menuItem.id,
 							optionName: menuItem.name,
-							priceAdjustment: adjustedPrice - numPrice,
+							priceAdjustment: 0, // Keep priceAdjustment for backward compatibility
 							menuItemId: menuItem.id,
+							menuItemBasePrice: adjustedPrice, // Use adjusted price with category adjustment
 						},
 					]
 				}
@@ -157,8 +158,9 @@ const VariationGroupMultiCategory: React.FC<
 						{
 							optionId: menuItem.id,
 							optionName: menuItem.name,
-							priceAdjustment: adjustedPrice - numPrice,
+							priceAdjustment: 0, // Keep priceAdjustment for backward compatibility
 							menuItemId: menuItem.id,
+							menuItemBasePrice: adjustedPrice, // Use adjusted price with category adjustment
 						},
 					]
 				}

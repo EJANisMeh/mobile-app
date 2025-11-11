@@ -306,7 +306,16 @@ const MenuItemViewScreen: React.FC = () => {
 		let variationAdjustments = 0
 		variationSelections.forEach((selection) => {
 			selection.selectedOptions.forEach((option) => {
-				variationAdjustments += option.priceAdjustment
+				// Use menuItemBasePrice if available (for category/existing modes)
+				// Otherwise use priceAdjustment (for custom mode)
+				if (
+					option.menuItemBasePrice !== undefined &&
+					option.menuItemBasePrice !== null
+				) {
+					variationAdjustments += option.menuItemBasePrice
+				} else {
+					variationAdjustments += option.priceAdjustment
+				}
 			})
 		})
 

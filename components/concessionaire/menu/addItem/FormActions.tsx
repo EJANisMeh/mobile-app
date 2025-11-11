@@ -1,17 +1,19 @@
 import React from 'react'
-import { TouchableOpacity, Text } from 'react-native'
+import { TouchableOpacity, Text, ActivityIndicator } from 'react-native'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createConcessionaireAddMenuItemStyles } from '../../../../styles/concessionaire/addMenuItem'
 
 interface FormActionsProps {
 	isFormValid: boolean
+	isValidating: boolean
 	handleSave: () => void
 	handleCancel: () => void
 }
 
 const FormActions: React.FC<FormActionsProps> = ({
 	isFormValid,
+	isValidating,
 	handleSave,
 	handleCancel,
 }) => {
@@ -23,14 +25,22 @@ const FormActions: React.FC<FormActionsProps> = ({
 		<>
 			<TouchableOpacity
 				style={styles.cancelButton}
-				onPress={handleCancel}>
+				onPress={handleCancel}
+				disabled={isValidating}>
 				<Text style={styles.cancelButtonText}>Cancel</Text>
 			</TouchableOpacity>
 			<TouchableOpacity
-				style={[styles.saveButton, !isFormValid && styles.saveButtonDisabled]}
+				style={[
+					styles.saveButton,
+					(!isFormValid || isValidating) && styles.saveButtonDisabled,
+				]}
 				onPress={handleSave}
-				disabled={!isFormValid}>
-				<Text style={styles.saveButtonText}>Add Item</Text>
+				disabled={!isFormValid || isValidating}>
+				{isValidating ? (
+					<ActivityIndicator color={colors.text} />
+				) : (
+					<Text style={styles.saveButtonText}>Add Item</Text>
+				)}
 			</TouchableOpacity>
 		</>
 	)

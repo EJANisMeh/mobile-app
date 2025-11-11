@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, TouchableOpacity, Text } from 'react-native'
+import { View, TouchableOpacity, Text, ActivityIndicator } from 'react-native'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createConcessionaireEditMenuItemStyles } from '../../../../styles/concessionaire'
@@ -7,6 +7,7 @@ import { createConcessionaireEditMenuItemStyles } from '../../../../styles/conce
 interface FormActionsProps {
 	isFormValid: boolean
 	hasChanges: boolean
+	isValidating: boolean
 	handleSave: () => void
 	handleCancel: () => void
 }
@@ -14,6 +15,7 @@ interface FormActionsProps {
 const FormActions: React.FC<FormActionsProps> = ({
 	isFormValid,
 	hasChanges,
+	isValidating,
 	handleSave,
 	handleCancel,
 }) => {
@@ -25,17 +27,23 @@ const FormActions: React.FC<FormActionsProps> = ({
 		<View style={styles.bottomActions}>
 			<TouchableOpacity
 				style={styles.cancelButton}
-				onPress={handleCancel}>
+				onPress={handleCancel}
+				disabled={isValidating}>
 				<Text style={styles.cancelButtonText}>Cancel</Text>
 			</TouchableOpacity>
 			<TouchableOpacity
 				style={[
 					styles.saveButton,
-					(!isFormValid || !hasChanges) && styles.saveButtonDisabled,
+					(!isFormValid || !hasChanges || isValidating) &&
+						styles.saveButtonDisabled,
 				]}
 				onPress={handleSave}
-				disabled={!isFormValid || !hasChanges}>
-				<Text style={styles.saveButtonText}>Save Changes</Text>
+				disabled={!isFormValid || !hasChanges || isValidating}>
+				{isValidating ? (
+					<ActivityIndicator color={colors.text} />
+				) : (
+					<Text style={styles.saveButtonText}>Save Changes</Text>
+				)}
 			</TouchableOpacity>
 		</View>
 	)

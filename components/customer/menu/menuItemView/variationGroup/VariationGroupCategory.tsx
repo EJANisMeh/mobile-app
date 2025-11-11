@@ -75,6 +75,10 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 							optionName: menuItem.name,
 							priceAdjustment: 0, // Category items don't have price adjustments
 							menuItemId: menuItem.id,
+							menuItemBasePrice:
+								typeof menuItem.basePrice === 'string'
+									? parseFloat(menuItem.basePrice)
+									: menuItem.basePrice,
 						},
 					]
 				}
@@ -103,6 +107,10 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 							optionName: menuItem.name,
 							priceAdjustment: 0, // Category items don't have price adjustments
 							menuItemId: menuItem.id,
+							menuItemBasePrice:
+								typeof menuItem.basePrice === 'string'
+									? parseFloat(menuItem.basePrice)
+									: menuItem.basePrice,
 						},
 					]
 				}
