@@ -505,6 +505,14 @@ const OrderDetailsScreen: React.FC = () => {
 					/>
 				)}
 
+				{/* Concession Note if exists */}
+				{order.concession_note && (
+					<View style={styles.section}>
+						<Text style={styles.sectionTitle}>Concession Note</Text>
+						<Text style={styles.detailValue}>{order.concession_note}</Text>
+					</View>
+				)}
+
 				{/* Order Information */}
 				<OrderInformationSection
 					orderMode={order.orderMode}
@@ -519,6 +527,16 @@ const OrderDetailsScreen: React.FC = () => {
 				/>
 
 				{/* Price Adjustment Section */}
+
+				{/* Payment Information */}
+				<PaymentInformationSection
+					paymentMode={order.payment_mode}
+					paymentProof={order.payment_proof}
+					formatDate={formatDate}
+					styles={styles}
+					colors={colors}
+				/>
+
 				{order.original_total && order.price_adjustment_reason && (
 					<View style={styles.section}>
 						<Text style={styles.sectionTitle}>Price Adjustment</Text>
@@ -545,32 +563,16 @@ const OrderDetailsScreen: React.FC = () => {
 				)}
 
 				{/* Price Adjustment Button - only show for certain statuses */}
-				{(order.order_statuses?.code === ORDER_STATUS_CODES.PENDING ||
-					order.order_statuses?.code === ORDER_STATUS_CODES.CONFIRMED) && (
-					<TouchableOpacity
-						style={styles.priceAdjustmentButton}
-						onPress={handlePriceAdjustment}
-						disabled={processing}>
-						<Text style={styles.priceAdjustmentButtonText}>Adjust Price</Text>
-					</TouchableOpacity>
-				)}
-
-				{/* Payment Information */}
-				<PaymentInformationSection
-					paymentMode={order.payment_mode}
-					paymentProof={order.payment_proof}
-					formatDate={formatDate}
-					styles={styles}
-					colors={colors}
-				/>
-
-				{/* Concession Note if exists */}
-				{order.concession_note && (
-					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Concession Note</Text>
-						<Text style={styles.detailValue}>{order.concession_note}</Text>
-					</View>
-				)}
+				{order.order_statuses?.code !== ORDER_STATUS_CODES.CANCELLED &&
+					order.order_statuses?.code !== ORDER_STATUS_CODES.DECLINED &&
+					order.order_statuses?.code !== ORDER_STATUS_CODES.COMPLETED && (
+						<TouchableOpacity
+							style={styles.priceAdjustmentButton}
+							onPress={handlePriceAdjustment}
+							disabled={processing}>
+							<Text style={styles.priceAdjustmentButtonText}>Adjust Price</Text>
+						</TouchableOpacity>
+					)}
 			</ScrollView>
 
 			<AlertModal

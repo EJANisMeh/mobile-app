@@ -377,5 +377,20 @@ export const createOrderDetailsStyles = (
 		disabledButton: {
 			opacity: 0.5,
 		},
+		detailRow: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
+			marginBottom: 12,
+		},
+		detailLabel: {
+			fontSize: 14,
+			color: colors.textSecondary,
+		},
+		detailValue: {
+			fontSize: 14,
+			color: colors.text,
+			fontWeight: '500',
+		},
 	})
 }

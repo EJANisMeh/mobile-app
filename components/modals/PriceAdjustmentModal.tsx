@@ -6,6 +6,7 @@ import {
 	TouchableOpacity,
 	StyleSheet,
 	ActivityIndicator,
+	ScrollView,
 } from 'react-native'
 import BaseModal from './BaseModal'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -51,7 +52,7 @@ const PriceAdjustmentModal: React.FC<PriceAdjustmentModalProps> = ({
 		}
 
 		if (!reason.trim()) {
-			setError('Please provide a reason for the adjustment')
+			setError('Provide a reason for the adjustment to let the customer know of the price change')
 			return
 		}
 
@@ -74,11 +75,14 @@ const PriceAdjustmentModal: React.FC<PriceAdjustmentModalProps> = ({
 			onClose={onClose}
 			title="Adjust Order Price"
 			showCloseButton={!isProcessing}>
-			<View style={styles.container}>
-				<Text style={styles.helperText}>
-					Adjust the order price and provide a reason. This can be used for
-					discounts or additional charges.
-				</Text>
+			<ScrollView
+				style={styles.scrollView}
+				showsVerticalScrollIndicator={false}>
+				<View style={styles.container}>
+					<Text style={styles.helperText}>
+						Adjust the order price and provide a reason. This can be used for
+						discounts or additional charges.
+					</Text>
 
 				{/* Current Total */}
 				<View style={styles.infoRow}>
@@ -189,12 +193,16 @@ const PriceAdjustmentModal: React.FC<PriceAdjustmentModalProps> = ({
 						)}
 					</TouchableOpacity>
 				</View>
-			</View>
+				</View>
+			</ScrollView>
 		</BaseModal>
 	)
 }
 
 const styles = StyleSheet.create({
+	scrollView: {
+		maxHeight: 500,
+	},
 	container: {
 		paddingTop: 8,
 	},

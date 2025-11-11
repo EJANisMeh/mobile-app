@@ -351,6 +351,32 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 					styles={styles}
 				/>
 
+				{/* Price Adjustment Section - only show if price was adjusted */}
+				{order.original_total && order.price_adjustment_reason && (
+					<View style={styles.section}>
+						<Text style={styles.sectionTitle}>Price Adjustment</Text>
+						<View style={styles.detailRow}>
+							<Text style={styles.detailLabel}>Original Total:</Text>
+							<Text style={styles.detailValue}>
+								{formatCurrency(Number(order.original_total))}
+							</Text>
+						</View>
+						<View style={styles.detailRow}>
+							<Text style={styles.detailLabel}>Adjusted Total:</Text>
+							<Text style={[styles.detailValue, { fontWeight: 'bold' }]}>
+								{formatCurrency(Number(order.total))}
+							</Text>
+						</View>
+						<View style={styles.detailRow}>
+							<Text style={styles.detailLabel}>Reason:</Text>
+							<Text
+								style={[styles.detailValue, { flex: 1, textAlign: 'right' }]}>
+								{order.price_adjustment_reason}
+							</Text>
+						</View>
+					</View>
+				)}
+
 				{/* Show Payment Section After if proof exists or not required */}
 				{!showPaymentFirst && (
 					<PaymentInformationSection
