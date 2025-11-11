@@ -5,6 +5,7 @@ import {
 	hasAnyMenuItemScheduleDay,
 } from '../../utils/menuItemSchedule'
 import { VariationGroupMode, getKindFromMode } from '../../types'
+import { AddMenuItemFormData } from '../../types/menuItemTypes'
 
 // Edit menu item endpoint
 export const editItem = async (req: express.Request, res: express.Response) => {
@@ -28,6 +29,17 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 			variationGroups,
 			addons,
 			availabilitySchedule,
+		}: {
+			name: AddMenuItemFormData['name']
+			description?: AddMenuItemFormData['description']
+			basePrice: AddMenuItemFormData['basePrice']
+			images?: AddMenuItemFormData['images']
+			displayImageIndex?: AddMenuItemFormData['displayImageIndex']
+			categoryIds: AddMenuItemFormData['categoryIds']
+			availability?: AddMenuItemFormData['availability']
+			variationGroups?: AddMenuItemFormData['variationGroups']
+			addons?: AddMenuItemFormData['addons']
+			availabilitySchedule?: AddMenuItemFormData['availabilitySchedule']
 		} = req.body
 
 		// Validate menu item exists

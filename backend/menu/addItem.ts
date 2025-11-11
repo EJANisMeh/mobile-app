@@ -5,6 +5,7 @@ import {
 	normalizeMenuItemSchedule,
 	hasAnyMenuItemScheduleDay,
 } from '../../utils/menuItemSchedule'
+import { AddMenuItemFormData } from '../../types/menuItemTypes'
 
 const prisma = new PrismaClient()
 
@@ -23,6 +24,18 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 			variationGroups,
 			addons,
 			availabilitySchedule,
+		}: {
+			concessionId: number
+			name: AddMenuItemFormData['name']
+			description?: AddMenuItemFormData['description']
+			basePrice?: AddMenuItemFormData['basePrice']
+			images?: AddMenuItemFormData['images']
+			displayImageIndex?: AddMenuItemFormData['displayImageIndex']
+			categoryIds: AddMenuItemFormData['categoryIds']
+			availability?: AddMenuItemFormData['availability']
+			variationGroups?: AddMenuItemFormData['variationGroups']
+			addons?: AddMenuItemFormData['addons']
+			availabilitySchedule?: AddMenuItemFormData['availabilitySchedule']
 		} = req.body
 
 		// Validate required fields: concessionId, name, categoryIds
