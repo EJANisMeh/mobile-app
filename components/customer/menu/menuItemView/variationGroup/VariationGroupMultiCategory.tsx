@@ -4,7 +4,10 @@ import { useThemeContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../../styles/customer'
 import { VariationSelection } from '../../../../../types'
+import { Category } from '../../../../../types/categoryTypes'
 import SubVariationGroups from './SubVariationGroups'
+import CategorySelectionModal from '../modals/CategorySelectionModal'
+import ItemSelectionModal from '../modals/ItemSelectionModal'
 
 interface CategoryMenuItem {
 	id: number
@@ -28,7 +31,7 @@ interface VariationGroupMultiCategoryProps {
 	setVariationSelections: Dispatch<
 		SetStateAction<Map<number, VariationSelection>>
 	>
-	categories: Array<{ id: number; name: string }>
+	categories: Category[]
 }
 
 const VariationGroupMultiCategory: React.FC<
@@ -38,6 +41,8 @@ const VariationGroupMultiCategory: React.FC<
 	const responsive = useResponsiveDimensions()
 	const styles = createCustomerMenuItemViewStyles(colors, responsive)
 
+	const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false)
+	const [isItemModalVisible, setIsItemModalVisible] = useState(false)
 	const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
 		null
 	)
@@ -53,16 +58,26 @@ const VariationGroupMultiCategory: React.FC<
 	// Get the category menu items from the group
 	const allCategoryMenuItems: CategoryMenuItem[] =
 		(group as any).categoryMenuItems || []
+	
+	console.log(`📦 [VariationGroupMultiCategory] Group ${group.id} (${group.name}):`)
+	console.log(`  - categoryMenuItems count: ${allCategoryMenuItems.length}`)
+	if (allCategoryMenuItems.length > 0) {
+		console.log(`  - Sample item:`, allCategoryMenuItems[0])
+	}
 
 	// Get category IDs from group configuration
 	const categoryFilterIds: number[] = group.category_filter_ids || []
+	console.log(`  - categoryFilterIds:`, categoryFilterIds)
 
 	// Get price adjustment
 	const categoryPriceAdjustment: number = group.category_price_adjustment || 0
+	console.log(`  - categoryPriceAdjustment: ${categoryPriceAdjustment}`)
 
 	// Filter categories to only those in the multi-category selection
 	const availableCategories = useMemo(() => {
-		return categories.filter((cat) => categoryFilterIds.includes(cat.id))
+		const filtered = categories.filter((cat) => categoryFilterIds.includes(cat.id))
+		console.log(`📂 [VariationGroupMultiCategory] availableCategories:`, filtered.map(c => ({ id: c.id, name: c.name })))
+		return filtered
 	}, [categories, categoryFilterIds])
 
 	// Group menu items by category
@@ -85,13 +100,13 @@ const VariationGroupMultiCategory: React.FC<
 			})
 		})
 
+		console.log(`🗂️ [VariationGroupMultiCategory] itemsByCategory Map:`)
+		grouped.forEach((items, catId) => {
+			console.log(`  - Category ${catId}: ${items.length} items`)
+		})
+
 		return grouped
 	}, [allCategoryMenuItems, categoryFilterIds])
-
-	// Get items for currently selected category
-	const currentCategoryItems = selectedCategoryId
-		? itemsByCategory.get(selectedCategoryId) || []
-		: []
 
 	const formatPrice = (price: number | string) => {
 		const numPrice = typeof price === 'string' ? parseFloat(price) : price
@@ -100,203 +115,120 @@ const VariationGroupMultiCategory: React.FC<
 		return `₱${adjustedPrice.toFixed(2)}`
 	}
 
-	const isOptionSelected = (menuItemId: number): boolean => {
-		return selection.selectedOptions.some(
-			(opt) => opt.menuItemId === menuItemId
-		)
+	const handleCategorySelect = (categoryId: number) => {
+		console.log(`🎯 [VariationGroupMultiCategory] Category selected: ${categoryId}`)
+		const category = availableCategories.find(c => c.id === categoryId)
+		console.log(`  - Category name: ${category?.name || 'Unknown'}`)
+		console.log(`  - Items in this category: ${itemsByCategory.get(categoryId)?.length || 0}`)
+		
+		setSelectedCategoryId(categoryId)
+		setIsCategoryModalVisible(false)
+		setIsItemModalVisible(true)
 	}
 
-	const handleOptionToggle = (menuItem: CategoryMenuItem) => {
+	const handleItemConfirm = (selectedItemIds: number[]) => {
+		console.log(`✅ [VariationGroupMultiCategory] Items confirmed:`, selectedItemIds)
+		console.log(`  - Selected category ID: ${selectedCategoryId}`)
+		
 		setVariationSelections((prev) => {
 			const newMap = new Map(prev)
 			const currentSelection = newMap.get(group.id)
 
-			if (!currentSelection) return prev
-
-			const isSelected = isOptionSelected(menuItem.id)
-			const numPrice =
-				typeof menuItem.basePrice === 'string'
-					? parseFloat(menuItem.basePrice)
-					: menuItem.basePrice
-			const adjustedPrice = Math.max(0, numPrice + categoryPriceAdjustment)
-
-			if (isSingleType) {
-				// Single selection: Replace selection or clear if same option
-				if (isSelected && selection.selectionTypeCode === 'single_optional') {
-					// Clear selection for optional single
-					currentSelection.selectedOptions = []
-				} else {
-					// Initialize subvariation selections if menu item has variation groups with specificity: false
-					const subVariationSelections = new Map<number, VariationSelection>()
-					if (menuItem.variationGroups && menuItem.variationGroups.length > 0) {
-						// Filter only variation groups with specificity === false
-						const subVariationGroupsToShow = menuItem.variationGroups.filter(
-							(subGroup: any) => subGroup.specificity === false
-						)
-
-						subVariationGroupsToShow.forEach((subGroup: any) => {
-							const selectionTypeCode =
-								subGroup.selection_types?.code || 'single_required'
-							subVariationSelections.set(subGroup.id, {
-								groupId: subGroup.id,
-								groupName: subGroup.name,
-								selectionTypeCode: selectionTypeCode,
-								multiLimit: subGroup.multi_limit || 0,
-								selectedOptions: [],
-							})
-						})
-					}
-
-					// Set new selection
-					currentSelection.selectedOptions = [
-						{
-							optionId: menuItem.id,
-							optionName: menuItem.name,
-							priceAdjustment: 0, // Keep priceAdjustment for backward compatibility
-							menuItemId: menuItem.id,
-							menuItemBasePrice: adjustedPrice, // Use adjusted price with category adjustment
-							subVariationSelections:
-								subVariationSelections.size > 0
-									? subVariationSelections
-									: undefined,
-						},
-					]
-				}
-			} else {
-				// Multi selection: Toggle checkbox with limit enforcement
-				if (isSelected) {
-					// Remove option
-					currentSelection.selectedOptions =
-						currentSelection.selectedOptions.filter(
-							(opt) => opt.menuItemId !== menuItem.id
-						)
-				} else {
-					// Check limit before adding
-					if (
-						multiLimit > 0 &&
-						currentSelection.selectedOptions.length >= multiLimit
-					) {
-						// Limit reached, don't add
-						return prev
-					}
-
-					// Initialize subvariation selections if menu item has variation groups with specificity: false
-					const subVariationSelections = new Map<number, VariationSelection>()
-					if (menuItem.variationGroups && menuItem.variationGroups.length > 0) {
-						// Filter only variation groups with specificity === false
-						const subVariationGroupsToShow = menuItem.variationGroups.filter(
-							(subGroup: any) => subGroup.specificity === false
-						)
-
-						subVariationGroupsToShow.forEach((subGroup: any) => {
-							const selectionTypeCode =
-								subGroup.selection_types?.code || 'single_required'
-							subVariationSelections.set(subGroup.id, {
-								groupId: subGroup.id,
-								groupName: subGroup.name,
-								selectionTypeCode: selectionTypeCode,
-								multiLimit: subGroup.multi_limit || 0,
-								selectedOptions: [],
-							})
-						})
-					}
-
-					// Add option
-					currentSelection.selectedOptions = [
-						...currentSelection.selectedOptions,
-						{
-							optionId: menuItem.id,
-							optionName: menuItem.name,
-							priceAdjustment: 0, // Keep priceAdjustment for backward compatibility
-							menuItemId: menuItem.id,
-							menuItemBasePrice: adjustedPrice, // Use adjusted price with category adjustment
-							subVariationSelections:
-								subVariationSelections.size > 0
-									? subVariationSelections
-									: undefined,
-						},
-					]
-				}
+			if (!currentSelection) {
+				console.log(`  ⚠️ No current selection found for group ${group.id}`)
+				return prev
 			}
+
+			// Get items for selected category
+			const categoryItems = selectedCategoryId
+				? itemsByCategory.get(selectedCategoryId) || []
+				: []
+			
+			console.log(`  - Category items available: ${categoryItems.length}`)
+
+			// Build selected options from selected item IDs
+			const selectedOptions = selectedItemIds.map((itemId) => {
+				const menuItem = categoryItems.find((item) => item.id === itemId)
+				if (!menuItem) {
+					console.log(`  ⚠️ Menu item ${itemId} not found in category items`)
+					return null
+				}
+
+				console.log(`  📦 Processing menu item ${menuItem.id} (${menuItem.name}):`)
+				console.log(`    - basePrice: ${menuItem.basePrice}`)
+				console.log(`    - variationGroups count: ${menuItem.variationGroups?.length || 0}`)
+
+				const numPrice =
+					typeof menuItem.basePrice === 'string'
+						? parseFloat(menuItem.basePrice)
+						: menuItem.basePrice
+				const adjustedPrice = Math.max(0, numPrice + categoryPriceAdjustment)
+
+				// Initialize subvariation selections if menu item has variation groups with specificity: false
+				const subVariationSelections = new Map<number, VariationSelection>()
+				if (menuItem.variationGroups && menuItem.variationGroups.length > 0) {
+					console.log(`    - Filtering subvariation groups (specificity: false)...`)
+					
+					// Filter only variation groups with specificity === false
+					const subVariationGroupsToShow = menuItem.variationGroups.filter(
+						(subGroup: any) => {
+							console.log(`      - Group ${subGroup.id} (${subGroup.name}): specificity=${subGroup.specificity}`)
+							return subGroup.specificity === false
+						}
+					)
+
+					console.log(`    - Subvariation groups to show: ${subVariationGroupsToShow.length}`)
+
+					subVariationGroupsToShow.forEach((subGroup: any) => {
+						const selectionTypeCode =
+							subGroup.selection_types?.code || 'single_required'
+						
+						console.log(`      ✓ Initializing subgroup ${subGroup.id} (${subGroup.name}) with type: ${selectionTypeCode}`)
+						
+						subVariationSelections.set(subGroup.id, {
+							groupId: subGroup.id,
+							groupName: subGroup.name,
+							selectionTypeCode: selectionTypeCode,
+							multiLimit: subGroup.multi_limit || 0,
+							selectedOptions: [],
+						})
+					})
+				}
+
+				console.log(`    - subVariationSelections Map size: ${subVariationSelections.size}`)
+
+				return {
+					optionId: menuItem.id,
+					optionName: menuItem.name,
+					priceAdjustment: 0, // Keep priceAdjustment for backward compatibility
+					menuItemId: menuItem.id,
+					menuItemBasePrice: adjustedPrice, // Use adjusted price with category adjustment
+					subVariationSelections:
+						subVariationSelections.size > 0
+							? subVariationSelections
+							: undefined,
+				}
+			})
+
+			// Filter out null values
+			currentSelection.selectedOptions = selectedOptions.filter(
+				(opt) => opt !== null
+			) as any[]
+
+			console.log(`  ✅ Total selected options: ${currentSelection.selectedOptions.length}`)
+			console.log(`  - Options with subvariations: ${currentSelection.selectedOptions.filter(opt => opt.subVariationSelections).length}`)
 
 			newMap.set(group.id, currentSelection)
 			return newMap
 		})
+
+		setIsItemModalVisible(false)
+		setSelectedCategoryId(null)
 	}
 
-	const canSelectMore = (): boolean => {
-		if (isSingleType) return true
-		if (multiLimit === 0) return true // Unlimited
-		return selection.selectedOptions.length < multiLimit
-	}
-
-	const renderSelectionIndicator = (menuItem: CategoryMenuItem) => {
-		const isSelected = isOptionSelected(menuItem.id)
-
-		if (isSingleType) {
-			// Radio button
-			return (
-				<View style={styles.radioButton}>
-					{isSelected && <View style={styles.radioButtonInner} />}
-				</View>
-			)
-		} else {
-			// Checkbox
-			const isDisabled = !isSelected && !canSelectMore()
-			return (
-				<View
-					style={[
-						styles.checkbox,
-						isDisabled && styles.checkboxDisabled,
-						isSelected && styles.checkboxChecked,
-					]}>
-					{isSelected && <Text style={styles.checkboxCheck}>✓</Text>}
-				</View>
-			)
-		}
-	}
-
-	// Show category selection if no category is selected
-	if (!selectedCategoryId) {
-		return (
-			<View style={styles.variationGroup}>
-				<View style={styles.variationGroupHeader}>
-					<Text style={styles.variationGroupName}>{group.name}</Text>
-					{isRequired && <Text style={styles.requiredBadge}>Required</Text>}
-					{!isSingleType && multiLimit > 0 && (
-						<Text style={styles.multiLimitText}>
-							(Select up to {multiLimit})
-						</Text>
-					)}
-				</View>
-
-				<Text style={styles.description}>Select a category:</Text>
-
-				<View style={styles.optionsList}>
-					{availableCategories.map((category) => {
-						const itemCount = itemsByCategory.get(category.id)?.length || 0
-						return (
-							<TouchableOpacity
-								key={category.id}
-								style={styles.optionItemButton}
-								onPress={() => setSelectedCategoryId(category.id)}>
-								<View style={styles.optionContent}>
-									<Text style={styles.optionName}>{category.name}</Text>
-									<Text style={styles.description}>
-										{itemCount} {itemCount === 1 ? 'item' : 'items'}
-									</Text>
-								</View>
-							</TouchableOpacity>
-						)
-					})}
-				</View>
-			</View>
-		)
-	}
-
-	// Show items from selected category
-	const selectedCategory = availableCategories.find(
-		(cat) => cat.id === selectedCategoryId
+	// Get currently selected item IDs for modal
+	const selectedItemIds = selection.selectedOptions.map(
+		(opt) => opt.menuItemId || 0
 	)
 
 	return (
@@ -309,132 +241,145 @@ const VariationGroupMultiCategory: React.FC<
 				)}
 			</View>
 
+			{/* Select a category button */}
 			<TouchableOpacity
-				style={styles.categoryBackButton}
-				onPress={() => {
-					// Deselect all items from current category before going back
-					setVariationSelections((prev) => {
-						const newMap = new Map(prev)
-						const currentSelection = newMap.get(group.id)
-
-						if (!currentSelection) return prev
-
-						// Filter out options that belong to the current category
-						currentSelection.selectedOptions =
-							currentSelection.selectedOptions.filter(
-								(opt) =>
-									!currentCategoryItems.some(
-										(item) => item.id === opt.menuItemId
-									)
-							)
-
-						newMap.set(group.id, currentSelection)
-						return newMap
-					})
-
-					// Go back to category selection
-					setSelectedCategoryId(null)
-				}}>
-				<Text style={styles.categoryBackButtonText}>
-					← Back to categories (Current: {selectedCategory?.name})
+				style={[styles.modalButton, { backgroundColor: colors.surface }]}
+				onPress={() => setIsCategoryModalVisible(true)}>
+				<Text style={[styles.modalButtonText, { color: colors.text }]}>
+					{selection.selectedOptions.length > 0
+						? `${selection.selectedOptions.length} item(s) selected`
+						: 'Select a category'}
 				</Text>
 			</TouchableOpacity>
 
-			<View style={styles.optionsList}>
-				{currentCategoryItems.length === 0 ? (
-					<Text style={styles.description}>
-						No items available in this category
-					</Text>
-				) : (
-					currentCategoryItems.map((menuItem) => {
-						const isSelected = isOptionSelected(menuItem.id)
-						const isOutOfStock = !menuItem.availability
-						const isDisabled = !isSingleType && !isSelected && !canSelectMore()
-
-						// Find the selected option to get subvariation selections
-						const selectedOption = selection.selectedOptions.find(
-							(opt) => opt.menuItemId === menuItem.id
+			{/* Display selected items with subvariations */}
+			{selection.selectedOptions.length > 0 && (
+				<View style={styles.selectedItemsList}>
+					{selection.selectedOptions.map((selectedOption) => {
+						const menuItem = allCategoryMenuItems.find(
+							(item) => item.id === selectedOption.menuItemId
 						)
+						if (!menuItem) {
+							console.log(`⚠️ [VariationGroupMultiCategory] Menu item ${selectedOption.menuItemId} not found in allCategoryMenuItems`)
+							return null
+						}
+
+						const subVariationGroupsToShow = menuItem.variationGroups?.filter(
+							(g: any) => g.specificity === false
+						) || []
+
+						console.log(`🎨 [VariationGroupMultiCategory] Rendering selected item ${menuItem.id} (${menuItem.name}):`)
+						console.log(`  - Has subVariationSelections: ${!!selectedOption.subVariationSelections}`)
+						console.log(`  - menuItem.variationGroups count: ${menuItem.variationGroups?.length || 0}`)
+						console.log(`  - Subvariation groups to show (specificity: false): ${subVariationGroupsToShow.length}`)
+						
+						if (subVariationGroupsToShow.length > 0) {
+							console.log(`  - Subvariation groups:`, subVariationGroupsToShow.map((g: any) => ({
+								id: g.id,
+								name: g.name,
+								specificity: g.specificity
+							})))
+						}
 
 						return (
-							<View key={menuItem.id}>
-								<TouchableOpacity
-									style={[
-										styles.optionItemButton,
-										isSelected && styles.optionItemSelected,
-										isDisabled && styles.optionItemDisabled,
-									]}
-									onPress={() => handleOptionToggle(menuItem)}
-									disabled={isDisabled}>
-									{renderSelectionIndicator(menuItem)}
-									<View style={styles.optionContent}>
-										<View style={styles.optionNameWrapper}>
-											<Text
-												style={[
-													styles.optionName,
-													isOutOfStock && styles.optionNameDisabled,
-												]}>
-												{menuItem.name}
-											</Text>
-											{isOutOfStock && (
-												<Text style={styles.outOfStockText}>Out of stock</Text>
-											)}
-										</View>
-										<Text style={styles.optionPrice}>
-											{formatPrice(menuItem.basePrice)}
-										</Text>
-									</View>
-								</TouchableOpacity>
+							<View
+								key={selectedOption.menuItemId}
+								style={styles.selectedItemContainer}>
+								<View style={styles.selectedItemHeader}>
+									<Text
+										style={[styles.selectedItemName, { color: colors.text }]}>
+										{selectedOption.optionName}
+									</Text>
+									<Text
+										style={[
+											styles.selectedItemPrice,
+											{ color: colors.primary },
+										]}>
+										{formatPrice(menuItem.basePrice)}
+									</Text>
+								</View>
 
-								{/* Show subvariations if option is selected and has variation groups with specificity: false */}
-								{isSelected &&
-									selectedOption?.subVariationSelections &&
-									menuItem.variationGroups &&
-									menuItem.variationGroups.filter(
-										(g: any) => g.specificity === false
-									).length > 0 && (
-										<SubVariationGroups
-											menuItemId={menuItem.id}
-											menuItemName={menuItem.name}
-											subVariationGroups={menuItem.variationGroups.filter(
-												(g: any) => g.specificity === false
-											)}
-											subVariationSelections={
-												selectedOption.subVariationSelections
-											}
-											setSubVariationSelections={(updater) => {
-												setVariationSelections((prev) => {
-													const newMap = new Map(prev)
-													const currentSelection = newMap.get(group.id)
-													if (!currentSelection) return prev
+								{/* Show subvariations if menu item has variation groups with specificity: false */}
+								{selectedOption.subVariationSelections &&
+									subVariationGroupsToShow.length > 0 && (
+										<>
+											{console.log(`  🚀 Passing to SubVariationGroups:`, {
+												menuItemId: menuItem.id,
+												menuItemName: menuItem.name,
+												subVariationGroupsCount: subVariationGroupsToShow.length,
+												subVariationSelectionsSize: selectedOption.subVariationSelections.size
+											})}
+											<SubVariationGroups
+												menuItemId={menuItem.id}
+												menuItemName={menuItem.name}
+												subVariationGroups={subVariationGroupsToShow}
+												subVariationSelections={
+													selectedOption.subVariationSelections
+												}
+												setSubVariationSelections={(updater) => {
+													setVariationSelections((prev) => {
+														const newMap = new Map(prev)
+														const currentSelection = newMap.get(group.id)
+														if (!currentSelection) return prev
 
-													currentSelection.selectedOptions =
-														currentSelection.selectedOptions.map((opt) =>
-															opt.menuItemId === menuItem.id
-																? {
-																		...opt,
-																		subVariationSelections:
-																			typeof updater === 'function'
-																				? updater(
-																						opt.subVariationSelections ||
-																							new Map()
-																				  )
-																				: updater,
-																  }
-																: opt
-														)
+														currentSelection.selectedOptions =
+															currentSelection.selectedOptions.map((opt) =>
+																opt.menuItemId === menuItem.id
+																	? {
+																			...opt,
+																			subVariationSelections:
+																				typeof updater === 'function'
+																					? updater(
+																							opt.subVariationSelections ||
+																								new Map()
+																					  )
+																					: updater,
+																	  }
+																	: opt
+															)
 
-													newMap.set(group.id, currentSelection)
-													return newMap
-												})
-											}}
-										/>
+														newMap.set(group.id, currentSelection)
+														return newMap
+													})
+												}}
+											/>
+										</>
 									)}
 							</View>
 						)
-					})
-				)}
-			</View>
+					})}
+				</View>
+			)}
+
+			{/* Category selection modal */}
+			<CategorySelectionModal
+				visible={isCategoryModalVisible}
+				categories={availableCategories}
+				onClose={() => setIsCategoryModalVisible(false)}
+				onConfirm={handleCategorySelect}
+				title={`Select a category - ${group.name}`}
+			/>
+
+			{/* Item selection modal */}
+			{selectedCategoryId && (
+				<ItemSelectionModal
+					visible={isItemModalVisible}
+					items={itemsByCategory.get(selectedCategoryId) || []}
+					onClose={() => {
+						setIsItemModalVisible(false)
+						setSelectedCategoryId(null)
+					}}
+					onConfirm={handleItemConfirm}
+					title={`Select items - ${
+						availableCategories.find((c) => c.id === selectedCategoryId)
+							?.name || ''
+					}`}
+					isSingleSelection={isSingleType}
+					isRequired={isRequired}
+					multiLimit={multiLimit}
+					categoryPriceAdjustment={categoryPriceAdjustment}
+				/>
+			)}
 		</View>
 	)
 }

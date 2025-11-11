@@ -381,6 +381,50 @@ export const createCustomerMenuItemViewStyles = (
 			color: colors.surface,
 		},
 
+		// Modal button for category and multi-category modes
+		modalButton: {
+			paddingVertical: spacing.md,
+			paddingHorizontal: spacing.md,
+			borderRadius: 8,
+			borderWidth: 1,
+			borderColor: colors.border,
+			marginBottom: spacing.sm,
+		},
+		modalButtonText: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			fontWeight: '500',
+		},
+
+		// Selected items display
+		selectedItemsList: {
+			gap: spacing.sm,
+			marginTop: spacing.xs,
+		},
+		selectedItemContainer: {
+			paddingVertical: spacing.sm,
+			paddingHorizontal: spacing.md,
+			backgroundColor: colors.surfaceSecondary,
+			borderRadius: 8,
+			borderWidth: 1,
+			borderColor: colors.border,
+		},
+		selectedItemHeader: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
+			marginBottom: spacing.xs,
+		},
+		selectedItemName: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			fontWeight: '600',
+			flex: 1,
+		},
+		selectedItemPrice: {
+			fontSize: responsive.getResponsiveFontSize(14),
+			fontWeight: '600',
+			marginLeft: spacing.sm,
+		},
+
 		// Add-ons Section
 		addonsContainer: {
 			marginBottom: spacing.lg,
