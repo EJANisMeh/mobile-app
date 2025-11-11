@@ -52,7 +52,9 @@ const PriceAdjustmentModal: React.FC<PriceAdjustmentModalProps> = ({
 		}
 
 		if (!reason.trim()) {
-			setError('Provide a reason for the adjustment to let the customer know of the price change')
+			setError(
+				'Provide a reason for the adjustment to let the customer know of the price change'
+			)
 			return
 		}
 
@@ -84,115 +86,115 @@ const PriceAdjustmentModal: React.FC<PriceAdjustmentModalProps> = ({
 						discounts or additional charges.
 					</Text>
 
-				{/* Current Total */}
-				<View style={styles.infoRow}>
-					<Text style={styles.label}>Current Total:</Text>
-					<Text style={styles.currentTotal}>₱{currentTotal.toFixed(2)}</Text>
-				</View>
+					{/* Current Total */}
+					<View style={styles.infoRow}>
+						<Text style={styles.label}>Current Total:</Text>
+						<Text style={styles.currentTotal}>₱{currentTotal.toFixed(2)}</Text>
+					</View>
 
-				{/* New Total Input */}
-				<View style={styles.inputContainer}>
-					<Text style={styles.inputLabel}>New Total Amount *</Text>
-					<View style={styles.inputWrapper}>
-						<Text style={styles.currencySymbol}>₱</Text>
+					{/* New Total Input */}
+					<View style={styles.inputContainer}>
+						<Text style={styles.inputLabel}>New Total Amount *</Text>
+						<View style={styles.inputWrapper}>
+							<Text style={styles.currencySymbol}>₱</Text>
+							<TextInput
+								style={styles.input}
+								value={newTotal}
+								onChangeText={(text) => {
+									setNewTotal(text)
+									setError(null)
+								}}
+								keyboardType="decimal-pad"
+								placeholder="0.00"
+								editable={!isProcessing}
+							/>
+						</View>
+					</View>
+
+					{/* Difference Display */}
+					{difference !== 0 && !isNaN(parseFloat(newTotal)) && (
+						<View
+							style={[
+								styles.differenceBox,
+								isDiscount ? styles.discountBox : styles.surchargeBox,
+							]}>
+							<MaterialCommunityIcons
+								name={isDiscount ? 'arrow-down-circle' : 'arrow-up-circle'}
+								size={20}
+								color={isDiscount ? '#4CAF50' : '#FF9800'}
+							/>
+							<Text
+								style={[
+									styles.differenceText,
+									isDiscount ? styles.discountText : styles.surchargeText,
+								]}>
+								{isDiscount ? 'Discount: ' : 'Surcharge: '}₱
+								{Math.abs(difference).toFixed(2)}
+							</Text>
+						</View>
+					)}
+
+					{/* Reason Input */}
+					<View style={styles.inputContainer}>
+						<Text style={styles.inputLabel}>Reason for Adjustment *</Text>
 						<TextInput
-							style={styles.input}
-							value={newTotal}
+							style={[styles.input, styles.textArea]}
+							value={reason}
 							onChangeText={(text) => {
-								setNewTotal(text)
+								setReason(text)
 								setError(null)
 							}}
-							keyboardType="decimal-pad"
-							placeholder="0.00"
+							placeholder={
+								isDiscount
+									? 'e.g., Closing soon discount, Loyalty discount'
+									: isSurcharge
+									? 'e.g., Extra fee for repeated violations'
+									: 'e.g., Price adjustment reason'
+							}
+							multiline
+							numberOfLines={3}
 							editable={!isProcessing}
 						/>
 					</View>
-				</View>
 
-				{/* Difference Display */}
-				{difference !== 0 && !isNaN(parseFloat(newTotal)) && (
-					<View
-						style={[
-							styles.differenceBox,
-							isDiscount ? styles.discountBox : styles.surchargeBox,
-						]}>
-						<MaterialCommunityIcons
-							name={isDiscount ? 'arrow-down-circle' : 'arrow-up-circle'}
-							size={20}
-							color={isDiscount ? '#4CAF50' : '#FF9800'}
-						/>
-						<Text
-							style={[
-								styles.differenceText,
-								isDiscount ? styles.discountText : styles.surchargeText,
-							]}>
-							{isDiscount ? 'Discount: ' : 'Surcharge: '}₱
-							{Math.abs(difference).toFixed(2)}
-						</Text>
-					</View>
-				)}
-
-				{/* Reason Input */}
-				<View style={styles.inputContainer}>
-					<Text style={styles.inputLabel}>Reason for Adjustment *</Text>
-					<TextInput
-						style={[styles.input, styles.textArea]}
-						value={reason}
-						onChangeText={(text) => {
-							setReason(text)
-							setError(null)
-						}}
-						placeholder={
-							isDiscount
-								? 'e.g., Closing soon discount, Loyalty discount'
-								: isSurcharge
-								? 'e.g., Extra fee for repeated violations'
-								: 'e.g., Price adjustment reason'
-						}
-						multiline
-						numberOfLines={3}
-						editable={!isProcessing}
-					/>
-				</View>
-
-				{/* Error Message */}
-				{error && (
-					<View style={styles.errorContainer}>
-						<MaterialCommunityIcons
-							name="alert-circle"
-							size={16}
-							color="#F44336"
-						/>
-						<Text style={styles.errorText}>{error}</Text>
-					</View>
-				)}
-
-				{/* Action Buttons */}
-				<View style={styles.buttonContainer}>
-					<TouchableOpacity
-						style={styles.cancelButton}
-						onPress={onClose}
-						disabled={isProcessing}>
-						<Text style={styles.cancelButtonText}>Cancel</Text>
-					</TouchableOpacity>
-
-					<TouchableOpacity
-						style={[
-							styles.confirmButton,
-							isProcessing && styles.confirmButtonDisabled,
-						]}
-						onPress={handleConfirm}
-						disabled={isProcessing}>
-						{isProcessing ? (
-							<ActivityIndicator
-								color="#fff"
-								size="small"
+					{/* Error Message */}
+					{error && (
+						<View style={styles.errorContainer}>
+							<MaterialCommunityIcons
+								name="alert-circle"
+								size={16}
+								color="#F44336"
 							/>
-						) : (
-							<Text style={styles.confirmButtonText}>Apply Adjustment</Text>
-						)}
-					</TouchableOpacity>
-				</View>
+							<Text style={styles.errorText}>{error}</Text>
+						</View>
+					)}
+
+					{/* Action Buttons */}
+					<View style={styles.buttonContainer}>
+						<TouchableOpacity
+							style={styles.cancelButton}
+							onPress={onClose}
+							disabled={isProcessing}>
+							<Text style={styles.cancelButtonText}>Cancel</Text>
+						</TouchableOpacity>
+
+						<TouchableOpacity
+							style={[
+								styles.confirmButton,
+								isProcessing && styles.confirmButtonDisabled,
+							]}
+							onPress={handleConfirm}
+							disabled={isProcessing}>
+							{isProcessing ? (
+								<ActivityIndicator
+									color="#fff"
+									size="small"
+								/>
+							) : (
+								<Text style={styles.confirmButtonText}>Apply Adjustment</Text>
+							)}
+						</TouchableOpacity>
+					</View>
 				</View>
 			</ScrollView>
 		</BaseModal>

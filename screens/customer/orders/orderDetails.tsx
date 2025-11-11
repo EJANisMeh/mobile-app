@@ -285,8 +285,7 @@ const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = () => {
 	}
 
 	return (
-		<DynamicKeyboardView
-			style={styles.container}>
+		<DynamicKeyboardView style={styles.container}>
 			<ScrollView
 				style={styles.scrollView}
 				contentContainerStyle={styles.scrollContent}
