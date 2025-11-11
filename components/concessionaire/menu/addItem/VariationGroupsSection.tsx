@@ -222,22 +222,22 @@ const VariationGroupsSection: React.FC<VariationGroupsSectionProps> = ({
 							showAlert={showAlert}
 							handleUpdateVariationGroup={handleUpdateVariationGroup}
 						/>
-				)}
-
-				{/* Specificity Toggle - Hidden for category modes */}
-				{group.mode !== 'single-category' &&
-					group.mode !== 'multi-category' && (
-						<VariationSpecificity
-							groupIndex={groupIndex}
-							group={group}
-							showAlert={showAlert}
-							handleUpdateVariationGroup={handleUpdateVariationGroup}
-						/>
 					)}
 
-				{/* Custom Options (for custom mode only) */}
-				{group.mode === 'custom' && (
-					<VariationCustomOptions
+					{/* Specificity Toggle - Hidden for category modes */}
+					{group.mode !== 'single-category' &&
+						group.mode !== 'multi-category' && (
+							<VariationSpecificity
+								groupIndex={groupIndex}
+								group={group}
+								showAlert={showAlert}
+								handleUpdateVariationGroup={handleUpdateVariationGroup}
+							/>
+						)}
+
+					{/* Custom Options (for custom mode only) */}
+					{group.mode === 'custom' && (
+						<VariationCustomOptions
 							formData={formData}
 							setFormData={setFormData}
 							groupIndex={groupIndex}
