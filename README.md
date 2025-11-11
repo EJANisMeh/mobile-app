@@ -19,3 +19,13 @@ npm run server
 
 terminal 2:
 npm start
+
+
+Database setup for local pgAdmin:
+right click database table
+open psql tool
+link console the exported database file to console: 
+``
+\i /[path to file]
+``
+Make sure username to be used by the app is in the login roles. If not add it.
