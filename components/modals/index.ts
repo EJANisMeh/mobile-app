@@ -10,3 +10,4 @@ export {
 	CheckboxMenuOption,
 } from './CheckboxMenuModal'
 export { default as PriceAdjustmentWarningModal } from './PriceAdjustmentWarningModal'
+export { default as PriceAdjustmentModal } from './PriceAdjustmentModal'

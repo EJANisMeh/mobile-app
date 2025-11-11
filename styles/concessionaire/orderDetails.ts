@@ -303,5 +303,21 @@ export const createConcessionaireOrderDetailsStyles = (
 			color: colors.textSecondary,
 			fontStyle: 'italic' as const,
 		},
+
+		// Price Adjustment Button
+		priceAdjustmentButton: {
+			backgroundColor: colors.primary,
+			paddingVertical: spacing.md,
+			paddingHorizontal: spacing.lg,
+			borderRadius: 8,
+			alignItems: 'center' as const,
+			justifyContent: 'center' as const,
+			marginBottom: spacing.md,
+		},
+		priceAdjustmentButtonText: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			fontWeight: '600' as const,
+			color: '#fff',
+		},
 	})
 }

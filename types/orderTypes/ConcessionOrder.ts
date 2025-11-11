@@ -14,6 +14,8 @@ export interface ConcessionOrder {
 	concessionId: number | null
 	concession_order_number: number | null
 	total: number
+	original_total: number | null
+	price_adjustment_reason: string | null
 	payment_mode: PaymentMode | null
 	payment_proof: any
 	orderMode: 'now' | 'scheduled'

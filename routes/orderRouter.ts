@@ -8,6 +8,7 @@ import {
 	updatePaymentProof,
 	cancelOrder,
 	rescheduleOrder,
+	adjustOrderPrice,
 } from '../backend/order'
 
 const router = express.Router()
@@ -20,5 +21,6 @@ router.put('/status/:orderId', updateOrderStatus)
 router.put('/payment-proof/:orderId', updatePaymentProof)
 router.put('/cancel/:orderId', cancelOrder)
 router.put('/reschedule/:orderId', rescheduleOrder)
+router.put('/adjust-price/:orderId', adjustOrderPrice)
 
 export default router

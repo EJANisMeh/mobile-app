@@ -20,6 +20,7 @@ import {
 	ConfirmationModal,
 	FeedbackInputModal,
 	RescheduleModal,
+	PriceAdjustmentModal,
 } from '../../../components/modals'
 import { useThemeContext, useAuthContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
@@ -50,6 +51,8 @@ const OrderDetailsScreen: React.FC = () => {
 	const [markReadyModalVisible, setMarkReadyModalVisible] = useState(false)
 	const [cancelOrderModalVisible, setCancelOrderModalVisible] = useState(false)
 	const [markCompleteModalVisible, setMarkCompleteModalVisible] =
+		useState(false)
+	const [priceAdjustmentModalVisible, setPriceAdjustmentModalVisible] =
 		useState(false)
 
 	const orderId = route.params?.orderId
@@ -359,6 +362,52 @@ const OrderDetailsScreen: React.FC = () => {
 		}
 	}
 
+	const handlePriceAdjustment = () => {
+		if (!order) {
+			return
+		}
+		setPriceAdjustmentModalVisible(true)
+	}
+
+	const handlePriceAdjustmentConfirm = async (
+		newTotal: number,
+		reason: string
+	) => {
+		if (!order) {
+			return
+		}
+
+		setProcessing(true)
+		try {
+			const response = await orderApi.adjustOrderPrice(
+				order.id,
+				newTotal,
+				reason
+			)
+
+			if (response.success) {
+				setPriceAdjustmentModalVisible(false)
+				alertModal.showAlert({
+					title: 'Success',
+					message: 'Order price adjusted successfully',
+				})
+				setTimeout(() => {
+					void loadOrderDetails()
+				}, 1500)
+			} else {
+				throw new Error(response.error || 'Failed to adjust order price')
+			}
+		} catch (err) {
+			console.error('Adjust price error:', err)
+			alertModal.showAlert({
+				title: 'Error',
+				message: 'Failed to adjust order price. Please try again.',
+			})
+		} finally {
+			setProcessing(false)
+		}
+	}
+
 	const canManageOrder =
 		order?.order_statuses?.code === ORDER_STATUS_CODES.PENDING
 
@@ -468,6 +517,44 @@ const OrderDetailsScreen: React.FC = () => {
 					formatDate={formatDate}
 					styles={styles}
 				/>
+
+				{/* Price Adjustment Section */}
+				{order.original_total && order.price_adjustment_reason && (
+					<View style={styles.section}>
+						<Text style={styles.sectionTitle}>Price Adjustment</Text>
+						<View style={styles.detailRow}>
+							<Text style={styles.detailLabel}>Original Total:</Text>
+							<Text style={styles.detailValue}>
+								{formatCurrency(Number(order.original_total))}
+							</Text>
+						</View>
+						<View style={styles.detailRow}>
+							<Text style={styles.detailLabel}>Adjusted Total:</Text>
+							<Text style={[styles.detailValue, { fontWeight: 'bold' }]}>
+								{formatCurrency(Number(order.total))}
+							</Text>
+						</View>
+						<View style={styles.detailRow}>
+							<Text style={styles.detailLabel}>Reason:</Text>
+							<Text style={[styles.detailValue, { flex: 1, textAlign: 'right' }]}>
+								{order.price_adjustment_reason}
+							</Text>
+						</View>
+					</View>
+				)}
+
+				{/* Price Adjustment Button - only show for certain statuses */}
+				{(order.order_statuses?.code === ORDER_STATUS_CODES.PENDING ||
+					order.order_statuses?.code === ORDER_STATUS_CODES.CONFIRMED) && (
+					<TouchableOpacity
+						style={styles.priceAdjustmentButton}
+						onPress={handlePriceAdjustment}
+						disabled={processing}>
+						<Text style={styles.priceAdjustmentButtonText}>
+							Adjust Price
+						</Text>
+					</TouchableOpacity>
+				)}
 
 				{/* Payment Information */}
 				<PaymentInformationSection
@@ -581,6 +668,14 @@ const OrderDetailsScreen: React.FC = () => {
 				confirmStyle="default"
 				placeholder="e.g., Thank you for your order!"
 				required={false}
+				isProcessing={processing}
+			/>
+
+			<PriceAdjustmentModal
+				visible={priceAdjustmentModalVisible}
+				onClose={() => setPriceAdjustmentModalVisible(false)}
+				onConfirm={handlePriceAdjustmentConfirm}
+				currentTotal={Number(order?.total || 0)}
 				isProcessing={processing}
 			/>
 		</DynamicKeyboardView>

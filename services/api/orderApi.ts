@@ -128,4 +128,22 @@ export const orderApi = {
 			headers: token ? { Authorization: `Bearer ${token}` } : {},
 		})
 	},
+
+	adjustOrderPrice: async (
+		orderId: number,
+		newTotal: number,
+		reason: string
+	): Promise<{ success: boolean; message?: string; error?: string }> => {
+		const token = await AsyncStorage.getItem('authToken')
+
+		return await apiCall<{
+			success: boolean
+			message?: string
+			error?: string
+		}>(`/orders/adjust-price/${orderId}`, {
+			method: 'PUT',
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+			body: JSON.stringify({ newTotal, reason }),
+		})
+	},
 }

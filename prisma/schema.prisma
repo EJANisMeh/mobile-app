@@ -98,11 +98,14 @@ model Order {
   concessionId          Int?           @map("concession_id")
   concession_order_number Int?         @map("concession_order_number")
   total                 Decimal        @db.Decimal(12, 2)
+  original_total        Decimal?       @db.Decimal(12, 2)
+  price_adjustment_reason String?
   payment_mode          Json?          @default("{}")
   payment_proof         Json?
   orderMode             String         @default("now") @map("order_mode") @db.VarChar(20)
   scheduledFor          DateTime?      @map("scheduled_for") @db.Timestamptz(6)
   status_id             Int
+  concession_note       String?
   createdAt             DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt             DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
   orderItems            OrderItem[]
