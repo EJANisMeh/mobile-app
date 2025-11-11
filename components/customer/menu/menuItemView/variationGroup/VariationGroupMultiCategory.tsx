@@ -258,7 +258,30 @@ const VariationGroupMultiCategory: React.FC<
 
 			<TouchableOpacity
 				style={styles.categoryBackButton}
-				onPress={() => setSelectedCategoryId(null)}>
+				onPress={() => {
+					// Deselect all items from current category before going back
+					setVariationSelections((prev) => {
+						const newMap = new Map(prev)
+						const currentSelection = newMap.get(group.id)
+
+						if (!currentSelection) return prev
+
+						// Filter out options that belong to the current category
+						currentSelection.selectedOptions =
+							currentSelection.selectedOptions.filter(
+								(opt) =>
+									!currentCategoryItems.some(
+										(item) => item.id === opt.menuItemId
+									)
+							)
+
+						newMap.set(group.id, currentSelection)
+						return newMap
+					})
+
+					// Go back to category selection
+					setSelectedCategoryId(null)
+				}}>
 				<Text style={styles.categoryBackButtonText}>
 					← Back to categories (Current: {selectedCategory?.name})
 				</Text>
