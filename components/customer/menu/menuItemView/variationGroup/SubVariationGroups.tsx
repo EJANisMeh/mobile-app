@@ -32,7 +32,9 @@ interface SubVariationGroupsProps {
 	menuItemName: string
 	subVariationGroups: SubVariationGroup[]
 	subVariationSelections: Map<number, VariationSelection>
-	setSubVariationSelections: Dispatch<SetStateAction<Map<number, VariationSelection>>>
+	setSubVariationSelections: Dispatch<
+		SetStateAction<Map<number, VariationSelection>>
+	>
 }
 
 const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
@@ -134,7 +136,8 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 		const formatPrice = (price: number | string) => {
 			const numPrice = typeof price === 'string' ? parseFloat(price) : price
 			if (numPrice === 0 || !Number.isFinite(numPrice)) return ''
-			const displayPrice = numPrice > 0 ? `+₱${numPrice.toFixed(2)}` : `₱${numPrice.toFixed(2)}`
+			const displayPrice =
+				numPrice > 0 ? `+₱${numPrice.toFixed(2)}` : `₱${numPrice.toFixed(2)}`
 			return displayPrice
 		}
 

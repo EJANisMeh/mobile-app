@@ -82,7 +82,7 @@ const VariationGroupCustom: React.FC<VariationGroupCustomProps> = ({
 						const subVariationGroupsToShow = menuItemRef.variationGroups.filter(
 							(subGroup: any) => subGroup.specificity === false
 						)
-						
+
 						subVariationGroupsToShow.forEach((subGroup: any) => {
 							const selectionTypeCode =
 								subGroup.selection_types?.code || 'single_required'
@@ -147,7 +147,7 @@ const VariationGroupCustom: React.FC<VariationGroupCustomProps> = ({
 						const subVariationGroupsToShow = menuItemRef.variationGroups.filter(
 							(subGroup: any) => subGroup.specificity === false
 						)
-						
+
 						subVariationGroupsToShow.forEach((subGroup: any) => {
 							const selectionTypeCode =
 								subGroup.selection_types?.code || 'single_required'
@@ -285,12 +285,18 @@ const VariationGroupCustom: React.FC<VariationGroupCustomProps> = ({
 								isExistingMode &&
 								menuItemRef &&
 								menuItemRef.variationGroups &&
-								menuItemRef.variationGroups.filter((g: any) => g.specificity === false).length > 0 && (
+								menuItemRef.variationGroups.filter(
+									(g: any) => g.specificity === false
+								).length > 0 && (
 									<SubVariationGroups
 										menuItemId={menuItemRef.id}
 										menuItemName={menuItemRef.name}
-										subVariationGroups={menuItemRef.variationGroups.filter((g: any) => g.specificity === false)}
-										subVariationSelections={selectedOption.subVariationSelections}
+										subVariationGroups={menuItemRef.variationGroups.filter(
+											(g: any) => g.specificity === false
+										)}
+										subVariationSelections={
+											selectedOption.subVariationSelections
+										}
 										setSubVariationSelections={(updater) => {
 											setVariationSelections((prev) => {
 												const newMap = new Map(prev)

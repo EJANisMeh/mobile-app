@@ -133,9 +133,10 @@ const VariationGroupMultiCategory: React.FC<
 						const subVariationGroupsToShow = menuItem.variationGroups.filter(
 							(subGroup: any) => subGroup.specificity === false
 						)
-						
+
 						subVariationGroupsToShow.forEach((subGroup: any) => {
-							const selectionTypeCode = subGroup.selection_types?.code || 'single_required'
+							const selectionTypeCode =
+								subGroup.selection_types?.code || 'single_required'
 							subVariationSelections.set(subGroup.id, {
 								groupId: subGroup.id,
 								groupName: subGroup.name,
@@ -154,7 +155,10 @@ const VariationGroupMultiCategory: React.FC<
 							priceAdjustment: 0, // Keep priceAdjustment for backward compatibility
 							menuItemId: menuItem.id,
 							menuItemBasePrice: adjustedPrice, // Use adjusted price with category adjustment
-							subVariationSelections: subVariationSelections.size > 0 ? subVariationSelections : undefined,
+							subVariationSelections:
+								subVariationSelections.size > 0
+									? subVariationSelections
+									: undefined,
 						},
 					]
 				}
@@ -183,9 +187,10 @@ const VariationGroupMultiCategory: React.FC<
 						const subVariationGroupsToShow = menuItem.variationGroups.filter(
 							(subGroup: any) => subGroup.specificity === false
 						)
-						
+
 						subVariationGroupsToShow.forEach((subGroup: any) => {
-							const selectionTypeCode = subGroup.selection_types?.code || 'single_required'
+							const selectionTypeCode =
+								subGroup.selection_types?.code || 'single_required'
 							subVariationSelections.set(subGroup.id, {
 								groupId: subGroup.id,
 								groupName: subGroup.name,
@@ -205,7 +210,10 @@ const VariationGroupMultiCategory: React.FC<
 							priceAdjustment: 0, // Keep priceAdjustment for backward compatibility
 							menuItemId: menuItem.id,
 							menuItemBasePrice: adjustedPrice, // Use adjusted price with category adjustment
-							subVariationSelections: subVariationSelections.size > 0 ? subVariationSelections : undefined,
+							subVariationSelections:
+								subVariationSelections.size > 0
+									? subVariationSelections
+									: undefined,
 						},
 					]
 				}
@@ -382,12 +390,18 @@ const VariationGroupMultiCategory: React.FC<
 								{isSelected &&
 									selectedOption?.subVariationSelections &&
 									menuItem.variationGroups &&
-									menuItem.variationGroups.filter((g: any) => g.specificity === false).length > 0 && (
+									menuItem.variationGroups.filter(
+										(g: any) => g.specificity === false
+									).length > 0 && (
 										<SubVariationGroups
 											menuItemId={menuItem.id}
 											menuItemName={menuItem.name}
-											subVariationGroups={menuItem.variationGroups.filter((g: any) => g.specificity === false)}
-											subVariationSelections={selectedOption.subVariationSelections}
+											subVariationGroups={menuItem.variationGroups.filter(
+												(g: any) => g.specificity === false
+											)}
+											subVariationSelections={
+												selectedOption.subVariationSelections
+											}
 											setSubVariationSelections={(updater) => {
 												setVariationSelections((prev) => {
 													const newMap = new Map(prev)
