@@ -35,7 +35,10 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 
 	// Load categories if any variation group needs them
 	useEffect(() => {
-		console.log('🔍 [MenuItemVariations] Total variation groups:', variationGroups.length)
+		console.log(
+			'🔍 [MenuItemVariations] Total variation groups:',
+			variationGroups.length
+		)
 		variationGroups.forEach((group, index) => {
 			console.log(`📦 [MenuItemVariations] Group ${index + 1}:`, {
 				id: group.id,
@@ -54,17 +57,25 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 		)
 
 		if (needsCategories && concessionId) {
-			console.log('📂 [MenuItemVariations] Loading categories for multi-category filter...')
+			console.log(
+				'📂 [MenuItemVariations] Loading categories for multi-category filter...'
+			)
 			setLoadingCategories(true)
 			apiCall(`/category/get?concessionId=${concessionId}`)
 				.then((data: any) => {
 					if (data.success && data.categories) {
-						console.log('✅ [MenuItemVariations] Categories loaded:', data.categories.length)
+						console.log(
+							'✅ [MenuItemVariations] Categories loaded:',
+							data.categories.length
+						)
 						setCategories(data.categories)
 					}
 				})
 				.catch((error) => {
-					console.error('❌ [MenuItemVariations] Failed to load categories:', error)
+					console.error(
+						'❌ [MenuItemVariations] Failed to load categories:',
+						error
+					)
 				})
 				.finally(() => {
 					setLoadingCategories(false)
@@ -78,11 +89,15 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 			{variationGroups.map((group) => {
 				const selection = variationSelections.get(group.id)
 				if (!selection) {
-					console.log(`⚠️ [MenuItemVariations] No selection found for group ${group.id} (${group.name})`)
+					console.log(
+						`⚠️ [MenuItemVariations] No selection found for group ${group.id} (${group.name})`
+					)
 					return null
 				}
 
-				console.log(`🎯 [MenuItemVariations] Rendering group ${group.id} (${group.name}) with kind: ${group.kind}`)
+				console.log(
+					`🎯 [MenuItemVariations] Rendering group ${group.id} (${group.name}) with kind: ${group.kind}`
+				)
 
 				// Route to different components based on kind
 				if (group.kind === 'group') {

@@ -50,19 +50,28 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 
 	const [expanded, setExpanded] = useState(false)
 
-	console.log(`🎨 [SubVariationGroups] Component rendered for menu item ${menuItemId} (${menuItemName}):`)
-	console.log(`  - subVariationGroups count: ${subVariationGroups?.length || 0}`)
-	console.log(`  - subVariationSelections Map size: ${subVariationSelections?.size || 0}`)
+	console.log(
+		`🎨 [SubVariationGroups] Component rendered for menu item ${menuItemId} (${menuItemName}):`
+	)
+	console.log(
+		`  - subVariationGroups count: ${subVariationGroups?.length || 0}`
+	)
+	console.log(
+		`  - subVariationSelections Map size: ${subVariationSelections?.size || 0}`
+	)
 	console.log(`  - expanded: ${expanded}`)
-	
+
 	if (subVariationGroups && subVariationGroups.length > 0) {
-		console.log(`  - Subvariation groups:`, subVariationGroups.map(g => ({
-			id: g.id,
-			name: g.name,
-			kind: g.kind,
-			specificity: g.specificity,
-			optionsCount: g.menu_item_variation_option_choices?.length || 0
-		})))
+		console.log(
+			`  - Subvariation groups:`,
+			subVariationGroups.map((g) => ({
+				id: g.id,
+				name: g.name,
+				kind: g.kind,
+				specificity: g.specificity,
+				optionsCount: g.menu_item_variation_option_choices?.length || 0,
+			}))
+		)
 	}
 
 	if (!subVariationGroups || subVariationGroups.length === 0) {
@@ -136,8 +145,10 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 	}
 
 	const renderSubVariationGroup = (group: SubVariationGroup) => {
-		console.log(`  📦 [SubVariationGroups] Rendering subvariation group ${group.id} (${group.name}):`)
-		
+		console.log(
+			`  📦 [SubVariationGroups] Rendering subvariation group ${group.id} (${group.name}):`
+		)
+
 		const selectionTypeCode = group.selection_types?.code || 'single_required'
 		const isSingleType =
 			selectionTypeCode === 'single_required' ||
@@ -149,7 +160,9 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 		const multiLimit = group.multi_limit || 0
 
 		console.log(`    - selectionTypeCode: ${selectionTypeCode}`)
-		console.log(`    - isSingleType: ${isSingleType}, isRequired: ${isRequired}`)
+		console.log(
+			`    - isSingleType: ${isSingleType}, isRequired: ${isRequired}`
+		)
 		console.log(`    - multiLimit: ${multiLimit}`)
 
 		const selection = subVariationSelections.get(group.id)
@@ -162,7 +175,7 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 				id: options[0].id,
 				name: options[0].name,
 				price_adjustment: options[0].price_adjustment,
-				availability: options[0].availability
+				availability: options[0].availability,
 			})
 		}
 
@@ -273,15 +286,19 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 		)
 	}
 
-	console.log(`  🎯 [SubVariationGroups] About to render toggle header (expanded: ${expanded})`)
-	
+	console.log(
+		`  🎯 [SubVariationGroups] About to render toggle header (expanded: ${expanded})`
+	)
+
 	return (
 		<View style={styles.variationsContainer}>
 			<TouchableOpacity
 				style={styles.variationGroupHeader}
 				onPress={() => {
 					const newExpanded = !expanded
-					console.log(`  🔄 [SubVariationGroups] Toggling expanded state: ${expanded} → ${newExpanded}`)
+					console.log(
+						`  🔄 [SubVariationGroups] Toggling expanded state: ${expanded} → ${newExpanded}`
+					)
 					setExpanded(newExpanded)
 				}}>
 				<Ionicons
@@ -297,7 +314,9 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 
 			{expanded ? (
 				<>
-					{console.log(`  📋 [SubVariationGroups] Expanded view - rendering ${subVariationGroups.length} groups`)}
+					{console.log(
+						`  📋 [SubVariationGroups] Expanded view - rendering ${subVariationGroups.length} groups`
+					)}
 					<View style={styles.optionsList}>
 						{subVariationGroups.map(renderSubVariationGroup)}
 					</View>

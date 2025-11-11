@@ -103,15 +103,15 @@ export const getItemById = async (
 						},
 					})
 
-			// If parent group specificity is true, load variation groups with specificity: false for each menu item (subvariations - 1 level deep only)
-			if (group.specificity) {
-					for (const item of categoryMenuItems) {
-						const subVariations =
-							await prisma.menu_item_variation_groups.findMany({
-								where: {
-									menu_item_id: item.id,
-									specificity: false, // Only load variations that should be shown when used as options (specificity: false)
-								},
+					// If parent group specificity is true, load variation groups with specificity: false for each menu item (subvariations - 1 level deep only)
+					if (group.specificity) {
+						for (const item of categoryMenuItems) {
+							const subVariations =
+								await prisma.menu_item_variation_groups.findMany({
+									where: {
+										menu_item_id: item.id,
+										specificity: false, // Only load variations that should be shown when used as options (specificity: false)
+									},
 									include: {
 										menu_item_variation_option_choices: {
 											orderBy: {
@@ -164,17 +164,17 @@ export const getItemById = async (
 						orderBy: {
 							name: 'asc',
 						},
-				})
+					})
 
-				// If parent group specificity is true, load variation groups with specificity: false for each menu item (subvariations - 1 level deep only)
-				if (group.specificity) {
-					for (const item of categoryMenuItems) {
-						const subVariations =
-							await prisma.menu_item_variation_groups.findMany({
-								where: {
-									menu_item_id: item.id,
-									specificity: false, // Only load variations that should be shown when used as options (specificity: false)
-								},
+					// If parent group specificity is true, load variation groups with specificity: false for each menu item (subvariations - 1 level deep only)
+					if (group.specificity) {
+						for (const item of categoryMenuItems) {
+							const subVariations =
+								await prisma.menu_item_variation_groups.findMany({
+									where: {
+										menu_item_id: item.id,
+										specificity: false, // Only load variations that should be shown when used as options (specificity: false)
+									},
 									include: {
 										menu_item_variation_option_choices: {
 											orderBy: {
@@ -223,17 +223,17 @@ export const getItemById = async (
 								basePrice: true,
 								availability: true,
 							},
-					})
+						})
 
-					// If parent group specificity is true, load variation groups with specificity: false for each menu item (subvariations - 1 level deep only)
-					if (group.specificity) {
-						for (const item of referencedMenuItems) {
-							const subVariations =
-								await prisma.menu_item_variation_groups.findMany({
-									where: {
-										menu_item_id: item.id,
-										specificity: false, // Only load variations that should be shown when used as options (specificity: false)
-									},
+						// If parent group specificity is true, load variation groups with specificity: false for each menu item (subvariations - 1 level deep only)
+						if (group.specificity) {
+							for (const item of referencedMenuItems) {
+								const subVariations =
+									await prisma.menu_item_variation_groups.findMany({
+										where: {
+											menu_item_id: item.id,
+											specificity: false, // Only load variations that should be shown when used as options (specificity: false)
+										},
 										include: {
 											menu_item_variation_option_choices: {
 												orderBy: {
