@@ -192,6 +192,17 @@ const EditMenuItemScreen: React.FC = () => {
 									isDefault: option.is_default ?? false,
 									position: option.position ?? 0,
 							  }))
+							: groupMode === 'existing'
+							? optionChoices.map((option) => ({
+									name: option.name || '',
+									priceAdjustment:
+										option.price_adjustment != null
+											? option.price_adjustment.toString()
+											: '0',
+									availability: option.availability ?? true,
+									isDefault: option.is_default ?? false,
+									position: option.position ?? 0,
+							  }))
 							: []
 					const existingMenuItemIds =
 						groupMode === 'existing'

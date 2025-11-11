@@ -205,14 +205,26 @@ export const addItem = async (req: express.Request, res: express.Response) => {
 							const referenced = await tx.menuItem.findMany({
 								where: { id: { in: ids } },
 							})
-							for (const ref of referenced) {
+							// Map to preserve order and position from form data
+							for (let i = 0; i < ids.length; i++) {
+								const menuItemId = ids[i]
+								const ref = referenced.find((r) => r.id === menuItemId)
+								if (!ref) continue
+
+								// Get price adjustment from group.options if available
+								const priceAdjustment =
+									group.options && group.options[i]
+										? parseFloat(group.options[i].priceAdjustment || '0')
+										: 0
+
 								await tx.menu_item_variation_option_choices.create({
 									data: {
 										group_id: createdGroup.id,
+										code: `item_${ref.id}`, // Store menu item ID in code field
 										name: ref.name,
-										price_adjustment: 0,
+										price_adjustment: priceAdjustment,
 										is_default: false,
-										position: 0,
+										position: i,
 										availability: true,
 									},
 								})

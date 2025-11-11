@@ -178,12 +178,18 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 						})
 
 						if (menuItem) {
+						// Get price adjustment from group.options if available
+						const priceAdjustment =
+							group.options && group.options[i]
+								? parseFloat(group.options[i].priceAdjustment || '0')
+								: 0
+
 							await prisma.menu_item_variation_option_choices.create({
 								data: {
 									group_id: createdGroup.id,
 									code: `item_${menuItemId}`,
 									name: menuItem.name,
-									price_adjustment: menuItem.basePrice,
+									price_adjustment: priceAdjustment,
 									availability: menuItem.availability,
 									is_default: false,
 									position: i,
@@ -266,3 +272,4 @@ export const editItem = async (req: express.Request, res: express.Response) => {
 		})
 	}
 }
+

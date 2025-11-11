@@ -103,6 +103,31 @@ export const getItemById = async (
 						},
 					})
 
+					// If specificity is false, load variation groups for each menu item (subvariations - 1 level deep only)
+					if (!group.specificity) {
+						for (const item of categoryMenuItems) {
+							const subVariations =
+								await prisma.menu_item_variation_groups.findMany({
+									where: {
+										menu_item_id: item.id,
+										specificity: true, // Only load variations that should be shown when used as options
+									},
+									include: {
+										menu_item_variation_option_choices: {
+											orderBy: {
+												position: 'asc',
+											},
+										},
+										selection_types: true,
+									},
+									orderBy: {
+										position: 'asc',
+									},
+								})
+							;(item as any).variationGroups = subVariations
+						}
+					}
+
 					// Attach the menu items as a custom property
 					;(group as any).categoryMenuItems = categoryMenuItems
 				}
@@ -141,8 +166,93 @@ export const getItemById = async (
 						},
 					})
 
+					// If specificity is false, load variation groups for each menu item (subvariations - 1 level deep only)
+					if (!group.specificity) {
+						for (const item of categoryMenuItems) {
+							const subVariations =
+								await prisma.menu_item_variation_groups.findMany({
+									where: {
+										menu_item_id: item.id,
+										specificity: true, // Only load variations that should be shown when used as options
+									},
+									include: {
+										menu_item_variation_option_choices: {
+											orderBy: {
+												position: 'asc',
+											},
+										},
+										selection_types: true,
+									},
+									orderBy: {
+										position: 'asc',
+									},
+								})
+							;(item as any).variationGroups = subVariations
+						}
+					}
+
 					// Attach the menu items as a custom property
 					;(group as any).categoryMenuItems = categoryMenuItems
+				}
+				// Handle existing items mode
+				else if (group.kind === 'existing_items') {
+					// Get menu item IDs from option choices
+					const existingItemOptions =
+						group.menu_item_variation_option_choices || []
+					const menuItemIds = existingItemOptions
+						.map((option) => {
+							if (!option.code) return null
+							const match = option.code.match(/item_(\d+)/)
+							if (!match) return null
+							const parsed = parseInt(match[1], 10)
+							return Number.isNaN(parsed) ? null : parsed
+						})
+						.filter((id): id is number => id !== null)
+
+					if (menuItemIds.length > 0) {
+						// Fetch the referenced menu items
+						const referencedMenuItems = await prisma.menuItem.findMany({
+							where: {
+								id: {
+									in: menuItemIds,
+								},
+							},
+							select: {
+								id: true,
+								name: true,
+								basePrice: true,
+								availability: true,
+							},
+						})
+
+						// If specificity is false, load variation groups for each menu item (subvariations - 1 level deep only)
+						if (!group.specificity) {
+							for (const item of referencedMenuItems) {
+								const subVariations =
+									await prisma.menu_item_variation_groups.findMany({
+										where: {
+											menu_item_id: item.id,
+											specificity: true, // Only load variations that should be shown when used as options
+										},
+										include: {
+											menu_item_variation_option_choices: {
+												orderBy: {
+													position: 'asc',
+												},
+											},
+											selection_types: true,
+										},
+										orderBy: {
+											position: 'asc',
+										},
+									})
+								;(item as any).variationGroups = subVariations
+							}
+						}
+
+						// Attach the menu items as a custom property
+						;(group as any).existingMenuItems = referencedMenuItems
+					}
 				}
 			}
 		}
