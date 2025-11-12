@@ -1,5 +1,6 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, Image, TouchableOpacity } from 'react-native'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 import {
 	DynamicKeyboardView,
 	DynamicScrollView,
@@ -7,56 +8,114 @@ import {
 } from '../../../components'
 import { useAuthContext, useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
+import { useConcessionaireNavigation } from '../../../hooks/useNavigation'
 import { createConcessionaireProfileStyles } from '../../../styles/concessionaire'
 
 const ProfileScreen: React.FC = () => {
 	const { user, isLoading, error, logout } = useAuthContext()
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
+	const navigation = useConcessionaireNavigation()
 	const concessionaireProfileStyles = createConcessionaireProfileStyles(
 		colors,
 		responsive
 	)
 
+	const handleEditAccount = () => {
+		navigation.navigate('AccountDetails')
+	}
+
+	// Parse contact details
+	const contactDetails = user?.contact_details
+		? Array.isArray(user.contact_details)
+			? user.contact_details
+			: []
+		: []
+
 	return (
 		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={concessionaireProfileStyles.profileContainer}
-				autoCenter={false}>
+				autoCenter={"center"}>
 				<View style={concessionaireProfileStyles.profileContent}>
-					<Text style={concessionaireProfileStyles.profileTitle}>
-						Concessionaire Profile
-					</Text>
+					{/* Profile Header */}
+					<View style={concessionaireProfileStyles.profileHeader}>
+						{/* Profile Image */}
+						<View style={concessionaireProfileStyles.profileImageContainer}>
+							{user?.image_url ? (
+								<Image
+									source={{ uri: user.image_url }}
+									style={concessionaireProfileStyles.profileImage}
+								/>
+							) : (
+								<MaterialCommunityIcons
+									name="account-circle"
+									size={120}
+									color={colors.textSecondary}
+								/>
+							)}
+						</View>
 
-					{/* User Information */}
+						{/* Name and Email */}
+						{user && (
+							<>
+								<Text style={concessionaireProfileStyles.profileName}>
+									{user.fname} {user.lname}
+								</Text>
+								<Text style={concessionaireProfileStyles.profileEmail}>
+									{user.email}
+								</Text>
+							</>
+						)}
+
+						{/* Edit Button */}
+						<View style={concessionaireProfileStyles.editButtonContainer}>
+							<TouchableOpacity
+								style={concessionaireProfileStyles.editButton}
+								onPress={handleEditAccount}>
+								<MaterialCommunityIcons
+									name="account-edit"
+									size={24}
+									color={colors.background}
+								/>
+							</TouchableOpacity>
+						</View>
+					</View>
+
+					{/* Contact Information */}
 					{user && (
 						<View style={concessionaireProfileStyles.userInfo}>
-							<Text style={concessionaireProfileStyles.infoLabel}>Name:</Text>
-							<Text style={concessionaireProfileStyles.infoValue}>
-								{user.fname} {user.lname}
+							<Text style={concessionaireProfileStyles.sectionTitle}>
+								Contact Information
 							</Text>
 
-							<Text style={concessionaireProfileStyles.infoLabel}>Email:</Text>
-							<Text style={concessionaireProfileStyles.infoValue}>
-								{user.email}
-							</Text>
-
-							<Text style={concessionaireProfileStyles.infoLabel}>Role:</Text>
-							<Text style={concessionaireProfileStyles.infoValue}>
-								{user.role}
-							</Text>
-
-							<Text style={concessionaireProfileStyles.infoLabel}>
-								Concession ID:
-							</Text>
-							<Text style={concessionaireProfileStyles.infoValue}>
-								{user.concession_id || 'Not assigned'}
-							</Text>
-
-							<Text style={concessionaireProfileStyles.infoLabel}>Status:</Text>
-							<Text style={concessionaireProfileStyles.infoValue}>
-								{user.emailVerified ? 'Verified' : 'Unverified'}
-							</Text>
+							{contactDetails.length > 0 ? (
+								contactDetails.map((contact: any, index: number) => (
+									<View
+										key={index}
+										style={concessionaireProfileStyles.contactItem}>
+										<MaterialCommunityIcons
+											name={
+												contact.type === 'phone'
+													? 'phone'
+													: contact.type === 'email'
+													? 'email'
+													: 'card-account-details'
+											}
+											size={20}
+											color={colors.primary}
+											style={concessionaireProfileStyles.contactIcon}
+										/>
+										<Text style={concessionaireProfileStyles.contactText}>
+											{contact.value}
+										</Text>
+									</View>
+								))
+							) : (
+								<Text style={concessionaireProfileStyles.noContactsText}>
+									No contact information added
+								</Text>
+							)}
 						</View>
 					)}
 

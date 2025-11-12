@@ -18,6 +18,7 @@ import AddMenuItemScreen from '../screens/concessionaire/menu/addItem'
 import EditMenuItemScreen from '../screens/concessionaire/menu/editItem'
 import NotificationsScreen from '../screens/concessionaire/notification'
 import ProfileScreen from '../screens/concessionaire/profile'
+import AccountDetailsScreen from '../screens/concessionaire/accountDetails'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 const Tab = createBottomTabNavigator()
@@ -212,6 +213,16 @@ const ConcessionaireStack: React.FC = () => {
 				options={{
 					headerShown: true,
 					title: 'Order Details',
+					presentation: 'modal',
+					headerLeft: () => null,
+				}}
+			/>
+			<Stack.Screen
+				name="AccountDetails"
+				component={AccountDetailsScreen}
+				options={{
+					headerShown: true,
+					title: 'Account Details',
 					presentation: 'modal',
 					headerLeft: () => null,
 				}}

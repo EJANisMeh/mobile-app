@@ -25,6 +25,7 @@ export type CustomerStackParamList = {
 	Orders: undefined
 	Notifications: undefined
 	Profile: undefined
+	AccountDetails: undefined
 	MenuItemView: { menuItemId: number }
 	FullMenuList: { concessionId: number; concessionName: string }
 	OrderDetails: { orderId: number }
@@ -41,6 +42,7 @@ export type ConcessionaireStackParamList = {
 	ScanQR: undefined
 	Notifications: undefined
 	Profile: undefined
+	AccountDetails: undefined
 	AddMenuItem: undefined
 	EditMenuItem: { itemId: string }
 	OrderDetails: { orderId: number }

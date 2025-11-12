@@ -13,6 +13,7 @@ import CartScreen from '../screens/customer/cart'
 import OrdersScreen from '../screens/customer/orders'
 import NotificationsScreen from '../screens/customer/notification'
 import ProfileScreen from '../screens/customer/profile'
+import AccountDetailsScreen from '../screens/customer/accountDetails'
 import MenuItemViewScreen from '../screens/customer/menu/menuItemView'
 import FullMenuListScreen from '../screens/customer/menu/fullMenuList'
 import OrderDetailsScreen from '../screens/customer/orders/orderDetails'
@@ -159,6 +160,11 @@ const CustomerStack: React.FC = () => {
 				name="OrderDetails"
 				component={OrderDetailsScreen}
 				options={{ title: 'Order Details', headerShown: true }}
+			/>
+			<Stack.Screen
+				name="AccountDetails"
+				component={AccountDetailsScreen}
+				options={{ title: 'Account Details', headerShown: true }}
 			/>
 		</Stack.Navigator>
 	)

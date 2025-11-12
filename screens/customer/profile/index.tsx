@@ -1,44 +1,118 @@
 import React from 'react'
-import { View, Text } from 'react-native'
-import { DynamicKeyboardView, DynamicScrollView, LogoutButton } from '../../../components'
+import { View, Text, Image, TouchableOpacity } from 'react-native'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import {
+	DynamicKeyboardView,
+	DynamicScrollView,
+	LogoutButton,
+} from '../../../components'
 import { useAuthContext, useThemeContext } from '../../../context'
 import { useResponsiveDimensions } from '../../../hooks'
+import { useCustomerNavigation } from '../../../hooks/useNavigation'
 import { createCustomerProfileStyles } from '../../../styles/customer'
 
 const ProfileScreen: React.FC = () => {
 	const { user, isLoading, error } = useAuthContext()
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
+	const navigation = useCustomerNavigation()
 	const customerProfileStyles = createCustomerProfileStyles(colors, responsive)
+
+	const handleEditAccount = () => {
+		navigation.navigate('AccountDetails')
+	}
+
+	// Parse contact details
+	const contactDetails = user?.contact_details
+		? Array.isArray(user.contact_details)
+			? user.contact_details
+			: []
+		: []
 
 	return (
 		<DynamicKeyboardView>
 			<DynamicScrollView
 				styles={customerProfileStyles.profileContainer}
-				autoCenter={false}>
+				autoCenter={"center"}>
 				<View style={customerProfileStyles.profileContent}>
-					<Text style={customerProfileStyles.profileTitle}>
-						Customer Profile
-					</Text>
+					{/* Profile Header */}
+					<View style={customerProfileStyles.profileHeader}>
+						{/* Profile Image */}
+						<View style={customerProfileStyles.profileImageContainer}>
+							{user?.image_url ? (
+								<Image
+									source={{ uri: user.image_url }}
+									style={customerProfileStyles.profileImage}
+								/>
+							) : (
+								<MaterialCommunityIcons
+									name="account-circle"
+									size={120}
+									color={colors.textSecondary}
+								/>
+							)}
+						</View>
 
-					{/* User Information */}
+						{/* Name and Email */}
+						{user && (
+							<>
+								<Text style={customerProfileStyles.profileName}>
+									{user.fname} {user.lname}
+								</Text>
+								<Text style={customerProfileStyles.profileEmail}>
+									{user.email}
+								</Text>
+							</>
+						)}
+
+						{/* Edit Button */}
+						<View style={customerProfileStyles.editButtonContainer}>
+							<TouchableOpacity
+								style={customerProfileStyles.editButton}
+								onPress={handleEditAccount}>
+								<MaterialCommunityIcons
+									name="account-edit"
+									size={24}
+									color={colors.background}
+								/>
+							</TouchableOpacity>
+						</View>
+					</View>
+
+					{/* Contact Information */}
 					{user && (
 						<View style={customerProfileStyles.userInfo}>
-							<Text style={customerProfileStyles.infoLabel}>Name:</Text>
-							<Text style={customerProfileStyles.infoValue}>
-								{user.fname} {user.lname}
+							<Text style={customerProfileStyles.sectionTitle}>
+								Contact Information
 							</Text>
 
-							<Text style={customerProfileStyles.infoLabel}>Email:</Text>
-							<Text style={customerProfileStyles.infoValue}>{user.email}</Text>
-
-							<Text style={customerProfileStyles.infoLabel}>Role:</Text>
-							<Text style={customerProfileStyles.infoValue}>{user.role}</Text>
-
-							<Text style={customerProfileStyles.infoLabel}>Status:</Text>
-							<Text style={customerProfileStyles.infoValue}>
-								{user.emailVerified ? 'Verified' : 'Unverified'}
-							</Text>
+							{contactDetails.length > 0 ? (
+								contactDetails.map((contact: any, index: number) => (
+									<View
+										key={index}
+										style={customerProfileStyles.contactItem}>
+										<MaterialCommunityIcons
+											name={
+												contact.type === 'phone'
+													? 'phone'
+													: contact.type === 'email'
+													? 'email'
+													: 'card-account-details'
+											}
+											size={20}
+											color={colors.primary}
+											style={customerProfileStyles.contactIcon}
+										/>
+										<Text style={customerProfileStyles.contactText}>
+											{contact.value}
+										</Text>
+									</View>
+								))
+							) : (
+								<Text style={customerProfileStyles.noContactsText}>
+									No contact information added
+								</Text>
+							)}
 						</View>
 					)}
 
