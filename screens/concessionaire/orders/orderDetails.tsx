@@ -74,14 +74,6 @@ const OrderDetailsScreen: React.FC = () => {
 				setOrder(response.order as ConcessionOrder)
 			} else {
 				setError(response.error || 'Failed to load order details')
-				// If order doesn't exist, show alert and go back
-				if (!response.order) {
-					alertModal.showAlert({
-						title: 'Order Not Found',
-						message: 'This order no longer exists',
-						onClose: () => navigation.goBack(),
-					})
-				}
 			}
 		} catch (err) {
 			console.error('Load order details error:', err)
@@ -89,7 +81,7 @@ const OrderDetailsScreen: React.FC = () => {
 		} finally {
 			setLoading(false)
 		}
-	}, [orderId, navigation, alertModal])
+	}, [orderId])
 
 	useFocusEffect(
 		useCallback(() => {
