@@ -13,4 +13,3 @@ export * from './menuItemSchedule'
 export * from './orderStatusCodes'
 export * from './orderStatusColors'
 export * from './scheduleValidation'
-

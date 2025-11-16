@@ -90,10 +90,10 @@ export const getItemById = async (
 						select: {
 							id: true,
 							name: true,
-						basePrice: true,
-						availability: true,
-						availabilitySchedule: true,
-						menu_item_category_links: {
+							basePrice: true,
+							availability: true,
+							availabilitySchedule: true,
+							menu_item_category_links: {
 								include: {
 									category: true,
 								},

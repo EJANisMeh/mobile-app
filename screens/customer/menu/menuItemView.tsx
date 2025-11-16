@@ -835,7 +835,10 @@ const MenuItemViewScreen: React.FC = () => {
 		// Console logs to help understand data structure
 		console.log('=== SCHEDULE DATA FOR DEBUGGING ===')
 		console.log('Main item schedule:', menuItem?.availabilitySchedule)
-		console.log('Variation selections:', Array.from(variationSelections.entries()))
+		console.log(
+			'Variation selections:',
+			Array.from(variationSelections.entries())
+		)
 		console.log('Addon selections:', Array.from(addonSelections.entries()))
 		console.log('Concession schedule:', menuItem?.concession?.schedule)
 		console.log('===================================')
