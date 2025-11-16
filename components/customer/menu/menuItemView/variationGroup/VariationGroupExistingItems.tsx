@@ -8,11 +8,7 @@ import {
 	VariationOptionSelection,
 } from '../../../../../types'
 import SubVariationGroups from './SubVariationGroups'
-import {
-	normalizeMenuItemSchedule,
-	getMenuItemAvailabilityStatus,
-	MenuItemAvailabilityStatus,
-} from '../../../../../utils'
+import { getMenuItemStatusText } from '../../../../../utils'
 
 interface VariationGroupExistingItemsProps {
 	group: any
@@ -46,29 +42,7 @@ const VariationGroupExistingItems: React.FC<
 		return `₱${numPrice.toFixed(2)}`
 	}
 
-	const getItemStatusText = (menuItem: any): string | null => {
-		// Check availability field (out of stock toggle)
-		if (menuItem.availability === false) {
-			return 'Out of stock'
-		}
-
-		// Check if item is available today based on schedule
-		if (menuItem.availabilitySchedule) {
-			const normalizedSchedule = normalizeMenuItemSchedule(
-				menuItem.availabilitySchedule
-			)
-			const status = getMenuItemAvailabilityStatus(
-				normalizedSchedule,
-				menuItem.availability ?? true
-			)
-
-			if (status === 'not_served_today') {
-				return 'Not available today'
-			}
-		}
-
-		return null
-	}
+	// Use imported utility function for consistent status text
 
 	const isItemSelected = (menuItemId: number): boolean => {
 		return selection.selectedOptions.some(
@@ -276,7 +250,7 @@ const VariationGroupExistingItems: React.FC<
 					const isSelected = isItemSelected(menuItem.id)
 					const isOutOfStock = !menuItem.availability
 					const isDisabled = !isSingleType && !isSelected && !canSelectMore()
-					const statusText = getItemStatusText(menuItem)
+					const statusText = getMenuItemStatusText(menuItem)
 
 					// Find the selected option to get subvariation selections
 					const selectedOption = selection.selectedOptions.find(

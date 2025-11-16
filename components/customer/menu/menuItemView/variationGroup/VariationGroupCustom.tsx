@@ -7,6 +7,7 @@ import {
 	VariationSelection,
 	VariationOptionSelection,
 } from '../../../../../types'
+import { getCustomOptionStatusText } from '../../../../../utils'
 
 interface VariationGroupCustomProps {
 	group: any
@@ -33,13 +34,7 @@ const VariationGroupCustom: React.FC<VariationGroupCustomProps> = ({
 		selection.selectionTypeCode === 'multi_required'
 	const multiLimit = selection.multiLimit || 0
 
-	const getOptionStatusText = (option: any): string | null => {
-		// Check if option is out of stock (availability toggle)
-		if (option.availability === false) {
-			return 'Out of stock'
-		}
-		return null
-	}
+	// Use imported utility function for consistent status text
 
 	const formatPrice = (price: number | string) => {
 		const numPrice = typeof price === 'string' ? parseFloat(price) : price
@@ -159,7 +154,7 @@ const VariationGroupCustom: React.FC<VariationGroupCustomProps> = ({
 				{group.menu_item_variation_option_choices?.map((option: any) => {
 					const isSelected = isOptionSelected(option.id)
 					const isDisabled = !isSingleType && !isSelected && !canSelectMore()
-					const statusText = getOptionStatusText(option)
+					const statusText = getCustomOptionStatusText(option)
 
 					return (
 						<TouchableOpacity

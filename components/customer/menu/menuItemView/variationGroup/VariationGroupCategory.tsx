@@ -4,10 +4,7 @@ import { useThemeContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../../styles/customer'
 import { VariationSelection } from '../../../../../types'
-import {
-	normalizeMenuItemSchedule,
-	getMenuItemAvailabilityStatus,
-} from '../../../../../utils'
+import { getMenuItemStatusText } from '../../../../../utils'
 import SubVariationGroups from './SubVariationGroups'
 import ItemSelectionModal from '../modals/ItemSelectionModal'
 
@@ -57,29 +54,7 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 		return `₱${numPrice.toFixed(2)}`
 	}
 
-	const getItemStatusText = (item: CategoryMenuItem): string | null => {
-		// Check availability field (out of stock toggle)
-		if (item.availability === false) {
-			return 'Out of stock'
-		}
-
-		// Check if item is available today based on schedule
-		if (item.availabilitySchedule) {
-			const normalizedSchedule = normalizeMenuItemSchedule(
-				item.availabilitySchedule
-			)
-			const status = getMenuItemAvailabilityStatus(
-				normalizedSchedule,
-				item.availability ?? true
-			)
-
-			if (status === 'not_served_today') {
-				return 'Not available today'
-			}
-		}
-
-		return null
-	}
+	// Use imported utility function for consistent status text
 
 	const handleModalConfirm = (selectedItemIds: number[]) => {
 		setVariationSelections((prev) => {
@@ -186,6 +161,7 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 							return null
 						}
 
+						const statusText = getMenuItemStatusText(menuItem)
 						const subVariationGroupsToShow =
 							menuItem.variationGroups?.filter(
 								(g: any) => g.specificity === false
@@ -201,20 +177,20 @@ const VariationGroupCategory: React.FC<VariationGroupCategoryProps> = ({
 											style={[
 												styles.selectedItemName,
 												{
-													color: getItemStatusText(menuItem)
+													color: statusText
 														? colors.textSecondary
 														: colors.text,
 												},
 											]}>
 											{selectedOption.optionName}
 										</Text>
-										{getItemStatusText(menuItem) && (
+										{statusText && (
 											<Text
 												style={[
 													styles.outOfStockText,
 													{ color: colors.error },
 												]}>
-												{getItemStatusText(menuItem)}
+												{statusText}
 											</Text>
 										)}
 									</View>

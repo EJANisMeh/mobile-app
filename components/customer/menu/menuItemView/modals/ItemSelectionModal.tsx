@@ -9,10 +9,7 @@ import {
 } from 'react-native'
 import { useThemeContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
-import {
-	normalizeMenuItemSchedule,
-	getMenuItemAvailabilityStatus,
-} from '../../../../../utils'
+import { getMenuItemStatusText } from '../../../../../utils'
 
 interface MenuItem {
 	id: number
@@ -92,29 +89,7 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
 		return `₱${adjustedPrice.toFixed(2)}`
 	}
 
-	const getItemStatusText = (item: MenuItem): string | null => {
-		// Check availability field (out of stock toggle)
-		if (item.availability === false) {
-			return 'Out of stock'
-		}
-
-		// Check if item is available today based on schedule
-		if (item.availabilitySchedule) {
-			const normalizedSchedule = normalizeMenuItemSchedule(
-				item.availabilitySchedule
-			)
-			const status = getMenuItemAvailabilityStatus(
-				normalizedSchedule,
-				item.availability ?? true
-			)
-
-			if (status === 'not_served_today') {
-				return 'Not available today'
-			}
-		}
-
-		return null
-	}
+	// Use imported utility function for consistent status text
 
 	return (
 		<Modal
@@ -142,7 +117,7 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
 					<ScrollView style={styles.scrollView}>
 						{items.map((item) => {
 							const isSelected = selectedItemIds.includes(item.id)
-							const statusText = getItemStatusText(item)
+							const statusText = getMenuItemStatusText(item)
 							const isDisabled =
 								!isSingleSelection &&
 								!isSelected &&

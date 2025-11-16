@@ -5,10 +5,7 @@ import { useResponsiveDimensions } from '../../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../../styles/customer'
 import { VariationSelection } from '../../../../../types'
 import { Category } from '../../../../../types/categoryTypes'
-import {
-	normalizeMenuItemSchedule,
-	getMenuItemAvailabilityStatus,
-} from '../../../../../utils'
+import { getMenuItemStatusText } from '../../../../../utils'
 import SubVariationGroups from './SubVariationGroups'
 import CategorySelectionModal from '../modals/CategorySelectionModal'
 import ItemSelectionModal from '../modals/ItemSelectionModal'
@@ -108,29 +105,7 @@ const VariationGroupMultiCategory: React.FC<
 		return `₱${adjustedPrice.toFixed(2)}`
 	}
 
-	const getItemStatusText = (item: CategoryMenuItem): string | null => {
-		// Check availability field (out of stock toggle)
-		if (item.availability === false) {
-			return 'Out of stock'
-		}
-
-		// Check if item is available today based on schedule
-		if (item.availabilitySchedule) {
-			const normalizedSchedule = normalizeMenuItemSchedule(
-				item.availabilitySchedule
-			)
-			const status = getMenuItemAvailabilityStatus(
-				normalizedSchedule,
-				item.availability ?? true
-			)
-
-			if (status === 'not_served_today') {
-				return 'Not available today'
-			}
-		}
-
-		return null
-	}
+	// Use imported utility function for consistent status text
 
 	const handleCategorySelect = (categoryId: number) => {
 		const category = availableCategories.find((c) => c.id === categoryId)
@@ -254,6 +229,7 @@ const VariationGroupMultiCategory: React.FC<
 							return null
 						}
 
+						const statusText = getMenuItemStatusText(menuItem)
 						const subVariationGroupsToShow =
 							menuItem.variationGroups?.filter(
 								(g: any) => g.specificity === false
@@ -269,20 +245,20 @@ const VariationGroupMultiCategory: React.FC<
 											style={[
 												styles.selectedItemName,
 												{
-													color: getItemStatusText(menuItem)
+													color: statusText
 														? colors.textSecondary
 														: colors.text,
 												},
 											]}>
 											{selectedOption.optionName}
 										</Text>
-										{getItemStatusText(menuItem) && (
+										{statusText && (
 											<Text
 												style={[
 													styles.outOfStockText,
 													{ color: colors.error },
 												]}>
-												{getItemStatusText(menuItem)}
+												{statusText}
 											</Text>
 										)}
 									</View>

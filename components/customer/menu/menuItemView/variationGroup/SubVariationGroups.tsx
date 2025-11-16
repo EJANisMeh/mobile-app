@@ -5,6 +5,7 @@ import { useThemeContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../../styles/customer'
 import { VariationSelection } from '../../../../../types'
+import { getCustomOptionStatusText } from '../../../../../utils'
 
 interface SubVariationGroup {
 	id: number
@@ -188,7 +189,7 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 						const isSelected = selection?.selectedOptions.some(
 							(opt) => opt.optionId === option.id
 						)
-						const isOutOfStock = !option.availability
+						const statusText = getCustomOptionStatusText(option)
 						const isDisabled =
 							!isSingleType &&
 							!isSelected &&
@@ -219,12 +220,12 @@ const SubVariationGroups: React.FC<SubVariationGroupsProps> = ({
 										<Text
 											style={[
 												styles.optionName,
-												isOutOfStock && styles.optionNameDisabled,
+												statusText && styles.optionNameDisabled,
 											]}>
 											{option.name}
 										</Text>
-										{isOutOfStock && (
-											<Text style={styles.outOfStockText}>Out of stock</Text>
+										{statusText && (
+											<Text style={styles.outOfStockText}>{statusText}</Text>
 										)}
 									</View>
 									<Text style={styles.optionPrice}>

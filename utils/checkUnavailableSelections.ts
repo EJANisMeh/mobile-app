@@ -24,6 +24,38 @@ export const isMenuItemUnavailable = (item: {
 }
 
 /**
+ * Gets the status text for a menu item (prioritizes 'not sold today' over 'out of stock')
+ * @param item Menu item with availability and schedule info
+ * @returns Status text or null if available
+ */
+export const getMenuItemStatusText = (item: {
+	availability?: boolean | null
+	availabilitySchedule?: any
+}): string | null => {
+	// Check if item is available today based on schedule (higher priority)
+	if (item.availabilitySchedule) {
+		const normalizedSchedule = normalizeMenuItemSchedule(
+			item.availabilitySchedule
+		)
+		const status = getMenuItemAvailabilityStatus(
+			normalizedSchedule,
+			item.availability ?? true
+		)
+
+		if (status === 'not_served_today') {
+			return 'Not available today'
+		}
+	}
+
+	// Then check availability field (out of stock toggle)
+	if (item.availability === false) {
+		return 'Out of stock'
+	}
+
+	return null
+}
+
+/**
  * Checks if a custom variation option is unavailable
  * @param option Custom option with availability field only
  * @returns true if option is unavailable, false if available
@@ -32,6 +64,20 @@ export const isCustomOptionUnavailable = (option: {
 	availability?: boolean | null
 }): boolean => {
 	return option.availability === false
+}
+
+/**
+ * Gets the status text for a custom variation option
+ * @param option Custom option with availability field only
+ * @returns Status text or null if available
+ */
+export const getCustomOptionStatusText = (option: {
+	availability?: boolean | null
+}): string | null => {
+	if (option.availability === false) {
+		return 'Out of stock'
+	}
+	return null
 }
 
 /**
@@ -88,7 +134,6 @@ export const hasUnavailableVariationSelections = (
 				}
 
 				// Check sub-variations
-				console.log(selectedOption)
 				if (
 					selectedOption.subVariationSelections &&
 					hasUnavailableVariationSelections(
