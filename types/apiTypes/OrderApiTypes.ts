@@ -19,6 +19,7 @@ export interface AddonSnapshot {
 	addonId: number
 	addonName: string
 	price: number
+	menuItemId?: number | null // Target menu item ID for schedule/availability checking
 }
 
 export interface PaymentProof {

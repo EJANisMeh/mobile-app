@@ -12,7 +12,7 @@ export const createOrderScheduleModalStyles = (
 			maxHeight: 350,
 		},
 		scrollContent: {
-			paddingBottom: 8,
+			paddingBottom: 20,
 		},
 		section: {
 			marginBottom: 20,

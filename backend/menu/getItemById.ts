@@ -54,6 +54,8 @@ export const getItemById = async (
 								id: true,
 								name: true,
 								basePrice: true,
+								availability: true,
+								availabilitySchedule: true,
 							},
 						},
 					},

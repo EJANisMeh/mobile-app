@@ -23,6 +23,7 @@ import {
 	CartItemInput,
 	RawMenuItem,
 	MenuItemAvailabilityStatus,
+	MenuItemAvailabilitySchedule,
 	ScheduleSelectionState,
 	MenuItemDayKey,
 	PaymentProof,
@@ -59,6 +60,8 @@ import { concessionApi } from '../../../services/api'
 import type { PaymentMethodTuple } from '../../../types'
 
 type MenuItemViewRouteProp = RouteProp<CustomerStackParamList, 'MenuItemView'>
+
+let debug = false
 
 const MenuItemViewScreen: React.FC = () => {
 	const { colors } = useThemeContext()
@@ -251,6 +254,227 @@ const MenuItemViewScreen: React.FC = () => {
 
 	const hasAnyUnavailableSelection =
 		hasOutOfStockVariationSelection || hasUnavailableAddonSelection
+
+	// Collect all schedules from main item + selected variations + selected addons
+	const allItemSchedules = useMemo(() => {
+		// debugging for allItemSchedules function
+		debug = false
+
+		debug && console.log('\n--Function: allItemSchedules--')
+		const schedules: (MenuItemAvailabilitySchedule | undefined | null)[] = []
+
+		// Add main item schedule
+		debug && console.log('--Adding main item schedule--')
+		debug && console.log(`Menu Item ID: ${menuItem ? menuItem.id : 'null'}`)
+		debug &&
+			console.log(
+				`Pushing Menu Item schedule: ${JSON.stringify(
+					menuItem?.availabilitySchedule
+				)}`
+			)
+		schedules.push(menuItem?.availabilitySchedule)
+
+		// Collect variation option schedules from raw menuItem data
+		debug && console.log('\n--Collecting variation option schedules--')
+		if (menuItem?.menu_item_variation_groups) {
+			debug &&
+				console.log(
+					`# of Variation groups: ${menuItem.menu_item_variation_groups.length}`
+				)
+			variationSelections.forEach((selection) => {
+				// Find the variation group
+				debug &&
+					console.log(`\nFinding variation group with ID: ${selection.groupId}`)
+				const varGroup = menuItem.menu_item_variation_groups.find(
+					(g: any) => g.id === selection.groupId
+				)
+				debug &&
+					console.log(
+						`Found variation group: ${varGroup ? varGroup.name : 'not found'}`
+					)
+
+				if (varGroup) {
+					debug &&
+						console.log(
+							`Selected Options for varGroup ${JSON.stringify(
+								varGroup.name
+							)}: ${JSON.stringify(
+								selection.selectedOptions.map((o) => o.optionName)
+							)}`
+						)
+					selection.selectedOptions.forEach((option) => {
+						debug &&
+							console.log(
+								`Processing option with menuItemId: ${option.menuItemId}`
+							)
+						let optionMenuItem: any = null
+
+						// Find the menu item based on variation group kind
+						debug && console.log(`Variation group kind: ${varGroup.kind}`)
+						if (varGroup.kind === 'single_category_filter') {
+							optionMenuItem = varGroup.categoryMenuItems?.find(
+								(mi: any) => mi.id === option.menuItemId
+							)
+						} else if (varGroup.kind === 'multi_category_filter') {
+							optionMenuItem = varGroup.categoryMenuItems?.find(
+								(mi: any) => mi.id === option.menuItemId
+							)
+						} else if (varGroup.kind === 'existing_items') {
+							optionMenuItem = varGroup.existingMenuItems?.find(
+								(item: any) => item.id === option.menuItemId
+							)
+							debug &&
+								console.log(`vargroup table: ${JSON.stringify(varGroup)}`)
+							debug &&
+								console.log(
+									`Found option menu item for existing_items?: ${
+										optionMenuItem ? optionMenuItem.id : 'not found'
+									}`
+								)
+						} // Add the option's schedule if it exists
+						debug &&
+							console.log(
+								`Adding option schedule: ${
+									optionMenuItem?.availabilitySchedule ? 'true' : 'false'
+								}`
+							)
+						if (optionMenuItem?.availabilitySchedule) {
+							debug &&
+								console.log(
+									`Pushing Selected Menu Item Option schedule: ${JSON.stringify(
+										optionMenuItem.availabilitySchedule
+									)}`
+								)
+							schedules.push(optionMenuItem.availabilitySchedule)
+						}
+						debug &&
+							console.log(
+								`Added option schedule: ${
+									optionMenuItem?.availabilitySchedule ? 'true' : 'false'
+								}`
+							)
+
+						// Recursively collect subvariation schedules
+						debug &&
+							console.log(
+								`Processing subvariation selections for option with menuItemId: ${option.menuItemId}`
+							)
+						if (option.subVariationSelections) {
+							debug &&
+								console.log(
+									`Subvariation selections: ${JSON.stringify(
+										option.subVariationSelections
+									)}`
+								)
+							option.subVariationSelections.forEach((subSelection) => {
+								// Find subvariation group
+								debug &&
+									console.log(
+										`Finding subvariation group with ID: ${subSelection.groupId}`
+									)
+								const subVarGroup = optionMenuItem?.variationGroups?.find(
+									(g: any) => g.id === subSelection.groupId
+								)
+								debug &&
+									console.log(
+										`Found subvariation group: ${
+											subVarGroup ? subVarGroup.id : 'not found'
+										}`
+									)
+
+								if (subVarGroup) {
+									subSelection.selectedOptions.forEach((subOption) => {
+										let subOptionMenuItem: any = null
+
+										// Find the menu item based on subvariation group kind
+										debug &&
+											console.log(
+												`Subvariation group kind: ${subVarGroup.kind}`
+											)
+										if (subVarGroup.kind === 'single_category_filter') {
+											subOptionMenuItem = subVarGroup.categoryMenuItems?.find(
+												(mi: any) => mi.id === subOption.menuItemId
+											)
+										} else if (subVarGroup.kind === 'multi_category_filter') {
+											subOptionMenuItem = subVarGroup.categoryMenuItems?.find(
+												(mi: any) => mi.id === subOption.menuItemId
+											)
+										} else if (subVarGroup.kind === 'existing_items') {
+											subOptionMenuItem = subVarGroup.items?.find(
+												(item: any) =>
+													item.menu_item?.id === subOption.menuItemId
+											)?.menu_item
+										}
+										debug &&
+											console.log(
+												`SubVariation option is a menu item?: ${
+													subOptionMenuItem ? 'true' : 'false'
+												}`
+											)
+
+										// Add the suboption's schedule if it exists
+										debug &&
+											console.log(
+												`Adding suboption schedule: ${
+													subOptionMenuItem?.availabilitySchedule
+														? 'true'
+														: 'false'
+												}`
+											)
+										if (subOptionMenuItem?.availabilitySchedule) {
+											debug &&
+												console.log(
+													`Pushing Selected Suboption schedule: ${JSON.stringify(
+														subOptionMenuItem.availabilitySchedule
+													)}`
+												)
+											schedules.push(subOptionMenuItem.availabilitySchedule)
+										}
+									})
+								}
+							})
+						}
+					})
+				}
+			})
+		} //--- Collect all schedules from main item + selected variations + selected addons
+
+		// Collect addon schedules - addons are menu items themselves
+		debug && console.log('\n--Collecting addon schedules--')
+		if (menuItem?.menu_item_addons_menu_item_addons_menu_item_idTomenu_items) {
+			debug &&
+				console.log(
+					`# of Addons: ${menuItem.menu_item_addons_menu_item_addons_menu_item_idTomenu_items.length}`
+				)
+			addonSelections.forEach((addon) => {
+				if (addon.selected) {
+					// Find the addon in the raw data
+					debug && console.log(`Processing selected addon: ${addon.addonName}`)
+					const addonData =
+						menuItem.menu_item_addons_menu_item_addons_menu_item_idTomenu_items.find(
+							(a: any) => a.id === addon.addonId
+						)
+
+					// Addons reference a target menu item
+					const targetMenuItem =
+						addonData?.menu_items_menu_item_addons_target_menu_item_idTomenu_items
+					if (targetMenuItem?.availabilitySchedule) {
+						debug &&
+							console.log(
+								`Pushing Selected Addon schedule: ${JSON.stringify(
+									targetMenuItem.availabilitySchedule
+								)}`
+							)
+						schedules.push(targetMenuItem.availabilitySchedule)
+					}
+				}
+			})
+		}
+		debug && console.log(`Collected schedules: ${JSON.stringify(schedules)}`)
+		debug && console.log('--End of function allItemSchedules--\n')
+		if (debug) debug = false
+		return schedules
+	}, [menuItem, variationSelections, addonSelections])
 
 	const orderRestrictionMessage = useMemo(() => {
 		if (!menuItem || !availabilityStatus) {
@@ -584,17 +808,46 @@ const MenuItemViewScreen: React.FC = () => {
 			}))
 		)
 
+		debug = true
+		debug && console.log('\n--Function: buildSelectionSnapshots--')
+		debug &&
+			console.log(
+				`Variation Groups Snapshot: ${JSON.stringify(
+					variationGroupsSnapshot,
+					null,
+					2
+				)}`
+			)
+		debug &&
+			console.log(
+				`Options Snapshot: ${JSON.stringify(optionsSnapshot, null, 2)}`
+			)
 		const addonsSnapshot = Array.from(addonSelections.values())
 			.filter((addon) => addon.selected)
-			.map((addon) => ({
-				addonId: addon.addonId,
-				addonName: addon.addonName,
-				price: addon.price,
-			}))
+			.map((addon) => {
+				// Find the addon data to get target menu item ID
+				debug && console.log(`Processing addon with ID: ${addon.addonId}`)
+				const addonData =
+					menuItem?.menu_item_addons_menu_item_addons_menu_item_idTomenu_items?.find(
+						(a: any) => a.id === addon.addonId
+					)
+				debug &&
+					console.log(`Found addon data: ${addonData ? 'true' : 'false'}`)
+
+				return {
+					addonId: addon.addonId,
+					addonName: addon.addonName,
+					price: addon.price,
+					menuItemId: addonData?.target_menu_item?.id ?? null,
+				}
+			})
+		debug &&
+			console.log(`Addons Snapshot: ${JSON.stringify(addonsSnapshot, null, 2)}`)
+		debug && console.log('--End of function buildSelectionSnapshots--\n')
+		if (debug) debug = false
 
 		return { variationGroupsSnapshot, optionsSnapshot, addonsSnapshot }
 	}
-
 	const navigateBackToMenu = () => {
 		if (navigation.canGoBack()) {
 			navigation.goBack()
@@ -833,15 +1086,6 @@ const MenuItemViewScreen: React.FC = () => {
 		}
 
 		// Console logs to help understand data structure
-		console.log('=== SCHEDULE DATA FOR DEBUGGING ===')
-		console.log('Main item schedule:', menuItem?.availabilitySchedule)
-		console.log(
-			'Variation selections:',
-			Array.from(variationSelections.entries())
-		)
-		console.log('Addon selections:', Array.from(addonSelections.entries()))
-		console.log('Concession schedule:', menuItem?.concession?.schedule)
-		console.log('===================================')
 
 		setOrderModalVisible(true)
 	}
@@ -1077,6 +1321,7 @@ const MenuItemViewScreen: React.FC = () => {
 				isConcessionOpen={Boolean(menuItem.concession?.is_open)}
 				itemName={menuItem.name ?? 'this item'}
 				hasOutOfStockVariationSelection={hasAnyUnavailableSelection}
+				itemSchedules={allItemSchedules}
 			/>
 			<PaymentMethodModal
 				visible={paymentModalVisible}
