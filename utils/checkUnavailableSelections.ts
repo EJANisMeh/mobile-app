@@ -53,17 +53,20 @@ export const hasUnavailableVariationSelections = (
 			continue
 		}
 		// Check based on group kind
-		if (group.kind === 'single_category_filter' || group.kind === 'multi_category_filter') {
+		if (
+			group.kind === 'single_category_filter' ||
+			group.kind === 'multi_category_filter'
+		) {
 			const categoryMenuItems = (group as any).categoryMenuItems || []
 			for (const selectedOption of selection.selectedOptions) {
 				const item = categoryMenuItems.find(
 					(item: any) => item.id === selectedOption.menuItemId
-        )
-        
+				)
+
 				if (item && isMenuItemUnavailable(item)) {
 					return true
 				}
-        // Check sub-variations
+				// Check sub-variations
 				if (
 					selectedOption.subVariationSelections &&
 					hasUnavailableVariationSelections(
