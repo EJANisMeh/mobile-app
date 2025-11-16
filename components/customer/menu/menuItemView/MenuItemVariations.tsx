@@ -35,45 +35,21 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 
 	// Load categories if any variation group needs them
 	useEffect(() => {
-		console.log(
-			'🔍 [MenuItemVariations] Total variation groups:',
-			variationGroups.length
-		)
-		variationGroups.forEach((group, index) => {
-			console.log(`📦 [MenuItemVariations] Group ${index + 1}:`, {
-				id: group.id,
-				name: group.name,
-				kind: group.kind,
-				specificity: group.specificity,
-				hasExistingItems: !!group.existingMenuItems,
-				existingItemsCount: group.existingMenuItems?.length || 0,
-				hasCategoryMenuItems: !!group.categoryMenuItems,
-				categoryMenuItemsCount: group.categoryMenuItems?.length || 0,
-			})
-		})
-
 		const needsCategories = variationGroups.some(
 			(group) => group.kind === 'multi_category_filter'
 		)
 
 		if (needsCategories && concessionId) {
-			console.log(
-				'📂 [MenuItemVariations] Loading categories for multi-category filter...'
-			)
 			setLoadingCategories(true)
 			apiCall(`/category/get?concessionId=${concessionId}`)
 				.then((data: any) => {
 					if (data.success && data.categories) {
-						console.log(
-							'✅ [MenuItemVariations] Categories loaded:',
-							data.categories.length
-						)
 						setCategories(data.categories)
 					}
 				})
 				.catch((error) => {
 					console.error(
-						'❌ [MenuItemVariations] Failed to load categories:',
+						'[MenuItemVariations] Failed to load categories:',
 						error
 					)
 				})
@@ -89,20 +65,12 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 			{variationGroups.map((group) => {
 				const selection = variationSelections.get(group.id)
 				if (!selection) {
-					console.log(
-						`⚠️ [MenuItemVariations] No selection found for group ${group.id} (${group.name})`
-					)
 					return null
 				}
-
-				console.log(
-					`🎯 [MenuItemVariations] Rendering group ${group.id} (${group.name}) with kind: ${group.kind}`
-				)
 
 				// Route to different components based on kind
 				if (group.kind === 'group') {
 					// Custom mode uses simple radio/checkboxes (no subvariations)
-					console.log(`  → Routing to VariationGroupCustom (custom mode)`)
 					return (
 						<VariationGroupCustom
 							key={group.id}
@@ -113,7 +81,6 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 					)
 				} else if (group.kind === 'existing_items') {
 					// Existing items mode lists items with subvariations (specificity: false)
-					console.log(`  → Routing to VariationGroupExistingItems`)
 					return (
 						<VariationGroupExistingItems
 							key={group.id}
@@ -127,7 +94,6 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 					group.kind === 'category_filter'
 				) {
 					// Single category mode uses menu items from one category
-					console.log(`  → Routing to VariationGroupCategory`)
 					return (
 						<VariationGroupCategory
 							key={group.id}
@@ -138,7 +104,6 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 					)
 				} else if (group.kind === 'multi_category_filter') {
 					// Multi category mode - now implemented!
-					console.log(`  → Routing to VariationGroupMultiCategory`)
 					if (loadingCategories) {
 						return (
 							<View
@@ -159,8 +124,6 @@ const MenuItemVariations: React.FC<MenuItemVariationsProps> = ({
 						/>
 					)
 				}
-
-				console.log(`  ⚠️ Unknown group kind: ${group.kind}`)
 				return null
 			})}
 		</View>

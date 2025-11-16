@@ -26,6 +26,7 @@ import {
 	getMenuItemDayKeyForDate,
 	getMenuItemAvailabilityStatus,
 	hasAnyMenuItemScheduleDay,
+	isMenuItemUnavailable,
 } from '../../../utils'
 import { menuApi, concessionApi } from '../../../services/api'
 import type {
@@ -42,6 +43,7 @@ import type {
 	CartItemStatusInfo,
 	PaymentMethodTuple,
 	PaymentProof,
+	VariationOptionSnapshot,
 } from '../../../types'
 
 type ScheduleContext = 'group' | 'split'
@@ -127,9 +129,22 @@ const CartScreen: React.FC = () => {
 		}
 
 		let isCancelled = false
-		const uniqueMenuItemIds = Array.from(
-			new Set(cartItems.map((item) => item.menuItemId))
-		)
+		// Collect all menu item IDs: base items + variation options
+		const menuItemIdsSet = new Set<number>()
+
+		cartItems.forEach((item) => {
+			// Add base menu item ID
+			menuItemIdsSet.add(item.menuItemId)
+
+			// Add menu item IDs from variation options
+			item.variationOptions.forEach((varOpt) => {
+				if (varOpt.menuItemId) {
+					menuItemIdsSet.add(varOpt.menuItemId)
+				}
+			})
+		})
+
+		const uniqueMenuItemIds = Array.from(menuItemIdsSet)
 
 		const loadMetadata = async () => {
 			setMetaLoading(true)
@@ -373,12 +388,54 @@ const CartScreen: React.FC = () => {
 		return splitQueue[index] ?? null
 	}, [splitIndex, splitQueue])
 
+	// Helper function to check if cart item has unavailable selections (including sub-variations)
+	const hasUnavailableSelections = useCallback(
+		(item: CartItem): boolean => {
+			// Check variations recursively
+			const checkVariations = (
+				variations: VariationOptionSnapshot[]
+			): boolean => {
+				return variations.some((varOpt) => {
+					// Check the variation option itself (menu item based options)
+					if (varOpt.menuItemId) {
+						const varMeta = menuItemMeta[varOpt.menuItemId]
+						if (varMeta) {
+							if (
+								varMeta.availabilityStatus === 'out_of_stock' ||
+								varMeta.availabilityStatus === 'not_served_today'
+							) {
+								return true
+							}
+						}
+					}
+					// Custom options don't have menuItemId or availability in snapshot
+					// They were already checked during order creation
+
+					// Check sub-variation groups recursively
+					if (varOpt.subVariationGroups && varOpt.subVariationGroups.length > 0) {
+						for (const subGroup of varOpt.subVariationGroups) {
+							if (checkVariations(subGroup.selectedOptions)) {
+								return true
+							}
+						}
+					}
+
+					return false
+				})
+			}
+
+			return checkVariations(item.variationOptions)
+		},
+		[menuItemMeta]
+	)
+
 	const scheduleModalState = useMemo<{
 		schedule: MenuItemAvailabilitySchedule | null | undefined
 		concessionSchedule: ConcessionSchedule | null | undefined
 		availabilityStatus: MenuItemAvailabilityStatus
 		itemName: string
 		isConcessionOpen: boolean
+		hasOutOfStockVariationSelection: boolean
 	}>(() => {
 		if (!activeGroup) {
 			return {
@@ -387,6 +444,7 @@ const CartScreen: React.FC = () => {
 				availabilityStatus: 'not_served_today',
 				itemName: 'from this concession',
 				isConcessionOpen: false,
+				hasOutOfStockVariationSelection: false,
 			}
 		}
 
@@ -394,6 +452,7 @@ const CartScreen: React.FC = () => {
 
 		if (scheduleContext === 'split' && splitActiveItem) {
 			const itemMeta = activeGroup.menuMeta[splitActiveItem.menuItemId]
+			const hasUnavailable = hasUnavailableSelections(splitActiveItem)
 			return {
 				schedule: itemMeta?.schedule ?? null,
 				concessionSchedule:
@@ -404,8 +463,14 @@ const CartScreen: React.FC = () => {
 				itemName: `${splitActiveItem.name} from ${concessionLabel}`,
 				isConcessionOpen:
 					itemMeta?.concessionIsOpen ?? activeGroup.concessionIsOpen,
+				hasOutOfStockVariationSelection: hasUnavailable,
 			}
 		}
+
+		// For group ordering, check if any item has unavailable selections
+		const hasUnavailable = activeGroup.items.some((item) =>
+			hasUnavailableSelections(item)
+		)
 
 		return {
 			schedule: activeGroup.combinedSchedule ?? null,
@@ -413,8 +478,9 @@ const CartScreen: React.FC = () => {
 			availabilityStatus: activeGroup.status,
 			itemName: `items from ${concessionLabel}`,
 			isConcessionOpen: activeGroup.concessionIsOpen,
+			hasOutOfStockVariationSelection: hasUnavailable,
 		}
-	}, [activeGroup, scheduleContext, splitActiveItem])
+	}, [activeGroup, scheduleContext, splitActiveItem, hasUnavailableSelections])
 
 	const totalItems = useMemo(
 		() => cartItems.reduce((sum, item) => sum + item.quantity, 0),
@@ -440,6 +506,33 @@ const CartScreen: React.FC = () => {
 				label: 'Checking availability…',
 				helper: 'We are confirming each item for this concession.',
 				tone: 'info',
+				servedToday,
+			}
+		}
+
+		// Check if any items have unavailable selections (variations)
+		const hasUnavailableSelections = group.items.some((item) => {
+			return item.variationOptions.some((varOpt) => {
+				if (varOpt.menuItemId) {
+					const varMeta = menuItemMeta[varOpt.menuItemId]
+					if (varMeta) {
+						if (
+							varMeta.availabilityStatus === 'out_of_stock' ||
+							varMeta.availabilityStatus === 'not_served_today'
+						) {
+							return true
+						}
+					}
+				}
+				return false
+			})
+		})
+
+		if (hasUnavailableSelections) {
+			return {
+				label: 'Contains unavailable items',
+				helper: 'Some variation selections are out of stock or not available.',
+				tone: 'error',
 				servedToday,
 			}
 		}
@@ -508,6 +601,32 @@ const CartScreen: React.FC = () => {
 				return {
 					label: 'Checking availability…',
 					tone: 'info',
+				}
+			}
+
+			// Check if any variation options reference menu items that are unavailable
+			const hasUnavailableVariation = item.variationOptions.some((varOpt) => {
+				// If variation option references a menu item, check its availability
+				if (varOpt.menuItemId) {
+					const varMeta = menuItemMeta[varOpt.menuItemId]
+					if (varMeta) {
+						// Check if the referenced menu item is unavailable
+						if (
+							varMeta.availabilityStatus === 'out_of_stock' ||
+							varMeta.availabilityStatus === 'not_served_today'
+						) {
+							return true
+						}
+					}
+				}
+				return false
+			})
+
+			// If any variation is unavailable, show error
+			if (hasUnavailableVariation) {
+				return {
+					label: 'Contains unavailable items',
+					tone: 'error',
 				}
 			}
 
@@ -1265,6 +1384,7 @@ const CartScreen: React.FC = () => {
 						buttonLabel={card.buttonLabel}
 						buttonDisabled={card.buttonDisabled}
 						showProcessingIndicator={card.showProcessingIndicator}
+						menuItemMeta={menuItemMeta}
 						onPlaceOrder={() => handlePlaceOrderPress(card.group)}
 						onOrderItem={(item) => handleOrderSingleItemPress(card.group, item)}
 						onRemoveItem={(item) => handleRemoveItemPress(card.group, item)}

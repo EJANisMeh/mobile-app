@@ -258,7 +258,6 @@ export const validatePriceAdjustment = async (
 								}
 
 								const adjustedPrice = Math.max(0, basePrice + adjustment)
-								console.log(item, adjustedPrice)
 
 								// If adjustment makes it 0, add to affected items
 								if (adjustedPrice === 0) {

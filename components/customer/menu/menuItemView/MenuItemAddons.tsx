@@ -4,6 +4,10 @@ import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../styles/customer'
 import { AddonSelection } from '../../../../types'
+import {
+	normalizeMenuItemSchedule,
+	getMenuItemAvailabilityStatus,
+} from '../../../../utils'
 
 interface MenuItemAddonsProps {
 	addons: any[]
@@ -25,6 +29,35 @@ const MenuItemAddons: React.FC<MenuItemAddonsProps> = ({
 		return `₱${numPrice.toFixed(2)}`
 	}
 
+	const getAddonStatusText = (addon: any): string | null => {
+		const targetItem =
+			addon.menu_items_menu_item_addons_target_menu_item_idTomenu_items
+
+		if (!targetItem) return null
+
+		// Check availability field (out of stock toggle)
+		if (targetItem.availability === false) {
+			return 'Out of stock'
+		}
+
+		// Check if addon target item is available today based on schedule
+		if (targetItem.availabilitySchedule) {
+			const normalizedSchedule = normalizeMenuItemSchedule(
+				targetItem.availabilitySchedule
+			)
+			const status = getMenuItemAvailabilityStatus(
+				normalizedSchedule,
+				targetItem.availability ?? true
+			)
+
+			if (status === 'not_served_today') {
+				return 'Not available today'
+			}
+		}
+
+		return null
+	}
+
 	const handleAddonToggle = (addonId: number) => {
 		setAddonSelections((prev) => {
 			const newMap = new Map(prev)
@@ -44,6 +77,7 @@ const MenuItemAddons: React.FC<MenuItemAddonsProps> = ({
 			addon.menu_items_menu_item_addons_target_menu_item_idTomenu_items
 		const displayName = addon.label || targetItem?.name || 'Unknown'
 		const displayPrice = addon.price_override ?? targetItem?.basePrice ?? 0
+		const statusText = getAddonStatusText(addon)
 
 		const selection = addonSelections.get(addon.id)
 		const isSelected = selection?.selected || false
@@ -55,7 +89,12 @@ const MenuItemAddons: React.FC<MenuItemAddonsProps> = ({
 					key={addon.id}
 					style={styles.addonItem}>
 					<View style={styles.addonInfo}>
-						<Text style={styles.addonName}>{displayName}</Text>
+						<View style={{ flex: 1 }}>
+							<Text style={styles.addonName}>{displayName}</Text>
+							{statusText && (
+								<Text style={styles.outOfStockText}>{statusText}</Text>
+							)}
+						</View>
 						<Text style={styles.requiredBadge}>Required</Text>
 					</View>
 					<Text style={styles.addonPrice}>{formatPrice(displayPrice)}</Text>
@@ -75,7 +114,12 @@ const MenuItemAddons: React.FC<MenuItemAddonsProps> = ({
 						{isSelected && <View style={styles.radioButtonInner} />}
 					</View>
 					<View style={styles.addonContent}>
-						<Text style={styles.addonName}>{displayName}</Text>
+						<View style={{ flex: 1 }}>
+							<Text style={styles.addonName}>{displayName}</Text>
+							{statusText && (
+								<Text style={styles.outOfStockText}>{statusText}</Text>
+							)}
+						</View>
 						<Text style={styles.addonPrice}>{formatPrice(displayPrice)}</Text>
 					</View>
 				</TouchableOpacity>

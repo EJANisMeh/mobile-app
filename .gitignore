@@ -50,3 +50,6 @@ yarn-error.*
 
 # Ignore repository architecture docs that may contain internal notes
 /.github/architecture
+
+#Ignore test files
+test.jsonc

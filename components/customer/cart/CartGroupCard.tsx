@@ -18,6 +18,7 @@ import type {
 	CartItemStatusInfo,
 	GroupStatusInfo,
 	StatusTone,
+	CartMenuItemMeta,
 } from '../../../types'
 import type { MenuItemDayKey } from '../../../types'
 import type { createCustomerCartStyles } from '../../../styles/customer/cart'
@@ -41,6 +42,7 @@ interface CartGroupCardProps {
 	buttonLabel: string
 	buttonDisabled: boolean
 	showProcessingIndicator: boolean
+	menuItemMeta: Record<number, CartMenuItemMeta>
 	onPlaceOrder: () => void
 	onOrderItem: (item: CartItem) => void
 	onRemoveItem: (item: CartItem) => void
@@ -56,6 +58,7 @@ const CartGroupCard: React.FC<CartGroupCardProps> = ({
 	buttonLabel,
 	buttonDisabled,
 	showProcessingIndicator,
+	menuItemMeta,
 	onPlaceOrder,
 	onOrderItem,
 	onRemoveItem,
@@ -97,6 +100,22 @@ const CartGroupCard: React.FC<CartGroupCardProps> = ({
 			default:
 				return styles.groupStatusLabelInfo
 		}
+	}
+
+	const getOptionStatus = (
+		menuItemId: number | null | undefined
+	): string | null => {
+		if (!menuItemId) return null
+		const meta = menuItemMeta[menuItemId]
+		if (!meta) return null
+
+		if (meta.availabilityStatus === 'out_of_stock') {
+			return 'Out of stock'
+		}
+		if (meta.availabilityStatus === 'not_served_today') {
+			return 'Not available today'
+		}
+		return null
 	}
 
 	return (
@@ -168,9 +187,29 @@ const CartGroupCard: React.FC<CartGroupCardProps> = ({
 											<View key={`${item.id}-variation-${groupEntry.groupId}`}>
 												<Text style={styles.cartGroupItemMeta}>
 													{groupEntry.groupName}:{' '}
-													{groupEntry.selectedOptions
-														.map((option) => option.optionName)
-														.join(', ')}
+													{groupEntry.selectedOptions.map((option, optIdx) => {
+														const statusText = getOptionStatus(
+															option.menuItemId
+														)
+														return (
+															<Text key={`opt-${optIdx}`}>
+																{option.optionName}
+																{statusText && (
+																	<Text
+																		style={{
+																			color: '#dc3545',
+																			fontStyle: 'italic',
+																		}}>
+																		{' '}
+																		({statusText})
+																	</Text>
+																)}
+																{optIdx < groupEntry.selectedOptions.length - 1
+																	? ', '
+																	: ''}
+															</Text>
+														)
+													})}
 												</Text>
 												{/* Show subvariations if present */}
 												{groupEntry.selectedOptions.map((option) =>
@@ -187,9 +226,32 @@ const CartGroupCard: React.FC<CartGroupCardProps> = ({
 																		{ fontSize: 12, color: '#666' },
 																	]}>
 																	• {subGroup.groupName}:{' '}
-																	{subGroup.selectedOptions
-																		.map((subOpt) => subOpt.optionName)
-																		.join(', ')}
+																	{subGroup.selectedOptions.map(
+																		(subOpt, subOptIdx) => {
+																			const subStatusText = getOptionStatus(
+																				subOpt.menuItemId
+																			)
+																			return (
+																				<Text key={`subopt-${subOptIdx}`}>
+																					{subOpt.optionName}
+																					{subStatusText && (
+																						<Text
+																							style={{
+																								color: '#dc3545',
+																								fontStyle: 'italic',
+																							}}>
+																							{' '}
+																							({subStatusText})
+																						</Text>
+																					)}
+																					{subOptIdx <
+																					subGroup.selectedOptions.length - 1
+																						? ', '
+																						: ''}
+																				</Text>
+																			)
+																		}
+																	)}
 																</Text>
 															))}
 														</View>

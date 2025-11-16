@@ -8,6 +8,11 @@ import {
 	VariationOptionSelection,
 } from '../../../../../types'
 import SubVariationGroups from './SubVariationGroups'
+import {
+	normalizeMenuItemSchedule,
+	getMenuItemAvailabilityStatus,
+	MenuItemAvailabilityStatus,
+} from '../../../../../utils'
 
 interface VariationGroupExistingItemsProps {
 	group: any
@@ -35,18 +40,34 @@ const VariationGroupExistingItems: React.FC<
 	// Get existing menu items from group
 	const existingMenuItems = (group as any).existingMenuItems || []
 
-	console.log(
-		`📦 [VariationGroupExistingItems] Group ${group.id} (${group.name}):`
-	)
-	console.log(`  - existingMenuItems count: ${existingMenuItems.length}`)
-	if (existingMenuItems.length > 0) {
-		console.log(`  - Sample item:`, existingMenuItems[0])
-	}
-
 	const formatPrice = (price: number | string) => {
 		const numPrice = typeof price === 'string' ? parseFloat(price) : price
 		if (numPrice === 0 || !Number.isFinite(numPrice)) return 'Free'
 		return `₱${numPrice.toFixed(2)}`
+	}
+
+	const getItemStatusText = (menuItem: any): string | null => {
+		// Check availability field (out of stock toggle)
+		if (menuItem.availability === false) {
+			return 'Out of stock'
+		}
+
+		// Check if item is available today based on schedule
+		if (menuItem.availabilitySchedule) {
+			const normalizedSchedule = normalizeMenuItemSchedule(
+				menuItem.availabilitySchedule
+			)
+			const status = getMenuItemAvailabilityStatus(
+				normalizedSchedule,
+				menuItem.availability ?? true
+			)
+
+			if (status === 'not_served_today') {
+				return 'Not available today'
+			}
+		}
+
+		return null
 	}
 
 	const isItemSelected = (menuItemId: number): boolean => {
@@ -56,69 +77,35 @@ const VariationGroupExistingItems: React.FC<
 	}
 
 	const handleItemToggle = (menuItem: any) => {
-		console.log(
-			`🎯 [VariationGroupExistingItems] Item toggled: ${menuItem.id} (${menuItem.name})`
-		)
-
 		setVariationSelections((prev) => {
 			const newMap = new Map(prev)
 			const currentSelection = newMap.get(group.id)
 
 			if (!currentSelection) {
-				console.log(`  ⚠️ No current selection found for group ${group.id}`)
 				return prev
 			}
 
 			const isSelected = isItemSelected(menuItem.id)
-			console.log(`  - Currently selected: ${isSelected}`)
-			console.log(`  - Selection type: ${isSingleType ? 'single' : 'multi'}`)
 
 			if (isSingleType) {
 				// Single selection: Replace selection or clear if same item
 				if (isSelected && selection.selectionTypeCode === 'single_optional') {
-					console.log(`  - Clearing optional single selection`)
 					// Clear selection for optional single
 					currentSelection.selectedOptions = []
 				} else {
-					console.log(`  - Setting new single selection`)
-					console.log(
-						`  📦 Processing menu item ${menuItem.id} (${menuItem.name}):`
-					)
-					console.log(`    - basePrice: ${menuItem.basePrice}`)
-					console.log(
-						`    - variationGroups count: ${
-							menuItem.variationGroups?.length || 0
-						}`
-					)
-
 					// Initialize subvariation selections if menu item has variation groups with specificity: false
 					const subVariationSelections = new Map<number, VariationSelection>()
 					if (menuItem.variationGroups && menuItem.variationGroups.length > 0) {
-						console.log(
-							`    - Filtering subvariation groups (specificity: false)...`
-						)
-
 						// Filter only variation groups with specificity === false
 						const subVariationGroupsToShow = menuItem.variationGroups.filter(
 							(subGroup: any) => {
-								console.log(
-									`      - Group ${subGroup.id} (${subGroup.name}): specificity=${subGroup.specificity}`
-								)
 								return subGroup.specificity === false
 							}
-						)
-
-						console.log(
-							`    - Subvariation groups to show: ${subVariationGroupsToShow.length}`
 						)
 
 						subVariationGroupsToShow.forEach((subGroup: any) => {
 							const selectionTypeCode =
 								subGroup.selection_types?.code || 'single_required'
-
-							console.log(
-								`      ✓ Initializing subgroup ${subGroup.id} (${subGroup.name}) with type: ${selectionTypeCode}`
-							)
 
 							subVariationSelections.set(subGroup.id, {
 								groupId: subGroup.id,
@@ -130,10 +117,6 @@ const VariationGroupExistingItems: React.FC<
 						})
 					}
 
-					console.log(
-						`    - subVariationSelections Map size: ${subVariationSelections.size}`
-					)
-
 					// Create option using the option choice that corresponds to this menu item
 					// For existing items mode, options are created with code like 'item_{itemId}'
 					const optionCode = `item_${menuItem.id}`
@@ -141,13 +124,7 @@ const VariationGroupExistingItems: React.FC<
 						(opt: any) => opt.code === optionCode
 					)
 
-					console.log(`    - Looking for option with code: ${optionCode}`)
-					console.log(`    - Option found: ${!!option}`)
-
 					if (!option) {
-						console.warn(
-							`No option found for menu item ${menuItem.id} in group ${group.id}`
-						)
 						return prev
 					}
 
@@ -167,18 +144,11 @@ const VariationGroupExistingItems: React.FC<
 						newOption.subVariationSelections = subVariationSelections
 					}
 
-					console.log(`    - Created option:`, {
-						optionId: newOption.optionId,
-						optionName: newOption.optionName,
-						hasSubvariations: !!newOption.subVariationSelections,
-					})
-
 					currentSelection.selectedOptions = [newOption]
 				}
 			} else {
 				// Multi selection: Toggle checkbox with limit enforcement
 				if (isSelected) {
-					console.log(`  - Removing from multi selection`)
 					// Remove option
 					currentSelection.selectedOptions =
 						currentSelection.selectedOptions.filter(
@@ -190,50 +160,23 @@ const VariationGroupExistingItems: React.FC<
 						multiLimit > 0 &&
 						currentSelection.selectedOptions.length >= multiLimit
 					) {
-						console.log(`  ⚠️ Multi-select limit reached (${multiLimit})`)
 						// Limit reached, don't add
 						return prev
 					}
 
-					console.log(`  - Adding to multi selection`)
-					console.log(
-						`  📦 Processing menu item ${menuItem.id} (${menuItem.name}):`
-					)
-					console.log(`    - basePrice: ${menuItem.basePrice}`)
-					console.log(
-						`    - variationGroups count: ${
-							menuItem.variationGroups?.length || 0
-						}`
-					)
-
 					// Initialize subvariation selections if menu item has variation groups with specificity: false
 					const subVariationSelections = new Map<number, VariationSelection>()
 					if (menuItem.variationGroups && menuItem.variationGroups.length > 0) {
-						console.log(
-							`    - Filtering subvariation groups (specificity: false)...`
-						)
-
 						// Filter only variation groups with specificity === false
 						const subVariationGroupsToShow = menuItem.variationGroups.filter(
 							(subGroup: any) => {
-								console.log(
-									`      - Group ${subGroup.id} (${subGroup.name}): specificity=${subGroup.specificity}`
-								)
 								return subGroup.specificity === false
 							}
-						)
-
-						console.log(
-							`    - Subvariation groups to show: ${subVariationGroupsToShow.length}`
 						)
 
 						subVariationGroupsToShow.forEach((subGroup: any) => {
 							const selectionTypeCode =
 								subGroup.selection_types?.code || 'single_required'
-
-							console.log(
-								`      ✓ Initializing subgroup ${subGroup.id} (${subGroup.name}) with type: ${selectionTypeCode}`
-							)
 
 							subVariationSelections.set(subGroup.id, {
 								groupId: subGroup.id,
@@ -245,18 +188,11 @@ const VariationGroupExistingItems: React.FC<
 						})
 					}
 
-					console.log(
-						`    - subVariationSelections Map size: ${subVariationSelections.size}`
-					)
-
 					// Create option using the option choice that corresponds to this menu item
 					const optionCode = `item_${menuItem.id}`
 					const option = group.menu_item_variation_option_choices?.find(
 						(opt: any) => opt.code === optionCode
 					)
-
-					console.log(`    - Looking for option with code: ${optionCode}`)
-					console.log(`    - Option found: ${!!option}`)
 
 					if (!option) {
 						console.warn(
@@ -281,29 +217,12 @@ const VariationGroupExistingItems: React.FC<
 						newOption.subVariationSelections = subVariationSelections
 					}
 
-					console.log(`    - Created option:`, {
-						optionId: newOption.optionId,
-						optionName: newOption.optionName,
-						hasSubvariations: !!newOption.subVariationSelections,
-					})
-
 					currentSelection.selectedOptions = [
 						...currentSelection.selectedOptions,
 						newOption,
 					]
 				}
 			}
-
-			console.log(
-				`  ✅ Total selected options: ${currentSelection.selectedOptions.length}`
-			)
-			console.log(
-				`  - Options with subvariations: ${
-					currentSelection.selectedOptions.filter(
-						(opt) => opt.subVariationSelections
-					).length
-				}`
-			)
 
 			newMap.set(group.id, currentSelection)
 			return newMap
@@ -357,6 +276,7 @@ const VariationGroupExistingItems: React.FC<
 					const isSelected = isItemSelected(menuItem.id)
 					const isOutOfStock = !menuItem.availability
 					const isDisabled = !isSingleType && !isSelected && !canSelectMore()
+					const statusText = getItemStatusText(menuItem)
 
 					// Find the selected option to get subvariation selections
 					const selectedOption = selection.selectedOptions.find(
@@ -367,35 +287,6 @@ const VariationGroupExistingItems: React.FC<
 						menuItem.variationGroups?.filter(
 							(g: any) => g.specificity === false
 						) || []
-
-					if (isSelected) {
-						console.log(
-							`🎨 [VariationGroupExistingItems] Rendering selected item ${menuItem.id} (${menuItem.name}):`
-						)
-						console.log(`  - Has selectedOption: ${!!selectedOption}`)
-						console.log(
-							`  - Has subVariationSelections: ${!!selectedOption?.subVariationSelections}`
-						)
-						console.log(
-							`  - menuItem.variationGroups count: ${
-								menuItem.variationGroups?.length || 0
-							}`
-						)
-						console.log(
-							`  - Subvariation groups to show (specificity: false): ${subVariationGroupsToShow.length}`
-						)
-
-						if (subVariationGroupsToShow.length > 0) {
-							console.log(
-								`  - Subvariation groups:`,
-								subVariationGroupsToShow.map((g: any) => ({
-									id: g.id,
-									name: g.name,
-									specificity: g.specificity,
-								}))
-							)
-						}
-					}
 
 					return (
 						<View key={menuItem.id}>
@@ -417,8 +308,8 @@ const VariationGroupExistingItems: React.FC<
 											]}>
 											{menuItem.name}
 										</Text>
-										{isOutOfStock && (
-											<Text style={styles.outOfStockText}>Out of stock</Text>
+										{statusText && (
+											<Text style={styles.outOfStockText}>{statusText}</Text>
 										)}
 									</View>
 									<Text style={styles.optionPrice}>
@@ -432,13 +323,6 @@ const VariationGroupExistingItems: React.FC<
 								selectedOption?.subVariationSelections &&
 								subVariationGroupsToShow.length > 0 && (
 									<>
-										{console.log(`  🚀 Passing to SubVariationGroups:`, {
-											menuItemId: menuItem.id,
-											menuItemName: menuItem.name,
-											subVariationGroupsCount: subVariationGroupsToShow.length,
-											subVariationSelectionsSize:
-												selectedOption.subVariationSelections.size,
-										})}
 										<SubVariationGroups
 											menuItemId={menuItem.id}
 											menuItemName={menuItem.name}

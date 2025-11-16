@@ -9,12 +9,17 @@ import {
 } from 'react-native'
 import { useThemeContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
+import {
+	normalizeMenuItemSchedule,
+	getMenuItemAvailabilityStatus,
+} from '../../../../../utils'
 
 interface MenuItem {
 	id: number
 	name: string
 	basePrice: number | string
 	availability: boolean
+	availabilitySchedule?: any
 }
 
 interface ItemSelectionModalProps {
@@ -87,6 +92,30 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
 		return `₱${adjustedPrice.toFixed(2)}`
 	}
 
+	const getItemStatusText = (item: MenuItem): string | null => {
+		// Check availability field (out of stock toggle)
+		if (item.availability === false) {
+			return 'Out of stock'
+		}
+
+		// Check if item is available today based on schedule
+		if (item.availabilitySchedule) {
+			const normalizedSchedule = normalizeMenuItemSchedule(
+				item.availabilitySchedule
+			)
+			const status = getMenuItemAvailabilityStatus(
+				normalizedSchedule,
+				item.availability ?? true
+			)
+
+			if (status === 'not_served_today') {
+				return 'Not available today'
+			}
+		}
+
+		return null
+	}
+
 	return (
 		<Modal
 			visible={visible}
@@ -113,7 +142,7 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
 					<ScrollView style={styles.scrollView}>
 						{items.map((item) => {
 							const isSelected = selectedItemIds.includes(item.id)
-							const isOutOfStock = !item.availability
+							const statusText = getItemStatusText(item)
 							const isDisabled =
 								!isSingleSelection &&
 								!isSelected &&
@@ -178,20 +207,20 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
 											style={[
 												styles.itemName,
 												{
-													color: isOutOfStock
+													color: statusText
 														? colors.textSecondary
 														: colors.text,
 												},
 											]}>
 											{item.name}
 										</Text>
-										{isOutOfStock && (
+										{statusText && (
 											<Text
 												style={[
 													styles.outOfStockText,
 													{ color: colors.error },
 												]}>
-												Out of stock
+												{statusText}
 											</Text>
 										)}
 									</View>

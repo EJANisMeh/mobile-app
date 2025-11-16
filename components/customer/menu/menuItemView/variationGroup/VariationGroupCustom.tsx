@@ -33,6 +33,14 @@ const VariationGroupCustom: React.FC<VariationGroupCustomProps> = ({
 		selection.selectionTypeCode === 'multi_required'
 	const multiLimit = selection.multiLimit || 0
 
+	const getOptionStatusText = (option: any): string | null => {
+		// Check if option is out of stock (availability toggle)
+		if (option.availability === false) {
+			return 'Out of stock'
+		}
+		return null
+	}
+
 	const formatPrice = (price: number | string) => {
 		const numPrice = typeof price === 'string' ? parseFloat(price) : price
 		if (numPrice === 0) return ''
@@ -151,6 +159,7 @@ const VariationGroupCustom: React.FC<VariationGroupCustomProps> = ({
 				{group.menu_item_variation_option_choices?.map((option: any) => {
 					const isSelected = isOptionSelected(option.id)
 					const isDisabled = !isSingleType && !isSelected && !canSelectMore()
+					const statusText = getOptionStatusText(option)
 
 					return (
 						<TouchableOpacity
@@ -164,13 +173,18 @@ const VariationGroupCustom: React.FC<VariationGroupCustomProps> = ({
 							disabled={isDisabled}>
 							{renderSelectionIndicator(option)}
 							<View style={styles.optionContent}>
-								<Text
-									style={[
-										styles.optionName,
-										isDisabled && styles.optionNameDisabled,
-									]}>
-									{option.name}
-								</Text>
+								<View style={styles.optionNameWrapper}>
+									<Text
+										style={[
+											styles.optionName,
+											isDisabled && styles.optionNameDisabled,
+										]}>
+										{option.name}
+									</Text>
+									{statusText && (
+										<Text style={styles.outOfStockText}>{statusText}</Text>
+									)}
+								</View>
 								{option.price_adjustment !== 0 && (
 									<Text style={styles.optionPrice}>
 										{formatPrice(option.price_adjustment)}

@@ -50,6 +50,8 @@ import {
 	getMenuItemAvailabilityStatus,
 	getMenuItemDayKeyForDate,
 	normalizeConcessionSchedule,
+	hasUnavailableVariationSelections,
+	hasUnavailableAddonSelections,
 	CONCESSION_SCHEDULE_DAY_KEYS,
 	CONCESSION_SCHEDULE_DAY_LABELS,
 } from '../../../utils'
@@ -230,48 +232,34 @@ const MenuItemViewScreen: React.FC = () => {
 
 	// Check if any selected variation option is out of stock
 	const hasOutOfStockVariationSelection = useMemo(() => {
-		if (!menuItem?.menu_item_variation_groups) {
-			return false
-		}
-
-		// Check each variation group
-		for (const group of menuItem.menu_item_variation_groups) {
-			const selection = variationSelections.get(group.id)
-			if (!selection || selection.selectedOptions.length === 0) {
-				continue
-			}
-
-			// For category_filter groups, check if selected menu items are out of stock
-			if (
-				group.kind === 'category_filter' &&
-				(group as any).categoryMenuItems
-			) {
-				const categoryMenuItems = (group as any).categoryMenuItems || []
-				for (const selectedOption of selection.selectedOptions) {
-					const menuItem = categoryMenuItems.find(
-						(item: any) => item.id === selectedOption.menuItemId
-					)
-					if (menuItem && !menuItem.availability) {
-						return true
-					}
-				}
-			}
-		}
-
-		return false
+		return hasUnavailableVariationSelections(
+			menuItem?.menu_item_variation_groups,
+			variationSelections
+		)
 	}, [menuItem, variationSelections])
 
 	const orderNowAllowed =
 		availabilityStatus === 'available' && !hasOutOfStockVariationSelection
+
+	// Check if any selected addons are unavailable
+	const hasUnavailableAddonSelection = useMemo(() => {
+		return hasUnavailableAddonSelections(
+			menuItem?.menu_item_addons_menu_item_addons_menu_item_idTomenu_items,
+			addonSelections
+		)
+	}, [menuItem, addonSelections])
+
+	const hasAnyUnavailableSelection =
+		hasOutOfStockVariationSelection || hasUnavailableAddonSelection
 
 	const orderRestrictionMessage = useMemo(() => {
 		if (!menuItem || !availabilityStatus) {
 			return null
 		}
 
-		// Check for out of stock variation selections first
-		if (hasOutOfStockVariationSelection) {
-			return 'One or more selected items are out of stock. You can only schedule an advanced order.'
+		// Check for out of stock or unavailable variation/addon selections first
+		if (hasAnyUnavailableSelection) {
+			return 'One or more selected items are out of stock or not available today. You can only schedule an advanced order.'
 		}
 
 		switch (availabilityStatus) {
@@ -284,7 +272,7 @@ const MenuItemViewScreen: React.FC = () => {
 			default:
 				return null
 		}
-	}, [availabilityStatus, menuItem, hasOutOfStockVariationSelection])
+	}, [availabilityStatus, menuItem, hasAnyUnavailableSelection])
 
 	const isOrdering = orderBackend.isProcessing
 
@@ -1077,7 +1065,7 @@ const MenuItemViewScreen: React.FC = () => {
 				availabilityStatus={availabilityStatus ?? 'not_served_today'}
 				isConcessionOpen={Boolean(menuItem.concession?.is_open)}
 				itemName={menuItem.name ?? 'this item'}
-				hasOutOfStockVariationSelection={hasOutOfStockVariationSelection}
+				hasOutOfStockVariationSelection={hasAnyUnavailableSelection}
 			/>
 			<PaymentMethodModal
 				visible={paymentModalVisible}

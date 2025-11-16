@@ -7,7 +7,9 @@ export {
 	overwriteCartItemsForUser,
 	clearCartItemsForUser,
 } from './cartStorage'
+export * from './checkUnavailableSelections'
 export * from './concessionSchedule'
 export * from './menuItemSchedule'
 export * from './orderStatusCodes'
 export * from './orderStatusColors'
+
