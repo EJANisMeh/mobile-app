@@ -8,6 +8,19 @@ export const createCustomerMenuItemViewStyles = (
 	const padding = responsive.getResponsivePadding()
 
 	return StyleSheet.create({
+		// Back Button
+		backButton: {
+			paddingVertical: spacing.sm,
+			paddingHorizontal: spacing.md,
+			marginBottom: spacing.sm,
+			alignSelf: 'flex-start',
+		},
+		backButtonText: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			color: colors.primary,
+			fontWeight: '600',
+		},
+
 		// Header Section
 		headerContainer: {
 			marginBottom: spacing.md,

@@ -61,6 +61,19 @@ export const createConcessionaireOrderDetailsStyles = (
 			color: '#fff',
 		},
 
+		// Back Button
+		backButton: {
+			paddingVertical: spacing.sm,
+			paddingHorizontal: spacing.md,
+			marginBottom: spacing.sm,
+			alignSelf: 'flex-start' as const,
+		},
+		backButtonText: {
+			fontSize: responsive.getResponsiveFontSize(16),
+			color: colors.primary,
+			fontWeight: '600' as const,
+		},
+
 		// Header
 		header: {
 			marginBottom: spacing.lg,

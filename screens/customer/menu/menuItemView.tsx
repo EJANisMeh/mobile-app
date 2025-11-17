@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { View, Text, ActivityIndicator } from 'react-native'
+import { View, Text, ActivityIndicator, TouchableOpacity } from 'react-native'
 import { useRoute, RouteProp } from '@react-navigation/native'
 import {
 	useAuthContext,
@@ -1225,6 +1225,12 @@ const MenuItemViewScreen: React.FC = () => {
 	return (
 		<DynamicKeyboardView useSafeArea={true}>
 			<DynamicScrollView showsVerticalScrollIndicator={false}>
+				{/* Back Button */}
+				<TouchableOpacity
+					style={styles.backButton}
+					onPress={navigateBackToMenu}>
+					<Text style={styles.backButtonText}>← Back</Text>
+				</TouchableOpacity>
 				{/* Header: Name and Categories */}
 				<MenuItemHeader menuItem={menuItem} />
 				{/* Images Carousel */}

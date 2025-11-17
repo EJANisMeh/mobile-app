@@ -531,6 +531,12 @@ const OrderDetailsScreen: React.FC = () => {
 				style={styles.scrollView}
 				contentContainerStyle={styles.scrollContent}
 				showsVerticalScrollIndicator={true}>
+				{/* Back Button */}
+				<TouchableOpacity
+					style={styles.backButton}
+					onPress={() => navigation.goBack()}>
+					<Text style={styles.backButtonText}>← Back</Text>
+				</TouchableOpacity>
 				<View style={styles.header}>
 					<Text style={styles.headerTitle}>
 						Order #
