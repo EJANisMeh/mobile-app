@@ -51,6 +51,8 @@ type ScheduleContext = 'group' | 'split'
 const roundCurrency = (value: number): number =>
 	Number.isFinite(value) ? Number(value.toFixed(2)) : 0
 
+let debug = false
+
 const CartScreen: React.FC = () => {
 	const { colors } = useThemeContext()
 	const { user } = useAuthContext()
@@ -129,7 +131,7 @@ const CartScreen: React.FC = () => {
 		}
 
 		let isCancelled = false
-		// Collect all menu item IDs: base items + variation options
+		// Collect all menu item IDs: base items + variation options + addons
 		const menuItemIdsSet = new Set<number>()
 
 		cartItems.forEach((item) => {
@@ -140,6 +142,13 @@ const CartScreen: React.FC = () => {
 			item.variationOptions.forEach((varOpt) => {
 				if (varOpt.menuItemId) {
 					menuItemIdsSet.add(varOpt.menuItemId)
+				}
+			})
+
+			// Add menu item IDs from addons
+			item.addons.forEach((addon) => {
+				if (addon.menuItemId) {
+					menuItemIdsSet.add(addon.menuItemId)
 				}
 			})
 		})
@@ -294,12 +303,58 @@ const CartScreen: React.FC = () => {
 			}
 
 			if (hasCompleteMeta) {
-				const template = normalizeMenuItemSchedule()
+				// Collect all schedules: main items + variations + addons
+				const allSchedules: MenuItemAvailabilitySchedule[] = []
+
+				// Add main item schedules
 				metaEntries.forEach((meta) => {
+					allSchedules.push(meta.schedule)
+				})
+
+				// Collect variation and addon schedules from cart items
+				group.items.forEach((item) => {
+					// Recursively collect variation schedules
+					const collectVariationSchedules = (
+						variations: VariationOptionSnapshot[]
+					): void => {
+						variations.forEach((varOpt) => {
+							if (varOpt.menuItemId) {
+								const varMeta = group.menuMeta[varOpt.menuItemId]
+								if (varMeta?.schedule) {
+									allSchedules.push(varMeta.schedule)
+								}
+							}
+							if (
+								varOpt.subVariationGroups &&
+								varOpt.subVariationGroups.length > 0
+							) {
+								varOpt.subVariationGroups.forEach((subGroup) => {
+									collectVariationSchedules(subGroup.selectedOptions)
+								})
+							}
+						})
+					}
+
+					collectVariationSchedules(item.variationOptions)
+
+					// Collect addon schedules
+					item.addons.forEach((addon) => {
+						if (addon.menuItemId) {
+							const addonMeta = group.menuMeta[addon.menuItemId]
+							if (addonMeta?.schedule) {
+								allSchedules.push(addonMeta.schedule)
+							}
+						}
+					})
+				})
+
+				// Calculate intersection of all schedules
+				const template = normalizeMenuItemSchedule()
+				allSchedules.forEach((schedule) => {
 					CONCESSION_SCHEDULE_DAY_KEYS.forEach((dayKey) => {
 						const typedKey = dayKey as MenuItemDayKey
 						template[typedKey] = Boolean(
-							template[typedKey] && meta.schedule[typedKey]
+							template[typedKey] && schedule[typedKey]
 						)
 					})
 				})
@@ -412,7 +467,10 @@ const CartScreen: React.FC = () => {
 					// They were already checked during order creation
 
 					// Check sub-variation groups recursively
-					if (varOpt.subVariationGroups && varOpt.subVariationGroups.length > 0) {
+					if (
+						varOpt.subVariationGroups &&
+						varOpt.subVariationGroups.length > 0
+					) {
 						for (const subGroup of varOpt.subVariationGroups) {
 							if (checkVariations(subGroup.selectedOptions)) {
 								return true
@@ -424,7 +482,23 @@ const CartScreen: React.FC = () => {
 				})
 			}
 
-			return checkVariations(item.variationOptions)
+			// Check addons
+			const hasUnavailableAddon = item.addons.some((addon) => {
+				if (addon.menuItemId) {
+					const addonMeta = menuItemMeta[addon.menuItemId]
+					if (addonMeta) {
+						if (
+							addonMeta.availabilityStatus === 'out_of_stock' ||
+							addonMeta.availabilityStatus === 'not_served_today'
+						) {
+							return true
+						}
+					}
+				}
+				return false
+			})
+
+			return checkVariations(item.variationOptions) || hasUnavailableAddon
 		},
 		[menuItemMeta]
 	)
@@ -436,6 +510,7 @@ const CartScreen: React.FC = () => {
 		itemName: string
 		isConcessionOpen: boolean
 		hasOutOfStockVariationSelection: boolean
+		allItemSchedules: (MenuItemAvailabilitySchedule | undefined | null)[]
 	}>(() => {
 		if (!activeGroup) {
 			return {
@@ -445,6 +520,7 @@ const CartScreen: React.FC = () => {
 				itemName: 'from this concession',
 				isConcessionOpen: false,
 				hasOutOfStockVariationSelection: false,
+				allItemSchedules: [],
 			}
 		}
 
@@ -453,6 +529,45 @@ const CartScreen: React.FC = () => {
 		if (scheduleContext === 'split' && splitActiveItem) {
 			const itemMeta = activeGroup.menuMeta[splitActiveItem.menuItemId]
 			const hasUnavailable = hasUnavailableSelections(splitActiveItem)
+
+			// Collect schedules for split item: main item + variations + addons
+			const schedules: (MenuItemAvailabilitySchedule | undefined | null)[] = []
+			schedules.push(itemMeta?.schedule)
+
+			// Recursively collect variation schedules
+			const collectVariationSchedules = (
+				variations: VariationOptionSnapshot[]
+			): void => {
+				variations.forEach((varOpt) => {
+					if (varOpt.menuItemId) {
+						const varMeta = activeGroup.menuMeta[varOpt.menuItemId]
+						if (varMeta?.schedule) {
+							schedules.push(varMeta.schedule)
+						}
+					}
+					if (
+						varOpt.subVariationGroups &&
+						varOpt.subVariationGroups.length > 0
+					) {
+						varOpt.subVariationGroups.forEach((subGroup) => {
+							collectVariationSchedules(subGroup.selectedOptions)
+						})
+					}
+				})
+			}
+
+			collectVariationSchedules(splitActiveItem.variationOptions)
+
+			// Collect addon schedules
+			splitActiveItem.addons.forEach((addon) => {
+				if (addon.menuItemId) {
+					const addonMeta = activeGroup.menuMeta[addon.menuItemId]
+					if (addonMeta?.schedule) {
+						schedules.push(addonMeta.schedule)
+					}
+				}
+			})
+
 			return {
 				schedule: itemMeta?.schedule ?? null,
 				concessionSchedule:
@@ -464,10 +579,53 @@ const CartScreen: React.FC = () => {
 				isConcessionOpen:
 					itemMeta?.concessionIsOpen ?? activeGroup.concessionIsOpen,
 				hasOutOfStockVariationSelection: hasUnavailable,
+				allItemSchedules: schedules,
 			}
 		}
 
-		// For group ordering, check if any item has unavailable selections
+		// For group ordering, collect schedules from ALL items + variations + addons
+		const schedules: (MenuItemAvailabilitySchedule | undefined | null)[] = []
+
+		activeGroup.items.forEach((item) => {
+			const itemMeta = activeGroup.menuMeta[item.menuItemId]
+			schedules.push(itemMeta?.schedule)
+
+			// Recursively collect variation schedules
+			const collectVariationSchedules = (
+				variations: VariationOptionSnapshot[]
+			): void => {
+				variations.forEach((varOpt) => {
+					if (varOpt.menuItemId) {
+						const varMeta = activeGroup.menuMeta[varOpt.menuItemId]
+						if (varMeta?.schedule) {
+							schedules.push(varMeta.schedule)
+						}
+					}
+					if (
+						varOpt.subVariationGroups &&
+						varOpt.subVariationGroups.length > 0
+					) {
+						varOpt.subVariationGroups.forEach((subGroup) => {
+							collectVariationSchedules(subGroup.selectedOptions)
+						})
+					}
+				})
+			}
+
+			collectVariationSchedules(item.variationOptions)
+
+			// Collect addon schedules
+			item.addons.forEach((addon) => {
+				if (addon.menuItemId) {
+					const addonMeta = activeGroup.menuMeta[addon.menuItemId]
+					if (addonMeta?.schedule) {
+						schedules.push(addonMeta.schedule)
+					}
+				}
+			})
+		})
+
+		// Check if any item has unavailable selections
 		const hasUnavailable = activeGroup.items.some((item) =>
 			hasUnavailableSelections(item)
 		)
@@ -479,6 +637,7 @@ const CartScreen: React.FC = () => {
 			itemName: `items from ${concessionLabel}`,
 			isConcessionOpen: activeGroup.concessionIsOpen,
 			hasOutOfStockVariationSelection: hasUnavailable,
+			allItemSchedules: schedules,
 		}
 	}, [activeGroup, scheduleContext, splitActiveItem, hasUnavailableSelections])
 
@@ -510,9 +669,10 @@ const CartScreen: React.FC = () => {
 			}
 		}
 
-		// Check if any items have unavailable selections (variations)
+		// Check if any items have unavailable selections (variations + addons)
 		const hasUnavailableSelections = group.items.some((item) => {
-			return item.variationOptions.some((varOpt) => {
+			// Check variations
+			const hasUnavailableVariation = item.variationOptions.some((varOpt) => {
 				if (varOpt.menuItemId) {
 					const varMeta = menuItemMeta[varOpt.menuItemId]
 					if (varMeta) {
@@ -526,6 +686,24 @@ const CartScreen: React.FC = () => {
 				}
 				return false
 			})
+
+			// Check addons
+			const hasUnavailableAddon = item.addons.some((addon) => {
+				if (addon.menuItemId) {
+					const addonMeta = menuItemMeta[addon.menuItemId]
+					if (addonMeta) {
+						if (
+							addonMeta.availabilityStatus === 'out_of_stock' ||
+							addonMeta.availabilityStatus === 'not_served_today'
+						) {
+							return true
+						}
+					}
+				}
+				return false
+			})
+
+			return hasUnavailableVariation || hasUnavailableAddon
 		})
 
 		if (hasUnavailableSelections) {
@@ -622,8 +800,26 @@ const CartScreen: React.FC = () => {
 				return false
 			})
 
-			// If any variation is unavailable, show error
-			if (hasUnavailableVariation) {
+			debug = false
+			// Check if any addons reference menu items that are unavailable
+			debug && console.log(`item: ${JSON.stringify(item)}`)
+			const hasUnavailableAddon = item.addons.some((addon) => {
+				if (addon.menuItemId) {
+					const addonMeta = menuItemMeta[addon.menuItemId]
+					if (addonMeta) {
+						if (
+							addonMeta.availabilityStatus === 'out_of_stock' ||
+							addonMeta.availabilityStatus === 'not_served_today'
+						) {
+							return true
+						}
+					}
+				}
+				return false
+			})
+
+			// If any variation or addon is unavailable, show error
+			if (hasUnavailableVariation || hasUnavailableAddon) {
 				return {
 					label: 'Contains unavailable items',
 					tone: 'error',
@@ -643,6 +839,8 @@ const CartScreen: React.FC = () => {
 					tone: 'warning',
 				}
 			}
+
+			if (debug) debug = false
 
 			switch (meta.availabilityStatus) {
 				case 'out_of_stock':
@@ -1389,6 +1587,18 @@ const CartScreen: React.FC = () => {
 						onOrderItem={(item) => handleOrderSingleItemPress(card.group, item)}
 						onRemoveItem={(item) => handleRemoveItemPress(card.group, item)}
 						onUpdateQuantity={handleUpdateQuantity}
+						onRemoveGroup={() => {
+							orderConfirmation.showConfirmation({
+								title: 'Remove all items?',
+								message: `Remove all items from ${card.group.concessionName}? This cannot be undone.`,
+								confirmText: 'Remove All',
+								cancelText: 'Cancel',
+								confirmStyle: 'destructive',
+								onConfirm: () => {
+									void removeGroupFromCart(card.group)
+								},
+							})
+						}}
 					/>
 				))}
 			</View>
@@ -1438,6 +1648,10 @@ const CartScreen: React.FC = () => {
 				availabilityStatus={scheduleModalState.availabilityStatus}
 				isConcessionOpen={scheduleModalState.isConcessionOpen}
 				itemName={scheduleModalState.itemName}
+				hasOutOfStockVariationSelection={
+					scheduleModalState.hasOutOfStockVariationSelection
+				}
+				itemSchedules={scheduleModalState.allItemSchedules}
 			/>
 			<PaymentMethodModal
 				visible={paymentModalVisible}

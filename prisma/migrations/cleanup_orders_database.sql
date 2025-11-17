@@ -22,7 +22,7 @@ DELETE FROM order_items;
 -- ============================================================
 -- STEP 2: Delete all notifications related to orders
 -- ============================================================
-DELETE FROM notifications WHERE order_id IS NOT NULL;
+DELETE FROM notifications WHERE user_id IS NOT NULL;
 
 -- ============================================================
 -- STEP 3: Delete all orders
@@ -55,7 +55,7 @@ SELECT COUNT(*) as orders_count FROM orders;
 SELECT COUNT(*) as order_items_count FROM order_items;
 
 -- Check if order-related notifications are deleted
-SELECT COUNT(*) as order_notifications_count FROM notifications WHERE order_id IS NOT NULL;
+SELECT COUNT(*) as order_notifications_count FROM notifications WHERE user_id IS NOT NULL;
 
 -- Check sequence values (should all be at 1)
 SELECT 

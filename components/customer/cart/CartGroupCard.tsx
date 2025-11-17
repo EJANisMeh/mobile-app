@@ -47,6 +47,7 @@ interface CartGroupCardProps {
 	onOrderItem: (item: CartItem) => void
 	onRemoveItem: (item: CartItem) => void
 	onUpdateQuantity: (item: CartItem, newQuantity: number) => void
+	onRemoveGroup: () => void
 }
 
 const CartGroupCard: React.FC<CartGroupCardProps> = ({
@@ -63,6 +64,7 @@ const CartGroupCard: React.FC<CartGroupCardProps> = ({
 	onOrderItem,
 	onRemoveItem,
 	onUpdateQuantity,
+	onRemoveGroup,
 }) => {
 	const getToneBadgeStyle = (tone: StatusTone) => {
 		switch (tone) {
@@ -128,6 +130,15 @@ const CartGroupCard: React.FC<CartGroupCardProps> = ({
 						• {formatCurrency(group.totalAmount)}
 					</Text>
 				</View>
+				<TouchableOpacity
+					onPress={onRemoveGroup}
+					style={styles.groupRemoveButton}>
+					<Ionicons
+						name="trash-outline"
+						size={20}
+						color="#dc2626"
+					/>
+				</TouchableOpacity>
 			</View>
 
 			<Text

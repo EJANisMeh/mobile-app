@@ -171,12 +171,12 @@ const MenuItemViewScreen: React.FC = () => {
 						addonId: addon.id,
 						addonName: displayName,
 						price: Number.isFinite(numericPrice) ? numericPrice : 0,
+						menuItemId: addon.target_menu_item_id ?? null,
 						selected: addon.required, // Auto-select required addons
 					})
 				}
 			)
 		}
-
 		setVariationSelections(varSelections)
 		setAddonSelections(addSelections)
 	}
@@ -584,7 +584,7 @@ const MenuItemViewScreen: React.FC = () => {
 			return true
 		}
 
-		debug = true
+		debug = false
 		debug && console.log('\n--Function: areVariationRequirementsMet--')
 
 		return menuItem.menu_item_variation_groups.every((group: any) => {
@@ -816,7 +816,7 @@ const MenuItemViewScreen: React.FC = () => {
 			}))
 		)
 
-		debug = true
+		debug = false
 		debug && console.log('\n--Function: buildSelectionSnapshots--')
 		debug &&
 			console.log(
@@ -833,20 +833,14 @@ const MenuItemViewScreen: React.FC = () => {
 		const addonsSnapshot = Array.from(addonSelections.values())
 			.filter((addon) => addon.selected)
 			.map((addon) => {
-				// Find the addon data to get target menu item ID
 				debug && console.log(`Processing addon with ID: ${addon.addonId}`)
-				const addonData =
-					menuItem?.menu_item_addons_menu_item_addons_menu_item_idTomenu_items?.find(
-						(a: any) => a.id === addon.addonId
-					)
-				debug &&
-					console.log(`Found addon data: ${addonData ? 'true' : 'false'}`)
+				debug && console.log(`Addon menuItemId: ${addon.menuItemId}`)
 
 				return {
 					addonId: addon.addonId,
 					addonName: addon.addonName,
 					price: addon.price,
-					menuItemId: addonData?.target_menu_item?.id ?? null,
+					menuItemId: addon.menuItemId,
 				}
 			})
 		debug &&

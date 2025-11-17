@@ -78,6 +78,13 @@ export const createCustomerCartStyles = (
 		cartGroupHeaderText: {
 			flex: 1,
 		},
+		groupRemoveButton: {
+			padding: spacing.xs,
+			borderRadius: 8,
+			backgroundColor: colors.surface,
+			borderWidth: 1,
+			borderColor: '#dc2626',
+		},
 		cartGroupTitle: {
 			fontSize: fontSize(18),
 			fontWeight: '700',

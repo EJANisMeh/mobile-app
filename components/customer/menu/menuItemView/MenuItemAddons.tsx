@@ -1,5 +1,6 @@
 import React, { Dispatch, SetStateAction } from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, Image } from 'react-native'
+import type { ImageSourcePropType } from 'react-native'
 import { useThemeContext } from '../../../../context'
 import { useResponsiveDimensions } from '../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../styles/customer'
@@ -8,6 +9,8 @@ import {
 	normalizeMenuItemSchedule,
 	getMenuItemAvailabilityStatus,
 } from '../../../../utils'
+
+const DEFAULT_MENU_IMAGE: ImageSourcePropType = require('../../../../assets/icon.png')
 
 interface MenuItemAddonsProps {
 	addons: any[]
@@ -88,6 +91,20 @@ const MenuItemAddons: React.FC<MenuItemAddonsProps> = ({
 				<View
 					key={addon.id}
 					style={styles.addonItem}>
+					{/* Item image */}
+					<Image
+						source={
+							targetItem?.images &&
+							targetItem.images.length > 0 &&
+							targetItem.images[targetItem.display_image_index ?? 0]
+								? {
+										uri: targetItem.images[targetItem.display_image_index ?? 0],
+								  }
+								: DEFAULT_MENU_IMAGE
+						}
+						style={styles.addonItemImage}
+						resizeMode="cover"
+					/>
 					<View style={styles.addonInfo}>
 						<View style={{ flex: 1 }}>
 							<Text style={styles.addonName}>{displayName}</Text>
@@ -110,6 +127,20 @@ const MenuItemAddons: React.FC<MenuItemAddonsProps> = ({
 						isSelected && styles.addonItemSelected,
 					]}
 					onPress={() => handleAddonToggle(addon.id)}>
+					{/* Item image */}
+					<Image
+						source={
+							targetItem?.images &&
+							targetItem.images.length > 0 &&
+							targetItem.images[targetItem.display_image_index ?? 0]
+								? {
+										uri: targetItem.images[targetItem.display_image_index ?? 0],
+								  }
+								: DEFAULT_MENU_IMAGE
+						}
+						style={styles.addonItemImage}
+						resizeMode="cover"
+					/>
 					<View style={styles.radioButton}>
 						{isSelected && <View style={styles.radioButtonInner} />}
 					</View>

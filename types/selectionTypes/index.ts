@@ -25,6 +25,7 @@ export interface AddonSelection {
 	addonId: number
 	addonName: string
 	price: number
+	menuItemId: number | null
 	selected: boolean
 }
 

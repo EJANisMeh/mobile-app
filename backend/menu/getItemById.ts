@@ -95,6 +95,8 @@ export const getItemById = async (
 							basePrice: true,
 							availability: true,
 							availabilitySchedule: true,
+							images: true,
+							display_image_index: true,
 							menu_item_category_links: {
 								include: {
 									category: true,
@@ -159,6 +161,8 @@ export const getItemById = async (
 							basePrice: true,
 							availability: true,
 							availabilitySchedule: true,
+							images: true,
+							display_image_index: true,
 							menu_item_category_links: {
 								include: {
 									category: true,
@@ -225,6 +229,8 @@ export const getItemById = async (
 								basePrice: true,
 								availability: true,
 								availabilitySchedule: true,
+								images: true,
+								display_image_index: true,
 							},
 						})
 

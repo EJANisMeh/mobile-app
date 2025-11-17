@@ -302,6 +302,11 @@ export const createCustomerMenuItemViewStyles = (
 			borderColor: colors.border,
 			gap: spacing.sm,
 		},
+		optionItemImage: {
+			width: 50,
+			height: 50,
+			borderRadius: 8,
+		},
 		optionItemSelected: {
 			backgroundColor: colors.primaryLight,
 			borderColor: colors.primary,
@@ -456,6 +461,11 @@ export const createCustomerMenuItemViewStyles = (
 			borderWidth: 1,
 			borderColor: colors.border,
 			gap: spacing.sm,
+		},
+		addonItemImage: {
+			width: 50,
+			height: 50,
+			borderRadius: 8,
 		},
 		addonItemSelected: {
 			backgroundColor: colors.primaryLight,

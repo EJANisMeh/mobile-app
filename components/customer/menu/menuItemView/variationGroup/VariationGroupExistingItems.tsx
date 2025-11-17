@@ -1,5 +1,6 @@
 import React, { Dispatch, SetStateAction } from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { View, Text, TouchableOpacity, Image } from 'react-native'
+import type { ImageSourcePropType } from 'react-native'
 import { useThemeContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
 import { createCustomerMenuItemViewStyles } from '../../../../../styles/customer'
@@ -9,6 +10,8 @@ import {
 } from '../../../../../types'
 import SubVariationGroups from './SubVariationGroups'
 import { getMenuItemStatusText } from '../../../../../utils'
+
+const DEFAULT_MENU_IMAGE: ImageSourcePropType = require('../../../../../assets/icon.png')
 
 interface VariationGroupExistingItemsProps {
 	group: any
@@ -272,6 +275,22 @@ const VariationGroupExistingItems: React.FC<
 								]}
 								onPress={() => handleItemToggle(menuItem)}
 								disabled={isDisabled}>
+								{/* Item image */}
+								<Image
+									source={
+										menuItem.images &&
+										menuItem.images.length > 0 &&
+										menuItem.images[menuItem.display_image_index ?? 0]
+											? {
+													uri: menuItem.images[
+														menuItem.display_image_index ?? 0
+													],
+											  }
+											: DEFAULT_MENU_IMAGE
+									}
+									style={styles.optionItemImage}
+									resizeMode="cover"
+								/>
 								{renderSelectionIndicator(menuItem)}
 								<View style={styles.optionContent}>
 									<View style={styles.optionNameWrapper}>

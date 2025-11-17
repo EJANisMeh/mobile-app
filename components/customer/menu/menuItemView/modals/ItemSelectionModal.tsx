@@ -6,10 +6,14 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	StyleSheet,
+	Image,
 } from 'react-native'
+import type { ImageSourcePropType } from 'react-native'
 import { useThemeContext } from '../../../../../context'
 import { useResponsiveDimensions } from '../../../../../hooks'
 import { getMenuItemStatusText } from '../../../../../utils'
+
+const DEFAULT_MENU_IMAGE: ImageSourcePropType = require('../../../../../assets/icon.png')
 
 interface MenuItem {
 	id: number
@@ -17,6 +21,8 @@ interface MenuItem {
 	basePrice: number | string
 	availability: boolean
 	availabilitySchedule?: any
+	images?: string[]
+	display_image_index?: number
 }
 
 interface ItemSelectionModalProps {
@@ -139,6 +145,21 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
 									]}
 									onPress={() => handleItemToggle(item.id)}
 									disabled={isDisabled}>
+									{/* Item image */}
+									<Image
+										source={
+											item.images &&
+											item.images.length > 0 &&
+											item.images[item.display_image_index ?? 0]
+												? {
+														uri: item.images[item.display_image_index ?? 0],
+												  }
+												: DEFAULT_MENU_IMAGE
+										}
+										style={styles.itemImage}
+										resizeMode="cover"
+									/>
+
 									{/* Selection indicator */}
 									{isSingleSelection ? (
 										<View style={styles.radioButton}>
@@ -282,6 +303,12 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		borderWidth: 2,
 		marginBottom: 8,
+	},
+	itemImage: {
+		width: 50,
+		height: 50,
+		borderRadius: 8,
+		marginRight: 12,
 	},
 	radioButton: {
 		width: 24,

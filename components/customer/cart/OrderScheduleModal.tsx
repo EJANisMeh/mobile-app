@@ -21,6 +21,8 @@ import {
 	CONCESSION_SCHEDULE_DAY_LABELS,
 	formatTimeDisplay,
 	isConcessionClosingSoon,
+	getValidScheduleWindows,
+	isValidScheduledDateTime,
 } from '../../../utils'
 
 interface OrderScheduleModalProps {
@@ -33,6 +35,7 @@ interface OrderScheduleModalProps {
 	availabilityStatus: MenuItemAvailabilityStatus
 	itemName: string
 	hasOutOfStockVariationSelection?: boolean
+	itemSchedules?: (MenuItemAvailabilitySchedule | undefined | null)[] // All item/option schedules for validation
 }
 const DEFAULT_SCHEDULED_HOUR = 11
 const DEFAULT_SCHEDULED_MINUTE = 0
@@ -67,6 +70,7 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 	availabilityStatus,
 	itemName,
 	hasOutOfStockVariationSelection = false,
+	itemSchedules = [],
 }) => {
 	const { colors } = useThemeContext()
 	const responsive = useResponsiveDimensions()
@@ -134,66 +138,53 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 		hasOutOfStockVariationSelection ||
 		isConcessionClosingSoon(isConcessionOpen, concessionSchedule)
 
+	// Calculate valid scheduling windows based on all item schedules + concession hours
+	const validWindows = useMemo(() => {
+		// Use itemSchedules if provided, otherwise fall back to single schedule
+		const schedulesToCheck =
+			itemSchedules.length > 0 ? itemSchedules : [schedule]
+		return getValidScheduleWindows(
+			concessionSchedule ?? null,
+			schedulesToCheck,
+			new Date(),
+			30 // Check 30 days ahead
+		)
+	}, [concessionSchedule, itemSchedules, schedule])
+
 	const availableDayKeys = useMemo(() => {
-		return CONCESSION_SCHEDULE_DAY_KEYS.filter((dayKey) => {
-			const itemAvailable = Boolean(normalizedSchedule[dayKey])
-			const concessionDay = normalizedConcessionSchedule[dayKey]
-			return (
-				itemAvailable &&
-				Boolean(concessionDay?.isOpen) &&
-				typeof concessionDay?.open === 'string' &&
-				typeof concessionDay?.close === 'string'
-			)
-		})
-	}, [normalizedConcessionSchedule, normalizedSchedule])
+		const uniqueDays = new Set(validWindows.map((w) => w.dayKey))
+		return Array.from(uniqueDays)
+	}, [validWindows])
 
 	const quickPickOptions = useMemo(() => {
 		const results: QuickPickOption[] = []
 		const now = new Date()
 
-		let offset = 1
-		while (results.length < 3 && offset <= 21) {
-			const candidateDate = new Date(now)
-			candidateDate.setDate(now.getDate() + offset)
-			candidateDate.setSeconds(0, 0)
+		// Take first 3 valid windows that are in the future
+		for (const window of validWindows) {
+			if (results.length >= 3) break
 
-			const dayKey = getMenuItemDayKeyForDate(candidateDate)
-			if (!availableDayKeys.includes(dayKey)) {
-				offset += 1
-				continue
-			}
-
-			const concessionDay = normalizedConcessionSchedule[dayKey]
-			const openTime =
-				typeof concessionDay?.open === 'string'
-					? concessionDay.open
-					: `${DEFAULT_SCHEDULED_HOUR}:${DEFAULT_SCHEDULED_MINUTE.toString().padStart(
-							2,
-							'0'
-					  )}`
-			const scheduledDate = combineDateAndTime(candidateDate, openTime)
+			const scheduledDate = combineDateAndTime(window.date, window.openTime)
 			if (scheduledDate.getTime() <= now.getTime()) {
-				offset += 1
 				continue
 			}
 
 			const label = `${
-				CONCESSION_SCHEDULE_DAY_LABELS[dayKey]
+				CONCESSION_SCHEDULE_DAY_LABELS[window.dayKey]
 			} • ${scheduledDate.toLocaleDateString(undefined, {
 				month: 'short',
 				day: 'numeric',
-			})} ${formatTimeDisplay(openTime)}`
+			})} ${formatTimeDisplay(window.openTime)}`
 
 			results.push({
-				id: `${dayKey}-${offset}`,
+				id: `${window.dayKey}-${window.date.getTime()}`,
 				label,
 				date: scheduledDate,
 			})
-			offset += 1
 		}
 
 		return results
-	}, [availableDayKeys, normalizedConcessionSchedule])
+	}, [validWindows])
 
 	const isDateValid = (candidate: Date | null): boolean => {
 		if (!candidate) {
@@ -205,28 +196,14 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 			return false
 		}
 
-		if (!isMenuItemScheduledOnDate(normalizedSchedule, candidate)) {
-			return false
-		}
-
-		const dayKey = getMenuItemDayKeyForDate(candidate)
-		const concessionDay = normalizedConcessionSchedule[dayKey]
-		if (
-			!concessionDay?.isOpen ||
-			typeof concessionDay.open !== 'string' ||
-			typeof concessionDay.close !== 'string'
-		) {
-			return false
-		}
-
-		const opensAt = combineDateAndTime(candidate, concessionDay.open)
-		const closesAt = combineDateAndTime(candidate, concessionDay.close)
-
-		if (candidate < opensAt || candidate > closesAt) {
-			return false
-		}
-
-		return true
+		// Use schedule validation utility with all item schedules
+		const schedulesToCheck =
+			itemSchedules.length > 0 ? itemSchedules : [schedule]
+		return isValidScheduledDateTime(
+			candidate,
+			concessionSchedule ?? null,
+			schedulesToCheck
+		)
 	}
 
 	const validateScheduledDate = (candidate: Date): boolean => {
@@ -236,35 +213,31 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 			return false
 		}
 
-		if (!isMenuItemScheduledOnDate(normalizedSchedule, candidate)) {
-			setError(
-				'This item is not available on the selected day/time. Pick another day/time.'
-			)
-			return false
-		}
+		// Use schedule validation utility with all item schedules
+		const schedulesToCheck =
+			itemSchedules.length > 0 ? itemSchedules : [schedule]
+		const isValid = isValidScheduledDateTime(
+			candidate,
+			concessionSchedule ?? null,
+			schedulesToCheck
+		)
 
-		const dayKey = getMenuItemDayKeyForDate(candidate)
-		const concessionDay = normalizedConcessionSchedule[dayKey]
-		if (
-			!concessionDay?.isOpen ||
-			typeof concessionDay.open !== 'string' ||
-			typeof concessionDay.close !== 'string'
-		) {
-			setError(
-				'The concession is closed on the selected day/time. Pick another date/time.'
-			)
-			return false
-		}
+		if (!isValid) {
+			// Find which window this date should fall into for better error message
+			const dayKey = getMenuItemDayKeyForDate(candidate)
+			const window = validWindows.find((w) => w.dayKey === dayKey)
 
-		const opensAt = combineDateAndTime(candidate, concessionDay.open)
-		const closesAt = combineDateAndTime(candidate, concessionDay.close)
-
-		if (candidate < opensAt || candidate > closesAt) {
-			setError(
-				`Please choose a time between ${formatTimeDisplay(
-					concessionDay.open
-				)} and ${formatTimeDisplay(concessionDay.close)}.`
-			)
+			if (!window) {
+				setError(
+					'Items are not available on the selected day. Pick another day.'
+				)
+			} else {
+				setError(
+					`Please choose a time between ${formatTimeDisplay(
+						window.openTime
+					)} and ${formatTimeDisplay(window.closeTime)}.`
+				)
+			}
 			return false
 		}
 
@@ -370,13 +343,13 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 
 					{mode === 'scheduled' ? (
 						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>Selling schedule</Text>
+							<Text style={styles.sectionTitle}>Available Days</Text>
 							<Text style={styles.helperText}>
-								Days this order is available for ordering:
+								Days when all selected items can be ordered together:
 							</Text>
 							<View style={styles.scheduleDaysRow}>
 								{CONCESSION_SCHEDULE_DAY_KEYS.map((dayKey) => {
-									const isActive = Boolean(normalizedSchedule[dayKey])
+									const isActive = availableDayKeys.includes(dayKey)
 									return (
 										<Text
 											key={dayKey}
@@ -398,7 +371,6 @@ const OrderScheduleModal: React.FC<OrderScheduleModalProps> = ({
 							) : null}
 						</View>
 					) : null}
-
 					{mode === 'scheduled' ? (
 						<View style={styles.section}>
 							{quickPickOptions.length > 0 ? (
