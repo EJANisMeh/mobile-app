@@ -43,6 +43,10 @@ const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 
 	return (
 		<>
+			{!orderNowAllowed && orderRestrictionMessage ? (
+				<Text style={styles.unavailableText}>{orderRestrictionMessage}</Text>
+			) : null}
+
 			<View style={styles.actionsContainer}>
 				<TouchableOpacity
 					style={styles.helpButton}
@@ -96,10 +100,6 @@ const MenuItemActions: React.FC<MenuItemActionsProps> = ({
 					)}
 				</TouchableOpacity>
 			</View>
-
-			{!orderNowAllowed && orderRestrictionMessage ? (
-				<Text style={styles.unavailableText}>{orderRestrictionMessage}</Text>
-			) : null}
 
 			<AlertModal
 				visible={alertModal.visible}

@@ -312,10 +312,17 @@ const MenuItemViewScreen: React.FC = () => {
 						// Find the menu item based on variation group kind
 						debug && console.log(`Variation group kind: ${varGroup.kind}`)
 						if (varGroup.kind === 'single_category_filter') {
+							debug &&
+								console.log(`vargroup table: ${JSON.stringify(varGroup)}`)
+							debug && console.log(`option: ${JSON.stringify(option)}`)
 							optionMenuItem = varGroup.categoryMenuItems?.find(
 								(mi: any) => mi.id === option.menuItemId
 							)
 						} else if (varGroup.kind === 'multi_category_filter') {
+							debug &&
+								console.log(`vargroup table: ${JSON.stringify(varGroup)}`)
+							debug && console.log(`option: ${JSON.stringify(option)}`)
+
 							optionMenuItem = varGroup.categoryMenuItems?.find(
 								(mi: any) => mi.id === option.menuItemId
 							)
@@ -323,8 +330,6 @@ const MenuItemViewScreen: React.FC = () => {
 							optionMenuItem = varGroup.existingMenuItems?.find(
 								(item: any) => item.id === option.menuItemId
 							)
-							debug &&
-								console.log(`vargroup table: ${JSON.stringify(varGroup)}`)
 							debug &&
 								console.log(
 									`Found option menu item for existing_items?: ${
@@ -391,6 +396,19 @@ const MenuItemViewScreen: React.FC = () => {
 											console.log(
 												`Subvariation group kind: ${subVarGroup.kind}`
 											)
+
+										// Skip custom variation groups (group, multi_group) - they don't have menu items
+										if (
+											subVarGroup.kind === 'group' ||
+											subVarGroup.kind === 'multi_group'
+										) {
+											debug &&
+												console.log(
+													`Skipping custom subvariation group - no menu items to check`
+												)
+											return
+										}
+
 										if (subVarGroup.kind === 'single_category_filter') {
 											subOptionMenuItem = subVarGroup.categoryMenuItems?.find(
 												(mi: any) => mi.id === subOption.menuItemId
@@ -400,19 +418,16 @@ const MenuItemViewScreen: React.FC = () => {
 												(mi: any) => mi.id === subOption.menuItemId
 											)
 										} else if (subVarGroup.kind === 'existing_items') {
-											subOptionMenuItem = subVarGroup.items?.find(
-												(item: any) =>
-													item.menu_item?.id === subOption.menuItemId
-											)?.menu_item
+											subOptionMenuItem = subVarGroup.existingMenuItems?.find(
+												(item: any) => item.id === subOption.menuItemId
+											)
 										}
 										debug &&
 											console.log(
 												`SubVariation option is a menu item?: ${
 													subOptionMenuItem ? 'true' : 'false'
 												}`
-											)
-
-										// Add the suboption's schedule if it exists
+											) // Add the suboption's schedule if it exists
 										debug &&
 											console.log(
 												`Adding suboption schedule: ${
@@ -569,8 +584,17 @@ const MenuItemViewScreen: React.FC = () => {
 			return true
 		}
 
+		debug = true
+		debug && console.log('\n--Function: areVariationRequirementsMet--')
+
 		return menuItem.menu_item_variation_groups.every((group: any) => {
 			const selection = variationSelections.get(group.id)
+			debug &&
+				console.log(
+					`\nChecking group: ${group.name} (ID: ${
+						group.id
+					}) with selection: ${JSON.stringify(selection)}`
+				)
 			const selectionTypeCode =
 				selection?.selectionTypeCode ?? group?.selection_types?.code ?? ''
 			const selectedCount = selection?.selectedOptions.length ?? 0
@@ -579,17 +603,18 @@ const MenuItemViewScreen: React.FC = () => {
 				(typeof group?.multi_limit === 'number' ? group.multi_limit : 0)
 			const isRequired = selectionTypeCode.includes('required')
 
-			if (!isRequired) {
-				return true
-			}
+			debug &&
+				console.log(
+					`Selection Type: ${selectionTypeCode}, Selected Count: ${selectedCount}, Multi Limit: ${multiLimit}, Is Required: ${isRequired}`
+				)
 
 			if (selectionTypeCode.startsWith('single')) {
-				if (selectedCount !== 1) {
+				if (isRequired && selectedCount < 1) {
 					return false
 				}
 			} else {
 				// For multi required selections, ensure at least one option is chosen
-				if (selectedCount === 0) {
+				if (isRequired && selectedCount < 1) {
 					return false
 				}
 
@@ -597,66 +622,49 @@ const MenuItemViewScreen: React.FC = () => {
 					return false
 				}
 			}
-
+			debug &&
+				console.log(
+					`--Checking subvariation requirements for group: ${group.name} (ID: ${group.id})--`
+				)
 			// Check subvariation requirements for selected options
+			debug &&
+				console.log(
+					`Selected options count: ${selection?.selectedOptions.length}`
+				)
 			if (selection && selection.selectedOptions.length > 0) {
 				for (const option of selection.selectedOptions) {
 					if (option.subVariationSelections) {
-						// Get the menu item reference to check its variation groups
-						let menuItemRef: any = null
+						// Iterate through the subvariation selections Map
+						for (const [
+							subGroupId,
+							subSelection,
+						] of option.subVariationSelections.entries()) {
+							const subSelectionTypeCode = subSelection.selectionTypeCode || ''
+							const subSelectedCount = subSelection.selectedOptions.length
+							const subIsRequired = subSelectionTypeCode.includes('required')
 
-						if (group.kind === 'existing_items') {
-							// Find the menu item in existingMenuItems
-							menuItemRef = (group as any).existingMenuItems?.find(
-								(item: any) => item.id === option.menuItemId
-							)
-						} else if (
-							group.kind === 'single_category_filter' ||
-							group.kind === 'category_filter'
-						) {
-							// Find the menu item in categoryMenuItems
-							menuItemRef = (group as any).categoryMenuItems?.find(
-								(item: any) => item.id === option.menuItemId
-							)
-						} else if (group.kind === 'multi_category_filter') {
-							// Find the menu item in categoryMenuItems
-							menuItemRef = (group as any).categoryMenuItems?.find(
-								(item: any) => item.id === option.menuItemId
-							)
-						}
-
-						// Check if subvariations are satisfied
-						if (menuItemRef && menuItemRef.variationGroups) {
-							for (const subGroup of menuItemRef.variationGroups) {
-								const subSelection = option.subVariationSelections.get(
-									subGroup.id
+							debug &&
+								console.log(
+									`Checking subvariation group ID: ${subGroupId}, Required: ${subIsRequired}, Selected Count: ${subSelectedCount}`
 								)
-								const subSelectionTypeCode =
-									subSelection?.selectionTypeCode ??
-									subGroup?.selection_types?.code ??
-									''
-								const subSelectedCount =
-									subSelection?.selectedOptions.length ?? 0
-								const subIsRequired = subSelectionTypeCode.includes('required')
 
-								if (!subIsRequired) {
-									continue
+							if (!subIsRequired) {
+								continue
+							}
+
+							if (subSelectionTypeCode.startsWith('single')) {
+								if (subSelectedCount !== 1) {
+									return false
+								}
+							} else {
+								// Multi required
+								if (subSelectedCount === 0) {
+									return false
 								}
 
-								if (subSelectionTypeCode.startsWith('single')) {
-									if (subSelectedCount !== 1) {
-										return false
-									}
-								} else {
-									// Multi required
-									if (subSelectedCount === 0) {
-										return false
-									}
-
-									const subMultiLimit = subSelection?.multiLimit ?? 0
-									if (subMultiLimit > 0 && subSelectedCount > subMultiLimit) {
-										return false
-									}
+								const subMultiLimit = subSelection.multiLimit || 0
+								if (subMultiLimit > 0 && subSelectedCount > subMultiLimit) {
+									return false
 								}
 							}
 						}
